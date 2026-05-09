@@ -24,20 +24,13 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Generate PR tag
-        id: tag
-        run: |
-          IMAGE_NAME_LC=$(echo "${IMAGE_NAME}" | tr '[:upper:]' '[:lower:]')
-          PR_NUMBER=${{ github.event.pull_request.number }}
-          SHORT_SHA=$(echo "${{ github.event.pull_request.head.sha }}" | cut -c1-7)
-          echo "tag=${REGISTRY}/${IMAGE_NAME_LC}:pr${PR_NUMBER}-${SHORT_SHA}" >> $GITHUB_OUTPUT
-
       - uses: docker/setup-buildx-action@v3
 
-      - uses: docker/build-push-action@v6
+      - name: Build and push dev image
+        uses: docker/build-push-action@v6
         with:
           context: api
           push: true
-          tags: ${{ steps.tag.outputs.tag }}
+          tags: ghcr.io/edificioelite/elite-dashboard/api:dev
           cache-from: type=gha
           cache-to: type=gha,mode=max
