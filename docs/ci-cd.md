@@ -24,10 +24,9 @@
 - Al hacer merge, `release.yml`:
   1. Lee el label del PR para determinar el tipo de bump (major/minor/patch)
   2. Incrementa la version en `api/package.json`
-  3. Commitea el bump a main con `[skip ci]`
-  4. Crea un tag git `vX.Y.Z`
-  5. Crea una release en GitHub
-  6. Publica la imagen Docker con tags `:vX.Y.Z` y `:latest`
+  3. Crea un tag git `vX.Y.Z` sobre el merge commit
+  4. Crea una release en GitHub
+  5. Publica la imagen Docker con tags `:vX.Y.Z` y `:latest`
 
 ### 3. Desplegar en dev (Portainer)
 
@@ -41,6 +40,5 @@
 
 ## Configuracion del repositorio
 
-- **Rama `main` protegida**: solo se puede pushear desde PRs
-- **Bypass**: `github-actions[bot]` puede pushear a main (para el bump de version)
+- **Rama `main` protegida**: solo se puede pushear desde PRs, requiere que el check `check-labels` pase
 - **Labels requeridos**: `major` (rojo), `minor` (azul), `patch` (verde)
