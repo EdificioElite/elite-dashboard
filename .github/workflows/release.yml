@@ -1,0 +1,101 @@
+name: Release
+
+on:
+  push:
+    branches: [main]
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.repository }}/api
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      packages: write
+    if: startsWith(github.event.head_commit.message, 'Merge pull request')
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Extract PR number
+        id: pr
+        run: |
+          PR_NUMBER=$(echo "${{ github.event.head_commit.message }}" | grep -oP 'Merge pull request #\K\d+')
+          echo "number=${PR_NUMBER}" >> $GITHUB_OUTPUT
+          echo "PR number: ${PR_NUMBER}"
+
+      - name: Get PR labels and determine bump
+        id: labels
+        run: |
+          LABELS=$(gh pr view ${{ steps.pr.outputs.number }} --json labels --jq '.labels[].name')
+          echo "PR labels: ${LABELS}"
+          if echo "${LABELS}" | grep -q "major"; then
+            echo "bump=major" >> $GITHUB_OUTPUT
+          elif echo "${LABELS}" | grep -q "minor"; then
+            echo "bump=minor" >> $GITHUB_OUTPUT
+          else
+            echo "bump=patch" >> $GITHUB_OUTPUT
+          fi
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Bump version and push tag
+        id: version
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+          OLD_VERSION=$(node -p "require('./api/package.json').version")
+          echo "Old version: ${OLD_VERSION}"
+
+          cd api && npm version ${{ steps.labels.outputs.bump }} --no-git-tag-version && cd ..
+          NEW_VERSION=$(node -p "require('./api/package.json').version")
+          echo "New version: ${NEW_VERSION}"
+
+          git add api/package.json api/package-lock.json
+          git commit -m "chore: bump version to ${NEW_VERSION} [skip ci]"
+          git pull --rebase origin main
+          git push
+
+          git tag "v${NEW_VERSION}"
+          git push --tags
+
+          echo "version=${NEW_VERSION}" >> $GITHUB_OUTPUT
+
+      - name: Create GitHub Release
+        run: |
+          gh release create "v${{ steps.version.outputs.version }}" \
+            --title "v${{ steps.version.outputs.version }}" \
+            --generate-notes \
+            --target main
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - uses: docker/metadata-action@v5
+        id: meta
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+          tags: |
+            type=raw,value=${{ steps.version.outputs.version }}
+            type=raw,value=latest
+
+      - uses: docker/build-push-action@v6
+        with:
+          context: api
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
