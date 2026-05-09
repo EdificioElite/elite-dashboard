@@ -43,6 +43,26 @@ cd api && npx tsc --noEmit     # Verificar backend compila
 
 ## Testing
 
-No hay test suite configurada actualmente. Si se anade:
-- Backend: vitest + supertest
-- Frontend: vitest + @testing-library/react
+```bash
+npm test                  # Frontend tests (vitest + @testing-library/react)
+cd api && npm test        # Backend tests (vitest + supertest)
+```
+
+### Backend (api/src/__tests__/)
+- **Unit tests:** JWT helpers, auth/admin/rateLimit middleware
+- **Integration tests:** API routes con supertest y DB mockeada
+- Ejecutar antes de commit: `cd api && npm test && npx tsc --noEmit`
+
+### Frontend (src/)
+- **Component tests:** ConsumoCard, ConsumoChart, FacturasTable
+- **Store tests:** Zustand auth store
+- **Page tests:** LoginPage
+- Ejecutar antes de commit: `npm test && npm run build`
+
+## CI/CD
+
+GitHub Actions (`.github/workflows/ci.yml`) ejecuta en cada push y PR:
+- Backend: typecheck + tests
+- Frontend: tests + build
+
+Vercel despliega preview por cada rama automaticamente al conectar el repo.
