@@ -50,8 +50,8 @@ function tooltipContent(props: any) {
   return (
     <div style={TOOLTIP_STYLE}>
       <div style={{ fontWeight: 500, marginBottom: 6 }}>{f.periodoLabel}</div>
-      {row('Calor', fmtMoney(f.importe_calor), '#c0392b')}
-      {row('Frio', fmtMoney(f.importe_frio), '#5b8ba0')}
+      {row('Calefacción', fmtMoney(f.importe_calor), '#c0392b')}
+      {row('Refrigeración', fmtMoney(f.importe_frio), '#5b8ba0')}
       {row('ACS', fmtMoney(f.importe_acs), '#6f8a5c')}
       <div style={{ marginTop: 4 }}>
         {row('kWh calor', String(f.kwh_calor))}
@@ -97,10 +97,10 @@ export default function FacturasChart({ data }: { data: Factura[] }) {
 
       <div className="flex items-center gap-4 mb-4 text-[11px] text-cocoa/40">
         <span className="flex items-center gap-1.5">
-          <span className="w-2 h-2 rounded-sm" style={{ background: '#c0392b' }} /> Calor
+          <span className="w-2 h-2 rounded-sm" style={{ background: '#c0392b' }} /> Calefacción
         </span>
         <span className="flex items-center gap-1.5">
-          <span className="w-2 h-2 rounded-sm" style={{ background: '#5b8ba0' }} /> Frio
+          <span className="w-2 h-2 rounded-sm" style={{ background: '#5b8ba0' }} /> Refrigeración
         </span>
         <span className="flex items-center gap-1.5">
           <span className="w-2 h-2 rounded-sm" style={{ background: '#6f8a5c' }} /> ACS

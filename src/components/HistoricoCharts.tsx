@@ -204,7 +204,7 @@ export default function HistoricoCharts({ endpoint, title }: { endpoint?: string
           <div id="calor" className="scroll-mt-20">
             <div className="flex items-center gap-2 mb-1.5">
               <span className="w-2 h-2 rounded-full shrink-0" style={{ background: 'var(--calor)' }} />
-              <span className="text-[11px] font-medium text-cocoa/40 uppercase tracking-wider">Calor</span>
+              <span className="text-[11px] font-medium text-cocoa/40 uppercase tracking-wider">Calefacción</span>
               <span className="text-[10px] text-cocoa/30 font-mono">kWh</span>
             </div>
             <ChartLine data={calorData} color="#c0392b" unit="kWh" />
@@ -212,7 +212,7 @@ export default function HistoricoCharts({ endpoint, title }: { endpoint?: string
           <div id="frio" className="scroll-mt-20">
             <div className="flex items-center gap-2 mb-1.5">
               <span className="w-2 h-2 rounded-full shrink-0" style={{ background: 'var(--frio)' }} />
-              <span className="text-[11px] font-medium text-cocoa/40 uppercase tracking-wider">Frio</span>
+              <span className="text-[11px] font-medium text-cocoa/40 uppercase tracking-wider">Refrigeración</span>
               <span className="text-[10px] text-cocoa/30 font-mono">kWh</span>
             </div>
             <ChartLine data={frioData} color="#5b8ba0" unit="kWh" />

@@ -23,8 +23,8 @@ describe('ConsumoCard', () => {
     expect(screen.getByText('123.456')).toBeInTheDocument();
     expect(screen.getByText('61.728')).toBeInTheDocument();
     expect(screen.getByText('12,35')).toBeInTheDocument();
-    expect(screen.getByText('Calor')).toBeInTheDocument();
-    expect(screen.getByText('Frio')).toBeInTheDocument();
+    expect(screen.getByText('Calefacción')).toBeInTheDocument();
+    expect(screen.getByText('Refrigeración')).toBeInTheDocument();
     expect(screen.getByText('ACS')).toBeInTheDocument();
     expect(screen.getByText('Estado')).toBeInTheDocument();
     expect(screen.getByText('+9 desde inicio de mes')).toBeInTheDocument();

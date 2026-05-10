@@ -64,8 +64,8 @@ Guía de diseño para el dashboard de la comunidad. Léela completa antes de toc
 ```
 
 **Color semántico:**
-- Calor → `--calor` (#c0392b), rojo cálido que representa calor.
-- Frio → `--frio` (#5b8ba0), azul apagado que representa frío.
+- Calefacción → `--calor` (#c0392b), rojo cálido que representa calefacción.
+- Refrigeración → `--frio` (#5b8ba0), azul apagado que representa refrigeración.
 - ACS / agua caliente → `--sage` (#6f8a5c) verde salvia, único color que rompe la paleta marrón porque representa "agua").
 - Éxito / bajada de consumo → `#5b7a4a`.
 - Error / subida de consumo → `#a3402a`.
@@ -210,7 +210,7 @@ Main (max-w 1180, padding 0 24, gap 22, flex-col)
 ### Dashboard del vecino
 1. Greeting con saludo segun hora (`Buenos dias/tardes/noches`). Sin parrafo de soporte debajo.
 2. ConsumoCard (live, calor + frio + ACS + estado) con 4 columnas. Deltas desde inicio de mes.
-3. HistoricoCharts: una card con 3 graficas independientes (Calor, Frio, ACS). Control de tiempo compartido (24h / 7 dias / 30 dias / 1 ano + inputs fecha).
+3. HistoricoCharts: una card con 3 graficas independientes (Calefaccion, Refrigeracion, ACS). Control de tiempo compartido (24h / 7 dias / 30 dias / 1 ano + inputs fecha).
 4. FacturasChart: barras apiladas con importes calor/frio/ACS por mes. Tooltip con desglose detallado (kWh, m3, importes parciales).
 5. FacturasTable.
 - **Nunca mostrar datos de otros vecinos.**

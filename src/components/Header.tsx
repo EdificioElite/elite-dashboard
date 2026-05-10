@@ -9,8 +9,8 @@ interface HeaderProps {
 
 const NAV_ITEMS = [
   { label: 'En vivo', target: 'envivo' },
-  { label: 'Calor', target: 'calor' },
-  { label: 'Frio', target: 'frio' },
+  { label: 'Calefacción', target: 'calor' },
+  { label: 'Refrigeración', target: 'frio' },
   { label: 'ACS', target: 'acs' },
   { label: 'Facturas', target: 'facturas' },
 ];
