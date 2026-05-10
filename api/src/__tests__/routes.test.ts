@@ -155,6 +155,23 @@ describe('Consumos routes', () => {
       expect(res.body).toHaveLength(2);
     });
 
+    it('uses sampling to limit results to 500 points', async () => {
+      mockQuery.mockResolvedValueOnce({ rows: [] });
+      const app = createApp();
+      const token = userToken();
+      const res = await request(app)
+        .get('/api/consumos?desde=2026-01-01&hasta=2026-12-31')
+        .set('Authorization', `Bearer ${token}`);
+      expect(res.status).toBe(200);
+      const sqlArg = mockQuery.mock.calls[0][0] as string;
+      expect(sqlArg).toContain('counted AS');
+      expect(sqlArg).toContain('sampled AS');
+      expect(sqlArg).toContain('with_deltas AS');
+      expect(sqlArg).toContain('rn = 1');
+      expect(sqlArg).toContain('rn = total');
+      expect(sqlArg).toContain('CEIL');
+    });
+
     it('filters by date range', async () => {
       mockQuery.mockResolvedValueOnce({ rows: [] });
       const app = createApp();

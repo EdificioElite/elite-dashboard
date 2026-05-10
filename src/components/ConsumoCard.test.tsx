@@ -11,7 +11,7 @@ describe('ConsumoCard', () => {
   it('displays calefaccion, refrigeracion and ACS values', () => {
     render(
       <ConsumoCard
-        data={{ timestamp: '2026-01-01T12:00:00Z', kwh_calor: 12.34, kwh_frio: 3.21, m3_acs: 0.12, kwh_acs: 5.67, temp_impulsion: 42, temp_retorno: 32 }}
+        data={{ timestamp: '2026-01-01T12:00:00Z', kwh_calor: 12.34, kwh_frio: 3.21, m3_acs: 0.12, kwh_acs: 5.67, temp_impulsion: 42, temp_retorno: 32, power_w: 150 }}
       />
     );
     expect(screen.getByText('12.34')).toBeInTheDocument();
@@ -25,7 +25,7 @@ describe('ConsumoCard', () => {
   it('displays timestamp', () => {
     render(
       <ConsumoCard
-        data={{ timestamp: '2026-05-09T10:30:00Z', kwh_calor: 1, kwh_frio: 0, m3_acs: 0.01, kwh_acs: 2, temp_impulsion: null, temp_retorno: null }}
+        data={{ timestamp: '2026-05-09T10:30:00Z', kwh_calor: 1, kwh_frio: 0, m3_acs: 0.01, kwh_acs: 2, temp_impulsion: null, temp_retorno: null, power_w: null }}
       />
     );
     expect(screen.getByText(/Actualizado:/)).toBeInTheDocument();

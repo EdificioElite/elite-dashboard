@@ -6,6 +6,7 @@ interface ConsumoActual {
   kwh_acs: number;
   temp_impulsion: number | null;
   temp_retorno: number | null;
+  power_w: number | null;
 }
 
 export default function ConsumoCard({ data }: { data: ConsumoActual | null }) {
@@ -41,6 +42,30 @@ export default function ConsumoCard({ data }: { data: ConsumoActual | null }) {
             {Number(data.kwh_acs).toFixed(2)}
           </p>
           <p className="text-xs text-gray-400">kWh / {Number(data.m3_acs).toFixed(3)} m³</p>
+        </div>
+      </div>
+      <div className="mt-4 pt-4 border-t border-gray-200">
+        <div className="flex items-center gap-6 text-sm flex-wrap">
+          <div className="flex items-center gap-2">
+            <span className={`inline-block w-2.5 h-2.5 rounded-full ${data.power_w != null && Number(data.power_w) > 0 ? 'bg-green-500' : 'bg-gray-300'}`} />
+            <span className="text-gray-400">
+              {data.power_w != null && Number(data.power_w) > 0
+                ? `${Number(data.power_w).toFixed(0)} W`
+                : 'Apagado'}
+            </span>
+          </div>
+          <div>
+            <span className="text-gray-400">Impulsion: </span>
+            <span className="font-semibold text-red-400">
+              {data.temp_impulsion != null ? `${Number(data.temp_impulsion).toFixed(1)} °C` : '—'}
+            </span>
+          </div>
+          <div>
+            <span className="text-gray-400">Retorno: </span>
+            <span className="font-semibold text-blue-400">
+              {data.temp_retorno != null ? `${Number(data.temp_retorno).toFixed(1)} °C` : '—'}
+            </span>
+          </div>
         </div>
       </div>
       <p className="mt-4 text-xs text-gray-400">

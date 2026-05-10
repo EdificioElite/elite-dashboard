@@ -14,6 +14,7 @@ export interface Consumo {
   kwh_acs: number;
   temp_impulsion: number | null;
   temp_retorno: number | null;
+  power_w: number | null;
 }
 
 export interface Factura {
@@ -35,20 +36,17 @@ export default function DashboardPage() {
   const { user, logout } = useAuthStore();
   const navigate = useNavigate();
   const [consumoActual, setConsumoActual] = useState<Consumo | null>(null);
-  const [consumos, setConsumos] = useState<Consumo[]>([]);
   const [facturas, setFacturas] = useState<Factura[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     async function fetchData() {
       try {
-        const [actual, historico, facturasData] = await Promise.all([
+        const [actual, facturasData] = await Promise.all([
           apiFetch<Consumo | null>('/consumo-actual'),
-          apiFetch<Consumo[]>('/consumos'),
           apiFetch<Factura[]>('/facturas'),
         ]);
         setConsumoActual(actual);
-        setConsumos(historico);
         setFacturas(facturasData);
       } catch (err) {
         console.error('Error fetching data:', err);
@@ -97,7 +95,7 @@ export default function DashboardPage() {
 
       <main className="max-w-4xl mx-auto p-4 space-y-6">
         <ConsumoCard data={consumoActual} />
-        <ConsumoChart data={consumos} />
+        <ConsumoChart />
         <FacturasTable data={facturas} />
       </main>
     </div>

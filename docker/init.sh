@@ -2,7 +2,7 @@
 set -e
 
 echo "Installing pg and bcrypt..."
-npm init -y > /dev/null
+test -f package.json || npm init -y > /dev/null
 npm install pg bcrypt > /dev/null 2>&1
 
 echo "Running n8n tables schema..."

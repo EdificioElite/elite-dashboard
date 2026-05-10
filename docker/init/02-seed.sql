@@ -1,3 +1,5 @@
+TRUNCATE facturas, contadores, vecinos CASCADE;
+
 INSERT INTO vecinos (piso, serial_number, device_identification, nombre, email, coeficiente, enviar_email) VALUES
   ('1A', '10000001', 'DEVID001', 'Vecino 1A', 'vecino1a@elite.com', '0.20', false),
   ('2A', '10000002', 'DEVID002', 'Vecino 2A', 'vecino2a@elite.com', '0.20', false),
@@ -10,7 +12,8 @@ INSERT INTO contadores (
   serial_number, device_identification, created, datetime_inst_value_0_0_0,
   energy_wh_inst_value_0_0_0, energy_manufacturer_specific_02_wh_inst_value_0_0_0,
   volume_m3_inst_value_0_1_0, volume_m3_inst_value_0_2_0,
-  flow_temp_c_inst_value_0_0_0, return_temp_c_inst_value_0_0_0
+  flow_temp_c_inst_value_0_0_0, return_temp_c_inst_value_0_0_0,
+  power_w_inst_value_0_0_0
 )
 SELECT
   v.serial_number::bigint AS serial_number,
@@ -19,14 +22,15 @@ SELECT
   ts AS datetime_inst_value_0_0_0,
   (100000 + (EXTRACT(EPOCH FROM ts)::bigint / 43200) * (50 + (ROW_NUMBER() OVER (PARTITION BY v.piso ORDER BY ts) * 10))) AS energy_wh_inst_value_0_0_0,
   (50000 + (EXTRACT(EPOCH FROM ts)::bigint / 43200) * (25 + (ROW_NUMBER() OVER (PARTITION BY v.piso ORDER BY ts) * 5))) AS energy_manufacturer_specific_02_wh_inst_value_0_0_0,
-  (10.0 + RANDOM() * 0.02)::real AS volume_m3_inst_value_0_1_0,
-  (5.0 + RANDOM() * 0.01)::real AS volume_m3_inst_value_0_2_0,
+  (10.0 + (ROW_NUMBER() OVER (PARTITION BY v.piso ORDER BY ts) * 0.02 + RANDOM() * 0.005))::real AS volume_m3_inst_value_0_1_0,
+  (5.0 + (ROW_NUMBER() OVER (PARTITION BY v.piso ORDER BY ts) * 0.01 + RANDOM() * 0.002))::real AS volume_m3_inst_value_0_2_0,
   (40.0 + RANDOM() * 5.0)::real AS flow_temp_c_inst_value_0_0_0,
-  (30.0 + RANDOM() * 3.0)::real AS return_temp_c_inst_value_0_0_0
+  (30.0 + RANDOM() * 3.0)::real AS return_temp_c_inst_value_0_0_0,
+  (RANDOM() * 500)::bigint AS power_w_inst_value_0_0_0
 FROM vecinos v
 CROSS JOIN generate_series(
   '2026-01-01 00:00:00'::timestamp,
-  '2026-03-31 23:00:00'::timestamp,
+  '2026-12-31 23:00:00'::timestamp,
   '12 hours'::interval
 ) AS ts;
 
@@ -58,6 +62,6 @@ SELECT
 FROM vecinos v
 CROSS JOIN generate_series(
   '2026-01-01'::date,
-  '2026-03-01'::date,
+  '2026-12-01'::date,
   '1 month'::interval
 ) AS d;
