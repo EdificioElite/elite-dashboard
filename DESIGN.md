@@ -210,7 +210,7 @@ Main (max-w 1180, padding 0 24, gap 22, flex-col)
 ### Dashboard del vecino
 1. Greeting con saludo segun hora (`Buenos dias/tardes/noches`). Sin parrafo de soporte debajo.
 2. ConsumoCard (live, calor + frio + ACS + estado) con 4 columnas. Deltas desde inicio de mes.
-3. HistoricoCharts: una card con 3 graficas independientes (Calefaccion, Refrigeracion, ACS). Control de tiempo compartido (24h / 7 dias / 30 dias / 1 ano + inputs fecha).
+3. HistoricoCharts: una card con 3 graficas independientes (Calefaccion, Refrigeracion, ACS). Control de tiempo compartido (24h / 7 dias / 30 dias / 1 año + inputs fecha).
 4. FacturasChart: barras apiladas con importes calor/frio/ACS por mes. Tooltip con desglose detallado (kWh, m3, importes parciales).
 5. FacturasTable.
 - **Nunca mostrar datos de otros vecinos.**

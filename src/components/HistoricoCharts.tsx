@@ -55,7 +55,7 @@ const PRESETS = [
   { key: '24h', label: '24h' },
   { key: '7d', label: '7 dias' },
   { key: '30d', label: '30 dias' },
-  { key: '1a', label: '1 ano' },
+  { key: '1a', label: '1 año' },
 ];
 
 const TOOLTIP_STYLE = {

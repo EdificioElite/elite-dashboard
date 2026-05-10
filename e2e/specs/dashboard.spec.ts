@@ -15,7 +15,7 @@ test.describe('Dashboard', () => {
   test('shows date range picker in chart', async ({ page }) => {
     await expect(page.getByText('24h')).toBeVisible({ timeout: 10000 });
     await expect(page.getByText('7 dias')).toBeVisible();
-    await expect(page.getByText('1 ano')).toBeVisible();
+    await expect(page.getByText('1 año')).toBeVisible();
   });
 
   test('can switch between presets and see chart data', async ({ page }) => {
