@@ -1,23 +1,28 @@
 import { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { useAuthStore } from '../store/auth';
 import { apiFetch } from '../api/client';
+import { greeting } from '../lib/format';
+import Header from '../components/Header';
 import ConsumoCard from '../components/ConsumoCard';
-import ConsumoChart from '../components/ConsumoChart';
+import HistoricoCharts from '../components/HistoricoCharts';
+import FacturasChart from '../components/FacturasChart';
 import FacturasTable from '../components/FacturasTable';
 
-export interface Consumo {
+interface Consumo {
   timestamp: string;
   kwh_calor: number;
   kwh_frio: number;
   m3_acs: number;
   kwh_acs: number;
+  kwh_calor_mes_inicio: number | null;
+  kwh_frio_mes_inicio: number | null;
+  m3_acs_mes_inicio: number | null;
   temp_impulsion: number | null;
   temp_retorno: number | null;
   power_w: number | null;
 }
 
-export interface Factura {
+interface Factura {
   id_factura: string;
   periodo: string;
   importe_total: number;
@@ -28,16 +33,16 @@ export interface Factura {
   importe_calor: number;
   importe_frio: number;
   importe_acs: number;
-  fecha_factura_inicio: string;
-  fecha_factura_fin: string;
 }
 
 export default function DashboardPage() {
-  const { user, logout } = useAuthStore();
-  const navigate = useNavigate();
+  const { user } = useAuthStore();
   const [consumoActual, setConsumoActual] = useState<Consumo | null>(null);
   const [facturas, setFacturas] = useState<Factura[]>([]);
   const [loading, setLoading] = useState(true);
+
+  const { saludo } = greeting();
+  const nombre = user?.vecino_piso || user?.email?.split('@')[0] || 'vecino';
 
   useEffect(() => {
     async function fetchData() {
@@ -57,46 +62,37 @@ export default function DashboardPage() {
     fetchData();
   }, []);
 
-  const handleLogout = () => {
-    logout();
-    navigate('/login');
-  };
-
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <p className="text-gray-500">Cargando...</p>
+      <div>
+        <Header showAdmin />
+        <main className="max-w-[1180px] mx-auto px-6 flex items-center justify-center min-h-[60vh]">
+          <div className="text-cocoa/40 text-sm">Cargando tus datos...</div>
+        </main>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-100">
-      <header className="bg-white shadow-sm p-4 flex justify-between items-center">
-        <h1 className="text-xl font-bold text-gray-800">Elite Dashboard</h1>
-        <div className="flex items-center gap-4">
-          <span className="text-sm text-gray-600">{user?.email}</span>
-          {user?.is_admin && (
-            <button
-              onClick={() => navigate('/admin')}
-              className="text-sm text-blue-600 hover:underline"
-            >
-              Admin
-            </button>
-          )}
-          <button
-            onClick={handleLogout}
-            className="text-sm text-red-600 hover:underline"
-          >
-            Salir
-          </button>
-        </div>
-      </header>
+    <div className="page-in">
+      <Header showAdmin />
 
-      <main className="max-w-4xl mx-auto p-4 space-y-6">
-        <ConsumoCard data={consumoActual} />
-        <ConsumoChart />
-        <FacturasTable data={facturas} />
+      <main className="max-w-[1180px] mx-auto px-6 flex flex-col gap-[22px] pb-10">
+        <div className="pt-2">
+          <p className="eyebrow">Dashboard</p>
+          <h1 className="font-display text-[40px] font-medium text-cocoa mt-1" style={{ letterSpacing: '-0.02em' }}>
+            {saludo}, {nombre}.
+          </h1>
+        </div>
+
+        <div className="stagger flex flex-col gap-[22px]">
+          <ConsumoCard data={consumoActual} />
+          <HistoricoCharts />
+          <div id="facturas">
+            <FacturasChart data={facturas} />
+          </div>
+          <FacturasTable data={facturas} />
+        </div>
       </main>
     </div>
   );
