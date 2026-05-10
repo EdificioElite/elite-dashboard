@@ -19,7 +19,7 @@ interface ConsumoActual {
 
 function deltaStr(desdeInicio: number | null, decimals: number): string {
   if (desdeInicio == null || isNaN(desdeInicio)) return '';
-  return `+${desdeInicio.toFixed(decimals)} desde inicio de mes`;
+  return `+${desdeInicio.toLocaleString('es-ES', { maximumFractionDigits: decimals, minimumFractionDigits: decimals })} desde inicio de mes`;
 }
 
 export default function ConsumoCard({ data }: { data: ConsumoActual | null }) {
