@@ -26,7 +26,7 @@ test.describe('Admin', () => {
     await emailInput.fill('vecino6@elite.com');
     const passInput = page.locator('form input[type="password"]');
     await passInput.fill('password1');
-    await page.click('form button[type="submit"]');
+    await page.click('text=Guardar');
     await expect(page.locator('.bg-green-100, .bg-red-100')).toBeVisible({ timeout: 10000 });
     await expect(page.locator('tbody')).toContainText('vecino6@elite.com');
   });

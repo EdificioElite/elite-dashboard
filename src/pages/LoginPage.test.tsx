@@ -19,7 +19,7 @@ describe('LoginPage', () => {
         <LoginPage />
       </MemoryRouter>
     );
-    expect(screen.getByText('Elite Dashboard')).toBeInTheDocument();
+    expect(screen.getByAltText('Elite Logo')).toBeInTheDocument();
     expect(screen.getByPlaceholderText('vecino@email.com')).toBeInTheDocument();
     expect(screen.getByPlaceholderText('••••••••')).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Entrar' })).toBeInTheDocument();
