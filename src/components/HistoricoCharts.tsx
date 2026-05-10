@@ -201,7 +201,7 @@ export default function HistoricoCharts({ endpoint, title }: { endpoint?: string
         <p className="text-sm text-cocoa/44 py-8">No hay datos en este periodo</p>
       ) : (
         <div className="flex flex-col gap-4">
-          <div id="calor">
+          <div id="calor" className="scroll-mt-20">
             <div className="flex items-center gap-2 mb-1.5">
               <span className="w-2 h-2 rounded-full shrink-0" style={{ background: 'var(--calor)' }} />
               <span className="text-[11px] font-medium text-cocoa/40 uppercase tracking-wider">Calor</span>
@@ -209,7 +209,7 @@ export default function HistoricoCharts({ endpoint, title }: { endpoint?: string
             </div>
             <ChartLine data={calorData} color="#c0392b" unit="kWh" />
           </div>
-          <div id="frio">
+          <div id="frio" className="scroll-mt-20">
             <div className="flex items-center gap-2 mb-1.5">
               <span className="w-2 h-2 rounded-full shrink-0" style={{ background: 'var(--frio)' }} />
               <span className="text-[11px] font-medium text-cocoa/40 uppercase tracking-wider">Frio</span>
@@ -217,7 +217,7 @@ export default function HistoricoCharts({ endpoint, title }: { endpoint?: string
             </div>
             <ChartLine data={frioData} color="#5b8ba0" unit="kWh" />
           </div>
-          <div id="acs">
+          <div id="acs" className="scroll-mt-20">
             <div className="flex items-center gap-2 mb-1.5">
               <span className="w-2 h-2 rounded-full shrink-0" style={{ background: 'var(--sage)' }} />
               <span className="text-[11px] font-medium text-cocoa/40 uppercase tracking-wider">ACS</span>

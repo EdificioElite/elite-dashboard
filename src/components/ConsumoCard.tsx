@@ -40,7 +40,7 @@ export default function ConsumoCard({ data }: { data: ConsumoActual | null }) {
   }
 
   return (
-    <div className="glass p-[26px]" id="envivo">
+    <div className="glass p-[26px] scroll-mt-20" id="envivo">
       <div className="flex items-center gap-3 mb-5">
         <div className="w-7 h-7 rounded-lg flex items-center justify-center shrink-0" style={{ background: 'var(--accent)' }}>
           <Icon name="activity" size={14} className="text-cream" />
@@ -84,15 +84,21 @@ export default function ConsumoCard({ data }: { data: ConsumoActual | null }) {
         </div>
         <div>
           <div className="text-[11px] font-medium uppercase tracking-wider text-cocoa/40 mb-1">Estado</div>
-          <div className="font-display text-[28px] font-medium leading-none" style={{ letterSpacing: '-0.02em' }}>
+          <div className="flex items-center gap-1.5 mb-1">
             {isLive ? (
-              <span className="live-dot" style={{ display: 'inline-block' }} />
+              <>
+                <span className="live-dot" style={{ display: 'inline-block' }} />
+                <span className="text-[13px] font-medium" style={{ color: '#5b7a4a' }}>Encendido</span>
+              </>
             ) : (
-              <span className="w-[7px] h-[7px] rounded-full" style={{ display: 'inline-block', background: 'rgba(58,47,36,.25)' }} />
+              <>
+                <span className="w-[7px] h-[7px] rounded-full" style={{ display: 'inline-block', background: 'rgba(58,47,36,.25)' }} />
+                <span className="text-[13px] font-medium" style={{ color: '#a3402a' }}>Apagado</span>
+              </>
             )}
           </div>
           <div className="font-mono text-[11px] text-cocoa/40 font-num mt-0.5">
-            {isLive ? `${Number(data.power_w).toFixed(0)} W` : 'Apagado'}
+            {isLive ? `${Number(data.power_w).toFixed(0)} W` : '—'}
           </div>
           <div className="text-[11px] text-cocoa/40 mt-1">
             Impulsion: <span className="text-rise font-medium">{data.temp_impulsion != null ? `${Number(data.temp_impulsion).toFixed(1)}°C` : '—'}</span>

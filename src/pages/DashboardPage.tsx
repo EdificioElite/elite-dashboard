@@ -91,7 +91,7 @@ export default function DashboardPage() {
         <div className="stagger flex flex-col gap-[22px]">
           <ConsumoCard data={consumoActual} />
           <HistoricoCharts />
-          <div id="facturas">
+          <div id="facturas" className="scroll-mt-20">
             <FacturasChart data={facturas} />
           </div>
           <FacturasTable data={facturas} />
