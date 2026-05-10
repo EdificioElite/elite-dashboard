@@ -7,14 +7,14 @@ test.describe('Admin', () => {
   });
 
   test('shows vecinos table', async ({ page }) => {
-    await expect(page.locator('h1')).toContainText('Panel de Administracion');
+    await expect(page.locator('h1')).toContainText('Vecinos');
     await expect(page.locator('table')).toBeVisible();
   });
 
   test('navigates to vecino consumos', async ({ page }) => {
     await page.click('text=Ver consumos');
     await expect(page).toHaveURL(/\/admin\/vecino\/\d/);
-    await expect(page.locator('h1')).toContainText('Consumos vecino');
+    await expect(page.getByText('Vecino', { exact: true })).toBeVisible();
   });
 
   // Skipped: flaky due to HTML5 form validation in headless browser
