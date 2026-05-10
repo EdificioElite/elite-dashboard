@@ -17,6 +17,7 @@ export async function loginAsVecino(page: Page) {
 }
 
 export async function logout(page: Page) {
+  await page.click('.sticky button.rounded-full');
   await page.click('text=Salir');
   await page.waitForURL('/login');
 }

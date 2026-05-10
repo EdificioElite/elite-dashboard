@@ -1,5 +1,7 @@
-import { Pool } from 'pg';
+import { Pool, types } from 'pg';
 import { config } from './config';
+
+types.setTypeParser(1700, parseFloat);
 
 export const pool = new Pool({
   connectionString: config.databaseUrl,
