@@ -14,6 +14,9 @@ interface Consumo {
   kwh_frio: number;
   m3_acs: number;
   kwh_acs: number;
+  kwh_calor_abs: number;
+  kwh_frio_abs: number;
+  m3_acs_abs: number;
   kwh_calor_mes_inicio: number | null;
   kwh_frio_mes_inicio: number | null;
   m3_acs_mes_inicio: number | null;

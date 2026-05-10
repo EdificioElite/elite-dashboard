@@ -6,6 +6,9 @@ interface ConsumoActual {
   kwh_frio: number;
   m3_acs: number;
   kwh_acs: number;
+  kwh_calor_abs: number;
+  kwh_frio_abs: number;
+  m3_acs_abs: number;
   kwh_calor_mes_inicio: number | null;
   kwh_frio_mes_inicio: number | null;
   m3_acs_mes_inicio: number | null;
@@ -52,31 +55,31 @@ export default function ConsumoCard({ data }: { data: ConsumoActual | null }) {
         <div>
           <div className="text-[11px] font-medium uppercase tracking-wider text-cocoa/40 mb-1">Calor</div>
           <div className="font-display text-[28px] font-medium leading-none" style={{ letterSpacing: '-0.02em', color: 'var(--calor)' }}>
-            {Number(data.kwh_calor).toFixed(2)}
+            {Number(data.kwh_calor_abs).toLocaleString('es-ES', { maximumFractionDigits: 0 })}
           </div>
           <div className="font-mono text-[11px] text-cocoa/40 font-num mt-0.5">kWh</div>
           <div className="text-[11px] mt-1 opacity-50" style={{ color: 'var(--calor)' }}>
-            {deltaStr(data.kwh_calor_mes_inicio, 2)}
+            {deltaStr(data.kwh_calor_mes_inicio, 0)}
           </div>
         </div>
         <div>
           <div className="text-[11px] font-medium uppercase tracking-wider text-cocoa/40 mb-1">Frio</div>
           <div className="font-display text-[28px] font-medium leading-none" style={{ letterSpacing: '-0.02em', color: 'var(--frio)' }}>
-            {Number(data.kwh_frio).toFixed(2)}
+            {Number(data.kwh_frio_abs).toLocaleString('es-ES', { maximumFractionDigits: 0 })}
           </div>
           <div className="font-mono text-[11px] text-cocoa/40 font-num mt-0.5">kWh</div>
           <div className="text-[11px] mt-1 opacity-50" style={{ color: 'var(--frio)' }}>
-            {deltaStr(data.kwh_frio_mes_inicio, 2)}
+            {deltaStr(data.kwh_frio_mes_inicio, 0)}
           </div>
         </div>
         <div>
           <div className="text-[11px] font-medium uppercase tracking-wider text-cocoa/40 mb-1">ACS</div>
           <div className="font-display text-[28px] font-medium leading-none" style={{ letterSpacing: '-0.02em', color: 'var(--sage)' }}>
-            {Number(data.m3_acs).toFixed(3)}
+            {Number(data.m3_acs_abs).toLocaleString('es-ES', { maximumFractionDigits: 2 })}
           </div>
-          <div className="font-mono text-[11px] text-cocoa/40 font-num mt-0.5">m³ / {Number(data.kwh_acs).toFixed(2)} kWh</div>
+          <div className="font-mono text-[11px] text-cocoa/40 font-num mt-0.5">m³</div>
           <div className="text-[11px] mt-1 opacity-50" style={{ color: 'var(--sage)' }}>
-            {deltaStr(data.m3_acs_mes_inicio, 3)}
+            {deltaStr(data.m3_acs_mes_inicio, 1)}
           </div>
         </div>
         <div>

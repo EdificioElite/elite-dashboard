@@ -14,21 +14,22 @@ describe('ConsumoCard', () => {
         data={{
           timestamp: '2026-01-01T12:00:00Z',
           kwh_calor: 12.34, kwh_frio: 3.21, m3_acs: 0.12, kwh_acs: 5.67,
+          kwh_calor_abs: 123456, kwh_frio_abs: 61728, m3_acs_abs: 12.345,
           kwh_calor_mes_inicio: 9.13, kwh_frio_mes_inicio: 2.76, m3_acs_mes_inicio: 0.117,
           temp_impulsion: 42, temp_retorno: 32, power_w: 150,
         }}
       />
     );
-    expect(screen.getByText('12.34')).toBeInTheDocument();
-    expect(screen.getByText('3.21')).toBeInTheDocument();
-    expect(screen.getByText('0.120')).toBeInTheDocument();
+    expect(screen.getByText('123.456')).toBeInTheDocument();
+    expect(screen.getByText('61.728')).toBeInTheDocument();
+    expect(screen.getByText('12,35')).toBeInTheDocument();
     expect(screen.getByText('Calor')).toBeInTheDocument();
     expect(screen.getByText('Frio')).toBeInTheDocument();
     expect(screen.getByText('ACS')).toBeInTheDocument();
     expect(screen.getByText('Estado')).toBeInTheDocument();
-    expect(screen.getByText('+9.13 desde inicio de mes')).toBeInTheDocument();
-    expect(screen.getByText('+2.76 desde inicio de mes')).toBeInTheDocument();
-    expect(screen.getByText('+0.117 desde inicio de mes')).toBeInTheDocument();
+    expect(screen.getByText('+9 desde inicio de mes')).toBeInTheDocument();
+    expect(screen.getByText('+3 desde inicio de mes')).toBeInTheDocument();
+    expect(screen.getByText('+0.1 desde inicio de mes')).toBeInTheDocument();
     expect(screen.getByText('150 W')).toBeInTheDocument();
     expect(screen.getByText('42.0°C')).toBeInTheDocument();
     expect(screen.getByText('32.0°C')).toBeInTheDocument();
@@ -40,6 +41,7 @@ describe('ConsumoCard', () => {
       <ConsumoCard
         data={{
           timestamp: '2026-05-09T10:30:00Z', kwh_calor: 5, kwh_frio: 0, m3_acs: 0.01, kwh_acs: 2,
+          kwh_calor_abs: 5, kwh_frio_abs: 0, m3_acs_abs: 0.01,
           kwh_calor_mes_inicio: null, kwh_frio_mes_inicio: null, m3_acs_mes_inicio: null,
           temp_impulsion: null, temp_retorno: null, power_w: null,
         }}
@@ -53,6 +55,7 @@ describe('ConsumoCard', () => {
       <ConsumoCard
         data={{
           timestamp: '2026-05-09T10:30:00Z', kwh_calor: 1, kwh_frio: 0, m3_acs: 0.01, kwh_acs: 2,
+          kwh_calor_abs: 1, kwh_frio_abs: 0, m3_acs_abs: 0.01,
           kwh_calor_mes_inicio: null, kwh_frio_mes_inicio: null, m3_acs_mes_inicio: null,
           temp_impulsion: null, temp_retorno: null, power_w: null,
         }}
