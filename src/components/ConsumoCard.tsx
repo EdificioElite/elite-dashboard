@@ -1,76 +1,104 @@
+import Icon from './Icon';
+
 interface ConsumoActual {
   timestamp: string;
   kwh_calor: number;
   kwh_frio: number;
   m3_acs: number;
   kwh_acs: number;
+  kwh_calor_mes_inicio: number | null;
+  kwh_frio_mes_inicio: number | null;
+  m3_acs_mes_inicio: number | null;
   temp_impulsion: number | null;
   temp_retorno: number | null;
   power_w: number | null;
 }
 
+function deltaStr(desdeInicio: number | null, decimals: number): string {
+  if (desdeInicio == null || isNaN(desdeInicio)) return '';
+  return `+${desdeInicio.toFixed(decimals)} desde inicio de mes`;
+}
+
 export default function ConsumoCard({ data }: { data: ConsumoActual | null }) {
+  const isLive = data?.power_w != null && Number(data.power_w) > 0;
+
   if (!data) {
     return (
-      <div className="bg-white p-6 rounded-lg shadow-md">
-        <p className="text-gray-500">No hay datos de consumo disponibles</p>
+      <div className="glass p-[26px]">
+        <div className="flex items-center gap-3 mb-4">
+          <div className="w-7 h-7 rounded-lg flex items-center justify-center shrink-0" style={{ background: 'var(--accent)' }}>
+            <Icon name="activity" size={14} className="text-cream" />
+          </div>
+          <span className="eyebrow">En vivo</span>
+        </div>
+        <div className="text-sm text-cocoa/44">Esperando datos del contador...</div>
       </div>
     );
   }
 
   return (
-    <div className="bg-white p-6 rounded-lg shadow-md">
-      <h2 className="text-lg font-semibold text-gray-700 mb-4">Consumo actual</h2>
-      <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+    <div className="glass p-[26px]" id="envivo">
+      <div className="flex items-center gap-3 mb-5">
+        <div className="w-7 h-7 rounded-lg flex items-center justify-center shrink-0" style={{ background: 'var(--accent)' }}>
+          <Icon name="activity" size={14} className="text-cream" />
+        </div>
+        <span className="eyebrow">En vivo</span>
+        <span className="ml-auto text-cocoa/30 text-xs">
+          {new Date(data.timestamp).toLocaleString('es-ES', { hour: '2-digit', minute: '2-digit' })}
+        </span>
+      </div>
+
+      <div className="grid grid-cols-4 gap-4">
         <div>
-          <p className="text-sm text-gray-500">Calefaccion</p>
-          <p className="text-3xl font-bold text-red-500">
+          <div className="text-[11px] font-medium uppercase tracking-wider text-cocoa/40 mb-1">Calor</div>
+          <div className="font-display text-[28px] font-medium leading-none" style={{ letterSpacing: '-0.02em', color: 'var(--calor)' }}>
             {Number(data.kwh_calor).toFixed(2)}
-          </p>
-          <p className="text-xs text-gray-400">kWh</p>
+          </div>
+          <div className="font-mono text-[11px] text-cocoa/40 font-num mt-0.5">kWh</div>
+          <div className="text-[11px] mt-1 opacity-50" style={{ color: 'var(--calor)' }}>
+            {deltaStr(data.kwh_calor_mes_inicio, 2)}
+          </div>
         </div>
         <div>
-          <p className="text-sm text-gray-500">Refrigeracion</p>
-          <p className="text-3xl font-bold text-blue-500">
+          <div className="text-[11px] font-medium uppercase tracking-wider text-cocoa/40 mb-1">Frio</div>
+          <div className="font-display text-[28px] font-medium leading-none" style={{ letterSpacing: '-0.02em', color: 'var(--frio)' }}>
             {Number(data.kwh_frio).toFixed(2)}
-          </p>
-          <p className="text-xs text-gray-400">kWh</p>
+          </div>
+          <div className="font-mono text-[11px] text-cocoa/40 font-num mt-0.5">kWh</div>
+          <div className="text-[11px] mt-1 opacity-50" style={{ color: 'var(--frio)' }}>
+            {deltaStr(data.kwh_frio_mes_inicio, 2)}
+          </div>
         </div>
         <div>
-          <p className="text-sm text-gray-500">ACS (Agua Caliente)</p>
-          <p className="text-3xl font-bold text-orange-500">
-            {Number(data.kwh_acs).toFixed(2)}
-          </p>
-          <p className="text-xs text-gray-400">kWh / {Number(data.m3_acs).toFixed(3)} m³</p>
-        </div>
-      </div>
-      <div className="mt-4 pt-4 border-t border-gray-200">
-        <div className="flex items-center gap-6 text-sm flex-wrap">
-          <div className="flex items-center gap-2">
-            <span className={`inline-block w-2.5 h-2.5 rounded-full ${data.power_w != null && Number(data.power_w) > 0 ? 'bg-green-500' : 'bg-gray-300'}`} />
-            <span className="text-gray-400">
-              {data.power_w != null && Number(data.power_w) > 0
-                ? `${Number(data.power_w).toFixed(0)} W`
-                : 'Apagado'}
-            </span>
+          <div className="text-[11px] font-medium uppercase tracking-wider text-cocoa/40 mb-1">ACS</div>
+          <div className="font-display text-[28px] font-medium leading-none" style={{ letterSpacing: '-0.02em', color: 'var(--sage)' }}>
+            {Number(data.m3_acs).toFixed(3)}
           </div>
-          <div>
-            <span className="text-gray-400">Impulsion: </span>
-            <span className="font-semibold text-red-400">
-              {data.temp_impulsion != null ? `${Number(data.temp_impulsion).toFixed(1)} °C` : '—'}
-            </span>
-          </div>
-          <div>
-            <span className="text-gray-400">Retorno: </span>
-            <span className="font-semibold text-blue-400">
-              {data.temp_retorno != null ? `${Number(data.temp_retorno).toFixed(1)} °C` : '—'}
-            </span>
+          <div className="font-mono text-[11px] text-cocoa/40 font-num mt-0.5">m³ / {Number(data.kwh_acs).toFixed(2)} kWh</div>
+          <div className="text-[11px] mt-1 opacity-50" style={{ color: 'var(--sage)' }}>
+            {deltaStr(data.m3_acs_mes_inicio, 3)}
           </div>
         </div>
+        <div>
+          <div className="text-[11px] font-medium uppercase tracking-wider text-cocoa/40 mb-1">Estado</div>
+          <div className="font-display text-[28px] font-medium leading-none" style={{ letterSpacing: '-0.02em' }}>
+            {isLive ? (
+              <span className="live-dot" style={{ display: 'inline-block' }} />
+            ) : (
+              <span className="w-[7px] h-[7px] rounded-full" style={{ display: 'inline-block', background: 'rgba(58,47,36,.25)' }} />
+            )}
+          </div>
+          <div className="font-mono text-[11px] text-cocoa/40 font-num mt-0.5">
+            {isLive ? `${Number(data.power_w).toFixed(0)} W` : 'Apagado'}
+          </div>
+          <div className="text-[11px] text-cocoa/40 mt-1">
+            Impulsion: <span className="text-rise font-medium">{data.temp_impulsion != null ? `${Number(data.temp_impulsion).toFixed(1)}°C` : '—'}</span>
+          </div>
+          <div className="text-[11px] text-cocoa/40">
+            Retorno: <span className="text-sage font-medium">{data.temp_retorno != null ? `${Number(data.temp_retorno).toFixed(1)}°C` : '—'}</span>
+          </div>
+        </div>
       </div>
-      <p className="mt-4 text-xs text-gray-400">
-        Actualizado: {new Date(data.timestamp).toLocaleString('es-ES')}
-      </p>
     </div>
   );
 }
