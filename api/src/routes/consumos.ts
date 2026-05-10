@@ -87,6 +87,19 @@ router.get('/consumo-actual', authMiddleware, async (req: Request, res: Response
           AND ct.serial_number::text = v.serial_number
         WHERE v.piso = $1
         ORDER BY ct.datetime_inst_value_0_0_0 DESC
+      ),
+      mes_inicio AS (
+        SELECT
+          ct.energy_wh_inst_value_0_0_0 AS calor_mes,
+          ct.energy_manufacturer_specific_02_wh_inst_value_0_0_0 AS frio_mes,
+          ct.volume_m3_inst_value_0_1_0 AS m3_acs_mes
+        FROM contadores ct
+        JOIN vecinos v ON ct.device_identification = v.device_identification
+          AND ct.serial_number::text = v.serial_number
+        WHERE v.piso = $1
+          AND ct.datetime_inst_value_0_0_0 <= date_trunc('month', NOW())
+        ORDER BY ct.datetime_inst_value_0_0_0 DESC
+        LIMIT 1
       )
       SELECT
         timestamp,
@@ -94,6 +107,9 @@ router.get('/consumo-actual', authMiddleware, async (req: Request, res: Response
         ROUND((energy_manufacturer_specific_02_wh_inst_value_0_0_0 - prev_wh_frio) / 1000.0, 3) AS kwh_frio,
         ROUND((volume_m3_inst_value_0_1_0 - prev_m3_acs)::numeric, 3) AS m3_acs,
         ROUND(((volume_m3_inst_value_0_1_0 - prev_m3_acs) * 46.5)::numeric, 3) AS kwh_acs,
+        (SELECT ROUND((energy_wh_inst_value_0_0_0 - calor_mes) / 1000.0, 3) FROM mes_inicio) AS kwh_calor_mes_inicio,
+        (SELECT ROUND((energy_manufacturer_specific_02_wh_inst_value_0_0_0 - frio_mes) / 1000.0, 3) FROM mes_inicio) AS kwh_frio_mes_inicio,
+        (SELECT ROUND((volume_m3_inst_value_0_1_0 - m3_acs_mes)::numeric, 3) FROM mes_inicio) AS m3_acs_mes_inicio,
         temp_impulsion,
         temp_retorno,
         power_w
