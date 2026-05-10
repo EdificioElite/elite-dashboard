@@ -8,7 +8,7 @@ process.env.JWT_SECRET = 'test-secret-key';
 describe('JWT helpers', () => {
   const payload: JwtPayload = {
     userId: 1,
-    vecinoId: 10,
+    vecinoPiso: '1A',
     email: 'test@test.com',
     isAdmin: false,
   };
@@ -25,7 +25,7 @@ describe('JWT helpers', () => {
     const token = signToken(payload);
     const decoded = verifyToken(token);
     expect(decoded.userId).toBe(1);
-    expect(decoded.vecinoId).toBe(10);
+    expect(decoded.vecinoPiso).toBe('1A');
     expect(decoded.email).toBe('test@test.com');
     expect(decoded.isAdmin).toBe(false);
   });

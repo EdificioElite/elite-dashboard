@@ -17,7 +17,7 @@ router.post('/auth/login', rateLimit(3, 60 * 1000), async (req: Request, res: Re
     }
 
     const result = await query(
-      'SELECT u.id, u.vecino_id, u.email, u.password_hash, u.is_admin FROM usuarios u WHERE u.email = $1',
+      'SELECT u.id, u.vecino_piso, u.email, u.password_hash, u.is_admin FROM usuarios u WHERE u.email = $1',
       [email]
     );
 
@@ -36,7 +36,7 @@ router.post('/auth/login', rateLimit(3, 60 * 1000), async (req: Request, res: Re
 
     const token = signToken({
       userId: user.id,
-      vecinoId: user.vecino_id,
+      vecinoPiso: user.vecino_piso,
       email: user.email,
       isAdmin: user.is_admin,
     });
@@ -45,7 +45,7 @@ router.post('/auth/login', rateLimit(3, 60 * 1000), async (req: Request, res: Re
       token,
       user: {
         id: user.id,
-        vecino_id: user.vecino_id,
+        vecino_piso: user.vecino_piso,
         email: user.email,
         is_admin: user.is_admin,
       },
@@ -59,7 +59,7 @@ router.post('/auth/login', rateLimit(3, 60 * 1000), async (req: Request, res: Re
 router.get('/auth/me', authMiddleware, (req: Request, res: Response) => {
   res.json({
     id: req.user!.userId,
-    vecino_id: req.user!.vecinoId,
+    vecino_piso: req.user!.vecinoPiso,
     email: req.user!.email,
     is_admin: req.user!.isAdmin,
   });

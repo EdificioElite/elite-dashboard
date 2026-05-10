@@ -1,7 +1,11 @@
 interface ConsumoActual {
   timestamp: string;
-  kwh_electrico: number;
+  kwh_calor: number;
+  kwh_frio: number;
+  m3_acs: number;
   kwh_acs: number;
+  temp_impulsion: number | null;
+  temp_retorno: number | null;
 }
 
 export default function ConsumoCard({ data }: { data: ConsumoActual | null }) {
@@ -16,11 +20,18 @@ export default function ConsumoCard({ data }: { data: ConsumoActual | null }) {
   return (
     <div className="bg-white p-6 rounded-lg shadow-md">
       <h2 className="text-lg font-semibold text-gray-700 mb-4">Consumo actual</h2>
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
         <div>
-          <p className="text-sm text-gray-500">Electricidad</p>
-          <p className="text-3xl font-bold text-blue-600">
-            {Number(data.kwh_electrico).toFixed(2)}
+          <p className="text-sm text-gray-500">Calefaccion</p>
+          <p className="text-3xl font-bold text-red-500">
+            {Number(data.kwh_calor).toFixed(2)}
+          </p>
+          <p className="text-xs text-gray-400">kWh</p>
+        </div>
+        <div>
+          <p className="text-sm text-gray-500">Refrigeracion</p>
+          <p className="text-3xl font-bold text-blue-500">
+            {Number(data.kwh_frio).toFixed(2)}
           </p>
           <p className="text-xs text-gray-400">kWh</p>
         </div>
@@ -29,7 +40,7 @@ export default function ConsumoCard({ data }: { data: ConsumoActual | null }) {
           <p className="text-3xl font-bold text-orange-500">
             {Number(data.kwh_acs).toFixed(2)}
           </p>
-          <p className="text-xs text-gray-400">kWh</p>
+          <p className="text-xs text-gray-400">kWh / {Number(data.m3_acs).toFixed(3)} m³</p>
         </div>
       </div>
       <p className="mt-4 text-xs text-gray-400">

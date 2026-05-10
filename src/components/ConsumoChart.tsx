@@ -12,7 +12,9 @@ import {
 
 interface Consumo {
   timestamp: string;
-  kwh_electrico: number;
+  kwh_calor: number;
+  kwh_frio: number;
+  m3_acs: number;
   kwh_acs: number;
 }
 
@@ -60,7 +62,7 @@ export default function ConsumoChart({ data }: { data: Consumo[] }) {
     <div className="bg-white p-6 rounded-lg shadow-md">
       <div className="flex justify-between items-center mb-4">
         <h2 className="text-lg font-semibold text-gray-700">
-          Consumo electrico y ACS
+          Consumo termico y ACS
         </h2>
         <select
           value={range}
@@ -81,9 +83,17 @@ export default function ConsumoChart({ data }: { data: Consumo[] }) {
           <Legend />
           <Line
             type="monotone"
-            dataKey="kwh_electrico"
-            name="Electricidad"
-            stroke="#2563eb"
+            dataKey="kwh_calor"
+            name="Calefaccion"
+            stroke="#ef4444"
+            strokeWidth={2}
+            dot={false}
+          />
+          <Line
+            type="monotone"
+            dataKey="kwh_frio"
+            name="Refrigeracion"
+            stroke="#3b82f6"
             strokeWidth={2}
             dot={false}
           />

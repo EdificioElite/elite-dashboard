@@ -51,7 +51,7 @@ export default function App() {
           }
         />
         <Route
-          path="/admin/vecino/:id"
+          path="/admin/vecino/:piso"
           element={
             <ProtectedRoute adminOnly>
               <AdminVecinoPage />

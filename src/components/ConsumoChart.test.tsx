@@ -20,18 +20,18 @@ describe('ConsumoChart', () => {
     render(
       <ConsumoChart
         data={[
-          { timestamp: '2026-01-01T00:00:00Z', kwh_electrico: 1.5, kwh_acs: 0.8 },
-          { timestamp: '2026-01-01T01:00:00Z', kwh_electrico: 1.6, kwh_acs: 0.9 },
+          { timestamp: '2026-01-01T00:00:00Z', kwh_calor: 1.5, kwh_frio: 0.3, m3_acs: 0.02, kwh_acs: 0.93 },
+          { timestamp: '2026-01-01T01:00:00Z', kwh_calor: 1.6, kwh_frio: 0.2, m3_acs: 0.01, kwh_acs: 0.465 },
         ]}
       />
     );
-    expect(screen.getByText('Consumo electrico y ACS')).toBeInTheDocument();
+    expect(screen.getByText('Consumo termico y ACS')).toBeInTheDocument();
   });
 
   it('renders range selector', () => {
     render(
       <ConsumoChart
-        data={[{ timestamp: '2026-01-01T00:00:00Z', kwh_electrico: 1, kwh_acs: 1 }]}
+        data={[{ timestamp: '2026-01-01T00:00:00Z', kwh_calor: 1, kwh_frio: 0, m3_acs: 0, kwh_acs: 0 }]}
       />
     );
     expect(screen.getByRole('combobox')).toBeInTheDocument();

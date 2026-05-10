@@ -3,7 +3,7 @@ import { apiFetch } from '../api/client';
 
 interface User {
   id: number;
-  vecino_id: number;
+  vecino_piso: string;
   email: string;
   is_admin: boolean;
 }

@@ -8,7 +8,10 @@
     "build": "tsc -b && vite build",
     "preview": "vite preview",
     "test": "vitest run",
-    "test:watch": "vitest"
+    "test:watch": "vitest",
+    "e2e:up": "docker compose -f docker-compose.e2e.yml up -d --build",
+    "e2e:test": "docker compose -f docker-compose.e2e.yml run --rm playwright",
+    "e2e:down": "docker compose -f docker-compose.e2e.yml down -v"
   },
   "dependencies": {
     "react": "^19.0.0",

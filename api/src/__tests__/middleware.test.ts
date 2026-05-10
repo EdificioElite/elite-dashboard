@@ -47,7 +47,7 @@ describe('authMiddleware', () => {
   });
 
   it('calls next() when token is valid', () => {
-    const token = signToken({ userId: 1, vecinoId: 10, email: 'a@a.com', isAdmin: false });
+    const token = signToken({ userId: 1, vecinoPiso: '1A', email: 'a@a.com', isAdmin: false });
     const req = mockReq({ headers: { authorization: `Bearer ${token}` } });
     const res = mockRes();
     const next = mockNext();
@@ -70,7 +70,7 @@ describe('authMiddleware', () => {
 describe('adminMiddleware', () => {
   it('returns 403 when user is not admin', () => {
     const req = mockReq();
-    req.user = { userId: 1, vecinoId: 10, email: 'a@a.com', isAdmin: false };
+    req.user = { userId: 1, vecinoPiso: '1A', email: 'a@a.com', isAdmin: false };
     const res = mockRes();
     const next = mockNext();
     adminMiddleware(req, res, next);
@@ -80,7 +80,7 @@ describe('adminMiddleware', () => {
 
   it('calls next() when user is admin', () => {
     const req = mockReq();
-    req.user = { userId: 1, vecinoId: 10, email: 'a@a.com', isAdmin: true };
+    req.user = { userId: 1, vecinoPiso: '1A', email: 'a@a.com', isAdmin: true };
     const res = mockRes();
     const next = mockNext();
     adminMiddleware(req, res, next);

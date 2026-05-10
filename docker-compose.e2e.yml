@@ -1,0 +1,72 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: elite
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d elite"]
+      interval: 3s
+      timeout: 3s
+      retries: 10
+
+  init:
+    image: node:22-alpine
+    working_dir: /app
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: postgres://postgres:postgres@postgres:5432/elite
+    volumes:
+      - ./api/migrations:/app/migrations:ro
+      - ./docker/init:/app/init:ro
+      - ./docker/init.sh:/app/init.sh:ro
+    command: sh /app/init.sh
+
+  api:
+    build:
+      context: ./api
+      dockerfile: Dockerfile
+    ports:
+      - "3001:3001"
+    depends_on:
+      init:
+        condition: service_completed_successfully
+    environment:
+      DATABASE_URL: postgres://postgres:postgres@postgres:5432/elite
+      JWT_SECRET: e2e-test-jwt-secret-dont-use-in-prod
+      CORS_ORIGIN: "*"
+      PORT: "3001"
+      DISABLE_RATE_LIMIT: "true"
+
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile.frontend
+    ports:
+      - "5173:80"
+    depends_on:
+      - api
+
+  playwright:
+    image: mcr.microsoft.com/playwright:v1.46.1-jammy
+    working_dir: /e2e
+    depends_on:
+      - frontend
+      - api
+    volumes:
+      - ./e2e:/e2e
+    environment:
+      BASE_URL: http://frontend:80
+    command: sh -c "npm install && npx playwright test"
+    profiles:
+      - test
+
+volumes:
+  pgdata:

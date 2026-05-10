@@ -5,22 +5,24 @@ import ConsumoChart from '../components/ConsumoChart';
 
 interface Consumo {
   timestamp: string;
-  kwh_electrico: number;
+  kwh_calor: number;
+  kwh_frio: number;
+  m3_acs: number;
   kwh_acs: number;
 }
 
 export default function AdminVecinoPage() {
-  const { id } = useParams<{ id: string }>();
+  const { piso } = useParams<{ piso: string }>();
   const navigate = useNavigate();
   const [consumos, setConsumos] = useState<Consumo[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    apiFetch<Consumo[]>(`/admin/vecinos/${id}`)
+    apiFetch<Consumo[]>(`/admin/vecinos/${piso}`)
       .then(setConsumos)
       .catch(console.error)
       .finally(() => setLoading(false));
-  }, [id]);
+  }, [piso]);
 
   if (loading) {
     return (
@@ -37,9 +39,9 @@ export default function AdminVecinoPage() {
           onClick={() => navigate('/admin')}
           className="text-sm text-blue-600 hover:underline"
         >
-          ← Volver
+          Volver
         </button>
-        <h1 className="text-xl font-bold text-gray-800">Consumos vecino #{id}</h1>
+        <h1 className="text-xl font-bold text-gray-800">Consumos vecino {piso}</h1>
       </header>
 
       <main className="max-w-4xl mx-auto p-4">

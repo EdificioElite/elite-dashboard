@@ -6,24 +6,28 @@ const router = Router();
 
 router.get('/facturas', authMiddleware, async (req: Request, res: Response) => {
   try {
-    const vecinoId = req.user!.vecinoId;
-    const { anio } = req.query;
+    const vecinoPiso = req.user!.vecinoPiso;
 
-    let sql = `
-      SELECT f.id, f.periodo, f.importe, f.kwh_electrico, f.kwh_acs, f.created_at
+    const result = await query(
+      `SELECT
+        f.id_factura,
+        f.fecha_factura_creacion AS periodo,
+        f.importe_vivienda_total AS importe_total,
+        f.kwh_vivienda_calor AS kwh_calor,
+        f.kwh_vivienda_frio AS kwh_frio,
+        f.kwh_vivienda_acs AS kwh_acs,
+        f.m3_vivienda_acs AS m3_acs,
+        f.importe_vivienda_variable_calor AS importe_calor,
+        f.importe_vivienda_variable_frio AS importe_frio,
+        f.importe_vivienda_acs AS importe_acs,
+        f.fecha_factura_inicio,
+        f.fecha_factura_fin
       FROM facturas f
-      WHERE f.vecino_id = $1
-    `;
-    const params: unknown[] = [vecinoId];
+      WHERE f.piso = $1
+      ORDER BY f.fecha_factura_creacion DESC`,
+      [vecinoPiso]
+    );
 
-    if (anio) {
-      params.push(anio);
-      sql += ` AND EXTRACT(YEAR FROM f.periodo) = $${params.length}`;
-    }
-
-    sql += ' ORDER BY f.periodo DESC';
-
-    const result = await query(sql, params);
     res.json(result.rows);
   } catch (err) {
     console.error('Facturas error:', err);

@@ -3,7 +3,7 @@ import { config } from '../config';
 
 export interface JwtPayload {
   userId: number;
-  vecinoId: number;
+  vecinoPiso: string;
   email: string;
   isAdmin: boolean;
 }
