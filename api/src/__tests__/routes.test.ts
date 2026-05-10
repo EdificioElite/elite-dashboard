@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach, afterAll } from 'vitest';
+import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { Request, Response, NextFunction } from 'express';
 import request from 'supertest';
 import express from 'express';
@@ -11,13 +11,11 @@ import { signToken } from '../lib/jwt';
 
 process.env.JWT_SECRET = 'test-secret-key';
 
-// Mock the database
 vi.mock('../db', () => ({
   query: vi.fn(),
   pool: {},
 }));
 
-// Mock rateLimit to avoid shared state issues
 vi.mock('../middleware/rateLimit', () => ({
   rateLimit: () => (_req: Request, _res: Response, next: NextFunction) => next(),
 }));
@@ -37,7 +35,7 @@ function createApp() {
 }
 
 function userToken(isAdmin = false) {
-  return signToken({ userId: 1, vecinoId: 10, email: 'test@test.com', isAdmin });
+  return signToken({ userId: 1, vecinoPiso: '1A', email: 'test@test.com', isAdmin });
 }
 
 describe('Auth routes', () => {
@@ -75,7 +73,7 @@ describe('Auth routes', () => {
       const bcrypt = await import('bcrypt');
       const hash = await bcrypt.hash('correct', 12);
       mockQuery.mockResolvedValueOnce({
-        rows: [{ id: 1, vecino_id: 10, email: 'test@test.com', password_hash: hash, is_admin: false }],
+        rows: [{ id: 1, vecino_piso: '1A', email: 'test@test.com', password_hash: hash, is_admin: false }],
       });
       const app = createApp();
       const res = await request(app)
@@ -88,7 +86,7 @@ describe('Auth routes', () => {
       const bcrypt = await import('bcrypt');
       const hash = await bcrypt.hash('correct', 12);
       mockQuery.mockResolvedValueOnce({
-        rows: [{ id: 1, vecino_id: 10, email: 'test@test.com', password_hash: hash, is_admin: false }],
+        rows: [{ id: 1, vecino_piso: '1A', email: 'test@test.com', password_hash: hash, is_admin: false }],
       });
       const app = createApp();
       const res = await request(app)
@@ -144,8 +142,8 @@ describe('Consumos routes', () => {
     it('returns consumos for authenticated user', async () => {
       mockQuery.mockResolvedValueOnce({
         rows: [
-          { timestamp: '2026-01-01T00:00:00Z', kwh_electrico: 1.5, kwh_acs: 0.8 },
-          { timestamp: '2026-01-01T00:05:00Z', kwh_electrico: 1.6, kwh_acs: 0.9 },
+          { timestamp: '2026-01-01T00:00:00Z', kwh_calor: 1.5, kwh_frio: 0.3, m3_acs: 0.02, kwh_acs: 0.93, temp_impulsion: 42.0, temp_retorno: 32.0 },
+          { timestamp: '2026-01-01T12:00:00Z', kwh_calor: 1.6, kwh_frio: 0.2, m3_acs: 0.01, kwh_acs: 0.465, temp_impulsion: 41.0, temp_retorno: 31.0 },
         ],
       });
       const app = createApp();
@@ -157,6 +155,23 @@ describe('Consumos routes', () => {
       expect(res.body).toHaveLength(2);
     });
 
+    it('uses sampling to limit results to 500 points', async () => {
+      mockQuery.mockResolvedValueOnce({ rows: [] });
+      const app = createApp();
+      const token = userToken();
+      const res = await request(app)
+        .get('/api/consumos?desde=2026-01-01&hasta=2026-12-31')
+        .set('Authorization', `Bearer ${token}`);
+      expect(res.status).toBe(200);
+      const sqlArg = mockQuery.mock.calls[0][0] as string;
+      expect(sqlArg).toContain('counted AS');
+      expect(sqlArg).toContain('sampled AS');
+      expect(sqlArg).toContain('with_deltas AS');
+      expect(sqlArg).toContain('rn = 1');
+      expect(sqlArg).toContain('rn = total');
+      expect(sqlArg).toContain('CEIL');
+    });
+
     it('filters by date range', async () => {
       mockQuery.mockResolvedValueOnce({ rows: [] });
       const app = createApp();
@@ -166,15 +181,15 @@ describe('Consumos routes', () => {
         .set('Authorization', `Bearer ${token}`);
       expect(res.status).toBe(200);
       const sqlArg = mockQuery.mock.calls[0][0];
-      expect(sqlArg).toContain('c.timestamp >= $2');
-      expect(sqlArg).toContain('c.timestamp <= $3');
+      expect(sqlArg).toContain('datetime_inst_value_0_0_0 >=');
+      expect(sqlArg).toContain('datetime_inst_value_0_0_0 <=');
     });
   });
 
   describe('GET /api/consumo-actual', () => {
     it('returns the latest reading', async () => {
       mockQuery.mockResolvedValueOnce({
-        rows: [{ timestamp: '2026-01-01T12:00:00Z', kwh_electrico: 2.0, kwh_acs: 1.0 }],
+        rows: [{ timestamp: '2026-01-01T12:00:00Z', kwh_calor: 2.0, kwh_frio: 0.5, m3_acs: 0.03, kwh_acs: 1.395, temp_impulsion: 43.0, temp_retorno: 33.0 }],
       });
       const app = createApp();
       const token = userToken();
@@ -182,7 +197,7 @@ describe('Consumos routes', () => {
         .get('/api/consumo-actual')
         .set('Authorization', `Bearer ${token}`);
       expect(res.status).toBe(200);
-      expect(res.body.kwh_electrico).toBe(2.0);
+      expect(res.body.kwh_calor).toBe(2.0);
     });
 
     it('returns null when no data', async () => {
@@ -212,7 +227,7 @@ describe('Facturas routes', () => {
 
     it('returns facturas for authenticated user', async () => {
       mockQuery.mockResolvedValueOnce({
-        rows: [{ id: 1, periodo: '2026-01-01', importe: 80.5, kwh_electrico: 100, kwh_acs: 50 }],
+        rows: [{ id_factura: '1', periodo: '2026-01-01', importe_total: 80.5, kwh_calor: 100, kwh_frio: 30, kwh_acs: 50, m3_acs: 2.5 }],
       });
       const app = createApp();
       const token = userToken();
@@ -221,7 +236,7 @@ describe('Facturas routes', () => {
         .set('Authorization', `Bearer ${token}`);
       expect(res.status).toBe(200);
       expect(res.body).toHaveLength(1);
-      expect(res.body[0].importe).toBe(80.5);
+      expect(res.body[0].importe_total).toBe(80.5);
     });
   });
 });
@@ -249,7 +264,7 @@ describe('Admin routes', () => {
 
     it('returns vecinos for admin', async () => {
       mockQuery.mockResolvedValueOnce({
-        rows: [{ id: 1, nombre: 'Vecino 1', piso: '1A', email: 'a@a.com', is_admin: false }],
+        rows: [{ piso: '1A', nombre: 'Vecino 1', email: 'a@a.com', is_admin: false }],
       });
       const app = createApp();
       const token = userToken(true);
@@ -274,14 +289,14 @@ describe('Admin routes', () => {
 
     it('creates user for admin', async () => {
       mockQuery.mockResolvedValueOnce({
-        rows: [{ id: 2, vecino_id: 2, email: 'new@test.com', is_admin: false, created_at: '2026-01-01' }],
+        rows: [{ id: 2, vecino_piso: '2A', email: 'new@test.com', is_admin: false, created_at: '2026-01-01' }],
       });
       const app = createApp();
       const token = userToken(true);
       const res = await request(app)
         .post('/api/admin/usuarios')
         .set('Authorization', `Bearer ${token}`)
-        .send({ email: 'new@test.com', password: '123456', vecino_id: 2 });
+        .send({ email: 'new@test.com', password: '123456', vecino_piso: '2A' });
       expect(res.status).toBe(201);
       expect(res.body.email).toBe('new@test.com');
     });

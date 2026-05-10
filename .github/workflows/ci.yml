@@ -57,3 +57,40 @@ jobs:
       - run: npm ci
       - run: npm test
       - run: npm run build
+
+  e2e:
+    runs-on: ubuntu-latest
+    if: github.event_name != 'pull_request' || (github.event.action != 'labeled' && github.event.action != 'unlabeled')
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build and start E2E stack
+        run: docker compose -f docker-compose.e2e.yml up -d --build
+
+      - name: Wait for services to be healthy
+        run: |
+          echo "Waiting for services..."
+          for i in $(seq 1 60); do
+            if curl -sf http://localhost:3001/api/health > /dev/null && \
+               curl -sf http://localhost:5173/ > /dev/null; then
+              echo "Services ready"
+              exit 0
+            fi
+            echo "  attempt $i/60..."
+            sleep 5
+          done
+          echo "Services did not become healthy"
+          docker compose -f docker-compose.e2e.yml logs
+          exit 1
+
+      - name: Run Playwright tests
+        run: docker compose -f docker-compose.e2e.yml run --rm playwright
+
+      - name: Collect logs on failure
+        if: failure()
+        run: docker compose -f docker-compose.e2e.yml logs
+
+      - name: Tear down
+        if: always()
+        run: docker compose -f docker-compose.e2e.yml down -v

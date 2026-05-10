@@ -3,9 +3,8 @@ import { useNavigate } from 'react-router-dom';
 import { apiFetch } from '../api/client';
 
 interface Vecino {
-  id: number;
-  nombre: string;
   piso: string;
+  nombre: string;
   email: string | null;
   is_admin: boolean;
 }
@@ -18,7 +17,7 @@ export default function AdminPage() {
   const [showForm, setShowForm] = useState(false);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [vecinoId, setVecinoId] = useState('');
+  const [vecinoPiso, setVecinoPiso] = useState('');
   const [formError, setFormError] = useState('');
   const [formSuccess, setFormSuccess] = useState('');
 
@@ -39,13 +38,13 @@ export default function AdminPage() {
         body: JSON.stringify({
           email,
           password,
-          vecino_id: parseInt(vecinoId, 10),
+          vecino_piso: vecinoPiso,
         }),
       });
       setFormSuccess('Usuario creado correctamente');
       setEmail('');
       setPassword('');
-      setVecinoId('');
+      setVecinoPiso('');
       setShowForm(false);
       const updated = await apiFetch<Vecino[]>('/admin/vecinos');
       setVecinos(updated);
@@ -106,14 +105,15 @@ export default function AdminPage() {
             )}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Vecino ID
+                Piso
               </label>
               <input
-                type="number"
-                value={vecinoId}
-                onChange={(e) => setVecinoId(e.target.value)}
+                type="text"
+                value={vecinoPiso}
+                onChange={(e) => setVecinoPiso(e.target.value)}
                 required
                 className="w-full px-3 py-2 border border-gray-300 rounded"
+                placeholder="1A"
               />
             </div>
             <div>
@@ -154,8 +154,8 @@ export default function AdminPage() {
           <table className="w-full text-sm text-left">
             <thead className="text-xs text-gray-500 uppercase bg-gray-50">
               <tr>
-                <th className="px-4 py-3">ID</th>
                 <th className="px-4 py-3">Piso</th>
+                <th className="px-4 py-3">Nombre</th>
                 <th className="px-4 py-3">Email</th>
                 <th className="px-4 py-3">Admin</th>
                 <th className="px-4 py-3">Accion</th>
@@ -163,9 +163,9 @@ export default function AdminPage() {
             </thead>
             <tbody>
               {vecinos.map((v) => (
-                <tr key={v.id} className="border-b">
-                  <td className="px-4 py-3 text-gray-500">{v.id}</td>
+                <tr key={v.piso} className="border-b">
                   <td className="px-4 py-3 font-medium">{v.piso}</td>
+                  <td className="px-4 py-3 text-gray-500">{v.nombre}</td>
                   <td className="px-4 py-3">{v.email || 'Sin usuario'}</td>
                   <td className="px-4 py-3">
                     {v.is_admin ? (
@@ -176,7 +176,7 @@ export default function AdminPage() {
                   </td>
                   <td className="px-4 py-3">
                     <button
-                      onClick={() => navigate(`/admin/vecino/${v.id}`)}
+                      onClick={() => navigate(`/admin/vecino/${v.piso}`)}
                       className="text-blue-600 hover:underline text-xs"
                     >
                       Ver consumos

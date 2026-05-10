@@ -31,7 +31,13 @@ export default function LoginPage() {
         onSubmit={handleSubmit}
         className="bg-white p-8 rounded-lg shadow-md w-full max-w-sm"
       >
-        <h1 className="text-2xl font-bold mb-6 text-center">Elite Dashboard</h1>
+        <div className="flex justify-center mb-6">
+          <img
+            src="/images/elite/Logotipo PNG.png"
+            alt="Elite Logo"
+            className="h-16 w-auto"
+          />
+        </div>
 
         {error && (
           <div className="mb-4 p-3 bg-red-100 text-red-700 rounded text-sm">

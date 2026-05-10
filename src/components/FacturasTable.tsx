@@ -1,9 +1,14 @@
 interface Factura {
-  id: number;
+  id_factura: string;
   periodo: string;
-  importe: number;
-  kwh_electrico: number;
+  importe_total: number;
+  kwh_calor: number;
+  kwh_frio: number;
   kwh_acs: number;
+  m3_acs: number;
+  importe_calor: number;
+  importe_frio: number;
+  importe_acs: number;
 }
 
 export default function FacturasTable({ data }: { data: Factura[] }) {
@@ -24,23 +29,27 @@ export default function FacturasTable({ data }: { data: Factura[] }) {
           <thead className="text-xs text-gray-500 uppercase bg-gray-50">
             <tr>
               <th className="px-4 py-2">Periodo</th>
-              <th className="px-4 py-2">kWh Elec.</th>
+              <th className="px-4 py-2">kWh Calor</th>
+              <th className="px-4 py-2">kWh Frio</th>
               <th className="px-4 py-2">kWh ACS</th>
+              <th className="px-4 py-2">m³ ACS</th>
               <th className="px-4 py-2">Importe</th>
             </tr>
           </thead>
           <tbody>
             {data.map((f) => (
-              <tr key={f.id} className="border-b">
+              <tr key={f.id_factura} className="border-b">
                 <td className="px-4 py-2">
                   {new Date(f.periodo).toLocaleDateString('es-ES', {
                     year: 'numeric',
                     month: 'long',
                   })}
                 </td>
-                <td className="px-4 py-2">{Number(f.kwh_electrico).toFixed(2)}</td>
-                <td className="px-4 py-2">{Number(f.kwh_acs).toFixed(2)}</td>
-                <td className="px-4 py-2 font-medium">{Number(f.importe).toFixed(2)} €</td>
+                <td className="px-4 py-2">{Number(f.kwh_calor).toFixed(0)}</td>
+                <td className="px-4 py-2">{Number(f.kwh_frio).toFixed(0)}</td>
+                <td className="px-4 py-2">{Number(f.kwh_acs).toFixed(0)}</td>
+                <td className="px-4 py-2">{Number(f.m3_acs).toFixed(1)}</td>
+                <td className="px-4 py-2 font-medium">{Number(f.importe_total).toFixed(2)} €</td>
               </tr>
             ))}
           </tbody>

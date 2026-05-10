@@ -12,26 +12,28 @@ describe('FacturasTable', () => {
     render(
       <FacturasTable
         data={[
-          { id: 1, periodo: '2026-01-01', importe: 80.5, kwh_electrico: 100, kwh_acs: 50 },
-          { id: 2, periodo: '2026-02-01', importe: 90.0, kwh_electrico: 110, kwh_acs: 55 },
+          { id_factura: '1', periodo: '2026-01-01', importe_total: 80.5, kwh_calor: 100, kwh_frio: 30, kwh_acs: 50, m3_acs: 2.5, importe_calor: 40, importe_frio: 10, importe_acs: 30.5 },
+          { id_factura: '2', periodo: '2026-02-01', importe_total: 90.0, kwh_calor: 110, kwh_frio: 25, kwh_acs: 55, m3_acs: 2.8, importe_calor: 45, importe_frio: 8, importe_acs: 37.0 },
         ]}
       />
     );
     expect(screen.getByText('80.50 €')).toBeInTheDocument();
     expect(screen.getByText('90.00 €')).toBeInTheDocument();
-    expect(screen.getByText('100.00')).toBeInTheDocument();
-    expect(screen.getByText('50.00')).toBeInTheDocument();
+    expect(screen.getByText('100')).toBeInTheDocument();
+    expect(screen.getByText('50')).toBeInTheDocument();
   });
 
   it('renders column headers', () => {
     render(
       <FacturasTable
-        data={[{ id: 1, periodo: '2026-01-01', importe: 80.5, kwh_electrico: 100, kwh_acs: 50 }]}
+        data={[{ id_factura: '1', periodo: '2026-01-01', importe_total: 80.5, kwh_calor: 100, kwh_frio: 30, kwh_acs: 50, m3_acs: 2.5, importe_calor: 40, importe_frio: 10, importe_acs: 30.5 }]}
       />
     );
     expect(screen.getByText('Periodo')).toBeInTheDocument();
-    expect(screen.getByText('kWh Elec.')).toBeInTheDocument();
+    expect(screen.getByText('kWh Calor')).toBeInTheDocument();
+    expect(screen.getByText('kWh Frio')).toBeInTheDocument();
     expect(screen.getByText('kWh ACS')).toBeInTheDocument();
+    expect(screen.getByText('m³ ACS')).toBeInTheDocument();
     expect(screen.getByText('Importe')).toBeInTheDocument();
   });
 });

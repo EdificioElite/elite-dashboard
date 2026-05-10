@@ -4,6 +4,10 @@ const attempts = new Map<string, { count: number; resetAt: number }>();
 
 export function rateLimit(maxAttempts: number, windowMs: number) {
   return (req: Request, res: Response, next: NextFunction) => {
+    if (process.env.DISABLE_RATE_LIMIT === 'true') {
+      next();
+      return;
+    }
     const ip = req.ip || req.socket.remoteAddress || 'unknown';
     const now = Date.now();
     const record = attempts.get(ip);

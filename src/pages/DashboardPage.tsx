@@ -6,38 +6,47 @@ import ConsumoCard from '../components/ConsumoCard';
 import ConsumoChart from '../components/ConsumoChart';
 import FacturasTable from '../components/FacturasTable';
 
-interface Consumo {
+export interface Consumo {
   timestamp: string;
-  kwh_electrico: number;
+  kwh_calor: number;
+  kwh_frio: number;
+  m3_acs: number;
   kwh_acs: number;
+  temp_impulsion: number | null;
+  temp_retorno: number | null;
+  power_w: number | null;
 }
 
-interface Factura {
-  id: number;
+export interface Factura {
+  id_factura: string;
   periodo: string;
-  importe: number;
-  kwh_electrico: number;
+  importe_total: number;
+  kwh_calor: number;
+  kwh_frio: number;
   kwh_acs: number;
+  m3_acs: number;
+  importe_calor: number;
+  importe_frio: number;
+  importe_acs: number;
+  fecha_factura_inicio: string;
+  fecha_factura_fin: string;
 }
 
 export default function DashboardPage() {
   const { user, logout } = useAuthStore();
   const navigate = useNavigate();
   const [consumoActual, setConsumoActual] = useState<Consumo | null>(null);
-  const [consumos, setConsumos] = useState<Consumo[]>([]);
   const [facturas, setFacturas] = useState<Factura[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     async function fetchData() {
       try {
-        const [actual, historico, facturasData] = await Promise.all([
+        const [actual, facturasData] = await Promise.all([
           apiFetch<Consumo | null>('/consumo-actual'),
-          apiFetch<Consumo[]>('/consumos'),
           apiFetch<Factura[]>('/facturas'),
         ]);
         setConsumoActual(actual);
-        setConsumos(historico);
         setFacturas(facturasData);
       } catch (err) {
         console.error('Error fetching data:', err);
@@ -86,7 +95,7 @@ export default function DashboardPage() {
 
       <main className="max-w-4xl mx-auto p-4 space-y-6">
         <ConsumoCard data={consumoActual} />
-        <ConsumoChart data={consumos} />
+        <ConsumoChart />
         <FacturasTable data={facturas} />
       </main>
     </div>
