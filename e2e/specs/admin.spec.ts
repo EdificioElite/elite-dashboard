@@ -12,14 +12,14 @@ test.describe('Admin', () => {
   });
 
   test('navigates to vecino consumos', async ({ page }) => {
-    await page.click('text=Ver consumos');
+    await page.click('text=1A');
     await expect(page).toHaveURL(/\/admin\/vecino\/\d/);
     await expect(page.getByText('Vecino', { exact: true })).toBeVisible();
   });
 
   // Skipped: flaky due to HTML5 form validation in headless browser
   test.skip('can create a new user', async ({ page }) => {
-    await page.click('text=Crear usuario');
+    await page.click('text=Crear acceso');
     await page.waitForSelector('form');
     const vecinoInput = page.locator('form input[type="text"]');
     await vecinoInput.fill('6A');
@@ -28,7 +28,7 @@ test.describe('Admin', () => {
     const passInput = page.locator('form input[type="password"]');
     await passInput.fill('password1');
     await page.click('text=Guardar');
-    await expect(page.locator('.bg-green-100, .bg-red-100')).toBeVisible({ timeout: 10000 });
+    await expect(page.getByText(/creado|error/i)).toBeVisible({ timeout: 10000 });
     await expect(page.locator('tbody')).toContainText('vecino6@elite.com');
   });
 
