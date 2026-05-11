@@ -66,17 +66,30 @@ cd api && npm test        # Backend tests (vitest + supertest)
 
 ## Flujo de trabajo
 
-- **Siempre trabajar en ramas**: `feat/`, `fix/`, `docs/`, `chore/` desde `main`
-- **Siempre crear PR** para mergear a `main`. Nunca push directo a main.
-- **Anadir label de versionado** a la PR: `major`, `minor` o `patch`
-- El workflow `Release` se ejecuta automaticamente al mergear una PR a main y:
-  - Lee el label de la PR para decidir el bump
-  - Genera GitHub Release + tag + build Docker
-  - Commitea el bump de version en `api/package.json`
+- **Siempre trabajar en ramas**: `feat/`, `fix/`, `docs/`, `chore/` desde `dev`
+- **Siempre crear PR** para mergear a `dev`. Nunca push directo a `dev` ni a `main`.
+- **Labels semver** (`major`, `minor`, `patch`) solo se exigen en PRs de `dev` → `main`
+- Para promocionar a produccion, ejecutar manualmente el workflow `Promote dev to main`
+  - Esto crea automaticamente un PR de `dev` → `main`
+  - Asignar label `major`, `minor` o `patch` a ese PR antes de mergearlo
+- Tras merge a `main`, el workflow `Sync main to dev` crea automaticamente un PR de `main` → `dev`
+  para sincronizar version bumps, hotfixes y releases de vuelta a dev
+
+### Ramas protegidas
+
+`main` y `dev` requieren PR antes de merge y que pasen los checks:
+`backend`, `frontend`, `e2e`, `check-labels`
+
+### Entornos
+
+| Rama | Entorno | URL | Backend |
+|---|---|---|---|
+| `dev` | Preview/Dev | dev.edificioelite.com | api-dev.edificioelite.com |
+| `main` | Production | www.edificioelite.com | api.edificioelite.com |
 
 ## CI/CD
 
-GitHub Actions (`.github/workflows/ci.yml`) ejecuta en cada push y PR:
+GitHub Actions (`.github/workflows/ci.yml`) ejecuta en cada push y PR a `main` y `dev`:
 - Backend: typecheck + tests
 - Frontend: tests + build
 - E2E: stack docker-compose + Playwright
@@ -85,6 +98,10 @@ Release (`.github/workflows/release.yml`) se ejecuta en merge a main:
 - Solo si el commit empieza por "Merge pull request"
 - Bump semver segun label de la PR
 - Tag + GitHub Release + Docker image
+
+Promote (`.github/workflows/promote.yml`): workflow_dispatch manual para crear PR de dev → main
+
+Sync (`.github/workflows/sync.yml`): auto back-merge main → dev tras cada release
 
 ## Superpowers
 
