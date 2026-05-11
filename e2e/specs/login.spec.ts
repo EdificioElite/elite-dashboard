@@ -5,7 +5,7 @@ test.describe('Login', () => {
   test('admin login redirects to /admin', async ({ page }) => {
     await loginAsAdmin(page);
     await expect(page).toHaveURL('/admin');
-    await expect(page.locator('h1')).toContainText('Vecinos');
+    await expect(page.locator('h1')).toContainText('Panel de Administracion');
   });
 
   test('vecino login redirects to /dashboard', async ({ page }) => {

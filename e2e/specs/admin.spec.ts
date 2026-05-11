@@ -7,7 +7,7 @@ test.describe('Admin', () => {
   });
 
   test('shows vecinos table', async ({ page }) => {
-    await expect(page.locator('h1')).toContainText('Vecinos');
+    await expect(page.locator('h1')).toContainText('Panel de Administracion');
     await expect(page.locator('table')).toBeVisible();
   });
 
