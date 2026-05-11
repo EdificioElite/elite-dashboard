@@ -301,4 +301,177 @@ describe('Admin routes', () => {
       expect(res.body.email).toBe('new@test.com');
     });
   });
+
+  describe('GET /api/admin/usuarios', () => {
+    it('returns 401 without token', async () => {
+      const app = createApp();
+      const res = await request(app).get('/api/admin/usuarios');
+      expect(res.status).toBe(401);
+    });
+
+    it('returns 403 for non-admin', async () => {
+      const app = createApp();
+      const res = await request(app)
+        .get('/api/admin/usuarios')
+        .set('Authorization', `Bearer ${userToken(false)}`);
+      expect(res.status).toBe(403);
+    });
+
+    it('returns users for admin', async () => {
+      mockQuery.mockResolvedValueOnce({
+        rows: [{ id: 1, vecino_piso: '1A', email: 'a@a.com', is_admin: true, created_at: '2026-01-01' }],
+      });
+      const app = createApp();
+      const res = await request(app)
+        .get('/api/admin/usuarios')
+        .set('Authorization', `Bearer ${userToken(true)}`);
+      expect(res.status).toBe(200);
+      expect(res.body).toHaveLength(1);
+    });
+  });
+
+  describe('PUT /api/admin/usuarios/:id', () => {
+    it('returns 401 without token', async () => {
+      const app = createApp();
+      const res = await request(app)
+        .put('/api/admin/usuarios/1')
+        .send({ email: 'x@x.com' });
+      expect(res.status).toBe(401);
+    });
+
+    it('returns 403 for non-admin', async () => {
+      const app = createApp();
+      const res = await request(app)
+        .put('/api/admin/usuarios/1')
+        .set('Authorization', `Bearer ${userToken(false)}`)
+        .send({ email: 'x@x.com' });
+      expect(res.status).toBe(403);
+    });
+
+    it('updates user for admin', async () => {
+      mockQuery.mockResolvedValueOnce({
+        rows: [{ id: 2, vecino_piso: '2A', email: 'updated@test.com', is_admin: false, created_at: '2026-01-01' }],
+      });
+      const app = createApp();
+      const res = await request(app)
+        .put('/api/admin/usuarios/2')
+        .set('Authorization', `Bearer ${userToken(true)}`)
+        .send({ email: 'updated@test.com' });
+      expect(res.status).toBe(200);
+      expect(res.body.email).toBe('updated@test.com');
+    });
+
+    it('returns 404 for non-existent user', async () => {
+      mockQuery.mockResolvedValueOnce({ rows: [] });
+      const app = createApp();
+      const res = await request(app)
+        .put('/api/admin/usuarios/999')
+        .set('Authorization', `Bearer ${userToken(true)}`)
+        .send({ email: 'x@x.com' });
+      expect(res.status).toBe(404);
+    });
+
+    it('returns 409 on unique violation', async () => {
+      const err = new Error() as any;
+      err.code = '23505';
+      err.constraint = 'usuarios_email_key';
+      mockQuery.mockRejectedValueOnce(err);
+      const app = createApp();
+      const res = await request(app)
+        .put('/api/admin/usuarios/2')
+        .set('Authorization', `Bearer ${userToken(true)}`)
+        .send({ email: 'taken@test.com' });
+      expect(res.status).toBe(409);
+    });
+  });
+
+  describe('PUT /api/admin/usuarios/:id/password', () => {
+    it('returns 401 without token', async () => {
+      const app = createApp();
+      const res = await request(app)
+        .put('/api/admin/usuarios/1/password')
+        .send({ password: '123456' });
+      expect(res.status).toBe(401);
+    });
+
+    it('returns 400 for short password', async () => {
+      const app = createApp();
+      const res = await request(app)
+        .put('/api/admin/usuarios/1/password')
+        .set('Authorization', `Bearer ${userToken(true)}`)
+        .send({ password: '12345' });
+      expect(res.status).toBe(400);
+    });
+
+    it('returns 400 for missing password', async () => {
+      const app = createApp();
+      const res = await request(app)
+        .put('/api/admin/usuarios/1/password')
+        .set('Authorization', `Bearer ${userToken(true)}`)
+        .send({});
+      expect(res.status).toBe(400);
+    });
+
+    it('returns 404 for non-existent user', async () => {
+      mockQuery.mockResolvedValueOnce({ rows: [] });
+      const app = createApp();
+      const res = await request(app)
+        .put('/api/admin/usuarios/999/password')
+        .set('Authorization', `Bearer ${userToken(true)}`)
+        .send({ password: 'newpassword' });
+      expect(res.status).toBe(404);
+    });
+
+    it('changes password for admin', async () => {
+      mockQuery.mockResolvedValueOnce({ rows: [{ id: 2 }] });
+      const app = createApp();
+      const res = await request(app)
+        .put('/api/admin/usuarios/2/password')
+        .set('Authorization', `Bearer ${userToken(true)}`)
+        .send({ password: 'newpassword' });
+      expect(res.status).toBe(200);
+    });
+  });
+
+  describe('DELETE /api/admin/usuarios/:id', () => {
+    it('returns 401 without token', async () => {
+      const app = createApp();
+      const res = await request(app).delete('/api/admin/usuarios/1');
+      expect(res.status).toBe(401);
+    });
+
+    it('returns 403 for non-admin', async () => {
+      const app = createApp();
+      const res = await request(app)
+        .delete('/api/admin/usuarios/1')
+        .set('Authorization', `Bearer ${userToken(false)}`);
+      expect(res.status).toBe(403);
+    });
+
+    it('returns 400 when admin deletes themselves', async () => {
+      const app = createApp();
+      const res = await request(app)
+        .delete('/api/admin/usuarios/1')
+        .set('Authorization', `Bearer ${userToken(true)}`);
+      expect(res.status).toBe(400);
+    });
+
+    it('returns 404 for non-existent user', async () => {
+      mockQuery.mockResolvedValueOnce({ rows: [] });
+      const app = createApp();
+      const res = await request(app)
+        .delete('/api/admin/usuarios/999')
+        .set('Authorization', `Bearer ${userToken(true)}`);
+      expect(res.status).toBe(404);
+    });
+
+    it('deletes user for admin', async () => {
+      mockQuery.mockResolvedValueOnce({ rows: [{ id: 2 }] });
+      const app = createApp();
+      const res = await request(app)
+        .delete('/api/admin/usuarios/2')
+        .set('Authorization', `Bearer ${userToken(true)}`);
+      expect(res.status).toBe(200);
+    });
+  });
 });

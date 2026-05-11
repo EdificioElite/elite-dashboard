@@ -31,3 +31,24 @@ export async function apiFetch<T>(
 
   return response.json();
 }
+
+export async function updateUser(id: number, data: { email?: string; vecino_piso?: string | null; is_admin?: boolean }) {
+  return apiFetch<{ id: number; vecino_piso: string | null; email: string; is_admin: boolean; created_at: string }>(
+    `/admin/usuarios/${id}`,
+    { method: 'PUT', body: JSON.stringify(data) }
+  );
+}
+
+export async function changePassword(id: number, password: string) {
+  return apiFetch<{ message: string }>(
+    `/admin/usuarios/${id}/password`,
+    { method: 'PUT', body: JSON.stringify({ password }) }
+  );
+}
+
+export async function deleteUser(id: number) {
+  return apiFetch<{ message: string }>(
+    `/admin/usuarios/${id}`,
+    { method: 'DELETE' }
+  );
+}
