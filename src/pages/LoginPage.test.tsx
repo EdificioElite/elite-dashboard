@@ -19,9 +19,20 @@ describe('LoginPage', () => {
         <LoginPage />
       </MemoryRouter>
     );
-    expect(screen.getByAltText('Elite Logo')).toBeInTheDocument();
+    expect(screen.getByAltText('Edificio Elite')).toBeInTheDocument();
     expect(screen.getByPlaceholderText('vecino@email.com')).toBeInTheDocument();
     expect(screen.getByPlaceholderText('••••••••')).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Entrar' })).toBeInTheDocument();
+  });
+
+  it('renders welcome heading', () => {
+    render(
+      <MemoryRouter>
+        <LoginPage />
+      </MemoryRouter>
+    );
+    expect(screen.getByText('Bienvenido')).toBeInTheDocument();
+    expect(screen.getByLabelText('Email')).toBeInTheDocument();
+    expect(screen.getByLabelText('Contrasena')).toBeInTheDocument();
   });
 });

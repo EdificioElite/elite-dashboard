@@ -1,6 +1,8 @@
 import { useEffect, useState, FormEvent } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { apiFetch } from '../api/client';
+import Header from '../components/Header';
+import Icon from '../components/Icon';
 
 interface Vecino {
   piso: string;
@@ -13,6 +15,7 @@ export default function AdminPage() {
   const navigate = useNavigate();
   const [vecinos, setVecinos] = useState<Vecino[]>([]);
   const [loading, setLoading] = useState(true);
+  const [search, setSearch] = useState('');
 
   const [showForm, setShowForm] = useState(false);
   const [email, setEmail] = useState('');
@@ -35,11 +38,7 @@ export default function AdminPage() {
     try {
       await apiFetch('/admin/usuarios', {
         method: 'POST',
-        body: JSON.stringify({
-          email,
-          password,
-          vecino_piso: vecinoPiso,
-        }),
+        body: JSON.stringify({ email, password, vecino_piso: vecinoPiso }),
       });
       setFormSuccess('Usuario creado correctamente');
       setEmail('');
@@ -53,139 +52,230 @@ export default function AdminPage() {
     }
   };
 
+  const filtered = vecinos.filter(
+    (v) =>
+      v.piso.toLowerCase().includes(search.toLowerCase()) ||
+      (v.nombre && v.nombre.toLowerCase().includes(search.toLowerCase())) ||
+      (v.email && v.email.toLowerCase().includes(search.toLowerCase()))
+  );
+
+  const stats = [
+    { label: 'Vecinos', value: vecinos.length, unit: '', icon: 'users', iconColor: 'var(--accent)' },
+    { label: 'Con acceso', value: vecinos.filter((v) => v.email).length, unit: '', icon: 'check', iconColor: 'var(--sage)' },
+    { label: 'Sin acceso', value: vecinos.filter((v) => !v.email).length, unit: '', icon: 'x', iconColor: 'var(--rise)' },
+    { label: 'Admins', value: vecinos.filter((v) => v.is_admin).length, unit: '', icon: 'settings', iconColor: 'var(--accent-2)' },
+  ];
+
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <p className="text-gray-500">Cargando...</p>
+      <div>
+        <Header showDashboard />
+        <main className="max-w-[1180px] mx-auto px-6 flex items-center justify-center min-h-[60vh]">
+          <div className="text-cocoa/40 text-sm">Cargando vecinos...</div>
+        </main>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-100">
-      <header className="bg-white shadow-sm p-4 flex justify-between items-center">
-        <div>
-          <h1 className="text-xl font-bold text-gray-800">Panel de Administracion</h1>
-          <button
-            onClick={() => navigate('/dashboard')}
-            className="text-sm text-blue-600 hover:underline"
-          >
-            Ver mi dashboard
-          </button>
-        </div>
-        <button
-          onClick={() => navigate('/login')}
-          className="text-sm text-red-600 hover:underline"
-        >
-          Salir
-        </button>
-      </header>
+    <div className="page-in">
+      <Header showDashboard />
 
-      <main className="max-w-4xl mx-auto p-4 space-y-6">
-        <div className="flex justify-between items-center">
-          <h2 className="text-lg font-semibold">Vecinos</h2>
+      <main className="max-w-[1180px] mx-auto px-6 flex flex-col gap-[22px] pb-10">
+        {/* Greeting */}
+        <div className="pt-2 flex items-start justify-between flex-wrap gap-4">
+          <div>
+            <p className="eyebrow">Panel de administracion</p>
+            <h1
+              className="font-display text-[40px] font-medium text-cocoa mt-1"
+              style={{ letterSpacing: '-0.02em' }}
+            >
+              Vecinos
+            </h1>
+            <p className="text-sm text-cocoa/60 mt-1.5 max-w-lg">
+              Gestiona los accesos y consulta el consumo de cada vecino.
+            </p>
+          </div>
           <button
             onClick={() => setShowForm(!showForm)}
-            className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 text-sm"
+            className={`btn ${showForm ? 'btn-ghost' : 'btn-primary'}`}
           >
-            {showForm ? 'Cancelar' : 'Crear usuario'}
+            <Icon name={showForm ? 'x' : 'plus'} size={14} />
+            {showForm ? 'Cancelar' : 'Crear acceso'}
           </button>
         </div>
 
-        {showForm && (
-          <form
-            onSubmit={handleCreateUser}
-            className="bg-white p-6 rounded-lg shadow-md space-y-4"
-          >
-            {formError && (
-              <div className="p-3 bg-red-100 text-red-700 rounded text-sm">{formError}</div>
-            )}
-            {formSuccess && (
-              <div className="p-3 bg-green-100 text-green-700 rounded text-sm">{formSuccess}</div>
-            )}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Piso
-              </label>
-              <input
-                type="text"
-                value={vecinoPiso}
-                onChange={(e) => setVecinoPiso(e.target.value)}
-                required
-                className="w-full px-3 py-2 border border-gray-300 rounded"
-                placeholder="1A"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Email
-              </label>
-              <input
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                required
-                className="w-full px-3 py-2 border border-gray-300 rounded"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Contrasena
-              </label>
-              <input
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
-                minLength={6}
-                className="w-full px-3 py-2 border border-gray-300 rounded"
-              />
-            </div>
-            <button
-              type="submit"
-              className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 text-sm"
-            >
-              Guardar
-            </button>
-          </form>
-        )}
+        <div className="stagger flex flex-col gap-[22px]">
+          {/* Stats */}
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-[16px]">
+            {stats.map((s) => (
+              <div key={s.label} className="glass p-[20px]">
+                <div className="flex items-center gap-2.5 mb-2">
+                  <div
+                    className="w-6 h-6 rounded-lg flex items-center justify-center shrink-0"
+                    style={{ background: s.iconColor }}
+                  >
+                    <Icon name={s.icon} size={12} className="text-cream" />
+                  </div>
+                  <span className="text-[11px] font-medium uppercase tracking-wider text-cocoa/40">{s.label}</span>
+                </div>
+                <span
+                  className="font-display text-[32px] font-medium leading-none text-cocoa"
+                  style={{ letterSpacing: '-0.02em' }}
+                >
+                  {s.value}
+                </span>
+              </div>
+            ))}
+          </div>
 
-        <div className="bg-white rounded-lg shadow-md overflow-hidden">
-          <table className="w-full text-sm text-left">
-            <thead className="text-xs text-gray-500 uppercase bg-gray-50">
-              <tr>
-                <th className="px-4 py-3">Piso</th>
-                <th className="px-4 py-3">Nombre</th>
-                <th className="px-4 py-3">Email</th>
-                <th className="px-4 py-3">Admin</th>
-                <th className="px-4 py-3">Accion</th>
-              </tr>
-            </thead>
-            <tbody>
-              {vecinos.map((v) => (
-                <tr key={v.piso} className="border-b">
-                  <td className="px-4 py-3 font-medium">{v.piso}</td>
-                  <td className="px-4 py-3 text-gray-500">{v.nombre}</td>
-                  <td className="px-4 py-3">{v.email || 'Sin usuario'}</td>
-                  <td className="px-4 py-3">
-                    {v.is_admin ? (
-                      <span className="text-green-600">Si</span>
-                    ) : (
-                      <span className="text-gray-400">No</span>
-                    )}
-                  </td>
-                  <td className="px-4 py-3">
-                    <button
-                      onClick={() => navigate(`/admin/vecino/${v.piso}`)}
-                      className="text-blue-600 hover:underline text-xs"
-                    >
-                      Ver consumos
-                    </button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+          {/* Create form */}
+          {showForm && (
+            <div className="glass p-[26px]">
+              <div className="flex items-center gap-3 mb-5">
+                <div className="w-7 h-7 rounded-lg flex items-center justify-center shrink-0" style={{ background: 'var(--accent)' }}>
+                  <Icon name="plus" size={14} className="text-cream" />
+                </div>
+                <span className="eyebrow">Nuevo acceso</span>
+              </div>
+
+              {formError && (
+                <div
+                  className="mb-4 px-4 py-3 rounded-xl text-sm flex items-center gap-2"
+                  style={{ background: 'rgba(163,64,42,.08)', color: '#a3402a' }}
+                >
+                  <Icon name="alertTriangle" size={14} />
+                  {formError}
+                </div>
+              )}
+              {formSuccess && (
+                <div
+                  className="mb-4 px-4 py-3 rounded-xl text-sm flex items-center gap-2"
+                  style={{ background: 'rgba(91,122,74,.1)', color: '#5b7a4a' }}
+                >
+                  <Icon name="check" size={14} />
+                  {formSuccess}
+                </div>
+              )}
+
+              <form onSubmit={handleCreateUser} className="grid grid-cols-1 md:grid-cols-3 gap-4 items-end">
+                <div>
+                  <label htmlFor="vecinoPiso" className="block text-xs font-semibold uppercase tracking-wider text-cocoa/40 mb-1.5">
+                    Piso
+                  </label>
+                  <input
+                    id="vecinoPiso"
+                    type="text"
+                    value={vecinoPiso}
+                    onChange={(e) => setVecinoPiso(e.target.value)}
+                    required
+                    className="input-card"
+                    placeholder="1A"
+                  />
+                </div>
+                <div>
+                  <label htmlFor="adminEmail" className="block text-xs font-semibold uppercase tracking-wider text-cocoa/40 mb-1.5">
+                    Email
+                  </label>
+                  <input
+                    id="adminEmail"
+                    type="email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    required
+                    className="input-card"
+                    placeholder="vecino@email.com"
+                  />
+                </div>
+                <div>
+                  <label htmlFor="adminPassword" className="block text-xs font-semibold uppercase tracking-wider text-cocoa/40 mb-1.5">
+                    Contrasena
+                  </label>
+                  <input
+                    id="adminPassword"
+                    type="password"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    required
+                    minLength={6}
+                    className="input-card"
+                    placeholder="••••••••"
+                  />
+                </div>
+                <div className="md:col-span-3 flex justify-end">
+                  <button type="submit" className="btn btn-primary">
+                    <Icon name="check" size={14} />
+                    Guardar
+                  </button>
+                </div>
+              </form>
+            </div>
+          )}
+
+          {/* Table */}
+          <div className="glass p-[26px]">
+            <div className="flex items-center gap-3 mb-5">
+              <div className="w-7 h-7 rounded-lg flex items-center justify-center shrink-0" style={{ background: 'var(--accent-2)' }}>
+                <Icon name="users" size={14} className="text-cream" />
+              </div>
+              <span className="eyebrow">Listado</span>
+
+              <div className="ml-auto flex items-center gap-2">
+                <Icon name="search" size={14} className="text-cocoa/30" />
+                <input
+                  type="text"
+                  value={search}
+                  onChange={(e) => setSearch(e.target.value)}
+                  placeholder="Buscar vecino..."
+                  className="bg-transparent border-none text-sm text-cocoa placeholder-cocoa/25 outline-none w-40"
+                />
+              </div>
+            </div>
+
+            <div className="overflow-x-auto -mx-2">
+              <table className="table-glass">
+                <thead>
+                  <tr>
+                    <th>Piso</th>
+                    <th>Nombre</th>
+                    <th>Email</th>
+                    <th>Admin</th>
+                    <th>Accion</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {filtered.map((v, i) => (
+                    <tr key={v.piso} className="row-stagger" style={{ animationDelay: `${i * 40}ms` }}>
+                      <td className="font-medium text-cocoa">{v.piso}</td>
+                      <td className="text-cocoa/60">{v.nombre}</td>
+                      <td className="text-sm text-cocoa/50">{v.email || '—'}</td>
+                      <td>
+                        {v.is_admin ? (
+                          <span className="chip chip-accent">Admin</span>
+                        ) : (
+                          <span className="chip">Vecino</span>
+                        )}
+                      </td>
+                      <td>
+                        <button
+                          onClick={() => navigate(`/admin/vecino/${v.piso}`)}
+                          className="btn btn-ghost text-xs py-1.5 px-3"
+                        >
+                          Ver consumos
+                          <Icon name="chevronRight" size={12} />
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+              {filtered.length === 0 && (
+                <div className="text-sm text-cocoa/40 py-8 text-center">
+                  No se encontraron vecinos
+                </div>
+              )}
+            </div>
+          </div>
         </div>
       </main>
     </div>
