@@ -18,6 +18,8 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Extract PR number
         id: pr
@@ -81,10 +83,12 @@ jobs:
           password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Set lowercase image name
+        if: steps.version.outputs.skip != 'true'
         run: |
           echo "IMAGE_NAME_LC=$(echo "${IMAGE_NAME}" | tr '[:upper:]' '[:lower:]')" >> $GITHUB_ENV
 
       - uses: docker/metadata-action@v5
+        if: steps.version.outputs.skip != 'true'
         id: meta
         with:
           images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME_LC }}
@@ -93,8 +97,10 @@ jobs:
             type=raw,value=latest
 
       - uses: docker/setup-buildx-action@v3
+        if: steps.version.outputs.skip != 'true'
 
       - uses: docker/build-push-action@v6
+        if: steps.version.outputs.skip != 'true'
         with:
           context: api
           push: true
