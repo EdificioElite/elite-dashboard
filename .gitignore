@@ -8,3 +8,4 @@ api/.env
 *.log
 docs/n8n-database.md
 e2e/test-results/
+.superpowers/
