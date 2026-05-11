@@ -85,3 +85,8 @@ Release (`.github/workflows/release.yml`) se ejecuta en merge a main:
 - Solo si el commit empieza por "Merge pull request"
 - Bump semver segun label de la PR
 - Tag + GitHub Release + Docker image
+
+## Superpowers
+
+- Los planes en `docs/superpowers/plans/` deben eliminarse tras ejecutarlos
+- Las specs en `docs/superpowers/specs/` se conservan como documentacion
