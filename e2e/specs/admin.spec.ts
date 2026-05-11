@@ -12,9 +12,49 @@ test.describe('Admin', () => {
   });
 
   test('navigates to vecino consumos', async ({ page }) => {
-    await page.click('text=1A');
-    await expect(page).toHaveURL(/\/admin\/vecino\/\d/);
-    await expect(page.getByText('Vecino', { exact: true })).toBeVisible();
+    await page.locator('td button', { hasText: '1A' }).click();
+    await expect(page).toHaveURL(/\/admin\/vecino\/1A/, { timeout: 10000 });
+  });
+
+  test('edits user email and piso', async ({ page }) => {
+    const row = page.locator('tr', { hasText: 'vecino4@elite.com' });
+    await row.locator('[title="Editar usuario"]').click();
+
+    const modal = page.locator('.fixed.inset-0').last();
+    await expect(modal.locator('.eyebrow')).toContainText('Editar usuario');
+
+    await modal.locator('input[type="email"]').fill('vecino4-mod@elite.com');
+    await modal.getByRole('button', { name: 'Guardar' }).click();
+
+    await expect(modal).not.toBeVisible({ timeout: 5000 });
+    await expect(page.locator('tbody')).toContainText('vecino4-mod@elite.com', { timeout: 5000 });
+  });
+
+  test('changes user password', async ({ page }) => {
+    const row = page.locator('tr', { hasText: 'vecino2@elite.com' });
+    await row.locator('[title="Cambiar contrasena"]').click();
+
+    const modal = page.locator('.fixed.inset-0').last();
+    await expect(modal.locator('.eyebrow')).toContainText('Cambiar contrasena');
+
+    await modal.locator('input[type="password"]').first().fill('newpass123');
+    await modal.locator('input[type="password"]').last().fill('newpass123');
+    await modal.getByRole('button', { name: 'Cambiar' }).click();
+
+    await expect(modal).not.toBeVisible({ timeout: 5000 });
+  });
+
+  test('deletes a user', async ({ page }) => {
+    const row = page.locator('tr', { hasText: 'vecino3@elite.com' });
+    await row.locator('[title="Eliminar usuario"]').click();
+
+    const modal = page.locator('.fixed.inset-0').last();
+    await expect(modal.locator('.eyebrow')).toContainText('Eliminar acceso');
+
+    await modal.getByRole('button', { name: 'Eliminar acceso' }).click();
+
+    await expect(modal).not.toBeVisible({ timeout: 5000 });
+    await expect(page.locator('tbody')).not.toContainText('vecino3@elite.com', { timeout: 5000 });
   });
 
   // Skipped: flaky due to HTML5 form validation in headless browser
