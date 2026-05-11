@@ -1,18 +1,24 @@
 import { useEffect, useState, FormEvent } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { apiFetch } from '../api/client';
+import { useAuthStore } from '../store/auth';
 import Header from '../components/Header';
 import Icon from '../components/Icon';
+import EditUserModal from '../components/EditUserModal';
+import ChangePasswordModal from '../components/ChangePasswordModal';
+import DeleteUserModal from '../components/DeleteUserModal';
 
 interface Vecino {
   piso: string;
   nombre: string;
+  user_id: number | null;
   email: string | null;
   is_admin: boolean;
 }
 
 export default function AdminPage() {
   const navigate = useNavigate();
+  const user = useAuthStore((s) => s.user);
   const [vecinos, setVecinos] = useState<Vecino[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
@@ -23,6 +29,10 @@ export default function AdminPage() {
   const [vecinoPiso, setVecinoPiso] = useState('');
   const [formError, setFormError] = useState('');
   const [formSuccess, setFormSuccess] = useState('');
+
+  const [editingVecino, setEditingVecino] = useState<Vecino | null>(null);
+  const [changingPassword, setChangingPassword] = useState<Vecino | null>(null);
+  const [deletingVecino, setDeletingVecino] = useState<Vecino | null>(null);
 
   useEffect(() => {
     apiFetch<Vecino[]>('/admin/vecinos')
@@ -240,13 +250,17 @@ export default function AdminPage() {
                     <th>Nombre</th>
                     <th>Email</th>
                     <th>Admin</th>
-                    <th>Accion</th>
+                    <th className="text-center">Acciones</th>
                   </tr>
                 </thead>
                 <tbody>
                   {filtered.map((v, i) => (
                     <tr key={v.piso} className="row-stagger" style={{ animationDelay: `${i * 40}ms` }}>
-                      <td className="font-medium text-cocoa">{v.piso}</td>
+                      <td className="font-medium text-cocoa">
+                        <button onClick={() => navigate(`/admin/vecino/${v.piso}`)} className="hover:text-accent transition-colors text-left">
+                          {v.piso}
+                        </button>
+                      </td>
                       <td className="text-cocoa/60">{v.nombre}</td>
                       <td className="text-sm text-cocoa/50">{v.email || '—'}</td>
                       <td>
@@ -257,13 +271,37 @@ export default function AdminPage() {
                         )}
                       </td>
                       <td>
-                        <button
-                          onClick={() => navigate(`/admin/vecino/${v.piso}`)}
-                          className="btn btn-ghost text-xs py-1.5 px-3"
-                        >
-                          Ver consumos
-                          <Icon name="chevronRight" size={12} />
-                        </button>
+                        <div className="flex items-center justify-center gap-1">
+                          {v.email ? (
+                            <>
+                              <button
+                                onClick={() => setEditingVecino(v)}
+                                className="btn btn-ghost p-2 text-cocoa/40 hover:text-cocoa"
+                                title="Editar usuario"
+                              >
+                                <Icon name="edit" size={15} />
+                              </button>
+                              <button
+                                onClick={() => setChangingPassword(v)}
+                                className="btn btn-ghost p-2 text-cocoa/40 hover:text-cocoa"
+                                title="Cambiar contrasena"
+                              >
+                                <Icon name="key" size={15} />
+                              </button>
+                              {v.user_id !== user?.id && (
+                                <button
+                                  onClick={() => setDeletingVecino(v)}
+                                  className="btn btn-ghost p-2 text-cocoa/40 hover:text-red-600"
+                                  title="Eliminar usuario"
+                                >
+                                  <Icon name="trash" size={15} />
+                                </button>
+                              )}
+                            </>
+                          ) : (
+                            <span className="text-[11px] text-cocoa/25">—</span>
+                          )}
+                        </div>
                       </td>
                     </tr>
                   ))}
@@ -278,6 +316,40 @@ export default function AdminPage() {
           </div>
         </div>
       </main>
+
+      {editingVecino && (
+        <EditUserModal
+          vecino={editingVecino}
+          vecinos={vecinos}
+          currentUserId={user?.id || 0}
+          onClose={() => setEditingVecino(null)}
+          onSaved={() => {
+            setEditingVecino(null);
+            apiFetch<Vecino[]>('/admin/vecinos').then(setVecinos).catch(console.error);
+          }}
+        />
+      )}
+
+      {changingPassword && (
+        <ChangePasswordModal
+          userId={changingPassword.user_id!}
+          userName={`${changingPassword.nombre} — Piso ${changingPassword.piso}`}
+          onClose={() => setChangingPassword(null)}
+          onSaved={() => setChangingPassword(null)}
+        />
+      )}
+
+      {deletingVecino && (
+        <DeleteUserModal
+          userId={deletingVecino.user_id!}
+          userName={`${deletingVecino.nombre} — Piso ${deletingVecino.piso}`}
+          onClose={() => setDeletingVecino(null)}
+          onDeleted={() => {
+            setDeletingVecino(null);
+            apiFetch<Vecino[]>('/admin/vecinos').then(setVecinos).catch(console.error);
+          }}
+        />
+      )}
     </div>
   );
 }
