@@ -64,10 +64,24 @@ cd api && npm test        # Backend tests (vitest + supertest)
 - Ejecutar con docker: `docker compose -f docker-compose.e2e.yml up -d && docker compose -f docker-compose.e2e.yml --profile test run --rm playwright sh -c "npx playwright test"`
 - Las specs usan fixtures en `e2e/fixtures/auth.ts`
 
+## Flujo de trabajo
+
+- **Siempre trabajar en ramas**: `feat/`, `fix/`, `docs/`, `chore/` desde `main`
+- **Siempre crear PR** para mergear a `main`. Nunca push directo a main.
+- **Anadir label de versionado** a la PR: `major`, `minor` o `patch`
+- El workflow `Release` se ejecuta automaticamente al mergear una PR a main y:
+  - Lee el label de la PR para decidir el bump
+  - Genera GitHub Release + tag + build Docker
+  - Commitea el bump de version en `api/package.json`
+
 ## CI/CD
 
 GitHub Actions (`.github/workflows/ci.yml`) ejecuta en cada push y PR:
 - Backend: typecheck + tests
 - Frontend: tests + build
+- E2E: stack docker-compose + Playwright
 
-Vercel despliega preview por cada rama automaticamente al conectar el repo.
+Release (`.github/workflows/release.yml`) se ejecuta en merge a main:
+- Solo si el commit empieza por "Merge pull request"
+- Bump semver segun label de la PR
+- Tag + GitHub Release + Docker image
