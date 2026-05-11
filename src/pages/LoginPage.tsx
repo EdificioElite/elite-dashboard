@@ -114,9 +114,7 @@ export default function LoginPage() {
           </button>
         </form>
 
-        <p className="text-[11.5px] text-center text-cocoa/40 mt-6">
-          Sin acceso? Contacta con tu administrador.
-        </p>
+
       </div>
     </div>
   );
