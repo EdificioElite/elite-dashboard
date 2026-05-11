@@ -1,0 +1,50 @@
+name: Promote dev to main
+
+on:
+  workflow_dispatch:
+
+jobs:
+  create-promote-pr:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Check if dev is ahead of main
+        id: check
+        run: |
+          git fetch origin dev main
+          DIFF=$(git rev-list origin/main..origin/dev --count)
+          echo "commits_ahead=${DIFF}" >> $GITHUB_OUTPUT
+          echo "dev esta ${DIFF} commits por delante de main"
+
+      - name: Close existing promote PRs
+        if: steps.check.outputs.commits_ahead != '0'
+        run: |
+          gh pr list --head dev --base main --state open --json number --jq '.[].number' | while read num; do
+            echo "Cerrando PR de promocion existente #${num}"
+            gh pr close "${num}" --comment "Reemplazado por un nuevo PR de promocion."
+          done
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Create PR dev → main
+        if: steps.check.outputs.commits_ahead != '0'
+        run: |
+          gh pr create \
+            --title "Promover dev a main" \
+            --body "PR automatizada para promover los cambios de dev a produccion.
+
+          Revisa los cambios y asigna label \`major\`, \`minor\` o \`patch\` antes de mergear." \
+            --head dev \
+            --base main
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Nothing to promote
+        if: steps.check.outputs.commits_ahead == '0'
+        run: echo "dev no tiene commits nuevos respecto a main, nada que promover."
