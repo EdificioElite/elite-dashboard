@@ -1,6 +1,6 @@
 # Elite Dashboard
 
-Dashboard web para los vecinos de la comunidad Elite. Permite visualizar consumos de aerotermia (kWh electrico y ACS) en tiempo real e historico, facturas mensuales, y gestion de usuarios.
+Dashboard web para los vecinos de la comunidad Elite. Permite visualizar consumos termicos de aerotermia (kWh calor, kWh frio) y ACS en tiempo real e historico, facturas mensuales, y gestion de usuarios.
 
 ## Arquitectura
 
@@ -19,6 +19,7 @@ Vecino -> Frontend React (Vercel) -> Cloudflare Tunnel -> API Express (docker-co
 
 - Node.js 22+
 - PostgreSQL con las tablas existentes de n8n (`vecinos`, `contadores`, `consumos`, `facturas`)
+- Alternativa: usar `docker compose -f docker-compose.e2e.yml up -d` para un entorno completo (postgres + api + frontend)
 
 ### Backend
 
@@ -66,8 +67,8 @@ Conectar el repo en Vercel:
 ### Crear primer usuario admin
 
 ```sql
-INSERT INTO usuarios (vecino_id, email, password_hash, is_admin)
-VALUES (1, 'admin@email.com', '<hash generado con bcrypt>', true);
+INSERT INTO usuarios (email, password_hash, vecino_piso, is_admin)
+VALUES ('admin@email.com', '<hash generado con bcrypt>', '1A', true);
 ```
 
 ## Estructura
@@ -88,6 +89,7 @@ VALUES (1, 'admin@email.com', '<hash generado con bcrypt>', true);
 │   ├── api/client.ts       # Fetch wrapper con auth
 │   ├── store/auth.ts       # Zustand auth store
 │   ├── pages/              # LoginPage, DashboardPage, AdminPage, AdminVecinoPage
-│   └── components/         # ConsumoCard, ConsumoChart, FacturasTable
+│   └── components/         # Header, ConsumoCard, HistoricoCharts, FacturasChart, FacturasTable, SegmentedControl
+├── e2e/                    # Tests end-to-end con Playwright
 └── docs/superpowers/       # Specs y planes
 ```

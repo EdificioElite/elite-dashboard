@@ -7,44 +7,40 @@ test.describe('Dashboard date range picker', () => {
   });
 
   test('shows preset buttons and date inputs', async ({ page }) => {
-    await expect(page.getByText('1h')).toBeVisible({ timeout: 10000 });
-    await expect(page.getByText('Hoy')).toBeVisible();
-    await expect(page.getByText('7d')).toBeVisible();
-    await expect(page.getByText('30d')).toBeVisible();
-    await expect(page.getByText('Año')).toBeVisible();
-    await expect(page.getByText('Todo')).toBeVisible();
+    await expect(page.getByText('24h')).toBeVisible({ timeout: 10000 });
+    await expect(page.getByText('7 dias')).toBeVisible();
+    await expect(page.getByText('30 dias')).toBeVisible();
+    await expect(page.getByText('1 año')).toBeVisible();
     await expect(page.getByText('Desde:')).toBeVisible();
     await expect(page.getByText('Hasta:')).toBeVisible();
   });
 
   test('default preset is 7d selected', async ({ page }) => {
-    const btn7d = page.locator('button', { hasText: '7d' });
-    await expect(btn7d).toHaveClass(/bg-blue-600/);
+    const btn7d = page.locator('button[aria-selected="true"]', { hasText: '7 dias' });
+    await expect(btn7d).toBeVisible();
   });
 
-  test('clicking 1h preset changes selection', async ({ page }) => {
-    const btn1h = page.locator('button', { hasText: '1h' });
-    await btn1h.click();
-    await expect(btn1h).toHaveClass(/bg-blue-600/);
-    await expect(page.locator('button', { hasText: '7d' })).not.toHaveClass(/bg-blue-600/);
+  test('clicking 24h preset changes selection', async ({ page }) => {
+    await page.locator('button', { hasText: '24h' }).click();
+    await expect(page.locator('button[aria-selected="true"]', { hasText: '24h' })).toBeVisible();
   });
 
   test('clicking 30d preset loads chart data', async ({ page }) => {
-    await page.locator('button', { hasText: '30d' }).click();
+    await page.locator('button', { hasText: '30 dias' }).click();
     await page.waitForTimeout(2000);
-    await expect(page.getByText('No hay datos en este rango')).not.toBeVisible({ timeout: 15000 });
+    await expect(page.getByText('No hay datos en este periodo')).not.toBeVisible({ timeout: 15000 });
   });
 
-  test('clicking Todo preset loads full year data', async ({ page }) => {
-    await page.locator('button', { hasText: 'Todo' }).click();
-    await expect(page.getByText('No hay datos en este rango')).not.toBeVisible({ timeout: 10000 });
+  test('clicking 1a preset loads full year data', async ({ page }) => {
+    await page.locator('button', { hasText: '1 año' }).click();
+    await expect(page.getByText('No hay datos en este periodo')).not.toBeVisible({ timeout: 10000 });
   });
 
   // Skipped: datetime-local fill unreliable in headless CI
   test.skip('custom date range clears preset and loads data', async ({ page }) => {
     const inputs = page.locator('input[type="datetime-local"]');
     await inputs.first().fill('2026-06-01T00:00');
-    await expect(page.locator('button', { hasText: '7d' })).not.toHaveClass(/bg-blue-600/);
-    await expect(page.getByText('No hay datos en este rango')).not.toBeVisible({ timeout: 10000 });
+    await expect(page.locator('button[aria-selected="true"]', { hasText: '7 dias' })).not.toBeVisible({ timeout: 5000 });
+    await expect(page.getByText('No hay datos en este periodo')).not.toBeVisible({ timeout: 10000 });
   });
 });

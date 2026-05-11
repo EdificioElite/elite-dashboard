@@ -54,10 +54,15 @@ cd api && npm test        # Backend tests (vitest + supertest)
 - Ejecutar antes de commit: `cd api && npm test && npx tsc --noEmit`
 
 ### Frontend (src/)
-- **Component tests:** ConsumoCard, ConsumoChart, FacturasTable
+- **Component tests:** ConsumoCard, HistoricoCharts, FacturasChart, FacturasTable
 - **Store tests:** Zustand auth store
 - **Page tests:** LoginPage
 - Ejecutar antes de commit: `npm test && npm run build`
+
+### E2E (e2e/)
+- **Playwright tests:** login, dashboard, admin, date-range
+- Ejecutar con docker: `docker compose -f docker-compose.e2e.yml up -d && docker compose -f docker-compose.e2e.yml --profile test run --rm playwright sh -c "npx playwright test"`
+- Las specs usan fixtures en `e2e/fixtures/auth.ts`
 
 ## CI/CD
 
