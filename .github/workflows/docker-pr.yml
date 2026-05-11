@@ -34,3 +34,12 @@ jobs:
           tags: ghcr.io/edificioelite/elite-dashboard/api:dev
           cache-from: type=gha
           cache-to: type=gha,mode=max
+
+  deploy-dev:
+    needs: [build-and-push-pr]
+    runs-on: ubuntu-latest
+    if: ${{ github.event_name == 'pull_request' }}
+    steps:
+      - name: Trigger Portainer webhook for dev deployment
+        run: |
+          curl -X POST "${{ secrets.PORTAINER_CALLBACK_DEV }}"
