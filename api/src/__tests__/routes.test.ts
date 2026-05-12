@@ -125,6 +125,130 @@ describe('Auth routes', () => {
       expect(res.body.status).toBe('ok');
     });
   });
+
+  describe('PUT /api/auth/password', () => {
+    it('returns 401 without token', async () => {
+      const app = createApp();
+      const res = await request(app)
+        .put('/api/auth/password')
+        .send({ currentPassword: 'old', newPassword: 'NewPass1' });
+      expect(res.status).toBe(401);
+    });
+
+    it('returns 400 when currentPassword is missing', async () => {
+      const app = createApp();
+      const token = userToken();
+      const res = await request(app)
+        .put('/api/auth/password')
+        .set('Authorization', `Bearer ${token}`)
+        .send({ newPassword: 'NewPass1' });
+      expect(res.status).toBe(400);
+      expect(res.body.error).toContain('actual');
+    });
+
+    it('returns 400 when newPassword is missing', async () => {
+      const app = createApp();
+      const token = userToken();
+      const res = await request(app)
+        .put('/api/auth/password')
+        .set('Authorization', `Bearer ${token}`)
+        .send({ currentPassword: 'old' });
+      expect(res.status).toBe(400);
+      expect(res.body.error).toContain('nueva');
+    });
+
+    it('returns 400 when newPassword is too short', async () => {
+      const app = createApp();
+      const token = userToken();
+      const res = await request(app)
+        .put('/api/auth/password')
+        .set('Authorization', `Bearer ${token}`)
+        .send({ currentPassword: 'old', newPassword: 'Abc1' });
+      expect(res.status).toBe(400);
+      expect(res.body.error).toContain('8 caracteres');
+    });
+
+    it('returns 400 when newPassword lacks uppercase', async () => {
+      const app = createApp();
+      const token = userToken();
+      const res = await request(app)
+        .put('/api/auth/password')
+        .set('Authorization', `Bearer ${token}`)
+        .send({ currentPassword: 'old', newPassword: 'abcdefg1' });
+      expect(res.status).toBe(400);
+      expect(res.body.error).toContain('mayuscula');
+    });
+
+    it('returns 400 when newPassword lacks lowercase', async () => {
+      const app = createApp();
+      const token = userToken();
+      const res = await request(app)
+        .put('/api/auth/password')
+        .set('Authorization', `Bearer ${token}`)
+        .send({ currentPassword: 'old', newPassword: 'ABCDEFG1' });
+      expect(res.status).toBe(400);
+      expect(res.body.error).toContain('minuscula');
+    });
+
+    it('returns 400 when newPassword lacks digit', async () => {
+      const app = createApp();
+      const token = userToken();
+      const res = await request(app)
+        .put('/api/auth/password')
+        .set('Authorization', `Bearer ${token}`)
+        .send({ currentPassword: 'old', newPassword: 'Abcdefgh' });
+      expect(res.status).toBe(400);
+      expect(res.body.error).toContain('numero');
+    });
+
+    it('returns 401 when currentPassword is wrong', async () => {
+      const bcrypt = await import('bcrypt');
+      const hash = await bcrypt.hash('correct', 12);
+      mockQuery.mockResolvedValueOnce({
+        rows: [{ id: 1, password_hash: hash }],
+      });
+      const app = createApp();
+      const token = userToken();
+      const res = await request(app)
+        .put('/api/auth/password')
+        .set('Authorization', `Bearer ${token}`)
+        .send({ currentPassword: 'wrong', newPassword: 'NewPass1' });
+      expect(res.status).toBe(401);
+      expect(res.body.error).toContain('actual');
+    });
+
+    it('changes password successfully', async () => {
+      const bcrypt = await import('bcrypt');
+      const hash = await bcrypt.hash('correct', 12);
+      mockQuery
+        .mockResolvedValueOnce({ rows: [{ id: 1, password_hash: hash }] })
+        .mockResolvedValueOnce({ rows: [{ id: 1 }] });
+      const app = createApp();
+      const token = userToken();
+      const res = await request(app)
+        .put('/api/auth/password')
+        .set('Authorization', `Bearer ${token}`)
+        .send({ currentPassword: 'correct', newPassword: 'NewPass1' });
+      expect(res.status).toBe(200);
+      expect(res.body.message).toBe('Contrasena actualizada');
+      // Verify the UPDATE query was called
+      const calls = mockQuery.mock.calls;
+      const updateCall = calls.find((c: any) => typeof c[0] === 'string' && c[0].includes('UPDATE usuarios SET password_hash'));
+      expect(updateCall).toBeDefined();
+      expect(updateCall![1]).toEqual([expect.any(String), 1]);
+    });
+
+    it('returns 401 when user not found (deleted after token issued)', async () => {
+      mockQuery.mockResolvedValueOnce({ rows: [] });
+      const app = createApp();
+      const token = userToken();
+      const res = await request(app)
+        .put('/api/auth/password')
+        .set('Authorization', `Bearer ${token}`)
+        .send({ currentPassword: 'old', newPassword: 'NewPass1' });
+      expect(res.status).toBe(401);
+    });
+  });
 });
 
 describe('Consumos routes', () => {
