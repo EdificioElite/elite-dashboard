@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuthStore } from '../store/auth';
+import SelfPasswordModal from './SelfPasswordModal';
 
 interface HeaderProps {
   showAdmin?: boolean;
@@ -19,6 +20,7 @@ export default function Header({ showAdmin, showDashboard }: HeaderProps) {
   const { user, logout } = useAuthStore();
   const navigate = useNavigate();
   const [open, setOpen] = useState(false);
+  const [showPasswordModal, setShowPasswordModal] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
   const initials = (user?.vecino_piso || user?.email?.[0] || '?').substring(0, 2).toUpperCase();
@@ -108,8 +110,8 @@ export default function Header({ showAdmin, showDashboard }: HeaderProps) {
                 {user?.email}
               </div>
               <button
-                disabled
-                className="w-full text-left px-4 py-2 text-[12.5px] text-cocoa/20 cursor-default bg-transparent border-none font-sans"
+                onClick={() => { setOpen(false); setShowPasswordModal(true); }}
+                className="w-full text-left px-4 py-2 text-[12.5px] text-cocoa/70 hover:text-cocoa hover:bg-white/5 bg-transparent border-none cursor-pointer font-sans"
               >
                 Cambiar contrasena
               </button>
@@ -123,6 +125,7 @@ export default function Header({ showAdmin, showDashboard }: HeaderProps) {
           )}
         </div>
       </div>
+      {showPasswordModal && <SelfPasswordModal onClose={() => setShowPasswordModal(false)} />}
     </header>
   );
 }
