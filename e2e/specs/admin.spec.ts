@@ -86,7 +86,7 @@ test.describe('Admin', () => {
 
     await modal.locator('input[type="password"]').first().fill('12345');
     await modal.locator('input[type="password"]').last().fill('12345');
-    await modal.getByRole('button', { name: 'Cambiar' }).click();
+    await modal.locator('form').dispatchEvent('submit');
 
     await expect(modal.locator('text=6 caracteres')).toBeVisible({ timeout: 5000 });
   });
