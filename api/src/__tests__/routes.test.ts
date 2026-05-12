@@ -231,6 +231,22 @@ describe('Auth routes', () => {
         .send({ currentPassword: 'correct', newPassword: 'NewPass1' });
       expect(res.status).toBe(200);
       expect(res.body.message).toBe('Contrasena actualizada');
+      // Verify the UPDATE query was called
+      const calls = mockQuery.mock.calls;
+      const updateCall = calls.find((c: any) => typeof c[0] === 'string' && c[0].includes('UPDATE usuarios SET password_hash'));
+      expect(updateCall).toBeDefined();
+      expect(updateCall[1]).toEqual([expect.any(String), 1]);
+    });
+
+    it('returns 401 when user not found (deleted after token issued)', async () => {
+      mockQuery.mockResolvedValueOnce({ rows: [] });
+      const app = createApp();
+      const token = userToken();
+      const res = await request(app)
+        .put('/api/auth/password')
+        .set('Authorization', `Bearer ${token}`)
+        .send({ currentPassword: 'old', newPassword: 'NewPass1' });
+      expect(res.status).toBe(401);
     });
   });
 });
