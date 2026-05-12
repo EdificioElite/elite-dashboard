@@ -46,6 +46,13 @@ export async function changePassword(id: number, password: string) {
   );
 }
 
+export async function changeOwnPassword(currentPassword: string, newPassword: string) {
+  return apiFetch<{ message: string }>('/auth/password', {
+    method: 'PUT',
+    body: JSON.stringify({ currentPassword, newPassword }),
+  });
+}
+
 export async function deleteUser(id: number) {
   return apiFetch<{ message: string }>(
     `/admin/usuarios/${id}`,
