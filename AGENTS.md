@@ -87,6 +87,18 @@ cd api && npm test        # Backend tests (vitest + supertest)
 | `dev` | Preview/Dev | dev.edificioelite.com | api-dev.edificioelite.com |
 | `main` | Production | www.edificioelite.com | api.edificioelite.com |
 
+## Debugging / Logs
+
+Si algo falla en los entornos dev o prod, consulta los logs en Grafana (MCP configurado):
+
+- **Grafana**: https://grafana.edificioelite.com
+- **Loki datasource UID**: `fepqwwjmv4iyoe`
+- **Backend dev**: `{service_name="dashboard-api-dev"}` (compose_project: `elitedashboard-dev`)
+- **Buscar errores**: `{service_name="dashboard-api-dev"} |= "error"`
+
+Usa las herramientas `grafana_query_loki_logs`, `grafana_list_loki_label_names`, etc.
+NO especules sobre la causa de un fallo sin revisar los logs primero.
+
 ## CI/CD
 
 GitHub Actions (`.github/workflows/ci.yml`) ejecuta en cada push y PR a `main` y `dev`:

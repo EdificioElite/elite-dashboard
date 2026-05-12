@@ -9,7 +9,7 @@ const router = Router();
 router.get('/admin/vecinos', authMiddleware, adminMiddleware, async (_req: Request, res: Response) => {
   try {
     const result = await query(`
-      SELECT v.piso, v.nombre, u.email, u.is_admin
+      SELECT v.piso, v.nombre, u.id as user_id, u.email, u.is_admin
       FROM vecinos v
       LEFT JOIN usuarios u ON u.vecino_piso = v.piso
       ORDER BY v.piso
@@ -91,6 +91,12 @@ router.post('/admin/usuarios', authMiddleware, adminMiddleware, async (req: Requ
       return;
     }
 
+    const vecino = await query('SELECT piso FROM vecinos WHERE piso = $1', [vecino_piso]);
+    if (vecino.rows.length === 0) {
+      res.status(400).json({ error: 'El piso indicado no existe en el edificio' });
+      return;
+    }
+
     const password_hash = await bcrypt.hash(password, 12);
 
     const result = await query(
@@ -107,6 +113,125 @@ router.post('/admin/usuarios', authMiddleware, adminMiddleware, async (req: Requ
       return;
     }
     console.error('Admin create user error:', err);
+    res.status(500).json({ error: 'Error interno del servidor' });
+  }
+});
+
+router.get('/admin/usuarios', authMiddleware, adminMiddleware, async (_req: Request, res: Response) => {
+  try {
+    const result = await query(`
+      SELECT id, vecino_piso, email, is_admin, created_at
+      FROM usuarios
+      ORDER BY id
+    `);
+    res.json(result.rows);
+  } catch (err) {
+    console.error('Admin list users error:', err);
+    res.status(500).json({ error: 'Error interno del servidor' });
+  }
+});
+
+router.put('/admin/usuarios/:id', authMiddleware, adminMiddleware, async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+    const { email, vecino_piso, is_admin } = req.body;
+
+    const updates: string[] = [];
+    const values: unknown[] = [];
+    let param = 1;
+
+    if (email !== undefined) {
+      updates.push(`email = $${param++}`);
+      values.push(email);
+    }
+    if (vecino_piso !== undefined) {
+      updates.push(`vecino_piso = $${param++}`);
+      values.push(vecino_piso);
+    }
+    if (is_admin !== undefined) {
+      updates.push(`is_admin = $${param++}`);
+      values.push(is_admin);
+    }
+
+    if (updates.length === 0) {
+      res.status(400).json({ error: 'No hay campos para actualizar' });
+      return;
+    }
+
+    values.push(id);
+    const result = await query(
+      `UPDATE usuarios SET ${updates.join(', ')} WHERE id = $${param} RETURNING id, vecino_piso, email, is_admin, created_at`,
+      values
+    );
+
+    if (result.rows.length === 0) {
+      res.status(404).json({ error: 'Usuario no encontrado' });
+      return;
+    }
+
+    res.json(result.rows[0]);
+  } catch (err: any) {
+    if (err.code === '23505') {
+      const field = err.constraint?.includes('email') ? 'email' : 'vecino_piso';
+      res.status(409).json({ error: `El ${field} ya esta en uso` });
+      return;
+    }
+    console.error('Admin update user error:', err);
+    res.status(500).json({ error: 'Error interno del servidor' });
+  }
+});
+
+router.put('/admin/usuarios/:id/password', authMiddleware, adminMiddleware, async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+    const { password } = req.body;
+
+    if (!password || password.length < 6) {
+      res.status(400).json({ error: 'La contrasena debe tener al menos 6 caracteres' });
+      return;
+    }
+
+    const password_hash = await bcrypt.hash(password, 12);
+
+    const result = await query(
+      `UPDATE usuarios SET password_hash = $1 WHERE id = $2 RETURNING id`,
+      [password_hash, id]
+    );
+
+    if (result.rows.length === 0) {
+      res.status(404).json({ error: 'Usuario no encontrado' });
+      return;
+    }
+
+    res.json({ message: 'Contrasena actualizada' });
+  } catch (err) {
+    console.error('Admin change password error:', err);
+    res.status(500).json({ error: 'Error interno del servidor' });
+  }
+});
+
+router.delete('/admin/usuarios/:id', authMiddleware, adminMiddleware, async (req: Request, res: Response) => {
+  try {
+    const id = req.params.id as string;
+
+    if (parseInt(id) === req.user!.userId) {
+      res.status(400).json({ error: 'No puedes eliminar tu propio usuario' });
+      return;
+    }
+
+    const result = await query(
+      `DELETE FROM usuarios WHERE id = $1 RETURNING id`,
+      [id]
+    );
+
+    if (result.rows.length === 0) {
+      res.status(404).json({ error: 'Usuario no encontrado' });
+      return;
+    }
+
+    res.json({ message: 'Usuario eliminado' });
+  } catch (err) {
+    console.error('Admin delete user error:', err);
     res.status(500).json({ error: 'Error interno del servidor' });
   }
 });
