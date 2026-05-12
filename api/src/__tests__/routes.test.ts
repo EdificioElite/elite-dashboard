@@ -235,7 +235,7 @@ describe('Auth routes', () => {
       const calls = mockQuery.mock.calls;
       const updateCall = calls.find((c: any) => typeof c[0] === 'string' && c[0].includes('UPDATE usuarios SET password_hash'));
       expect(updateCall).toBeDefined();
-      expect(updateCall[1]).toEqual([expect.any(String), 1]);
+      expect(updateCall![1]).toEqual([expect.any(String), 1]);
     });
 
     it('returns 401 when user not found (deleted after token issued)', async () => {
