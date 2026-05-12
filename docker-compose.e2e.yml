@@ -64,6 +64,7 @@ services:
       - ./e2e:/e2e
     environment:
       BASE_URL: http://frontend:80
+      API_URL: http://api:3001
     command: sh -c "npm install && npx playwright test"
     profiles:
       - test
