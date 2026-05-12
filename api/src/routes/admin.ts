@@ -91,6 +91,12 @@ router.post('/admin/usuarios', authMiddleware, adminMiddleware, async (req: Requ
       return;
     }
 
+    const vecino = await query('SELECT piso FROM vecinos WHERE piso = $1', [vecino_piso]);
+    if (vecino.rows.length === 0) {
+      res.status(400).json({ error: 'El piso indicado no existe en el edificio' });
+      return;
+    }
+
     const password_hash = await bcrypt.hash(password, 12);
 
     const result = await query(
