@@ -288,9 +288,11 @@ describe('Admin routes', () => {
     });
 
     it('creates user for admin', async () => {
-      mockQuery.mockResolvedValueOnce({
-        rows: [{ id: 2, vecino_piso: '2A', email: 'new@test.com', is_admin: false, created_at: '2026-01-01' }],
-      });
+      mockQuery
+        .mockResolvedValueOnce({ rows: [{ piso: '2A' }] })
+        .mockResolvedValueOnce({
+          rows: [{ id: 2, vecino_piso: '2A', email: 'new@test.com', is_admin: false, created_at: '2026-01-01' }],
+        });
       const app = createApp();
       const token = userToken(true);
       const res = await request(app)
@@ -299,6 +301,18 @@ describe('Admin routes', () => {
         .send({ email: 'new@test.com', password: '123456', vecino_piso: '2A' });
       expect(res.status).toBe(201);
       expect(res.body.email).toBe('new@test.com');
+    });
+
+    it('returns 400 when vecino does not exist', async () => {
+      mockQuery.mockResolvedValueOnce({ rows: [] });
+      const app = createApp();
+      const token = userToken(true);
+      const res = await request(app)
+        .post('/api/admin/usuarios')
+        .set('Authorization', `Bearer ${token}`)
+        .send({ email: 'new@test.com', password: '123456', vecino_piso: 'Z9' });
+      expect(res.status).toBe(400);
+      expect(res.body.error).toBe('El piso indicado no existe en el edificio');
     });
   });
 

@@ -173,15 +173,22 @@ export default function AdminPage() {
                   <label htmlFor="vecinoPiso" className="block text-xs font-semibold uppercase tracking-wider text-cocoa/40 mb-1.5">
                     Piso
                   </label>
-                  <input
+                  <select
                     id="vecinoPiso"
-                    type="text"
                     value={vecinoPiso}
                     onChange={(e) => setVecinoPiso(e.target.value)}
                     required
                     className="input-card"
-                    placeholder="1A"
-                  />
+                  >
+                    <option value="">Seleccionar piso...</option>
+                    {vecinos
+                      .filter((v) => !v.email)
+                      .map((v) => (
+                        <option key={v.piso} value={v.piso}>
+                          {v.piso} — {v.nombre}
+                        </option>
+                      ))}
+                  </select>
                 </div>
                 <div>
                   <label htmlFor="adminEmail" className="block text-xs font-semibold uppercase tracking-wider text-cocoa/40 mb-1.5">
