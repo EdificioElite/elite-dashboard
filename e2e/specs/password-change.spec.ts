@@ -1,7 +1,7 @@
 import { test, expect, request, APIRequestContext } from '@playwright/test';
 import { loginAs } from '../fixtures/auth';
 
-const TEST_EMAIL = 'vecino4@elite.com';
+const TEST_EMAIL = 'vecino1@elite.com';
 const OLD_PASSWORD = 'password1';
 const NEW_PASSWORD = 'NewPass1';
 const API_BASE = process.env.API_URL || 'http://localhost:3001';
