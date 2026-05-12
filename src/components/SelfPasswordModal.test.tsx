@@ -32,6 +32,25 @@ describe('SelfPasswordModal', () => {
     expect(screen.getByText(/8 caracteres/)).toBeInTheDocument();
   });
 
+  it('shows error when current password is empty', async () => {
+    const user = userEvent.setup();
+    render(<SelfPasswordModal onClose={onClose} />);
+    await user.type(screen.getByLabelText('Nueva contrasena'), 'NewPass1');
+    await user.type(screen.getByLabelText('Confirmar contrasena'), 'NewPass1');
+    await user.click(screen.getByRole('button', { name: /cambiar/i }));
+    expect(screen.getByText(/actual es requerida/)).toBeInTheDocument();
+  });
+
+  it('shows error when new password lacks uppercase', async () => {
+    const user = userEvent.setup();
+    render(<SelfPasswordModal onClose={onClose} />);
+    await user.type(screen.getByLabelText('Contrasena actual'), 'oldpass');
+    await user.type(screen.getByLabelText('Nueva contrasena'), 'lowercase1');
+    await user.type(screen.getByLabelText('Confirmar contrasena'), 'lowercase1');
+    await user.click(screen.getByRole('button', { name: /cambiar/i }));
+    expect(screen.getByText(/mayuscula/)).toBeInTheDocument();
+  });
+
   it('shows error when passwords do not match', async () => {
     const user = userEvent.setup();
     render(<SelfPasswordModal onClose={onClose} />);
@@ -80,6 +99,13 @@ describe('SelfPasswordModal', () => {
     const user = userEvent.setup();
     render(<SelfPasswordModal onClose={onClose} />);
     await user.click(screen.getByRole('button', { name: /cancelar/i }));
+    expect(onClose).toHaveBeenCalled();
+  });
+
+  it('closes on backdrop click', async () => {
+    const user = userEvent.setup();
+    render(<SelfPasswordModal onClose={onClose} />);
+    await user.click(screen.getByRole('dialog'));
     expect(onClose).toHaveBeenCalled();
   });
 });

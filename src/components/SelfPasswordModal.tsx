@@ -1,4 +1,4 @@
-import { useState, FormEvent } from 'react';
+import { useState, useRef, useEffect, FormEvent } from 'react';
 import Icon from './Icon';
 import { changeOwnPassword } from '../api/client';
 
@@ -13,9 +13,12 @@ export default function SelfPasswordModal({ onClose }: Props) {
   const [error, setError] = useState('');
   const [success, setSuccess] = useState(false);
   const [saving, setSaving] = useState(false);
+  const mountedRef = useRef(true);
+  useEffect(() => () => { mountedRef.current = false; }, []);
 
   const validate = (): string | null => {
     if (!current) return 'La contrasena actual es requerida';
+    if (!password) return 'La nueva contrasena es requerida';
     if (password.length < 8) return 'La contrasena debe tener al menos 8 caracteres';
     if (!/[A-Z]/.test(password)) return 'La contrasena debe contener al menos una mayuscula';
     if (!/[a-z]/.test(password)) return 'La contrasena debe contener al menos una minuscula';
@@ -38,7 +41,7 @@ export default function SelfPasswordModal({ onClose }: Props) {
     try {
       await changeOwnPassword(current, password);
       setSuccess(true);
-      setTimeout(onClose, 1500);
+      setTimeout(() => { if (mountedRef.current) onClose(); }, 1500);
     } catch (err: any) {
       setError(err.message || 'Error al cambiar contrasena');
     } finally {
@@ -50,6 +53,8 @@ export default function SelfPasswordModal({ onClose }: Props) {
     <div
       className="fixed inset-0 z-50 flex items-center justify-center p-4"
       style={{ background: 'rgba(58,47,36,0.3)', backdropFilter: 'blur(4px)' }}
+      role="dialog"
+      aria-modal="true"
       onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}
     >
       <div className="glass p-[26px] w-full max-w-[420px] animate-[fadeUp_250ms_ease-out]">
@@ -81,9 +86,11 @@ export default function SelfPasswordModal({ onClose }: Props) {
             Contrasena actualizada correctamente
           </div>
         ) : (
-          <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+          <form onSubmit={handleSubmit} noValidate className="flex flex-col gap-4">
             {error && (
               <div
+                id="password-error"
+                role="alert"
                 className="px-4 py-3 rounded-xl text-sm flex items-center gap-2"
                 style={{ background: 'rgba(163,64,42,.08)', color: '#a3402a' }}
               >
@@ -102,6 +109,7 @@ export default function SelfPasswordModal({ onClose }: Props) {
                 value={current}
                 onChange={(e) => setCurrent(e.target.value)}
                 required
+                aria-describedby={error ? 'password-error' : undefined}
                 className="input-card"
                 placeholder="Tu contrasena actual"
               />
@@ -117,6 +125,7 @@ export default function SelfPasswordModal({ onClose }: Props) {
                 onChange={(e) => setPassword(e.target.value)}
                 required
                 minLength={8}
+                aria-describedby={error ? 'password-error' : undefined}
                 className="input-card"
                 placeholder="Minimo 8 caracteres, mayuscula, minuscula y numero"
               />
@@ -132,6 +141,7 @@ export default function SelfPasswordModal({ onClose }: Props) {
                 onChange={(e) => setConfirm(e.target.value)}
                 required
                 minLength={8}
+                aria-describedby={error ? 'password-error' : undefined}
                 className="input-card"
                 placeholder="Repetir nueva contrasena"
               />
