@@ -4,6 +4,7 @@ import { query } from '../db';
 import { signToken } from '../lib/jwt';
 import { authMiddleware } from '../middleware/auth';
 import { rateLimit } from '../middleware/rateLimit';
+import { logger } from '../lib/logger';
 
 const router = Router();
 
@@ -51,7 +52,7 @@ router.post('/auth/login', rateLimit(3, 60 * 1000), async (req: Request, res: Re
       },
     });
   } catch (err) {
-    console.error('Login error:', err);
+    logger.error(err, 'Login error');
     res.status(500).json({ error: 'Error interno del servidor' });
   }
 });
@@ -119,7 +120,7 @@ router.put('/auth/password', authMiddleware, rateLimit(5, 60 * 1000), async (req
 
     res.json({ message: 'Contrasena actualizada' });
   } catch (err) {
-    console.error('Change password error:', err);
+    logger.error(err, 'Change password error');
     res.status(500).json({ error: 'Error interno del servidor' });
   }
 });
