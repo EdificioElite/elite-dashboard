@@ -190,11 +190,15 @@ export default function HistoricoCharts({ endpoint, title }: { endpoint?: string
         <SegmentedControl options={PRESETS} value={preset ?? ''} onChange={(k) => setRange(k)} />
       </div>
 
-      <div className="flex items-center gap-3 mb-5 flex-wrap">
-        <label className="text-[11px] font-medium uppercase tracking-wider text-cocoa/40">Desde:</label>
-        <input type="datetime-local" value={desdeInput} onChange={(e) => { setDesdeInput(e.target.value); setPreset(null); }} className="input-card text-xs py-1.5 px-3 w-auto" />
-        <label className="text-[11px] font-medium uppercase tracking-wider text-cocoa/40">Hasta:</label>
-        <input type="datetime-local" value={hastaInput} onChange={(e) => { setHastaInput(e.target.value); setPreset(null); }} className="input-card text-xs py-1.5 px-3 w-auto" />
+      <div className="flex flex-col sm:flex-row sm:items-center gap-3 mb-5">
+        <div className="flex items-center gap-2">
+          <label className="text-[11px] font-medium uppercase tracking-wider text-cocoa/40 shrink-0">Desde:</label>
+          <input type="datetime-local" value={desdeInput} onChange={(e) => { setDesdeInput(e.target.value); setPreset(null); }} className="input-card text-xs py-1.5 px-3 w-full sm:w-auto" />
+        </div>
+        <div className="flex items-center gap-2">
+          <label className="text-[11px] font-medium uppercase tracking-wider text-cocoa/40 shrink-0">Hasta:</label>
+          <input type="datetime-local" value={hastaInput} onChange={(e) => { setHastaInput(e.target.value); setPreset(null); }} className="input-card text-xs py-1.5 px-3 w-full sm:w-auto" />
+        </div>
       </div>
 
       {data.length === 0 ? (

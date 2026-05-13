@@ -40,8 +40,10 @@ export default function ChangePasswordModal({ userId, userName, onClose, onSaved
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ background: 'rgba(58,47,36,0.3)', backdropFilter: 'blur(4px)' }}>
-      <div className="glass p-[26px] w-full max-w-[420px] animate-[fadeUp_250ms_ease-out]">
+    <>
+      <div className="fixed inset-0 z-40" style={{ background: 'rgba(58,47,36,0.3)', backdropFilter: 'blur(4px)' }} onClick={onClose} />
+      <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 pointer-events-none">
+        <div className="glass p-[26px] w-full max-w-[420px] animate-[fadeUp_250ms_ease-out] pointer-events-auto overflow-y-auto max-h-[calc(100vh-2rem)]">
         <div className="flex items-center justify-between mb-5">
           <div className="flex items-center gap-3">
             <div className="w-7 h-7 rounded-lg flex items-center justify-center shrink-0" style={{ background: 'var(--accent-2)' }}>
@@ -96,7 +98,8 @@ export default function ChangePasswordModal({ userId, userName, onClose, onSaved
             </button>
           </div>
         </form>
+        </div>
       </div>
-    </div>
+    </>
   );
 }
