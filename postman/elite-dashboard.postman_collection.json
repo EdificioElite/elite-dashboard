@@ -1,0 +1,467 @@
+{
+  "info": {
+    "name": "Elite Dashboard API",
+    "description": "Coleccion de todas las llamadas al backend del Elite Dashboard.\n\n## Autenticacion\n- Usa el endpoint `POST /auth/login` para obtener un token JWT.\n- El token se guarda automaticamente en la variable `token` de la coleccion tras hacer login.\n- Los demas endpoints usan `Authorization: Bearer {{token}}`.\n\n## Entornos\nImporta tambien los archivos de entorno para `dev` y `prod` y selecciona el que necesites.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "elite-dashboard"
+  },
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      {
+        "key": "token",
+        "value": "{{token}}",
+        "type": "string"
+      }
+    ]
+  },
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "https://api-dev.edificioelite.com/api",
+      "type": "string"
+    },
+    {
+      "key": "token",
+      "value": "",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "Auth",
+      "description": "Endpoints de autenticacion y health check.",
+      "item": [
+        {
+          "name": "Login",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    const json = pm.response.json();",
+                  "    pm.collectionVariables.set('token', json.token);",
+                  "}",
+                  "",
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                  "",
+                  "pm.test('Respuesta contiene token y user', () => {",
+                  "    const json = pm.response.json();",
+                  "    pm.expect(json).to.have.property('token');",
+                  "    pm.expect(json).to.have.property('user');",
+                  "    pm.expect(json.user).to.have.property('id');",
+                  "    pm.expect(json.user).to.have.property('vecino_piso');",
+                  "    pm.expect(json.user).to.have.property('email');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{email}}\",\n  \"password\": \"{{password}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/auth/login",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "auth",
+                "login"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Me (Perfil)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                  "",
+                  "pm.test('Contiene datos del usuario', () => {",
+                  "    const json = pm.response.json();",
+                  "    pm.expect(json).to.have.property('id');",
+                  "    pm.expect(json).to.have.property('vecino_piso');",
+                  "    pm.expect(json).to.have.property('email');",
+                  "    pm.expect(json).to.have.property('is_admin');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/auth/me",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "auth",
+                "me"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Health Check",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                  "",
+                  "pm.test('Status ok', () => {",
+                  "    const json = pm.response.json();",
+                  "    pm.expect(json.status).to.eql('ok');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "auth": {
+              "type": "noauth"
+            },
+            "url": {
+              "raw": "{{base_url}}/health",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "health"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Consumos",
+      "description": "Datos de consumo para el vecino autenticado.",
+      "item": [
+        {
+          "name": "Historico de consumos",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                  "pm.test('Respuesta es un array', () => pm.expect(pm.response.json()).to.be.an('array'));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/consumos",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "consumos"
+              ],
+              "query": [
+                {
+                  "key": "desde",
+                  "value": "",
+                  "description": "Fecha inicio ISO (opcional). Ej: 2025-01-01T00:00:00Z",
+                  "disabled": true
+                },
+                {
+                  "key": "hasta",
+                  "value": "",
+                  "description": "Fecha fin ISO (opcional). Ej: 2025-12-31T23:59:59Z",
+                  "disabled": true
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Consumo actual",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                  "const json = pm.response.json();",
+                  "if (json) {",
+                  "    pm.expect(json).to.have.property('timestamp');",
+                  "    pm.expect(json).to.have.property('kwh_calor');",
+                  "    pm.expect(json).to.have.property('kwh_frio');",
+                  "    pm.expect(json).to.have.property('m3_acs');",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/consumo-actual",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "consumo-actual"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Facturas",
+      "description": "Facturas del vecino autenticado.",
+      "item": [
+        {
+          "name": "Listar facturas",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                  "pm.test('Respuesta es un array', () => pm.expect(pm.response.json()).to.be.an('array'));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/facturas",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "facturas"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Admin",
+      "description": "Endpoints de administracion. Requieren token + rol admin.",
+      "item": [
+        {
+          "name": "Listar vecinos",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/admin/vecinos",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "admin",
+                "vecinos"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Consumo de un vecino",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/admin/vecinos/{{piso}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "admin",
+                "vecinos",
+                "{{piso}}"
+              ],
+              "query": [
+                {
+                  "key": "desde",
+                  "value": "",
+                  "description": "Fecha inicio ISO (opcional)",
+                  "disabled": true
+                },
+                {
+                  "key": "hasta",
+                  "value": "",
+                  "description": "Fecha fin ISO (opcional)",
+                  "disabled": true
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Listar usuarios",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/admin/usuarios",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "admin",
+                "usuarios"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Crear usuario",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"nuevo@ejemplo.com\",\n  \"password\": \"123456\",\n  \"vecino_piso\": \"Bajo A\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/admin/usuarios",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "admin",
+                "usuarios"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Actualizar usuario",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"actualizado@ejemplo.com\",\n  \"vecino_piso\": \"Bajo A\",\n  \"is_admin\": false\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/admin/usuarios/{{user_id}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "admin",
+                "usuarios",
+                "{{user_id}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Cambiar password de usuario",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"password\": \"nuevapassword123\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/admin/usuarios/{{user_id}}/password",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "admin",
+                "usuarios",
+                "{{user_id}}",
+                "password"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Eliminar usuario",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/admin/usuarios/{{user_id}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "admin",
+                "usuarios",
+                "{{user_id}}"
+              ]
+            }
+          }
+        }
+      ]
+    }
+  ]
+}

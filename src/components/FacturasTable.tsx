@@ -1,4 +1,4 @@
-import { fmtMonth, fmtMoney } from '../lib/format';
+import { fmtMonth, fmtMonthShort, capitalizar, fmtMoney } from '../lib/format';
 import Icon from './Icon';
 
 interface Factura {
@@ -43,17 +43,20 @@ export default function FacturasTable({ data }: { data: Factura[] }) {
           <thead>
             <tr>
               <th>Periodo</th>
-              <th>Calefacción</th>
-              <th>Refrigeración</th>
+              <th><span className="hidden sm:inline">Calefacción</span><span className="sm:hidden">Cal.</span></th>
+              <th><span className="hidden sm:inline">Refrigeración</span><span className="sm:hidden">Ref.</span></th>
               <th>ACS</th>
-              <th>m³ ACS</th>
+              <th><span className="hidden sm:inline">m³ ACS</span><span className="sm:hidden">m³</span></th>
               <th className="text-right">Importe</th>
             </tr>
           </thead>
           <tbody>
             {data.map((f, i) => (
               <tr key={f.id_factura} className="row-stagger" style={{ animationDelay: `${i * 40}ms` }}>
-                <td className="font-medium text-cocoa">{fmtMonth(f.periodo)}</td>
+                <td className="font-medium text-cocoa">
+                  <span className="hidden sm:inline">{fmtMonth(f.periodo)}</span>
+                  <span className="sm:hidden">{capitalizar(fmtMonthShort(f.periodo))}</span>
+                </td>
                 <td className="font-mono text-xs font-num">{Number(f.kwh_calor).toFixed(0)}</td>
                 <td className="font-mono text-xs font-num">{Number(f.kwh_frio).toFixed(0)}</td>
                 <td className="font-mono text-xs font-num">{Number(f.kwh_acs).toFixed(0)}</td>

@@ -8,10 +8,10 @@ test.describe('Login', () => {
     await expect(page.locator('h1')).toContainText('Vecinos');
   });
 
-  test('vecino login redirects to /dashboard', async ({ page }) => {
+  test('vecino login redirects to /aerotermia', async ({ page }) => {
     await loginAsVecino(page);
-    await expect(page).toHaveURL('/dashboard');
-    await expect(page.getByText('Dashboard')).toBeVisible();
+    await expect(page).toHaveURL('/aerotermia');
+    await expect(page.getByText('Aerotermia')).toBeVisible();
   });
 
   test('wrong credentials shows error', async ({ page }) => {

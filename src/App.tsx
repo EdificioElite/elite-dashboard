@@ -2,9 +2,13 @@ import { useEffect } from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { useAuthStore } from './store/auth';
 import LoginPage from './pages/LoginPage';
+import InicioPage from './pages/InicioPage';
 import DashboardPage from './pages/DashboardPage';
 import AdminPage from './pages/AdminPage';
 import AdminVecinoPage from './pages/AdminVecinoPage';
+import JuntasGeneralesPage from './pages/JuntasGeneralesPage';
+import ContactosPage from './pages/ContactosPage';
+import VersionFooter from './components/VersionFooter';
 
 function ProtectedRoute({ children, adminOnly = false }: { children: React.ReactNode; adminOnly?: boolean }) {
   const { user, loading } = useAuthStore();
@@ -18,7 +22,7 @@ function ProtectedRoute({ children, adminOnly = false }: { children: React.React
   }
 
   if (!user) return <Navigate to="/login" replace />;
-  if (adminOnly && !user.is_admin) return <Navigate to="/dashboard" replace />;
+  if (adminOnly && !user.is_admin) return <Navigate to="/inicio" replace />;
 
   return <>{children}</>;
 }
@@ -42,14 +46,11 @@ export default function App() {
       <div className="relative z-10 min-h-screen">
         <Routes>
           <Route path="/login" element={<LoginPage />} />
-          <Route
-            path="/dashboard"
-            element={
-              <ProtectedRoute>
-                <DashboardPage />
-              </ProtectedRoute>
-            }
-          />
+          <Route path="/inicio" element={<ProtectedRoute><InicioPage /></ProtectedRoute>} />
+          <Route path="/aerotermia" element={<ProtectedRoute><DashboardPage /></ProtectedRoute>} />
+          <Route path="/dashboard" element={<Navigate to="/aerotermia" replace />} />
+          <Route path="/juntas" element={<ProtectedRoute><JuntasGeneralesPage /></ProtectedRoute>} />
+          <Route path="/contactos" element={<ProtectedRoute><ContactosPage /></ProtectedRoute>} />
           <Route
             path="/admin"
             element={
@@ -66,8 +67,10 @@ export default function App() {
               </ProtectedRoute>
             }
           />
-          <Route path="*" element={<Navigate to="/dashboard" replace />} />
+          <Route path="/" element={<Navigate to="/inicio" replace />} />
+          <Route path="*" element={<Navigate to="/inicio" replace />} />
         </Routes>
+        <VersionFooter />
       </div>
     </BrowserRouter>
   );

@@ -51,7 +51,7 @@ export default function ConsumoCard({ data }: { data: ConsumoActual | null }) {
         </span>
       </div>
 
-      <div className="grid grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
         <div>
           <div className="text-[11px] font-medium uppercase tracking-wider text-cocoa/40 mb-1">Calefacción</div>
           <div className="font-display text-[28px] font-medium leading-none" style={{ letterSpacing: '-0.02em', color: 'var(--calor)' }}>

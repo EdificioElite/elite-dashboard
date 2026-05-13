@@ -1,6 +1,7 @@
 import { Router, Request, Response } from 'express';
 import { query } from '../db';
 import { authMiddleware } from '../middleware/auth';
+import { logger } from '../lib/logger';
 
 const router = Router();
 
@@ -30,7 +31,7 @@ router.get('/facturas', authMiddleware, async (req: Request, res: Response) => {
 
     res.json(result.rows);
   } catch (err) {
-    console.error('Facturas error:', err);
+    logger.error(err, 'Facturas error');
     res.status(500).json({ error: 'Error interno del servidor' });
   }
 });

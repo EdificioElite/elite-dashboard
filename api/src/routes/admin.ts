@@ -3,6 +3,7 @@ import bcrypt from 'bcrypt';
 import { query } from '../db';
 import { authMiddleware } from '../middleware/auth';
 import { adminMiddleware } from '../middleware/admin';
+import { logger } from '../lib/logger';
 
 const router = Router();
 
@@ -16,7 +17,7 @@ router.get('/admin/vecinos', authMiddleware, adminMiddleware, async (_req: Reque
     `);
     res.json(result.rows);
   } catch (err) {
-    console.error('Admin vecinos error:', err);
+    logger.error(err, 'Admin vecinos error');
     res.status(500).json({ error: 'Error interno del servidor' });
   }
 });
@@ -77,7 +78,7 @@ router.get('/admin/vecinos/:piso', authMiddleware, adminMiddleware, async (req: 
     const result = await query(sql, params);
     res.json(result.rows);
   } catch (err) {
-    console.error('Admin vecino consumos error:', err);
+    logger.error(err, 'Admin vecino consumos error');
     res.status(500).json({ error: 'Error interno del servidor' });
   }
 });
@@ -112,7 +113,7 @@ router.post('/admin/usuarios', authMiddleware, adminMiddleware, async (req: Requ
       res.status(409).json({ error: 'El email o el vecino ya tiene un usuario asignado' });
       return;
     }
-    console.error('Admin create user error:', err);
+    logger.error(err, 'Admin create user error');
     res.status(500).json({ error: 'Error interno del servidor' });
   }
 });
@@ -126,7 +127,7 @@ router.get('/admin/usuarios', authMiddleware, adminMiddleware, async (_req: Requ
     `);
     res.json(result.rows);
   } catch (err) {
-    console.error('Admin list users error:', err);
+    logger.error(err, 'Admin list users error');
     res.status(500).json({ error: 'Error interno del servidor' });
   }
 });
@@ -176,7 +177,7 @@ router.put('/admin/usuarios/:id', authMiddleware, adminMiddleware, async (req: R
       res.status(409).json({ error: `El ${field} ya esta en uso` });
       return;
     }
-    console.error('Admin update user error:', err);
+    logger.error(err, 'Admin update user error');
     res.status(500).json({ error: 'Error interno del servidor' });
   }
 });
@@ -205,7 +206,7 @@ router.put('/admin/usuarios/:id/password', authMiddleware, adminMiddleware, asyn
 
     res.json({ message: 'Contrasena actualizada' });
   } catch (err) {
-    console.error('Admin change password error:', err);
+    logger.error(err, 'Admin change password error');
     res.status(500).json({ error: 'Error interno del servidor' });
   }
 });
@@ -231,7 +232,7 @@ router.delete('/admin/usuarios/:id', authMiddleware, adminMiddleware, async (req
 
     res.json({ message: 'Usuario eliminado' });
   } catch (err) {
-    console.error('Admin delete user error:', err);
+    logger.error(err, 'Admin delete user error');
     res.status(500).json({ error: 'Error interno del servidor' });
   }
 });
