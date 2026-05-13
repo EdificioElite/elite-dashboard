@@ -55,7 +55,7 @@ export default function Header({ showAdmin, showDashboard }: HeaderProps) {
 
   return (
     <header
-      className="sticky top-0 z-20 glass m-4 px-6 py-3 flex items-center justify-between"
+      className="sticky top-0 z-50 glass m-4 px-6 py-3 flex items-center justify-between"
       style={{ borderRadius: 'var(--radius-lg)', margin: '16px 24px' }}
     >
       <div className="flex items-center gap-4">
