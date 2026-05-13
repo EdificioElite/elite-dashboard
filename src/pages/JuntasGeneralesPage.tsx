@@ -13,7 +13,7 @@ const JUNTAS: Junta[] = [
   { tipo: 'Ordinaria', fecha: 'Viernes 19 de Septiembre 2026 — 18:00', titulo: 'Junta General Ordinaria' },
   { tipo: 'Extraordinaria', fecha: 'Lunes 1 de Junio 2026 — 19:00', titulo: 'Junta General Extraordinaria' },
   { tipo: 'Extraordinaria', fecha: 'Martes 10 de Febrero 2026 — 19:00', titulo: 'Junta General Extraordinaria' },
-  { tipo: 'Extraordinaria', fecha: 'Miercoles 15 de Octubre 2026 — 19:00', titulo: 'Junta General Extraordinaria' },
+  { tipo: 'Extraordinaria', fecha: 'Miércoles 15 de Octubre 2026 — 19:00', titulo: 'Junta General Extraordinaria' },
 ];
 
 export default function JuntasGeneralesPage() {
@@ -43,7 +43,7 @@ export default function JuntasGeneralesPage() {
                 <tr>
                   <th>Tipo</th>
                   <th>Fecha</th>
-                  <th>Titulo</th>
+                  <th>Título</th>
                   <th className="text-right">Acta</th>
                 </tr>
               </thead>
@@ -63,7 +63,7 @@ export default function JuntasGeneralesPage() {
                         className="btn btn-ghost text-xs opacity-40 cursor-default"
                       >
                         <Icon name="download" size={12} />
-                        Proximamente
+                        Próximamente
                       </button>
                     </td>
                   </tr>
@@ -87,7 +87,7 @@ export default function JuntasGeneralesPage() {
                 <tr>
                   <th>Tipo</th>
                   <th>Fecha</th>
-                  <th>Titulo</th>
+                  <th>Título</th>
                   <th className="text-right">Acta</th>
                 </tr>
               </thead>
@@ -107,7 +107,7 @@ export default function JuntasGeneralesPage() {
                         className="btn btn-ghost text-xs opacity-40 cursor-default"
                       >
                         <Icon name="download" size={12} />
-                        Proximamente
+                        Próximamente
                       </button>
                     </td>
                   </tr>

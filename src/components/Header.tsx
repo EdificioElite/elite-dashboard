@@ -69,12 +69,17 @@ export default function Header({ showAdmin }: HeaderProps) {
       style={{ borderRadius: 'var(--radius-lg)', margin: '16px 24px' }}
     >
       <div className="flex items-center gap-4">
-        <img
-          src="/images/elite/Logotipo PNG.png"
-          alt="Edificio Elite"
-          className="h-8 w-auto cursor-pointer"
+        <button
           onClick={() => navigate('/inicio')}
-        />
+          className="bg-transparent border-none cursor-pointer p-0"
+          aria-label="Ir a Inicio"
+        >
+          <img
+            src="/images/elite/Logotipo PNG.png"
+            alt="Edificio Elite"
+            className="h-8 w-auto"
+          />
+        </button>
 
         <nav className="hidden md:flex items-center gap-1">
           {PAGE_NAV.map((item) => (

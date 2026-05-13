@@ -83,7 +83,7 @@ export default function InicioPage() {
 
   return (
     <div className="page-in">
-      <Header />
+      <Header showAdmin />
 
       <main className="max-w-[1180px] mx-auto px-6 flex flex-col gap-[22px] pb-10">
         <div className="pt-2">
