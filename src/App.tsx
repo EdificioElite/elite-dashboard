@@ -40,37 +40,39 @@ export default function App() {
         <div className="orb o4" />
         <div className="grain" />
       </div>
-      <div className="relative z-10 min-h-screen">
-        <Routes>
-          <Route path="/login" element={<LoginPage />} />
-          <Route
-            path="/dashboard"
-            element={
-              <ProtectedRoute>
-                <DashboardPage />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/admin"
-            element={
-              <ProtectedRoute adminOnly>
-                <AdminPage />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/admin/vecino/:piso"
-            element={
-              <ProtectedRoute adminOnly>
-                <AdminVecinoPage />
-              </ProtectedRoute>
-            }
-          />
-          <Route path="*" element={<Navigate to="/dashboard" replace />} />
-        </Routes>
+      <div className="relative z-10 min-h-screen flex flex-col">
+        <div className="flex-1">
+          <Routes>
+            <Route path="/login" element={<LoginPage />} />
+            <Route
+              path="/dashboard"
+              element={
+                <ProtectedRoute>
+                  <DashboardPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/admin"
+              element={
+                <ProtectedRoute adminOnly>
+                  <AdminPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/admin/vecino/:piso"
+              element={
+                <ProtectedRoute adminOnly>
+                  <AdminVecinoPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route path="*" element={<Navigate to="/dashboard" replace />} />
+          </Routes>
+        </div>
+        <VersionFooter />
       </div>
-      <VersionFooter />
     </BrowserRouter>
   );
 }
