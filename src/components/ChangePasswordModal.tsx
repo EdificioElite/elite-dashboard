@@ -1,4 +1,5 @@
 import { useState, FormEvent } from 'react';
+import { createPortal } from 'react-dom';
 import Icon from './Icon';
 import { changePassword } from '../api/client';
 
@@ -39,7 +40,7 @@ export default function ChangePasswordModal({ userId, userName, onClose, onSaved
     }
   };
 
-  return (
+  return createPortal(
     <>
       <div className="fixed inset-0 z-40" style={{ background: 'rgba(58,47,36,0.3)' }} onClick={onClose} />
       <div className="fixed inset-0 z-[60] flex items-center justify-center p-4" onClick={onClose}>
@@ -104,6 +105,7 @@ export default function ChangePasswordModal({ userId, userName, onClose, onSaved
           </form>
         </div>
       </div>
-    </>
+    </>,
+    document.body
   );
 }
