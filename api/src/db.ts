@@ -1,5 +1,6 @@
 import { Pool, types } from 'pg';
 import { config } from './config';
+import { logger } from './lib/logger';
 
 types.setTypeParser(1700, parseFloat);
 
@@ -8,7 +9,7 @@ export const pool = new Pool({
 });
 
 pool.on('error', (err) => {
-  console.error('Unexpected error on idle client', err);
+  logger.error(err, 'Unexpected error on idle client');
   process.exit(-1);
 });
 
