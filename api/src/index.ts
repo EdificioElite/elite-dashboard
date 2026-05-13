@@ -16,6 +16,7 @@ app.use(pinoHttp({
   autoLogging: {
     ignore: (req) => req.method === 'OPTIONS',
   },
+  redact: ['req.headers.authorization', 'req.headers.cookie'],
 }));
 
 app.use(cors({ origin: config.corsOrigin }));
