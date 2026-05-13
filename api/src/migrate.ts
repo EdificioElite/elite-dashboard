@@ -1,6 +1,7 @@
 import fs from 'fs';
 import path from 'path';
 import { pool } from './db';
+import { logger } from './lib/logger';
 
 async function migrate() {
   const migrationsDir = path.join(__dirname, '..', 'migrations');
@@ -8,16 +9,16 @@ async function migrate() {
 
   for (const file of files) {
     const sql = fs.readFileSync(path.join(migrationsDir, file), 'utf-8');
-    console.log(`Running migration: ${file}`);
+    logger.info(`Running migration: ${file}`);
     await pool.query(sql);
-    console.log(`Migration ${file} complete`);
+    logger.info(`Migration ${file} complete`);
   }
 
   await pool.end();
-  console.log('All migrations complete');
+  logger.info('All migrations complete');
 }
 
 migrate().catch((err) => {
-  console.error('Migration failed:', err);
+  logger.error(err, 'Migration failed');
   process.exit(1);
 });
