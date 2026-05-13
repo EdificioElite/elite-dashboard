@@ -79,7 +79,7 @@ export default function AdminPage() {
   if (loading) {
     return (
       <div>
-        <Header showDashboard />
+        <Header />
         <main className="max-w-[1180px] mx-auto px-6 flex items-center justify-center min-h-[60vh]">
           <div className="text-cocoa/40 text-sm">Cargando vecinos...</div>
         </main>
@@ -89,7 +89,7 @@ export default function AdminPage() {
 
   return (
     <div className="page-in">
-      <Header showDashboard />
+      <Header />
 
       <main className="max-w-[1180px] mx-auto px-6 flex flex-col gap-[22px] pb-10">
         {/* Greeting */}

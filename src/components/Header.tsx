@@ -1,34 +1,31 @@
 import { useState, useEffect, useRef } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuthStore } from '../store/auth';
+import Icon from './Icon';
 import SelfPasswordModal from './SelfPasswordModal';
 
 interface HeaderProps {
   showAdmin?: boolean;
-  showDashboard?: boolean;
 }
 
-const NAV_ITEMS = [
-  { label: 'En vivo', target: 'envivo' },
-  { label: 'Calefacción', target: 'calor' },
-  { label: 'Refrigeración', target: 'frio' },
-  { label: 'ACS', target: 'acs' },
-  { label: 'Facturas', target: 'facturas' },
+const PAGE_NAV = [
+  { label: 'Inicio', path: '/inicio' },
+  { label: 'Aerotermia', path: '/aerotermia' },
+  { label: 'Juntas', path: '/juntas' },
+  { label: 'Contactos', path: '/contactos' },
 ];
 
-export default function Header({ showAdmin, showDashboard }: HeaderProps) {
+export default function Header({ showAdmin }: HeaderProps) {
   const { user, logout } = useAuthStore();
   const navigate = useNavigate();
+  const location = useLocation();
   const [open, setOpen] = useState(false);
+  const [mobileNavOpen, setMobileNavOpen] = useState(false);
   const [showPasswordModal, setShowPasswordModal] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
   const initials = (user?.vecino_piso || user?.email?.[0] || '?').substring(0, 2).toUpperCase();
-
-  const scrollTo = (id: string) => {
-    const el = document.getElementById(id);
-    if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
-  };
+  const isActive = (path: string) => location.pathname === path || (path === '/aerotermia' && location.pathname === '/dashboard');
 
   useEffect(() => {
     if (!open) return;
@@ -48,6 +45,19 @@ export default function Header({ showAdmin, showDashboard }: HeaderProps) {
     };
   }, [open]);
 
+  useEffect(() => {
+    setMobileNavOpen(false);
+  }, [location.pathname]);
+
+  useEffect(() => {
+    if (!mobileNavOpen) return;
+    const keyHandler = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setMobileNavOpen(false);
+    };
+    document.addEventListener('keydown', keyHandler);
+    return () => document.removeEventListener('keydown', keyHandler);
+  }, [mobileNavOpen]);
+
   const handleLogout = () => {
     logout();
     navigate('/login');
@@ -62,28 +72,35 @@ export default function Header({ showAdmin, showDashboard }: HeaderProps) {
         <img
           src="/images/elite/Logotipo PNG.png"
           alt="Edificio Elite"
-          className="h-8 w-auto"
+          className="h-8 w-auto cursor-pointer"
+          onClick={() => navigate('/inicio')}
         />
-        {NAV_ITEMS.map((item) => (
-          <button
-            key={item.target}
-            onClick={() => scrollTo(item.target)}
-            className="text-[11.5px] font-medium uppercase tracking-[0.05em] text-cocoa/40 hover:text-cocoa hover:bg-accent/8 px-2 py-1 rounded-md transition-colors hidden md:inline"
-          >
-            {item.label}
-          </button>
-        ))}
+
+        <nav className="hidden md:flex items-center gap-1">
+          {PAGE_NAV.map((item) => (
+            <button
+              key={item.path}
+              onClick={() => navigate(item.path)}
+              className={`text-[11.5px] font-medium uppercase tracking-[0.05em] hover:text-cocoa hover:bg-accent/8 px-2 py-1 rounded-md transition-colors ${isActive(item.path) ? 'text-cocoa bg-accent/12' : 'text-cocoa/40'}`}
+            >
+              {item.label}
+            </button>
+          ))}
+        </nav>
       </div>
 
       <div className="flex items-center gap-3">
+        <button
+          onClick={() => setMobileNavOpen(true)}
+          className="md:hidden btn btn-ghost p-2 text-cocoa/40 hover:text-cocoa"
+          aria-label="Abrir menu"
+        >
+          <Icon name="menu" size={18} />
+        </button>
+
         {showAdmin && user?.is_admin && (
           <button onClick={() => navigate('/admin')} className="btn btn-ghost text-xs">
             Admin
-          </button>
-        )}
-        {showDashboard && (
-          <button onClick={() => navigate('/dashboard')} className="btn btn-ghost text-xs">
-            Mi dashboard
           </button>
         )}
 
@@ -125,6 +142,37 @@ export default function Header({ showAdmin, showDashboard }: HeaderProps) {
           )}
         </div>
       </div>
+
+      {mobileNavOpen && (
+        <div className="fixed inset-0 z-[70] flex flex-col" style={{ background: 'rgba(58,47,36,0.4)', backdropFilter: 'blur(12px)' }} onClick={() => setMobileNavOpen(false)}>
+          <div
+            className="ml-auto m-4 glass p-6 w-[260px] flex flex-col gap-1"
+            onClick={(e) => e.stopPropagation()}
+            style={{ borderRadius: 'var(--radius-lg)' }}
+          >
+            <div className="flex items-center justify-between mb-3">
+              <span className="eyebrow">Menu</span>
+              <button
+                onClick={() => setMobileNavOpen(false)}
+                className="btn btn-ghost p-2 text-cocoa/40 hover:text-cocoa"
+                aria-label="Cerrar menu"
+              >
+                <Icon name="x" size={16} />
+              </button>
+            </div>
+            {PAGE_NAV.map((item) => (
+              <button
+                key={item.path}
+                onClick={() => { navigate(item.path); setMobileNavOpen(false); }}
+                className={`w-full text-left px-3 py-2.5 text-[14px] font-medium rounded-lg transition-colors ${isActive(item.path) ? 'text-cocoa bg-accent/12' : 'text-cocoa/60 hover:text-cocoa hover:bg-accent/6'}`}
+              >
+                {item.label}
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+
       {showPasswordModal && <SelfPasswordModal onClose={() => setShowPasswordModal(false)} />}
     </header>
   );
