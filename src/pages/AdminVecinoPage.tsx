@@ -73,7 +73,7 @@ export default function AdminVecinoPage() {
   if (loading) {
     return (
       <div>
-        <Header showDashboard />
+        <Header />
         <main className="max-w-[1180px] mx-auto px-6 flex items-center justify-center min-h-[60vh]">
           <div className="text-cocoa/40 text-sm">Cargando datos del vecino...</div>
         </main>
@@ -83,7 +83,7 @@ export default function AdminVecinoPage() {
 
   return (
     <div className="page-in">
-      <Header showDashboard />
+      <Header />
 
       <main className="max-w-[1180px] mx-auto px-6 flex flex-col gap-[22px] pb-10">
         {/* Back + Greeting */}

@@ -1,6 +1,7 @@
 import { Router, Request, Response } from 'express';
 import { query } from '../db';
 import { authMiddleware } from '../middleware/auth';
+import { logger } from '../lib/logger';
 
 const router = Router();
 
@@ -60,7 +61,7 @@ router.get('/consumos', authMiddleware, async (req: Request, res: Response) => {
     const result = await query(sql, params);
     res.json(result.rows);
   } catch (err) {
-    console.error('Consumos error:', err);
+    logger.error(err, 'Consumos error');
     res.status(500).json({ error: 'Error interno del servidor' });
   }
 });
@@ -129,7 +130,7 @@ router.get('/consumo-actual', authMiddleware, async (req: Request, res: Response
 
     res.json(result.rows[0]);
   } catch (err) {
-    console.error('Consumo actual error:', err);
+    logger.error(err, 'Consumo actual error');
     res.status(500).json({ error: 'Error interno del servidor' });
   }
 });

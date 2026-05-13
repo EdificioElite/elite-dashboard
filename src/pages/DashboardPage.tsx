@@ -38,6 +38,14 @@ interface Factura {
   importe_acs: number;
 }
 
+const SECTION_NAV = [
+  { label: 'En vivo', target: 'envivo' },
+  { label: 'Calefacción', target: 'calor' },
+  { label: 'Refrigeración', target: 'frio' },
+  { label: 'ACS', target: 'acs' },
+  { label: 'Facturas', target: 'facturas' },
+];
+
 export default function DashboardPage() {
   const { user } = useAuthStore();
   const [consumoActual, setConsumoActual] = useState<Consumo | null>(null);
@@ -46,6 +54,11 @@ export default function DashboardPage() {
 
   const { saludo } = greeting();
   const nombre = user?.vecino_piso || user?.email?.split('@')[0] || 'vecino';
+
+  const scrollTo = (id: string) => {
+    const el = document.getElementById(id);
+    if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  };
 
   useEffect(() => {
     async function fetchData() {
@@ -82,10 +95,22 @@ export default function DashboardPage() {
 
       <main className="max-w-[1180px] mx-auto px-6 flex flex-col gap-[22px] pb-10">
         <div className="pt-2">
-          <p className="eyebrow">Dashboard</p>
+          <p className="eyebrow">Servicios</p>
           <h1 className="font-display text-[40px] font-medium text-cocoa mt-1" style={{ letterSpacing: '-0.02em' }}>
             {saludo}, {nombre}.
           </h1>
+        </div>
+
+        <div className="flex items-center gap-2 flex-wrap">
+          {SECTION_NAV.map((item) => (
+            <button
+              key={item.target}
+              onClick={() => scrollTo(item.target)}
+              className="text-[11px] font-medium uppercase tracking-[0.05em] text-cocoa/40 hover:text-cocoa hover:bg-accent/8 px-2.5 py-1.5 rounded-md transition-colors"
+            >
+              {item.label}
+            </button>
+          ))}
         </div>
 
         <div className="stagger flex flex-col gap-[22px]">

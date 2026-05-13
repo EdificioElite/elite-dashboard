@@ -5,7 +5,7 @@ export async function loginAs(page: Page, email: string, password: string) {
   await page.fill('input[type="email"]', email);
   await page.fill('input[type="password"]', password);
   await page.click('button[type="submit"]');
-  await page.waitForURL(/\/(dashboard|admin)/);
+  await page.waitForURL(/\/(dashboard|admin|aerotermia|inicio)/);
 }
 
 export async function loginAsAdmin(page: Page) {
