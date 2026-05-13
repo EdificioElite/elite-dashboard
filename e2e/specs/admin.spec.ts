@@ -136,6 +136,6 @@ test.describe('Admin', () => {
   test('non-admin cannot access /admin', async ({ page }) => {
     await loginAsVecino(page);
     await page.goto('/admin');
-    await expect(page).toHaveURL('/dashboard');
+    await expect(page).toHaveURL('/inicio');
   });
 });
