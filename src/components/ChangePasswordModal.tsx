@@ -56,7 +56,7 @@ export default function ChangePasswordModal({ userId, userName, onClose, onSaved
               </div>
               <span className="eyebrow">Cambiar contrasena</span>
             </div>
-            <button onClick={onClose} className="btn btn-ghost p-2 text-cocoa/40 hover:text-cocoa">
+            <button onClick={onClose} className="btn btn-ghost p-2 text-cocoa/40 hover:text-cocoa" aria-label="Cerrar">
               <Icon name="x" size={16} />
             </button>
           </div>
