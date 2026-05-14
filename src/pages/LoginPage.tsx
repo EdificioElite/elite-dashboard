@@ -1,5 +1,5 @@
 import { useState, FormEvent } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { useAuthStore } from '../store/auth';
 
 export default function LoginPage() {
@@ -114,6 +114,11 @@ export default function LoginPage() {
           </button>
         </form>
 
+        <div className="mt-5 text-center">
+          <Link to="/recuperar-contrasena" className="text-sm text-accent hover:underline">
+            ¿Olvidaste tu contrasena?
+          </Link>
+        </div>
 
       </div>
     </div>

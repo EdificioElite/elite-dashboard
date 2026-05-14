@@ -13,6 +13,7 @@ interface Vecino {
   nombre: string;
   user_id: number | null;
   email: string | null;
+  vecino_email: string | null;
   is_admin: boolean;
 }
 
@@ -33,6 +34,7 @@ export default function AdminPage() {
   const [editingVecino, setEditingVecino] = useState<Vecino | null>(null);
   const [changingPassword, setChangingPassword] = useState<Vecino | null>(null);
   const [deletingVecino, setDeletingVecino] = useState<Vecino | null>(null);
+  const [inviteMessage, setInviteMessage] = useState('');
 
   useEffect(() => {
     apiFetch<Vecino[]>('/admin/vecinos')
@@ -59,6 +61,19 @@ export default function AdminPage() {
       setVecinos(updated);
     } catch (err: any) {
       setFormError(err.message || 'Error al crear usuario');
+    }
+  };
+
+  const handleInvite = async (piso: string) => {
+    setInviteMessage('');
+    try {
+      await apiFetch('/admin/invitar', {
+        method: 'POST',
+        body: JSON.stringify({ piso }),
+      });
+      setInviteMessage('Invitacion enviada correctamente');
+    } catch (err: any) {
+      setInviteMessage(err.message || 'Error al enviar invitacion');
     }
   };
 
@@ -116,6 +131,12 @@ export default function AdminPage() {
         </div>
 
         <div className="stagger flex flex-col gap-[22px]">
+          {inviteMessage && (
+            <div className="mb-4 px-4 py-3 rounded-xl text-sm" style={{ background: 'rgba(91,122,74,.1)', color: '#5b7a4a' }}>
+              {inviteMessage}
+            </div>
+          )}
+
           {/* Stats */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-[16px]">
             {stats.map((s) => (
@@ -279,7 +300,19 @@ export default function AdminPage() {
                       </td>
                       <td>
                         <div className="flex items-center justify-center gap-1">
-                          {v.email ? (
+                          {!v.user_id ? (
+                            v.vecino_email ? (
+                              <button
+                                onClick={() => handleInvite(v.piso)}
+                                className="btn btn-ghost p-2 text-accent hover:text-accent/80"
+                                title="Enviar invitacion"
+                              >
+                                <Icon name="mail" size={15} />
+                              </button>
+                            ) : (
+                              <span className="text-[11px] text-cocoa/25">Sin email</span>
+                            )
+                          ) : (
                             <>
                               <button
                                 onClick={() => setEditingVecino(v)}
@@ -305,8 +338,6 @@ export default function AdminPage() {
                                 </button>
                               )}
                             </>
-                          ) : (
-                            <span className="text-[11px] text-cocoa/25">—</span>
                           )}
                         </div>
                       </td>
