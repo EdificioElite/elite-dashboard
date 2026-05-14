@@ -10,21 +10,22 @@ export default function ResetPasswordPage() {
   const [password, setPassword] = useState('');
   const [confirm, setConfirm] = useState('');
   const [error, setError] = useState('');
+  const [tokenError, setTokenError] = useState('');
   const [success, setSuccess] = useState(false);
   const [loading, setLoading] = useState(false);
   const [verifying, setVerifying] = useState(true);
 
   useEffect(() => {
     if (!token) {
-      setError('Enlace invalido');
+      setTokenError('Enlace invalido');
       setVerifying(false);
       return;
     }
     verifyToken(token)
       .then((data) => {
-        if (data.type !== 'reset') setError('Enlace invalido');
+        if (data.type !== 'reset') setTokenError('Enlace invalido');
       })
-      .catch(() => setError('Enlace invalido o expirado'))
+      .catch(() => setTokenError('Enlace invalido o expirado'))
       .finally(() => setVerifying(false));
   }, [token]);
 
@@ -54,11 +55,16 @@ export default function ResetPasswordPage() {
     );
   }
 
-  if (error && !success) {
+  if (tokenError) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-cream">
         <div className="glass p-8 w-full max-w-[380px] text-center">
-          <div className="text-rise text-sm mb-4">{error}</div>
+          <div className="text-rise text-sm mb-4 flex items-center justify-center gap-2">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+              <circle cx="12" cy="12" r="10"/><path d="M12 8v4"/><path d="M12 16h.01"/>
+            </svg>
+            {tokenError}
+          </div>
           <Link to="/login" className="text-accent hover:underline text-sm">Volver al login</Link>
         </div>
       </div>
@@ -83,7 +89,7 @@ export default function ResetPasswordPage() {
           </div>
         ) : (
           <form onSubmit={handleSubmit} className="space-y-4">
-            {error && <div className="mb-5 px-4 py-3 rounded-xl text-sm flex items-center gap-2 text-rise" style={{ background: 'rgba(163,64,42,.08)' }}>{error}</div>}
+            {error && <div className="mb-5 px-4 py-3 rounded-xl text-sm flex items-center gap-2 text-rise" style={{ background: 'rgba(163,64,42,.08)' }}><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M12 8v4"/><path d="M12 16h.01"/></svg>{error}</div>}
             <div>
               <label htmlFor="password" className="block text-xs font-semibold uppercase tracking-wider text-cocoa/40 mb-1.5 ml-1">Nueva contrasena</label>
               <input id="password" type="password" value={password} onChange={(e) => setPassword(e.target.value)} required minLength={8} className="input-card" placeholder="••••••••" autoComplete="new-password" />

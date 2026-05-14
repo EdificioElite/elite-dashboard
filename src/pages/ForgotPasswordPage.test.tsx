@@ -31,4 +31,14 @@ describe('ForgotPasswordPage', () => {
       expect(screen.getByText(/recibiras un enlace/i)).toBeInTheDocument();
     });
   });
+
+  it('shows error when API rejects', async () => {
+    mockForgotPassword.mockRejectedValueOnce(new Error('API error'));
+    render(<MemoryRouter><ForgotPasswordPage /></MemoryRouter>);
+    await userEvent.type(screen.getByLabelText('Email'), 'a@a.com');
+    await userEvent.click(screen.getByRole('button', { name: 'Enviar enlace' }));
+    await waitFor(() => {
+      expect(screen.getByText('API error')).toBeInTheDocument();
+    });
+  });
 });
