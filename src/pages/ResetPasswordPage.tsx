@@ -1,11 +1,10 @@
 import { useState, useEffect, FormEvent } from 'react';
-import { useSearchParams, useNavigate, Link } from 'react-router-dom';
+import { useSearchParams, Link } from 'react-router-dom';
 import { verifyToken, resetPassword } from '../api/client';
 
 export default function ResetPasswordPage() {
   const [searchParams] = useSearchParams();
   const token = searchParams.get('token') || '';
-  const navigate = useNavigate();
 
   const [password, setPassword] = useState('');
   const [confirm, setConfirm] = useState('');

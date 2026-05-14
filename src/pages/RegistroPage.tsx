@@ -29,7 +29,7 @@ export default function RegistroPage() {
           setError('Enlace de registro invalido');
         } else {
           setEmail(data.email);
-          setPiso(data.piso);
+          setPiso(data.piso || '');
         }
       })
       .catch(() => setError('Enlace de registro invalido o expirado'))
