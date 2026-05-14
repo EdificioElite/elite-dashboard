@@ -35,6 +35,7 @@ export default function AdminPage() {
   const [changingPassword, setChangingPassword] = useState<Vecino | null>(null);
   const [deletingVecino, setDeletingVecino] = useState<Vecino | null>(null);
   const [inviteMessage, setInviteMessage] = useState('');
+  const [inviteError, setInviteError] = useState(false);
 
   useEffect(() => {
     apiFetch<Vecino[]>('/admin/vecinos')
@@ -66,14 +67,17 @@ export default function AdminPage() {
 
   const handleInvite = async (piso: string) => {
     setInviteMessage('');
+    setInviteError(false);
     try {
       await apiFetch('/admin/invitar', {
         method: 'POST',
         body: JSON.stringify({ piso }),
       });
       setInviteMessage('Invitacion enviada correctamente');
+      setInviteError(false);
     } catch (err: any) {
       setInviteMessage(err.message || 'Error al enviar invitacion');
+      setInviteError(true);
     }
   };
 
@@ -132,7 +136,15 @@ export default function AdminPage() {
 
         <div className="stagger flex flex-col gap-[22px]">
           {inviteMessage && (
-            <div className="mb-4 px-4 py-3 rounded-xl text-sm" style={{ background: 'rgba(91,122,74,.1)', color: '#5b7a4a' }}>
+            <div
+              className="mb-4 px-4 py-3 rounded-xl text-sm flex items-center gap-2"
+              style={
+                inviteError
+                  ? { background: 'rgba(163,64,42,.08)', color: '#a3402a' }
+                  : { background: 'rgba(91,122,74,.1)', color: '#5b7a4a' }
+              }
+            >
+              <Icon name={inviteError ? 'alertTriangle' : 'check'} size={14} />
               {inviteMessage}
             </div>
           )}
