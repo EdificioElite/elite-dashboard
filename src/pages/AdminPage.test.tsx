@@ -4,13 +4,11 @@ import { MemoryRouter } from 'react-router-dom';
 import AdminPage from './AdminPage';
 
 vi.mock('../store/auth', () => ({
-  useAuthStore: vi.fn((selector?: string) => {
+  useAuthStore: vi.fn((selector) => {
     const state = {
       user: { id: 1, vecinoPiso: '1A', email: 'admin@elite.com', isAdmin: true },
     };
-    if (selector === 'user') return state.user;
-    if (typeof selector === 'function') return selector(state);
-    return state;
+    return selector ? selector(state) : state;
   }),
 }));
 
