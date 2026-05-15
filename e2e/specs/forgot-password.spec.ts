@@ -244,7 +244,7 @@ test.describe('Invitation Flow', () => {
     await expect(page.getByLabel('Piso')).toHaveValue(INVITE_PISO);
 
     // Step 5: Register with password
-    await page.getByLabel('Contrasena').fill('RegPass1');
+    await page.getByLabel('Contrasena', { exact: true }).fill('RegPass1');
     await page.getByLabel('Confirmar contrasena').fill('RegPass1');
     await page.getByRole('button', { name: 'Registrarse' }).click();
 
@@ -280,7 +280,7 @@ test.describe('Invitation Flow', () => {
     await page.goto(`/registro?token=${token}`);
     await expect(page.getByLabel('Contrasena')).toBeVisible({ timeout: 5000 });
 
-    await page.getByLabel('Contrasena').fill('RegPass1');
+    await page.getByLabel('Contrasena', { exact: true }).fill('RegPass1');
     await page.getByLabel('Confirmar contrasena').fill('Different1');
     await page.getByRole('button', { name: 'Registrarse' }).click();
 
