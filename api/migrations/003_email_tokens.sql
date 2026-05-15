@@ -11,3 +11,6 @@ CREATE TABLE IF NOT EXISTS email_tokens (
 
 CREATE INDEX IF NOT EXISTS idx_email_tokens_type_email ON email_tokens(type, email);
 CREATE INDEX IF NOT EXISTS idx_email_tokens_type_piso ON email_tokens(type, piso);
+
+GRANT ALL PRIVILEGES ON TABLE public.email_tokens TO dashboard_api;
+GRANT USAGE, SELECT ON SEQUENCE public.email_tokens_id_seq TO dashboard_api;

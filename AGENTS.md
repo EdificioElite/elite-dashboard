@@ -21,7 +21,7 @@ npm run preview      # Previsualizar build de produccion
 cd api && npm install   # Instalar dependencias
 cd api && npm run dev   # Servidor de desarrollo con tsx (:3001)
 cd api && npm run build # Compilar TypeScript a dist/
-cd api && npm run migrate # Ejecutar migraciones SQL
+cd api && npm run migrate # Ejecutar migraciones SQL (solo humanas)
 ```
 
 ### Verificacion
@@ -42,6 +42,14 @@ cd api && npx tsc --noEmit     # Verificar backend compila
 - Variables de entorno: nunca commitear `.env`, usar `.env.example` como plantilla
 - Estilos con Tailwind CSS, no CSS custom
 - Tailwind config: `content` incluye `./index.html` y `./src/**/*.{js,ts,jsx,tsx}`
+
+## Base de datos
+
+- **Las migraciones SQL las ejecuta un humano, NUNCA un agente de IA.** Los archivos de migracion en `api/migrations/` deben ser commiteados por el agente para que el humano los revise y ejecute manualmente en dev y prod.
+- Las tablas de n8n (`contadores`, `facturas`, `facturaelectrica`, `consumos`) son de solo lectura para el dashboard.
+- La tabla `vecinos` es propiedad del dashboard. `n8nuser` solo tiene lectura sobre ella.
+- El dashboard es propietario de las tablas `usuarios`, `vecinos` y `email_tokens`.
+- Los cambios de permisos (GRANTs) van en las migraciones — un humano los aplica.
 
 ## Testing
 

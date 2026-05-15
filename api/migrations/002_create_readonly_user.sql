@@ -25,6 +25,9 @@ ALTER TABLE IF EXISTS public.usuarios OWNER TO dashboard_api;
 GRANT ALL PRIVILEGES ON TABLE public.usuarios TO dashboard_api;
 GRANT USAGE, SELECT ON SEQUENCE public.usuarios_id_seq TO dashboard_api;
 
+-- El dashboard necesita actualizar el email de vecinos para enviar invitaciones
+GRANT UPDATE (email) ON public.vecinos TO dashboard_api;
+
 -- Permisos por defecto para futuras tablas que cree dashboard_api
 ALTER DEFAULT PRIVILEGES FOR ROLE dashboard_api IN SCHEMA public
   GRANT ALL PRIVILEGES ON TABLES TO dashboard_api;
