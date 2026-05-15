@@ -86,7 +86,7 @@ jobs:
         run: |
           PR_URL=$(gh pr create \
             --title "Release v${{ steps.version.outputs.version }}" \
-            --body "PR automatizada de release v${{ steps.version.outputs.version }}.\n\nTipo: \`${{ inputs.version }}\`." \
+            --body $'PR automatizada de release v${{ steps.version.outputs.version }}.\n\nTipo: `${{ inputs.version }}`.' \
             --head dev \
             --base main)
 
