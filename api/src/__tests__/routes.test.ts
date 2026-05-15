@@ -915,6 +915,14 @@ describe('Admin routes', () => {
       expect(res.status).toBe(403);
     });
 
+    it('returns 401 without token', async () => {
+      const app = createApp();
+      const res = await request(app)
+        .put('/api/admin/vecinos/1A')
+        .send({ nombre: 'X' });
+      expect(res.status).toBe(401);
+    });
+
     it('returns 400 when no fields provided', async () => {
       const app = createApp();
       const res = await request(app)
@@ -959,6 +967,7 @@ describe('Admin routes', () => {
         .set('Authorization', `Bearer ${userToken(true)}`)
         .send({ coeficiente: '0.30' });
       expect(res.status).toBe(200);
+      expect(res.body.coeficiente).toBe('0.30');
     });
 
     it('updates vecino enviar_email for admin', async () => {
@@ -969,6 +978,7 @@ describe('Admin routes', () => {
         .set('Authorization', `Bearer ${userToken(true)}`)
         .send({ enviar_email: true });
       expect(res.status).toBe(200);
+      expect(res.body.enviar_email).toBe(true);
     });
 
     it('updates vecino device_identification for admin', async () => {
@@ -979,6 +989,7 @@ describe('Admin routes', () => {
         .set('Authorization', `Bearer ${userToken(true)}`)
         .send({ device_identification: 'DEVID99' });
       expect(res.status).toBe(200);
+      expect(res.body.device_identification).toBe('DEVID99');
     });
 
     it('updates vecino serial_number for admin', async () => {
@@ -989,6 +1000,7 @@ describe('Admin routes', () => {
         .set('Authorization', `Bearer ${userToken(true)}`)
         .send({ serial_number: '1234' });
       expect(res.status).toBe(200);
+      expect(res.body.serial_number).toBe('1234');
     });
 
     it('returns 404 when vecino not found', async () => {
