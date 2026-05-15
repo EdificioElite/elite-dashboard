@@ -1,4 +1,4 @@
-name: Release
+name: Publish
 
 on:
   push:
@@ -9,7 +9,7 @@ env:
   IMAGE_NAME: ${{ github.repository }}/api
 
 jobs:
-  release:
+  publish:
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -21,52 +21,12 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Extract PR number
-        id: pr
-        run: |
-          PR_NUMBER=$(echo "${{ github.event.head_commit.message }}" | grep -oP 'Merge pull request #\K\d+')
-          echo "number=${PR_NUMBER}" >> $GITHUB_OUTPUT
-          echo "PR number: ${PR_NUMBER}"
-
-      - name: Get PR labels and determine bump
-        id: labels
-        run: |
-          LABELS=$(gh pr view ${{ steps.pr.outputs.number }} --json labels --jq '.labels[].name')
-          echo "PR labels: ${LABELS}"
-          if echo "${LABELS}" | grep -q "major"; then
-            echo "bump=major" >> $GITHUB_OUTPUT
-          elif echo "${LABELS}" | grep -q "minor"; then
-            echo "bump=minor" >> $GITHUB_OUTPUT
-          else
-            echo "bump=patch" >> $GITHUB_OUTPUT
-          fi
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Compute next version from tags
+      - name: Read version from package.json
         id: version
         run: |
-          LAST_TAG=$(git tag --sort=-v:refname | grep -E '^v[0-9]+\.[0-9]+\.[0-9]+$' | head -1)
-          if [ -z "${LAST_TAG}" ]; then
-            LAST_TAG="v0.0.0"
-          fi
-          echo "Last tag: ${LAST_TAG}"
-
-          MAJOR=$(echo "${LAST_TAG}" | sed 's/v//' | cut -d. -f1)
-          MINOR=$(echo "${LAST_TAG}" | sed 's/v//' | cut -d. -f2)
-          PATCH=$(echo "${LAST_TAG}" | sed 's/v//' | cut -d. -f3)
-
-          BUMP="${{ steps.labels.outputs.bump }}"
-          case "${BUMP}" in
-            major) MAJOR=$((MAJOR + 1)); MINOR=0; PATCH=0 ;;
-            minor) MINOR=$((MINOR + 1)); PATCH=0 ;;
-            patch|*) PATCH=$((PATCH + 1)) ;;
-          esac
-
-          NEW_VERSION="${MAJOR}.${MINOR}.${PATCH}"
-          echo "New version: ${NEW_VERSION}"
-
-          echo "version=${NEW_VERSION}" >> $GITHUB_OUTPUT
+          VERSION=$(jq -r '.version' package.json)
+          echo "Version: ${VERSION}"
+          echo "version=${VERSION}" >> $GITHUB_OUTPUT
 
       - name: Create GitHub Release
         run: |
