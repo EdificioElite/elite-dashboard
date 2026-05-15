@@ -15,4 +15,8 @@ export const config = {
         return trimmed;
       })
     : 'http://localhost:5173',
+  smtpUser: process.env.SMTP_USER || '',
+  smtpPass: process.env.SMTP_PASS || '',
+  frontendUrl: process.env.FRONTEND_URL || 'http://localhost:5173',
+  mockEmail: process.env.MOCK_EMAIL === 'true',
 };
