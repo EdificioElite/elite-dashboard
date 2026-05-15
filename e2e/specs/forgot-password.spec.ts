@@ -248,8 +248,8 @@ test.describe('Invitation Flow', () => {
     await page.getByLabel('Confirmar contrasena').fill('RegPass1');
     await page.getByRole('button', { name: 'Registrarse' }).click();
 
-    // Step 6: Verify redirect to inicio
-    await page.waitForURL('/inicio', { timeout: 10000 });
+    // Step 6: Verify redirect to inicio (use regex to handle possible URL variations)
+    await page.waitForURL(/\/inicio/, { timeout: 10000 });
     await expect(page.getByText(/Bienvenido/i)).toBeVisible({ timeout: 5000 });
 
     // Step 7: Logout

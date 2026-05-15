@@ -53,7 +53,7 @@ export const useAuthStore = create<AuthState>((set) => ({
   },
 
   registerFromInvite: async (token: string, password: string) => {
-    const data = await apiFetch<{ token: string; user: User }>('/auth/register-invite', {
+    const data = await apiFetch<{ token: string; user: User }>('/auth/register', {
       method: 'POST',
       body: JSON.stringify({ token, password }),
     });
