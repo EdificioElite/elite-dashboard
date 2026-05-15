@@ -110,30 +110,6 @@ jobs:
 
           gh pr merge "${PR_NUMBER}" --auto --merge
 
-      - name: Wait for CI on release branch
-        if: steps.check.outputs.commits_ahead != '0'
-        run: |
-          BRANCH="${{ steps.branch.outputs.branch }}"
-          echo "Esperando CI trigger por push a ${BRANCH}..."
-          for i in $(seq 1 60); do
-            sleep 10
-            CONCLUSION=$(gh run list --branch "${BRANCH}" --workflow CI --limit 1 --json conclusion,status --jq '.[0].conclusion // "waiting"')
-            echo "  Intento $i/60: CI estado = ${CONCLUSION}"
-            case "${CONCLUSION}" in
-              success)
-                echo "CI paso en ${BRANCH}"
-                exit 0
-                ;;
-              failure|cancelled|skipped)
-                echo "CI fallo en ${BRANCH}: ${CONCLUSION}. Cerrando PR #${{ steps.dev_pr.outputs.number }}"
-                gh pr close "${{ steps.dev_pr.outputs.number }}" --comment "CI fallo en ${BRANCH}. Release cancelado."
-                exit 1
-                ;;
-            esac
-          done
-          echo "Timeout esperando CI en ${BRANCH}"
-          exit 1
-
       - name: Wait for dev PR to merge
         if: steps.check.outputs.commits_ahead != '0'
         run: |

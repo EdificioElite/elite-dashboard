@@ -9,3 +9,4 @@ api/.env
 docs/n8n-database.md
 e2e/test-results/
 .superpowers/
+.worktrees/
