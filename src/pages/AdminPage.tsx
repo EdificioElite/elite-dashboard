@@ -36,6 +36,8 @@ export default function AdminPage() {
   const [deletingVecino, setDeletingVecino] = useState<Vecino | null>(null);
   const [inviteMessage, setInviteMessage] = useState('');
   const [inviteError, setInviteError] = useState(false);
+  const [editingVecinoEmail, setEditingVecinoEmail] = useState<string | null>(null);
+  const [editingVecinoEmailValue, setEditingVecinoEmailValue] = useState('');
 
   useEffect(() => {
     apiFetch<Vecino[]>('/admin/vecinos')
@@ -74,10 +76,24 @@ export default function AdminPage() {
         body: JSON.stringify({ piso }),
       });
       setInviteMessage('Invitacion enviada correctamente');
-      setInviteError(false);
     } catch (err: any) {
       setInviteMessage(err.message || 'Error al enviar invitacion');
       setInviteError(true);
+    }
+  };
+
+  const handleSaveVecinoEmail = async () => {
+    if (!editingVecinoEmail || !editingVecinoEmailValue) return;
+    try {
+      await apiFetch(`/admin/vecinos/${editingVecinoEmail}`, {
+        method: 'PUT',
+        body: JSON.stringify({ email: editingVecinoEmailValue }),
+      });
+      setEditingVecinoEmail(null);
+      const updated = await apiFetch<Vecino[]>('/admin/vecinos');
+      setVecinos(updated);
+    } catch (err: any) {
+      alert(err.message || 'Error al guardar email');
     }
   };
 
@@ -312,18 +328,43 @@ export default function AdminPage() {
                       </td>
                       <td>
                         <div className="flex items-center justify-center gap-1">
-                          {!v.user_id ? (
-                            v.vecino_email ? (
-                              <button
-                                onClick={() => handleInvite(v.piso)}
-                                className="btn btn-ghost p-2 text-accent hover:text-accent/80"
-                                title="Enviar invitacion"
-                              >
-                                <Icon name="mail" size={15} />
-                              </button>
-                            ) : (
-                              <span className="text-[11px] text-cocoa/25">Sin email</span>
-                            )
+                           {!v.user_id ? (
+                             v.vecino_email ? (
+                               <button
+                                 onClick={() => handleInvite(v.piso)}
+                                 className="btn btn-ghost p-2 text-accent hover:text-accent/80"
+                                 title="Enviar invitacion"
+                               >
+                                 <Icon name="mail" size={15} />
+                               </button>
+                             ) : (
+                               editingVecinoEmail === v.piso ? (
+                                 <span className="flex items-center gap-1">
+                                   <input
+                                     type="email"
+                                     value={editingVecinoEmailValue}
+                                     onChange={(e) => setEditingVecinoEmailValue(e.target.value)}
+                                     onKeyDown={(e) => { if (e.key === 'Enter') handleSaveVecinoEmail(); if (e.key === 'Escape') setEditingVecinoEmail(null); }}
+                                     className="input-card text-xs py-0.5 px-1.5 w-32"
+                                     placeholder="email..."
+                                     autoFocus
+                                   />
+                                   <button onClick={handleSaveVecinoEmail} className="btn btn-ghost p-1 text-sage" title="Guardar"><Icon name="check" size={12} /></button>
+                                   <button onClick={() => setEditingVecinoEmail(null)} className="btn btn-ghost p-1 text-rise" title="Cancelar"><Icon name="x" size={12} /></button>
+                                 </span>
+                               ) : (
+                                 <span className="text-[11px] text-cocoa/25">
+                                   Sin email{' '}
+                                   <button
+                                     onClick={() => { setEditingVecinoEmail(v.piso); setEditingVecinoEmailValue(''); }}
+                                     className="btn btn-ghost p-1 -m-1 text-cocoa/40 hover:text-accent inline-flex align-middle"
+                                     title="Asignar email"
+                                   >
+                                     <Icon name="edit" size={12} />
+                                   </button>
+                                 </span>
+                               )
+                             )
                           ) : (
                             <>
                               <button

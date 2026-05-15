@@ -25,6 +25,29 @@ router.get('/admin/vecinos', authMiddleware, adminMiddleware, async (_req: Reque
   }
 });
 
+router.put('/admin/vecinos/:piso', authMiddleware, adminMiddleware, async (req: Request, res: Response) => {
+  try {
+    const { piso } = req.params;
+    const { email } = req.body;
+    if (!email) {
+      res.status(400).json({ error: 'Email requerido' });
+      return;
+    }
+    const result = await query(
+      `UPDATE vecinos SET email = $1 WHERE piso = $2 RETURNING piso, email`,
+      [email, piso]
+    );
+    if (result.rows.length === 0) {
+      res.status(404).json({ error: 'Vecino no encontrado' });
+      return;
+    }
+    res.json(result.rows[0]);
+  } catch (err) {
+    logger.error(err, 'Admin update vecino error');
+    res.status(500).json({ error: 'Error interno del servidor' });
+  }
+});
+
 router.get('/admin/vecinos/:piso', authMiddleware, adminMiddleware, async (req: Request, res: Response) => {
   try {
     const { piso } = req.params;
