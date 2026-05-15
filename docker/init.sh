@@ -22,9 +22,15 @@ node -e "
   const fs = require('fs');
   const pool = new Pool({ connectionString: process.env.DATABASE_URL });
   const files = fs.readdirSync('/app/migrations').filter(f => f.endsWith('.sql')).sort();
-  pool.query(fs.readFileSync('/app/migrations/' + files[0], 'utf-8'))
-    .then(() => { console.log('usuarios table created'); return pool.end(); })
-    .catch(e => { console.error(e); process.exit(1); });
+  async function run() {
+    for (const file of files) {
+      await pool.query(fs.readFileSync('/app/migrations/' + file, 'utf-8'));
+      console.log('Migration executed: ' + file);
+    }
+    await pool.end();
+    console.log('All migrations complete');
+  }
+  run().catch(e => { console.error(e); process.exit(1); });
 "
 
 echo "Running user seed..."

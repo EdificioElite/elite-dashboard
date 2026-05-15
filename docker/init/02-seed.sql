@@ -6,7 +6,7 @@ INSERT INTO vecinos (piso, serial_number, device_identification, nombre, email, 
   ('3A', '10000003', 'DEVID003', 'Vecino 3A', 'vecino3a@elite.com', '0.20', false),
   ('4A', '10000004', 'DEVID004', 'Vecino 4A', 'vecino4a@elite.com', '0.20', false),
   ('5A', '10000005', 'DEVID005', 'Vecino 5A', 'vecino5a@elite.com', '0.20', false),
-  ('6A', '10000006', 'DEVID006', 'Vecino 6A', NULL, '0.20', false);
+  ('6A', '10000006', 'DEVID006', 'Vecino 6A', 'vecino6@elite.com', '0.20', false);
 
 INSERT INTO contadores (
   serial_number, device_identification, created, datetime_inst_value_0_0_0,
