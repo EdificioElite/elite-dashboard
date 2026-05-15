@@ -124,7 +124,7 @@ function validatePassword(password: string): string | null {
   return null;
 }
 
-router.get('/auth/verify-token', async (req: Request, res: Response) => {
+router.get('/auth/verify-token', rateLimit(30, 60 * 1000), async (req: Request, res: Response) => {
   try {
     const { token } = req.query;
     if (!token || typeof token !== 'string') {
