@@ -13,7 +13,7 @@ const mockStore = vi.mocked(useAuthStore);
 function renderHeader(initialRoute = '/inicio') {
   return render(
     <MemoryRouter initialEntries={[initialRoute]}>
-      <Header showAdmin />
+      <Header />
     </MemoryRouter>
   );
 }
