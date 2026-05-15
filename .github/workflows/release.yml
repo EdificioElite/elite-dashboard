@@ -18,7 +18,6 @@ jobs:
     permissions:
       contents: write
       pull-requests: write
-      actions: write
     env:
       GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     steps:
@@ -86,34 +85,15 @@ jobs:
           git push origin "${BRANCH}"
           echo "branch=${BRANCH}" >> $GITHUB_OUTPUT
 
-      - name: Create PR release branch → dev
-        if: steps.check.outputs.commits_ahead != '0'
-        id: dev_pr
-        run: |
-          PR_URL=$(gh pr create \
-            --title "chore: bump version to v${{ steps.version.outputs.version }}" \
-            --body "Actualiza version en package.json a v${{ steps.version.outputs.version }} antes del release." \
-            --head "${{ steps.branch.outputs.branch }}" \
-            --base dev)
-
-          PR_NUMBER=$(echo "${PR_URL}" | grep -oP '\d+$')
-          echo "PR a dev creada: ${PR_URL}"
-          echo "number=${PR_NUMBER}" >> $GITHUB_OUTPUT
-
-      - name: Dispatch CI on release branch
-        if: steps.check.outputs.commits_ahead != '0'
-        run: |
-          gh workflow run CI --ref "${{ steps.branch.outputs.branch }}"
-          echo "CI despachado en ${{ steps.branch.outputs.branch }}"
-
       - name: Wait for CI on release branch
         if: steps.check.outputs.commits_ahead != '0'
         run: |
           BRANCH="${{ steps.branch.outputs.branch }}"
-          for i in $(seq 1 90); do
+          echo "Esperando CI trigger por push a ${BRANCH}..."
+          for i in $(seq 1 60); do
             sleep 10
             CONCLUSION=$(gh run list --branch "${BRANCH}" --workflow CI --limit 1 --json conclusion,status --jq '.[0].conclusion // "waiting"')
-            echo "  Intento $i/90: CI estado = ${CONCLUSION}"
+            echo "  Intento $i/60: CI estado = ${CONCLUSION}"
             case "${CONCLUSION}" in
               success)
                 echo "CI paso en ${BRANCH}"
@@ -128,35 +108,61 @@ jobs:
           echo "Timeout esperando CI en ${BRANCH}"
           exit 1
 
-      - name: Merge PR to dev
+      - name: Create PR release branch → dev and auto-merge
+        if: steps.check.outputs.commits_ahead != '0'
+        id: dev_pr
+        run: |
+          PR_URL=$(gh pr create \
+            --title "chore: bump version to v${{ steps.version.outputs.version }}" \
+            --body "Actualiza version en package.json a v${{ steps.version.outputs.version }} antes del release." \
+            --head "${{ steps.branch.outputs.branch }}" \
+            --base dev)
+
+          PR_NUMBER=$(echo "${PR_URL}" | grep -oP '\d+$')
+          echo "PR a dev creada: ${PR_URL}"
+          echo "number=${PR_NUMBER}" >> $GITHUB_OUTPUT
+
+          gh pr merge "${PR_NUMBER}" --auto --merge
+
+      - name: Wait for dev PR to merge
         if: steps.check.outputs.commits_ahead != '0'
         run: |
-          gh pr merge "${{ steps.dev_pr.outputs.number }}" --merge
+          for i in $(seq 1 30); do
+            STATE=$(gh pr view "${{ steps.dev_pr.outputs.number }}" --json state --jq '.state' 2>/dev/null || echo "OPEN")
+            echo "  Intento $i/30: estado PR dev = ${STATE}"
+            if [ "${STATE}" = "MERGED" ]; then
+              echo "PR a dev mergeada"
+              exit 0
+            fi
+            sleep 10
+          done
+          echo "Timeout esperando merge de PR a dev"
+          exit 1
 
       - name: Wait for dev push CI to complete
         if: steps.check.outputs.commits_ahead != '0'
         run: |
           git fetch origin dev
           DEV_SHA=$(git rev-parse origin/dev)
-          for i in $(seq 1 90); do
+          echo "Esperando CI en dev (${DEV_SHA})..."
+          for i in $(seq 1 60); do
             sleep 10
-            CONCLUSION=$(gh run list --branch dev --workflow CI --limit 1 --json conclusion,headSha --jq ".[0] | select(.headSha == \"${DEV_SHA}\") | .conclusion // \"waiting\"")
-            echo "  Intento $i/90: CI en dev = ${CONCLUSION}"
-            case "${CONCLUSION}" in
-              success)
-                echo "CI en dev paso"
-                exit 0
-                ;;
-              failure|cancelled|skipped)
-                echo "CI en dev fallo: ${CONCLUSION}"
-                exit 1
-                ;;
-            esac
+            RUN=$(gh run list --branch dev --workflow CI --limit 1 --json conclusion,headSha --jq '.[0]')
+            CONCLUSION=$(echo "${RUN}" | jq -r '.conclusion // "waiting"')
+            RUN_SHA=$(echo "${RUN}" | jq -r '.headSha // ""')
+            echo "  Intento $i/60: CI en dev = ${CONCLUSION} (SHA: ${RUN_SHA:0:7})"
+            if [ "${RUN_SHA}" = "${DEV_SHA}" ] && [ "${CONCLUSION}" = "success" ]; then
+              echo "CI en dev paso"
+              exit 0
+            elif [ "${CONCLUSION}" = "failure" ] || [ "${CONCLUSION}" = "cancelled" ]; then
+              echo "CI en dev fallo: ${CONCLUSION}"
+              exit 1
+            fi
           done
           echo "Timeout esperando CI en dev"
           exit 1
 
-      - name: Create release PR dev → main and merge
+      - name: Create release PR dev → main and auto-merge
         if: steps.check.outputs.commits_ahead != '0'
         run: |
           git fetch origin dev
@@ -169,7 +175,7 @@ jobs:
           PR_NUMBER=$(echo "${PR_URL}" | grep -oP '\d+$')
           echo "PR a main creada: ${PR_URL}"
 
-          gh pr merge "${PR_NUMBER}" --merge
+          gh pr merge "${PR_NUMBER}" --auto --merge
 
       - name: Nothing to promote
         if: steps.check.outputs.commits_ahead == '0'
