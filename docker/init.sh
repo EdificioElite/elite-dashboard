@@ -11,8 +11,16 @@ node -e "
   const fs = require('fs');
   const pool = new Pool({ connectionString: process.env.DATABASE_URL });
   pool.query(fs.readFileSync('/app/init/01-n8n-tables.sql', 'utf-8'))
-    .then(() => { console.log('n8n tables created'); return pool.query(fs.readFileSync('/app/init/02-seed.sql', 'utf-8')); })
-    .then(() => { console.log('Seed data inserted'); return pool.end(); })
+    .then(() => pool.query('SELECT COUNT(*) FROM vecinos'))
+    .then(res => {
+      if (parseInt(res.rows[0].count) > 0) {
+        console.log('Seed data already exists, skipping');
+        return pool.end();
+      }
+      console.log('Inserting seed data...');
+      return pool.query(fs.readFileSync('/app/init/02-seed.sql', 'utf-8'))
+        .then(() => { console.log('Seed data inserted'); return pool.end(); });
+    })
     .catch(e => { console.error(e); process.exit(1); });
 "
 

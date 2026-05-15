@@ -164,11 +164,11 @@ test.describe('Forgot Password Flow', () => {
     await page.goto(`/resetear-contrasena?token=${token}`);
     await expect(page.getByLabel('Nueva contrasena')).toBeVisible({ timeout: 5000 });
 
-    await page.getByLabel('Nueva contrasena').fill('short');
-    await page.getByLabel('Confirmar contrasena').fill('short');
+    await page.getByLabel('Nueva contrasena').fill('abcdefgh');
+    await page.getByLabel('Confirmar contrasena').fill('abcdefgh');
     await page.getByRole('button', { name: 'Guardar contrasena' }).click();
 
-    await expect(page.getByText(/8 caracteres/i)).toBeVisible({ timeout: 5000 });
+    await expect(page.getByText(/mayuscula/i)).toBeVisible({ timeout: 5000 });
   });
 });
 
