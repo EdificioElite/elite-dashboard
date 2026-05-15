@@ -73,7 +73,7 @@ export default function InicioPage() {
   if (loading) {
     return (
       <div>
-        <Header showAdmin />
+        <Header />
         <main className="max-w-[1180px] mx-auto px-6 flex items-center justify-center min-h-[60vh]">
           <div className="text-cocoa/40 text-sm">Cargando...</div>
         </main>
@@ -83,7 +83,7 @@ export default function InicioPage() {
 
   return (
     <div className="page-in">
-      <Header showAdmin />
+      <Header />
 
       <main className="max-w-[1180px] mx-auto px-6 flex flex-col gap-[22px] pb-10">
         <div className="pt-2">

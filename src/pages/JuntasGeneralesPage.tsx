@@ -19,7 +19,7 @@ const JUNTAS: Junta[] = [
 export default function JuntasGeneralesPage() {
   return (
     <div className="page-in">
-        <Header showAdmin />
+        <Header />
 
       <main className="max-w-[1180px] mx-auto px-6 flex flex-col gap-[22px] pb-10">
         <div className="pt-2">

@@ -21,7 +21,7 @@ npm run preview      # Previsualizar build de produccion
 cd api && npm install   # Instalar dependencias
 cd api && npm run dev   # Servidor de desarrollo con tsx (:3001)
 cd api && npm run build # Compilar TypeScript a dist/
-cd api && npm run migrate # Ejecutar migraciones SQL
+cd api && npm run migrate # Ejecutar migraciones SQL (solo humanas)
 ```
 
 ### Verificacion
@@ -42,6 +42,14 @@ cd api && npx tsc --noEmit     # Verificar backend compila
 - Variables de entorno: nunca commitear `.env`, usar `.env.example` como plantilla
 - Estilos con Tailwind CSS, no CSS custom
 - Tailwind config: `content` incluye `./index.html` y `./src/**/*.{js,ts,jsx,tsx}`
+
+## Base de datos
+
+- **Las migraciones SQL en los entornos reales (dev.edificioelite.com, www.edificioelite.com) las ejecuta un humano, NUNCA un agente de IA.** Los archivos de migracion en `api/migrations/` deben ser commiteados por el agente para que el humano los revise y ejecute manualmente en esos entornos. En docker-compose local o entorno de desarrollo local, el agente puede ejecutar migraciones sin problema.
+- Las tablas de n8n (`contadores`, `facturas`, `facturaelectrica`, `consumos`) son de solo lectura para el dashboard.
+- La tabla `vecinos` es propiedad del dashboard. `n8nuser` solo tiene lectura sobre ella.
+- El dashboard es propietario de las tablas `usuarios`, `vecinos` y `email_tokens`.
+- Los cambios de permisos (GRANTs) van en las migraciones — un humano los aplica.
 
 ## Testing
 
@@ -73,7 +81,8 @@ Ver [CONTRIBUTING.md](./CONTRIBUTING.md) para las reglas de ramas, PRs, entornos
 Como agente, ademas:
 - **Siempre trabajar en ramas** `feat/`, `fix/`, `docs/`, `chore/` desde `dev`
 - **Siempre crear PR** para mergear a `dev`. Nunca push directo a `dev` ni a `main`.
-- **Siempre revisar los comentarios de Copilot en el PR** y resolver los issues que señale antes de pedir review humana. Copilot revisa automaticamente cada PR y deja comentarios inline.
+- **Siempre verificar que la CI esta en verde** (`gh pr checks`) antes de pedir review humana. Si e2e, backend o frontend fallan, analizar los logs y corregir.
+- **Siempre revisar los comentarios de Copilot en el PR** y resolver los issues que señale. Copilot revisa automaticamente cada PR y deja comentarios inline (puede tardar unos minutos). Revisar Copilot despues de la CI, no antes.
 
 ## Debugging / Logs
 

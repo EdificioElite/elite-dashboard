@@ -13,7 +13,7 @@ const mockStore = vi.mocked(useAuthStore);
 function renderHeader(initialRoute = '/inicio') {
   return render(
     <MemoryRouter initialEntries={[initialRoute]}>
-      <Header showAdmin />
+      <Header />
     </MemoryRouter>
   );
 }
@@ -59,17 +59,17 @@ describe('Header', () => {
     expect(screen.getByText('Salir')).toBeInTheDocument();
   });
 
-  it('does not show Admin button when user is not admin', () => {
+  it('does not show admin nav when user is not admin', () => {
     renderHeader();
-    expect(screen.queryByText('Admin')).not.toBeInTheDocument();
+    expect(screen.queryByText('Vecinos')).not.toBeInTheDocument();
   });
 
-  it('shows Admin button when user is admin', () => {
+  it('shows admin nav when user is admin', () => {
     mockStore.mockReturnValue({
       user: { vecino_piso: '1A', email: 'admin@test.com', is_admin: true },
       logout: vi.fn(),
     });
     renderHeader();
-    expect(screen.getByText('Admin')).toBeInTheDocument();
+    expect(screen.getByText('Vecinos')).toBeInTheDocument();
   });
 });

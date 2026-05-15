@@ -655,6 +655,18 @@ describe('Admin routes', () => {
       expect(res.status).toBe(400);
       expect(res.body.error).toBe('El piso indicado no existe en el edificio');
     });
+
+    it('creates user without vecino_piso (global user)', async () => {
+      mockQuery.mockResolvedValueOnce({ rows: [{ id: 10, vecino_piso: null, email: 'gestor@elite.com', is_admin: true, created_at: new Date().toISOString() }] });
+      const app = createApp();
+      const res = await request(app)
+        .post('/api/admin/usuarios')
+        .set('Authorization', `Bearer ${userToken(true)}`)
+        .send({ email: 'gestor@elite.com', password: 'password123' });
+      expect(res.status).toBe(201);
+      expect(res.body.vecino_piso).toBeNull();
+      expect(res.body.email).toBe('gestor@elite.com');
+    });
   });
 
   describe('GET /api/admin/usuarios', () => {
@@ -898,6 +910,232 @@ describe('Admin routes', () => {
         .send({ piso: '2A' });
       expect(res.status).toBe(200);
       expect(res.body.message).toContain('Invitacion enviada');
+    });
+  });
+
+  describe('PUT /api/admin/vecinos/:piso', () => {
+    beforeEach(() => {
+      vi.resetAllMocks();
+    });
+
+    it('returns 403 for non-admin user', async () => {
+      const app = createApp();
+      const res = await request(app)
+        .put('/api/admin/vecinos/1A')
+        .set('Authorization', `Bearer ${userToken(false)}`)
+        .send({ nombre: 'Nuevo nombre' });
+      expect(res.status).toBe(403);
+    });
+
+    it('returns 401 without token', async () => {
+      const app = createApp();
+      const res = await request(app)
+        .put('/api/admin/vecinos/1A')
+        .send({ nombre: 'X' });
+      expect(res.status).toBe(401);
+    });
+
+    it('returns 400 when no fields provided', async () => {
+      const app = createApp();
+      const res = await request(app)
+        .put('/api/admin/vecinos/1A')
+        .set('Authorization', `Bearer ${userToken(true)}`)
+        .send({});
+      expect(res.status).toBe(400);
+      expect(res.body.error).toMatch(/campo/);
+    });
+
+    it('updates vecino nombre for admin', async () => {
+      mockQuery.mockResolvedValueOnce({ rows: [{ piso: '1A', nombre: 'Nuevo nombre', email: 'v@e.com' }] });
+      const app = createApp();
+      const res = await request(app)
+        .put('/api/admin/vecinos/1A')
+        .set('Authorization', `Bearer ${userToken(true)}`)
+        .send({ nombre: 'Nuevo nombre' });
+      expect(res.status).toBe(200);
+      expect(res.body.nombre).toBe('Nuevo nombre');
+      expect(mockQuery).toHaveBeenCalledWith(
+        expect.stringContaining('UPDATE vecinos'),
+        expect.arrayContaining(['Nuevo nombre', '1A'])
+      );
+    });
+
+    it('updates vecino email for admin', async () => {
+      mockQuery.mockResolvedValueOnce({ rows: [{ piso: '1A', nombre: 'V1', email: 'new@email.com' }] });
+      const app = createApp();
+      const res = await request(app)
+        .put('/api/admin/vecinos/1A')
+        .set('Authorization', `Bearer ${userToken(true)}`)
+        .send({ email: 'new@email.com' });
+      expect(res.status).toBe(200);
+      expect(res.body.email).toBe('new@email.com');
+    });
+
+    it('updates vecino coeficiente for admin', async () => {
+      mockQuery.mockResolvedValueOnce({ rows: [{ piso: '1A', nombre: 'V1', email: 'v@e.com', coeficiente: '0.30' }] });
+      const app = createApp();
+      const res = await request(app)
+        .put('/api/admin/vecinos/1A')
+        .set('Authorization', `Bearer ${userToken(true)}`)
+        .send({ coeficiente: '0.30' });
+      expect(res.status).toBe(200);
+      expect(res.body.coeficiente).toBe('0.30');
+    });
+
+    it('updates vecino enviar_email for admin', async () => {
+      mockQuery.mockResolvedValueOnce({ rows: [{ piso: '1A', nombre: 'V1', email: 'v@e.com', enviar_email: true }] });
+      const app = createApp();
+      const res = await request(app)
+        .put('/api/admin/vecinos/1A')
+        .set('Authorization', `Bearer ${userToken(true)}`)
+        .send({ enviar_email: true });
+      expect(res.status).toBe(200);
+      expect(res.body.enviar_email).toBe(true);
+    });
+
+    it('updates vecino device_identification for admin', async () => {
+      mockQuery.mockResolvedValueOnce({ rows: [{ piso: '1A', nombre: 'V1', email: 'v@e.com', device_identification: 'DEVID99' }] });
+      const app = createApp();
+      const res = await request(app)
+        .put('/api/admin/vecinos/1A')
+        .set('Authorization', `Bearer ${userToken(true)}`)
+        .send({ device_identification: 'DEVID99' });
+      expect(res.status).toBe(200);
+      expect(res.body.device_identification).toBe('DEVID99');
+    });
+
+    it('updates vecino serial_number for admin', async () => {
+      mockQuery.mockResolvedValueOnce({ rows: [{ piso: '1A', nombre: 'V1', email: 'v@e.com', serial_number: '1234' }] });
+      const app = createApp();
+      const res = await request(app)
+        .put('/api/admin/vecinos/1A')
+        .set('Authorization', `Bearer ${userToken(true)}`)
+        .send({ serial_number: '1234' });
+      expect(res.status).toBe(200);
+      expect(res.body.serial_number).toBe('1234');
+    });
+
+    it('returns 404 when vecino not found', async () => {
+      mockQuery.mockResolvedValueOnce({ rows: [] });
+      const app = createApp();
+      const res = await request(app)
+        .put('/api/admin/vecinos/99Z')
+        .set('Authorization', `Bearer ${userToken(true)}`)
+        .send({ nombre: 'X' });
+      expect(res.status).toBe(404);
+    });
+  });
+
+  describe('POST /api/admin/vecinos', () => {
+    beforeEach(() => {
+      vi.resetAllMocks();
+    });
+
+    it('returns 403 for non-admin user', async () => {
+      const app = createApp();
+      const res = await request(app)
+        .post('/api/admin/vecinos')
+        .set('Authorization', `Bearer ${userToken(false)}`)
+        .send({ piso: '7A', nombre: 'Vecino 7A' });
+      expect(res.status).toBe(403);
+    });
+
+    it('returns 401 without token', async () => {
+      const app = createApp();
+      const res = await request(app)
+        .post('/api/admin/vecinos')
+        .send({ piso: '7A' });
+      expect(res.status).toBe(401);
+    });
+
+    it('returns 400 when piso is missing', async () => {
+      const app = createApp();
+      const res = await request(app)
+        .post('/api/admin/vecinos')
+        .set('Authorization', `Bearer ${userToken(true)}`)
+        .send({ nombre: 'Sin piso' });
+      expect(res.status).toBe(400);
+    });
+
+    it('creates vecino for admin', async () => {
+      mockQuery.mockResolvedValueOnce({ rows: [{ piso: '7A', nombre: 'Vecino 7A', email: 'vecino7a@elite.com', coeficiente: null, enviar_email: false, device_identification: null, serial_number: null }] });
+      const app = createApp();
+      const res = await request(app)
+        .post('/api/admin/vecinos')
+        .set('Authorization', `Bearer ${userToken(true)}`)
+        .send({ piso: '7A', nombre: 'Vecino 7A', email: 'vecino7a@elite.com' });
+      expect(res.status).toBe(201);
+      expect(res.body.piso).toBe('7A');
+      expect(res.body.nombre).toBe('Vecino 7A');
+      expect(res.body.email).toBe('vecino7a@elite.com');
+    });
+
+    it('returns 409 when piso already exists', async () => {
+      const err = new Error('duplicate') as any;
+      err.code = '23505';
+      mockQuery.mockRejectedValueOnce(err);
+      const app = createApp();
+      const res = await request(app)
+        .post('/api/admin/vecinos')
+        .set('Authorization', `Bearer ${userToken(true)}`)
+        .send({ piso: '1A', nombre: 'Duplicado' });
+      expect(res.status).toBe(409);
+    });
+  });
+
+  describe('DELETE /api/admin/vecinos/:piso', () => {
+    beforeEach(() => {
+      vi.resetAllMocks();
+    });
+
+    it('returns 403 for non-admin user', async () => {
+      const app = createApp();
+      const res = await request(app)
+        .delete('/api/admin/vecinos/1A')
+        .set('Authorization', `Bearer ${userToken(false)}`);
+      expect(res.status).toBe(403);
+    });
+
+    it('returns 401 without token', async () => {
+      const app = createApp();
+      const res = await request(app)
+        .delete('/api/admin/vecinos/1A');
+      expect(res.status).toBe(401);
+    });
+
+    it('deletes vecino for admin', async () => {
+      mockQuery.mockResolvedValueOnce({ rows: [] }); // UPDATE usuarios
+      mockQuery.mockResolvedValueOnce({ rows: [{ piso: '7A' }] }); // DELETE
+      const app = createApp();
+      const res = await request(app)
+        .delete('/api/admin/vecinos/7A')
+        .set('Authorization', `Bearer ${userToken(true)}`);
+      expect(res.status).toBe(200);
+      expect(res.body.message).toMatch(/eliminado/);
+    });
+
+    it('returns 404 when vecino not found', async () => {
+      mockQuery.mockResolvedValueOnce({ rows: [] }); // UPDATE usuarios
+      mockQuery.mockResolvedValueOnce({ rows: [] }); // DELETE
+      const app = createApp();
+      const res = await request(app)
+        .delete('/api/admin/vecinos/99Z')
+        .set('Authorization', `Bearer ${userToken(true)}`);
+      expect(res.status).toBe(404);
+    });
+
+    it('sets usuario.vecino_piso to NULL when vecino is deleted', async () => {
+      mockQuery.mockResolvedValueOnce({ rows: [] }); // UPDATE usuarios
+      mockQuery.mockResolvedValueOnce({ rows: [{ piso: '7A' }] }); // DELETE
+      const app = createApp();
+      const res = await request(app)
+        .delete('/api/admin/vecinos/7A')
+        .set('Authorization', `Bearer ${userToken(true)}`);
+      expect(res.status).toBe(200);
+      expect(mockQuery).toHaveBeenCalledWith(
+        expect.stringContaining('UPDATE usuarios SET vecino_piso = NULL'),
+        ['7A']
+      );
     });
   });
 });
