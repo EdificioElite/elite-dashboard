@@ -22,7 +22,7 @@ Actualmente el admin tiene una sola pagina mezclada (`/admin`) donde se listan v
 
 Cuando el usuario es admin:
 - Se elimina el boton "Admin" actual
-- Se añaden "Vecinos" y "Usuarios" como enlaces normales en `PAGE_NAV` (junto a Inicio, Aerotermia, Juntas, Contactos)
+- Se añaden "Vecinos", "Usuarios" y "Aerotermia" (admin) como enlaces en la barra de navegacion, junto a los existentes (Inicio, Aerotermia, Juntas, Contactos)
 
 ## VecinosPage (`/admin/vecinos`)
 
@@ -77,7 +77,7 @@ Pagina con Header y contenido placeholder:
 | `src/pages/VecinosPage.tsx` | Crear (nuevo) |
 | `src/pages/UsuariosPage.tsx` | Crear (nuevo) |
 | `src/pages/AdminAerotermiaPage.tsx` | Crear (nuevo, placeholder) |
-| `src/components/Header.tsx` | Añadir links condicionales Vecinos/Usuarios, quitar boton Admin |
+| `src/components/Header.tsx` | Añadir links condicionales Vecinos/Usuarios/Aerotermia(admin), quitar boton Admin |
 | `src/components/EditVecinoModal.tsx` | (ya existe) |
 | `src/components/DeleteVecinoModal.tsx` | Crear (nuevo) |
 | `src/components/EditUserModal.tsx` | (ya existe, puede necesitar ajustes) |
