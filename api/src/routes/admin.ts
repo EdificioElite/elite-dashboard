@@ -3,14 +3,17 @@ import bcrypt from 'bcrypt';
 import { query } from '../db';
 import { authMiddleware } from '../middleware/auth';
 import { adminMiddleware } from '../middleware/admin';
+import { rateLimit } from '../middleware/rateLimit';
 import { logger } from '../lib/logger';
+import { createEmailToken } from '../lib/tokens';
+import { sendInviteEmail } from '../lib/email';
 
 const router = Router();
 
 router.get('/admin/vecinos', authMiddleware, adminMiddleware, async (_req: Request, res: Response) => {
   try {
     const result = await query(`
-      SELECT v.piso, v.nombre, u.id as user_id, u.email, u.is_admin
+      SELECT v.piso, v.nombre, u.id as user_id, u.email, v.email as vecino_email, u.is_admin
       FROM vecinos v
       LEFT JOIN usuarios u ON u.vecino_piso = v.piso
       ORDER BY v.piso
@@ -18,6 +21,29 @@ router.get('/admin/vecinos', authMiddleware, adminMiddleware, async (_req: Reque
     res.json(result.rows);
   } catch (err) {
     logger.error(err, 'Admin vecinos error');
+    res.status(500).json({ error: 'Error interno del servidor' });
+  }
+});
+
+router.put('/admin/vecinos/:piso', authMiddleware, adminMiddleware, async (req: Request, res: Response) => {
+  try {
+    const { piso } = req.params;
+    const { email } = req.body;
+    if (!email) {
+      res.status(400).json({ error: 'Email requerido' });
+      return;
+    }
+    const result = await query(
+      `UPDATE vecinos SET email = $1 WHERE piso = $2 RETURNING piso, email`,
+      [email, piso]
+    );
+    if (result.rows.length === 0) {
+      res.status(404).json({ error: 'Vecino no encontrado' });
+      return;
+    }
+    res.json(result.rows[0]);
+  } catch (err) {
+    logger.error(err, 'Admin update vecino error');
     res.status(500).json({ error: 'Error interno del servidor' });
   }
 });
@@ -233,6 +259,37 @@ router.delete('/admin/usuarios/:id', authMiddleware, adminMiddleware, async (req
     res.json({ message: 'Usuario eliminado' });
   } catch (err) {
     logger.error(err, 'Admin delete user error');
+    res.status(500).json({ error: 'Error interno del servidor' });
+  }
+});
+
+router.post('/admin/invitar', authMiddleware, adminMiddleware, rateLimit(10, 60 * 60 * 1000), async (req: Request, res: Response) => {
+  try {
+    const { piso } = req.body;
+    if (!piso) {
+      res.status(400).json({ error: 'Piso requerido' });
+      return;
+    }
+    const vecinoResult = await query('SELECT piso, email FROM vecinos WHERE piso = $1', [piso]);
+    if (vecinoResult.rows.length === 0) {
+      res.status(400).json({ error: 'El piso indicado no existe' });
+      return;
+    }
+    const vecino = vecinoResult.rows[0];
+    if (!vecino.email) {
+      res.status(400).json({ error: 'El vecino no tiene email registrado' });
+      return;
+    }
+    const existingUser = await query('SELECT id FROM usuarios WHERE vecino_piso = $1', [piso]);
+    if (existingUser.rows.length > 0) {
+      res.status(409).json({ error: 'Este piso ya tiene un usuario registrado' });
+      return;
+    }
+    const token = await createEmailToken(vecino.email, 'invite', vecino.piso);
+    await sendInviteEmail(vecino.email, vecino.piso, token);
+    res.json({ message: 'Invitacion enviada correctamente' });
+  } catch (err) {
+    logger.error(err, 'Admin invite error');
     res.status(500).json({ error: 'Error interno del servidor' });
   }
 });

@@ -59,3 +59,23 @@ export async function deleteUser(id: number) {
     { method: 'DELETE' }
   );
 }
+
+export async function forgotPassword(email: string) {
+  return apiFetch<{ message: string }>('/auth/forgot-password', {
+    method: 'POST',
+    body: JSON.stringify({ email }),
+  });
+}
+
+export async function verifyToken(token: string) {
+  return apiFetch<{ email: string; piso: string | null; type: 'invite' | 'reset' }>(
+    `/auth/verify-token?token=${encodeURIComponent(token)}`
+  );
+}
+
+export async function resetPassword(token: string, password: string) {
+  return apiFetch<{ message: string }>('/auth/reset-password', {
+    method: 'POST',
+    body: JSON.stringify({ token, password }),
+  });
+}

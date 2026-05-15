@@ -13,6 +13,7 @@ interface Vecino {
   nombre: string;
   user_id: number | null;
   email: string | null;
+  vecino_email: string | null;
   is_admin: boolean;
 }
 
@@ -33,6 +34,10 @@ export default function AdminPage() {
   const [editingVecino, setEditingVecino] = useState<Vecino | null>(null);
   const [changingPassword, setChangingPassword] = useState<Vecino | null>(null);
   const [deletingVecino, setDeletingVecino] = useState<Vecino | null>(null);
+  const [inviteMessage, setInviteMessage] = useState('');
+  const [inviteError, setInviteError] = useState(false);
+  const [editingVecinoEmail, setEditingVecinoEmail] = useState<string | null>(null);
+  const [editingVecinoEmailValue, setEditingVecinoEmailValue] = useState('');
 
   useEffect(() => {
     apiFetch<Vecino[]>('/admin/vecinos')
@@ -59,6 +64,36 @@ export default function AdminPage() {
       setVecinos(updated);
     } catch (err: any) {
       setFormError(err.message || 'Error al crear usuario');
+    }
+  };
+
+  const handleInvite = async (piso: string) => {
+    setInviteMessage('');
+    setInviteError(false);
+    try {
+      await apiFetch('/admin/invitar', {
+        method: 'POST',
+        body: JSON.stringify({ piso }),
+      });
+      setInviteMessage('Invitacion enviada correctamente');
+    } catch (err: any) {
+      setInviteMessage(err.message || 'Error al enviar invitacion');
+      setInviteError(true);
+    }
+  };
+
+  const handleSaveVecinoEmail = async () => {
+    if (!editingVecinoEmail || !editingVecinoEmailValue) return;
+    try {
+      await apiFetch(`/admin/vecinos/${editingVecinoEmail}`, {
+        method: 'PUT',
+        body: JSON.stringify({ email: editingVecinoEmailValue }),
+      });
+      setEditingVecinoEmail(null);
+      const updated = await apiFetch<Vecino[]>('/admin/vecinos');
+      setVecinos(updated);
+    } catch (err: any) {
+      alert(err.message || 'Error al guardar email');
     }
   };
 
@@ -116,6 +151,20 @@ export default function AdminPage() {
         </div>
 
         <div className="stagger flex flex-col gap-[22px]">
+          {inviteMessage && (
+            <div
+              className="mb-4 px-4 py-3 rounded-xl text-sm flex items-center gap-2"
+              style={
+                inviteError
+                  ? { background: 'rgba(163,64,42,.08)', color: '#a3402a' }
+                  : { background: 'rgba(91,122,74,.1)', color: '#5b7a4a' }
+              }
+            >
+              <Icon name={inviteError ? 'alertTriangle' : 'check'} size={14} />
+              {inviteMessage}
+            </div>
+          )}
+
           {/* Stats */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-[16px]">
             {stats.map((s) => (
@@ -279,7 +328,44 @@ export default function AdminPage() {
                       </td>
                       <td>
                         <div className="flex items-center justify-center gap-1">
-                          {v.email ? (
+                           {!v.user_id ? (
+                             v.vecino_email ? (
+                               <button
+                                 onClick={() => handleInvite(v.piso)}
+                                 className="btn btn-ghost p-2 text-accent hover:text-accent/80"
+                                 title="Enviar invitacion"
+                               >
+                                 <Icon name="mail" size={15} />
+                               </button>
+                             ) : (
+                               editingVecinoEmail === v.piso ? (
+                                 <span className="flex items-center gap-1">
+                                   <input
+                                     type="email"
+                                     value={editingVecinoEmailValue}
+                                     onChange={(e) => setEditingVecinoEmailValue(e.target.value)}
+                                     onKeyDown={(e) => { if (e.key === 'Enter') handleSaveVecinoEmail(); if (e.key === 'Escape') setEditingVecinoEmail(null); }}
+                                     className="input-card text-xs py-0.5 px-1.5 w-32"
+                                     placeholder="email..."
+                                     autoFocus
+                                   />
+                                   <button onClick={handleSaveVecinoEmail} className="btn btn-ghost p-1 text-sage" title="Guardar"><Icon name="check" size={12} /></button>
+                                   <button onClick={() => setEditingVecinoEmail(null)} className="btn btn-ghost p-1 text-rise" title="Cancelar"><Icon name="x" size={12} /></button>
+                                 </span>
+                               ) : (
+                                 <span className="text-[11px] text-cocoa/25">
+                                   Sin email{' '}
+                                   <button
+                                     onClick={() => { setEditingVecinoEmail(v.piso); setEditingVecinoEmailValue(''); }}
+                                     className="btn btn-ghost p-1 -m-1 text-cocoa/40 hover:text-accent inline-flex align-middle"
+                                     title="Asignar email"
+                                   >
+                                     <Icon name="edit" size={12} />
+                                   </button>
+                                 </span>
+                               )
+                             )
+                          ) : (
                             <>
                               <button
                                 onClick={() => setEditingVecino(v)}
@@ -305,8 +391,6 @@ export default function AdminPage() {
                                 </button>
                               )}
                             </>
-                          ) : (
-                            <span className="text-[11px] text-cocoa/25">—</span>
                           )}
                         </div>
                       </td>

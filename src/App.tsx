@@ -8,6 +8,9 @@ import AdminPage from './pages/AdminPage';
 import AdminVecinoPage from './pages/AdminVecinoPage';
 import JuntasGeneralesPage from './pages/JuntasGeneralesPage';
 import ContactosPage from './pages/ContactosPage';
+import RegistroPage from './pages/RegistroPage';
+import ForgotPasswordPage from './pages/ForgotPasswordPage';
+import ResetPasswordPage from './pages/ResetPasswordPage';
 import VersionFooter from './components/VersionFooter';
 
 function ProtectedRoute({ children, adminOnly = false }: { children: React.ReactNode; adminOnly?: boolean }) {
@@ -46,6 +49,9 @@ export default function App() {
       <div className="relative z-10 min-h-screen">
         <Routes>
           <Route path="/login" element={<LoginPage />} />
+          <Route path="/registro" element={<RegistroPage />} />
+          <Route path="/recuperar-contrasena" element={<ForgotPasswordPage />} />
+          <Route path="/resetear-contrasena" element={<ResetPasswordPage />} />
           <Route path="/inicio" element={<ProtectedRoute><InicioPage /></ProtectedRoute>} />
           <Route path="/aerotermia" element={<ProtectedRoute><DashboardPage /></ProtectedRoute>} />
           <Route path="/dashboard" element={<Navigate to="/aerotermia" replace />} />

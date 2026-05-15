@@ -44,6 +44,8 @@ services:
       CORS_ORIGIN: "*"
       PORT: "3001"
       DISABLE_RATE_LIMIT: "true"
+      MOCK_EMAIL: "true"
+      FRONTEND_URL: "http://frontend:80"
 
   frontend:
     build:

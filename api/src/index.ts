@@ -8,6 +8,7 @@ import authRoutes from './routes/auth';
 import consumosRoutes from './routes/consumos';
 import facturasRoutes from './routes/facturas';
 import adminRoutes from './routes/admin';
+import testRoutes from './routes/test';
 
 const app = express();
 
@@ -40,6 +41,9 @@ app.use('/api', authRoutes);
 app.use('/api', consumosRoutes);
 app.use('/api', facturasRoutes);
 app.use('/api', adminRoutes);
+if (config.mockEmail) {
+  app.use('/api', testRoutes);
+}
 
 app.listen(config.port, () => {
   logger.info({ port: config.port }, 'API running');
