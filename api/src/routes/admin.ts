@@ -3,7 +3,7 @@ import bcrypt from 'bcrypt';
 import { query } from '../db';
 import { authMiddleware } from '../middleware/auth';
 import { adminMiddleware } from '../middleware/admin';
-import { rateLimit } from '../middleware/rateLimit';
+
 import { logger } from '../lib/logger';
 import { createEmailToken } from '../lib/tokens';
 import { sendInviteEmail } from '../lib/email';
@@ -326,7 +326,7 @@ router.delete('/admin/usuarios/:id', authMiddleware, adminMiddleware, async (req
   }
 });
 
-router.post('/admin/invitar', authMiddleware, adminMiddleware, rateLimit(10, 60 * 60 * 1000), async (req: Request, res: Response) => {
+router.post('/admin/invitar', authMiddleware, adminMiddleware, async (req: Request, res: Response) => {
   try {
     const { piso } = req.body;
     if (!piso) {
