@@ -20,6 +20,27 @@ vi.mock('../middleware/rateLimit', () => ({
   rateLimit: () => (_req: Request, _res: Response, next: NextFunction) => next(),
 }));
 
+vi.mock('../lib/tokens', () => ({
+  createEmailToken: vi.fn().mockResolvedValue('mock-token'),
+  verifyEmailToken: vi.fn(),
+  markTokenUsed: vi.fn().mockResolvedValue(undefined),
+  generateToken: vi.fn().mockReturnValue('mock-token'),
+  hashToken: vi.fn((t: string) => `hash-${t}`),
+}));
+
+vi.mock('../lib/email', () => ({
+  sendInviteEmail: vi.fn().mockResolvedValue(undefined),
+  sendResetEmail: vi.fn().mockResolvedValue(undefined),
+  sentEmails: [],
+}));
+
+import { verifyEmailToken, createEmailToken, markTokenUsed } from '../lib/tokens';
+import { sendResetEmail } from '../lib/email';
+const mockVerifyEmailToken = verifyEmailToken as ReturnType<typeof vi.fn>;
+const mockCreateEmailToken = createEmailToken as ReturnType<typeof vi.fn>;
+const mockMarkTokenUsed = markTokenUsed as ReturnType<typeof vi.fn>;
+const mockSendResetEmail = sendResetEmail as ReturnType<typeof vi.fn>;
+
 import { query } from '../db';
 const mockQuery = query as ReturnType<typeof vi.fn>;
 
@@ -41,6 +62,7 @@ function userToken(isAdmin = false) {
 describe('Auth routes', () => {
   beforeEach(() => {
     vi.resetAllMocks();
+    mockCreateEmailToken.mockResolvedValue('mock-token');
   });
 
   describe('POST /api/auth/login', () => {
@@ -249,6 +271,201 @@ describe('Auth routes', () => {
       expect(res.status).toBe(401);
     });
   });
+
+  describe('GET /api/auth/verify-token', () => {
+    it('returns 400 when token is missing', async () => {
+      const app = createApp();
+      const res = await request(app).get('/api/auth/verify-token');
+      expect(res.status).toBe(400);
+    });
+
+    it('returns 400 when token is invalid', async () => {
+      mockQuery.mockResolvedValueOnce({ rows: [] });
+      const app = createApp();
+      const res = await request(app).get('/api/auth/verify-token?token=bad');
+      expect(res.status).toBe(400);
+    });
+
+    it('returns 400 when token is used', async () => {
+      mockQuery.mockResolvedValueOnce({
+        rows: [{ email: 'a@a.com', piso: '2A', type: 'invite', expires_at: new Date(Date.now() + 100000).toISOString(), used_at: new Date() }],
+      });
+      const app = createApp();
+      const res = await request(app).get('/api/auth/verify-token?token=used');
+      expect(res.status).toBe(400);
+    });
+
+    it('returns 400 when token is expired', async () => {
+      mockQuery.mockResolvedValueOnce({
+        rows: [{ email: 'a@a.com', piso: '2A', type: 'invite', expires_at: new Date(Date.now() - 100000).toISOString(), used_at: null }],
+      });
+      const app = createApp();
+      const res = await request(app).get('/api/auth/verify-token?token=expired');
+      expect(res.status).toBe(400);
+    });
+
+    it('returns email and piso for valid token', async () => {
+      mockQuery.mockResolvedValueOnce({
+        rows: [{ email: 'a@a.com', piso: '2A', type: 'invite', expires_at: new Date(Date.now() + 100000).toISOString(), used_at: null }],
+      });
+      const app = createApp();
+      const res = await request(app).get('/api/auth/verify-token?token=valid');
+      expect(res.status).toBe(200);
+      expect(res.body.email).toBe('a@a.com');
+      expect(res.body.piso).toBe('2A');
+      expect(res.body.type).toBe('invite');
+    });
+  });
+
+  describe('POST /api/auth/register', () => {
+    it('returns 400 when token is missing', async () => {
+      const app = createApp();
+      const res = await request(app).post('/api/auth/register').send({ password: 'Pass1234' });
+      expect(res.status).toBe(400);
+    });
+
+    it('returns 400 when password is missing', async () => {
+      const app = createApp();
+      const res = await request(app).post('/api/auth/register').send({ token: 'abc' });
+      expect(res.status).toBe(400);
+    });
+
+    it('returns 400 when password is too short', async () => {
+      const app = createApp();
+      const res = await request(app).post('/api/auth/register').send({ token: 'abc', password: 'Abc1' });
+      expect(res.status).toBe(400);
+      expect(res.body.error).toContain('8 caracteres');
+    });
+
+    it('returns 400 when password lacks uppercase', async () => {
+      const app = createApp();
+      const res = await request(app).post('/api/auth/register').send({ token: 'abc', password: 'abcdefg1' });
+      expect(res.status).toBe(400);
+      expect(res.body.error).toContain('mayuscula');
+    });
+
+    it('returns 400 when password lacks lowercase', async () => {
+      const app = createApp();
+      const res = await request(app).post('/api/auth/register').send({ token: 'abc', password: 'ABCDEFG1' });
+      expect(res.status).toBe(400);
+      expect(res.body.error).toContain('minuscula');
+    });
+
+    it('returns 400 when password lacks digit', async () => {
+      const app = createApp();
+      const res = await request(app).post('/api/auth/register').send({ token: 'abc', password: 'Abcdefgh' });
+      expect(res.status).toBe(400);
+      expect(res.body.error).toContain('numero');
+    });
+
+    it('returns 400 when token is invalid', async () => {
+      mockVerifyEmailToken.mockResolvedValueOnce(null);
+      const app = createApp();
+      const res = await request(app).post('/api/auth/register').send({ token: 'bad', password: 'Pass1234' });
+      expect(res.status).toBe(400);
+    });
+
+    it('returns 409 when user already exists for piso', async () => {
+      mockVerifyEmailToken.mockResolvedValueOnce({ id: 1, email: 'a@a.com', piso: '2A' });
+      mockQuery.mockResolvedValueOnce({ rows: [{ id: 5 }] });
+      const app = createApp();
+      const res = await request(app).post('/api/auth/register').send({ token: 'valid', password: 'Pass1234' });
+      expect(res.status).toBe(409);
+    });
+
+    it('registers user and returns token', async () => {
+      mockVerifyEmailToken.mockResolvedValueOnce({ id: 1, email: 'a@a.com', piso: '2A' });
+      mockQuery
+        .mockResolvedValueOnce({ rows: [] })
+        .mockResolvedValueOnce({ rows: [{ id: 10, vecino_piso: '2A', email: 'a@a.com', is_admin: false }] });
+      const app = createApp();
+      const res = await request(app).post('/api/auth/register').send({ token: 'valid', password: 'Pass1234' });
+      expect(res.status).toBe(200);
+      expect(res.body.token).toBeDefined();
+      expect(res.body.user.email).toBe('a@a.com');
+      expect(mockMarkTokenUsed).toHaveBeenCalledWith(1);
+    });
+  });
+
+  describe('POST /api/auth/forgot-password', () => {
+    it('returns 400 when email is missing', async () => {
+      const app = createApp();
+      const res = await request(app).post('/api/auth/forgot-password').send({});
+      expect(res.status).toBe(400);
+    });
+
+    it('returns generic message when email does not exist', async () => {
+      mockQuery.mockResolvedValueOnce({ rows: [] });
+      const app = createApp();
+      const res = await request(app).post('/api/auth/forgot-password').send({ email: 'no@exist.com' });
+      expect(res.status).toBe(200);
+      expect(res.body.message).toContain('Si el email existe');
+    });
+
+    it('sends reset email when email exists', async () => {
+      mockCreateEmailToken.mockResolvedValueOnce('mock-token');
+      mockQuery.mockResolvedValueOnce({ rows: [{ id: 1, email: 'a@a.com' }] });
+      const app = createApp();
+      const res = await request(app).post('/api/auth/forgot-password').send({ email: 'a@a.com' });
+      expect(res.status).toBe(200);
+      expect(res.body.message).toContain('Si el email existe');
+      expect(mockCreateEmailToken).toHaveBeenCalledWith('a@a.com', 'reset');
+      expect(mockSendResetEmail).toHaveBeenCalledWith('a@a.com', 'mock-token');
+    });
+  });
+
+  describe('POST /api/auth/reset-password', () => {
+    it('returns 400 when token is missing', async () => {
+      const app = createApp();
+      const res = await request(app).post('/api/auth/reset-password').send({ password: 'Pass1234' });
+      expect(res.status).toBe(400);
+    });
+
+    it('returns 400 when password is too short', async () => {
+      const app = createApp();
+      const res = await request(app).post('/api/auth/reset-password').send({ token: 'abc', password: 'Abc1' });
+      expect(res.status).toBe(400);
+      expect(res.body.error).toContain('8 caracteres');
+    });
+
+    it('returns 400 when password lacks uppercase', async () => {
+      const app = createApp();
+      const res = await request(app).post('/api/auth/reset-password').send({ token: 'abc', password: 'abcdefg1' });
+      expect(res.status).toBe(400);
+      expect(res.body.error).toContain('mayuscula');
+    });
+
+    it('returns 400 when password lacks lowercase', async () => {
+      const app = createApp();
+      const res = await request(app).post('/api/auth/reset-password').send({ token: 'abc', password: 'ABCDEFG1' });
+      expect(res.status).toBe(400);
+      expect(res.body.error).toContain('minuscula');
+    });
+
+    it('returns 400 when password lacks digit', async () => {
+      const app = createApp();
+      const res = await request(app).post('/api/auth/reset-password').send({ token: 'abc', password: 'Abcdefgh' });
+      expect(res.status).toBe(400);
+      expect(res.body.error).toContain('numero');
+    });
+
+    it('returns 400 when token is invalid', async () => {
+      mockVerifyEmailToken.mockResolvedValueOnce(null);
+      const app = createApp();
+      const res = await request(app).post('/api/auth/reset-password').send({ token: 'bad', password: 'Pass1234' });
+      expect(res.status).toBe(400);
+    });
+
+    it('resets password successfully', async () => {
+      mockVerifyEmailToken.mockResolvedValueOnce({ id: 1, email: 'a@a.com', piso: null });
+      mockQuery.mockResolvedValueOnce({ rows: [] });
+      const app = createApp();
+      const res = await request(app).post('/api/auth/reset-password').send({ token: 'valid', password: 'Pass1234' });
+      expect(res.status).toBe(200);
+      expect(res.body.message).toContain('actualizada');
+      expect(mockMarkTokenUsed).toHaveBeenCalledWith(1);
+    });
+  });
 });
 
 describe('Consumos routes', () => {
@@ -438,6 +655,18 @@ describe('Admin routes', () => {
       expect(res.status).toBe(400);
       expect(res.body.error).toBe('El piso indicado no existe en el edificio');
     });
+
+    it('creates user without vecino_piso (global user)', async () => {
+      mockQuery.mockResolvedValueOnce({ rows: [{ id: 10, vecino_piso: null, email: 'gestor@elite.com', is_admin: true, created_at: new Date().toISOString() }] });
+      const app = createApp();
+      const res = await request(app)
+        .post('/api/admin/usuarios')
+        .set('Authorization', `Bearer ${userToken(true)}`)
+        .send({ email: 'gestor@elite.com', password: 'password123' });
+      expect(res.status).toBe(201);
+      expect(res.body.vecino_piso).toBeNull();
+      expect(res.body.email).toBe('gestor@elite.com');
+    });
   });
 
   describe('GET /api/admin/usuarios', () => {
@@ -610,6 +839,303 @@ describe('Admin routes', () => {
         .delete('/api/admin/usuarios/2')
         .set('Authorization', `Bearer ${userToken(true)}`);
       expect(res.status).toBe(200);
+    });
+  });
+
+  describe('POST /api/admin/invitar', () => {
+    it('returns 401 without token', async () => {
+      const app = createApp();
+      const res = await request(app).post('/api/admin/invitar').send({ piso: '2A' });
+      expect(res.status).toBe(401);
+    });
+
+    it('returns 403 for non-admin', async () => {
+      const app = createApp();
+      const res = await request(app)
+        .post('/api/admin/invitar')
+        .set('Authorization', `Bearer ${userToken(false)}`)
+        .send({ piso: '2A' });
+      expect(res.status).toBe(403);
+    });
+
+    it('returns 400 when piso is missing', async () => {
+      const app = createApp();
+      const res = await request(app)
+        .post('/api/admin/invitar')
+        .set('Authorization', `Bearer ${userToken(true)}`)
+        .send({});
+      expect(res.status).toBe(400);
+    });
+
+    it('returns 400 when vecino does not exist', async () => {
+      mockQuery.mockResolvedValueOnce({ rows: [] });
+      const app = createApp();
+      const res = await request(app)
+        .post('/api/admin/invitar')
+        .set('Authorization', `Bearer ${userToken(true)}`)
+        .send({ piso: 'Z9' });
+      expect(res.status).toBe(400);
+    });
+
+    it('returns 400 when vecino has no email', async () => {
+      mockQuery.mockResolvedValueOnce({ rows: [{ piso: '2A', email: null }] });
+      const app = createApp();
+      const res = await request(app)
+        .post('/api/admin/invitar')
+        .set('Authorization', `Bearer ${userToken(true)}`)
+        .send({ piso: '2A' });
+      expect(res.status).toBe(400);
+    });
+
+    it('returns 409 when user already exists', async () => {
+      mockQuery
+        .mockResolvedValueOnce({ rows: [{ piso: '2A', email: 'a@a.com' }] })
+        .mockResolvedValueOnce({ rows: [{ id: 5 }] });
+      const app = createApp();
+      const res = await request(app)
+        .post('/api/admin/invitar')
+        .set('Authorization', `Bearer ${userToken(true)}`)
+        .send({ piso: '2A' });
+      expect(res.status).toBe(409);
+    });
+
+    it('sends invite for valid vecino', async () => {
+      mockQuery
+        .mockResolvedValueOnce({ rows: [{ piso: '2A', email: 'a@a.com' }] })
+        .mockResolvedValueOnce({ rows: [] });
+      const app = createApp();
+      const res = await request(app)
+        .post('/api/admin/invitar')
+        .set('Authorization', `Bearer ${userToken(true)}`)
+        .send({ piso: '2A' });
+      expect(res.status).toBe(200);
+      expect(res.body.message).toContain('Invitacion enviada');
+    });
+  });
+
+  describe('PUT /api/admin/vecinos/:piso', () => {
+    beforeEach(() => {
+      vi.resetAllMocks();
+    });
+
+    it('returns 403 for non-admin user', async () => {
+      const app = createApp();
+      const res = await request(app)
+        .put('/api/admin/vecinos/1A')
+        .set('Authorization', `Bearer ${userToken(false)}`)
+        .send({ nombre: 'Nuevo nombre' });
+      expect(res.status).toBe(403);
+    });
+
+    it('returns 401 without token', async () => {
+      const app = createApp();
+      const res = await request(app)
+        .put('/api/admin/vecinos/1A')
+        .send({ nombre: 'X' });
+      expect(res.status).toBe(401);
+    });
+
+    it('returns 400 when no fields provided', async () => {
+      const app = createApp();
+      const res = await request(app)
+        .put('/api/admin/vecinos/1A')
+        .set('Authorization', `Bearer ${userToken(true)}`)
+        .send({});
+      expect(res.status).toBe(400);
+      expect(res.body.error).toMatch(/campo/);
+    });
+
+    it('updates vecino nombre for admin', async () => {
+      mockQuery.mockResolvedValueOnce({ rows: [{ piso: '1A', nombre: 'Nuevo nombre', email: 'v@e.com' }] });
+      const app = createApp();
+      const res = await request(app)
+        .put('/api/admin/vecinos/1A')
+        .set('Authorization', `Bearer ${userToken(true)}`)
+        .send({ nombre: 'Nuevo nombre' });
+      expect(res.status).toBe(200);
+      expect(res.body.nombre).toBe('Nuevo nombre');
+      expect(mockQuery).toHaveBeenCalledWith(
+        expect.stringContaining('UPDATE vecinos'),
+        expect.arrayContaining(['Nuevo nombre', '1A'])
+      );
+    });
+
+    it('updates vecino email for admin', async () => {
+      mockQuery.mockResolvedValueOnce({ rows: [{ piso: '1A', nombre: 'V1', email: 'new@email.com' }] });
+      const app = createApp();
+      const res = await request(app)
+        .put('/api/admin/vecinos/1A')
+        .set('Authorization', `Bearer ${userToken(true)}`)
+        .send({ email: 'new@email.com' });
+      expect(res.status).toBe(200);
+      expect(res.body.email).toBe('new@email.com');
+    });
+
+    it('updates vecino coeficiente for admin', async () => {
+      mockQuery.mockResolvedValueOnce({ rows: [{ piso: '1A', nombre: 'V1', email: 'v@e.com', coeficiente: '0.30' }] });
+      const app = createApp();
+      const res = await request(app)
+        .put('/api/admin/vecinos/1A')
+        .set('Authorization', `Bearer ${userToken(true)}`)
+        .send({ coeficiente: '0.30' });
+      expect(res.status).toBe(200);
+      expect(res.body.coeficiente).toBe('0.30');
+    });
+
+    it('updates vecino enviar_email for admin', async () => {
+      mockQuery.mockResolvedValueOnce({ rows: [{ piso: '1A', nombre: 'V1', email: 'v@e.com', enviar_email: true }] });
+      const app = createApp();
+      const res = await request(app)
+        .put('/api/admin/vecinos/1A')
+        .set('Authorization', `Bearer ${userToken(true)}`)
+        .send({ enviar_email: true });
+      expect(res.status).toBe(200);
+      expect(res.body.enviar_email).toBe(true);
+    });
+
+    it('updates vecino device_identification for admin', async () => {
+      mockQuery.mockResolvedValueOnce({ rows: [{ piso: '1A', nombre: 'V1', email: 'v@e.com', device_identification: 'DEVID99' }] });
+      const app = createApp();
+      const res = await request(app)
+        .put('/api/admin/vecinos/1A')
+        .set('Authorization', `Bearer ${userToken(true)}`)
+        .send({ device_identification: 'DEVID99' });
+      expect(res.status).toBe(200);
+      expect(res.body.device_identification).toBe('DEVID99');
+    });
+
+    it('updates vecino serial_number for admin', async () => {
+      mockQuery.mockResolvedValueOnce({ rows: [{ piso: '1A', nombre: 'V1', email: 'v@e.com', serial_number: '1234' }] });
+      const app = createApp();
+      const res = await request(app)
+        .put('/api/admin/vecinos/1A')
+        .set('Authorization', `Bearer ${userToken(true)}`)
+        .send({ serial_number: '1234' });
+      expect(res.status).toBe(200);
+      expect(res.body.serial_number).toBe('1234');
+    });
+
+    it('returns 404 when vecino not found', async () => {
+      mockQuery.mockResolvedValueOnce({ rows: [] });
+      const app = createApp();
+      const res = await request(app)
+        .put('/api/admin/vecinos/99Z')
+        .set('Authorization', `Bearer ${userToken(true)}`)
+        .send({ nombre: 'X' });
+      expect(res.status).toBe(404);
+    });
+  });
+
+  describe('POST /api/admin/vecinos', () => {
+    beforeEach(() => {
+      vi.resetAllMocks();
+    });
+
+    it('returns 403 for non-admin user', async () => {
+      const app = createApp();
+      const res = await request(app)
+        .post('/api/admin/vecinos')
+        .set('Authorization', `Bearer ${userToken(false)}`)
+        .send({ piso: '7A', nombre: 'Vecino 7A' });
+      expect(res.status).toBe(403);
+    });
+
+    it('returns 401 without token', async () => {
+      const app = createApp();
+      const res = await request(app)
+        .post('/api/admin/vecinos')
+        .send({ piso: '7A' });
+      expect(res.status).toBe(401);
+    });
+
+    it('returns 400 when piso is missing', async () => {
+      const app = createApp();
+      const res = await request(app)
+        .post('/api/admin/vecinos')
+        .set('Authorization', `Bearer ${userToken(true)}`)
+        .send({ nombre: 'Sin piso' });
+      expect(res.status).toBe(400);
+    });
+
+    it('creates vecino for admin', async () => {
+      mockQuery.mockResolvedValueOnce({ rows: [{ piso: '7A', nombre: 'Vecino 7A', email: 'vecino7a@elite.com', coeficiente: null, enviar_email: false, device_identification: null, serial_number: null }] });
+      const app = createApp();
+      const res = await request(app)
+        .post('/api/admin/vecinos')
+        .set('Authorization', `Bearer ${userToken(true)}`)
+        .send({ piso: '7A', nombre: 'Vecino 7A', email: 'vecino7a@elite.com' });
+      expect(res.status).toBe(201);
+      expect(res.body.piso).toBe('7A');
+      expect(res.body.nombre).toBe('Vecino 7A');
+      expect(res.body.email).toBe('vecino7a@elite.com');
+    });
+
+    it('returns 409 when piso already exists', async () => {
+      const err = new Error('duplicate') as any;
+      err.code = '23505';
+      mockQuery.mockRejectedValueOnce(err);
+      const app = createApp();
+      const res = await request(app)
+        .post('/api/admin/vecinos')
+        .set('Authorization', `Bearer ${userToken(true)}`)
+        .send({ piso: '1A', nombre: 'Duplicado' });
+      expect(res.status).toBe(409);
+    });
+  });
+
+  describe('DELETE /api/admin/vecinos/:piso', () => {
+    beforeEach(() => {
+      vi.resetAllMocks();
+    });
+
+    it('returns 403 for non-admin user', async () => {
+      const app = createApp();
+      const res = await request(app)
+        .delete('/api/admin/vecinos/1A')
+        .set('Authorization', `Bearer ${userToken(false)}`);
+      expect(res.status).toBe(403);
+    });
+
+    it('returns 401 without token', async () => {
+      const app = createApp();
+      const res = await request(app)
+        .delete('/api/admin/vecinos/1A');
+      expect(res.status).toBe(401);
+    });
+
+    it('deletes vecino for admin', async () => {
+      mockQuery.mockResolvedValueOnce({ rows: [] }); // UPDATE usuarios
+      mockQuery.mockResolvedValueOnce({ rows: [{ piso: '7A' }] }); // DELETE
+      const app = createApp();
+      const res = await request(app)
+        .delete('/api/admin/vecinos/7A')
+        .set('Authorization', `Bearer ${userToken(true)}`);
+      expect(res.status).toBe(200);
+      expect(res.body.message).toMatch(/eliminado/);
+    });
+
+    it('returns 404 when vecino not found', async () => {
+      mockQuery.mockResolvedValueOnce({ rows: [] }); // UPDATE usuarios
+      mockQuery.mockResolvedValueOnce({ rows: [] }); // DELETE
+      const app = createApp();
+      const res = await request(app)
+        .delete('/api/admin/vecinos/99Z')
+        .set('Authorization', `Bearer ${userToken(true)}`);
+      expect(res.status).toBe(404);
+    });
+
+    it('sets usuario.vecino_piso to NULL when vecino is deleted', async () => {
+      mockQuery.mockResolvedValueOnce({ rows: [] }); // UPDATE usuarios
+      mockQuery.mockResolvedValueOnce({ rows: [{ piso: '7A' }] }); // DELETE
+      const app = createApp();
+      const res = await request(app)
+        .delete('/api/admin/vecinos/7A')
+        .set('Authorization', `Bearer ${userToken(true)}`);
+      expect(res.status).toBe(200);
+      expect(mockQuery).toHaveBeenCalledWith(
+        expect.stringContaining('UPDATE usuarios SET vecino_piso = NULL'),
+        ['7A']
+      );
     });
   });
 });

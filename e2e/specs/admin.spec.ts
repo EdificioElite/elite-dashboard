@@ -35,6 +35,7 @@ test.describe('Admin', () => {
 
   test.beforeEach(async ({ page }) => {
     await loginAsAdmin(page);
+    await page.goto('/admin/vecinos');
   });
 
   test('shows vecinos table', async ({ page }) => {
@@ -43,11 +44,12 @@ test.describe('Admin', () => {
   });
 
   test('navigates to vecino consumos', async ({ page }) => {
-    await page.locator('td button', { hasText: '1A' }).click();
-    await expect(page).toHaveURL(/\/admin\/vecino\/1A/, { timeout: 10000 });
+    await page.locator('[title="Ver aerotermia"]').first().click();
+    await expect(page).toHaveURL(/\/admin\/vecino\//, { timeout: 10000 });
   });
 
   test('edits user email and piso', async ({ page }) => {
+    await page.goto('/admin/usuarios');
     const row = page.locator('tr', { hasText: 'vecino4@elite.com' });
     await row.locator('[title="Editar usuario"]').click();
 
@@ -62,6 +64,7 @@ test.describe('Admin', () => {
   });
 
   test('changes user password', async ({ page }) => {
+    await page.goto('/admin/usuarios');
     const row = page.locator('tr', { hasText: 'vecino2@elite.com' });
     await row.locator('[title="Cambiar contrasena"]').click();
 
@@ -78,6 +81,7 @@ test.describe('Admin', () => {
   });
 
   test('shows error on admin password change with too short password', async ({ page }) => {
+    await page.goto('/admin/usuarios');
     const row = page.locator('tr', { hasText: 'vecino2@elite.com' });
     await row.locator('[title="Cambiar contrasena"]').click();
 
@@ -92,6 +96,7 @@ test.describe('Admin', () => {
   });
 
   test('shows error on admin password change with mismatched passwords', async ({ page }) => {
+    await page.goto('/admin/usuarios');
     const row = page.locator('tr', { hasText: 'vecino2@elite.com' });
     await row.locator('[title="Cambiar contrasena"]').click();
 
@@ -106,6 +111,7 @@ test.describe('Admin', () => {
   });
 
   test('deletes a user', async ({ page }) => {
+    await page.goto('/admin/usuarios');
     const row = page.locator('tr', { hasText: 'vecino3@elite.com' });
     await row.locator('[title="Eliminar usuario"]').click();
 
@@ -118,24 +124,22 @@ test.describe('Admin', () => {
     await expect(page.locator('tbody')).not.toContainText('vecino3@elite.com', { timeout: 5000 });
   });
 
-  // Skipped: flaky due to HTML5 form validation in headless browser
   test.skip('can create a new user', async ({ page }) => {
+    await page.goto('/admin/usuarios');
     await page.click('text=Crear acceso');
     await page.waitForSelector('form');
-    const vecinoInput = page.locator('form input[type="text"]');
-    await vecinoInput.fill('6A');
+    await page.locator('form select').selectOption({ index: 1 });
     const emailInput = page.locator('form input[type="email"]');
     await emailInput.fill('vecino6@elite.com');
     const passInput = page.locator('form input[type="password"]');
     await passInput.fill('password1');
     await page.click('text=Guardar');
     await expect(page.getByText(/creado|error/i)).toBeVisible({ timeout: 10000 });
-    await expect(page.locator('tbody')).toContainText('vecino6@elite.com');
   });
 
   test('non-admin cannot access /admin', async ({ page }) => {
     await loginAsVecino(page);
-    await page.goto('/admin');
+    await page.goto('/admin/vecinos');
     await expect(page).toHaveURL('/inicio');
   });
 });

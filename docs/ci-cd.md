@@ -6,8 +6,8 @@
 |---|---|---|
 | CI | `.github/workflows/ci.yml` | Push a main/dev, PR a main/dev |
 | Docker PR | `.github/workflows/docker-pr.yml` | PR open/sync/reopen |
-| Release | `.github/workflows/release.yml` | Push a main (solo merge commits) |
-| Promote | `.github/workflows/promote.yml` | Manual (`workflow_dispatch`) |
+| Release | `.github/workflows/release.yml` | Manual con selector de version (`workflow_dispatch`) |
+| Publish | `.github/workflows/publish.yml` | Push a main (solo merge commits) |
 | Sync | `.github/workflows/sync.yml` | Push a main (solo merge commits) |
 
 ## Flujo de trabajo
@@ -15,7 +15,7 @@
 El proyecto sigue un modelo Git Flow simplificado:
 
 ```
-feat/x ──PR──▶ dev ──promote manual──▶ main ──sync auto──▶ dev
+feat/x ──PR──▶ dev ──release manual──▶ main ──sync auto──▶ dev
 ```
 
 | Rama | Entorno | URL | Backend |
@@ -36,21 +36,16 @@ feat/x ──PR──▶ dev ──promote manual──▶ main ──sync auto�
 
 ### 3. Promover a main
 
-- Ejecutar manualmente el workflow `Promote dev to main` (`.github/workflows/promote.yml`)
-- Esto crea un PR de `dev` → `main`
-- **Ese PR debe tener** uno de estos labels para pasar el CI y poder mergear:
-  - `major` — breaking changes (1.x.x → 2.0.0)
-  - `minor` — nuevas features (1.0.x → 1.1.0)
-  - `patch` — fixes y cambios pequenos (1.0.0 → 1.0.1)
+- Ejecutar manualmente el workflow `Release` (`.github/workflows/release.yml`) seleccionando el tipo de version (`major`, `minor`, `patch`)
+- Esto crea un PR de `dev` → `main` con la version ya incrementada
 
 ### 4. Mergear a main (release)
 
-- Al hacer merge del PR de promocion, `release.yml`:
-  1. Lee el label del PR para determinar el tipo de bump (major/minor/patch)
-  2. Incrementa la version en `api/package.json`
-  3. Crea un tag git `vX.Y.Z` sobre el merge commit
-  4. Crea una release en GitHub
-  5. Publica la imagen Docker con tags `:vX.Y.Z` y `:latest`
+- Al hacer merge del PR de release, `publish.yml`:
+  1. Lee la version de `package.json` (ya incrementada por `release.yml`)
+  2. Crea un tag git `vX.Y.Z`
+  3. Crea una release en GitHub
+  4. Publica la imagen Docker con tags `:vX.Y.Z` y `:latest`
 
 ### 5. Sincronizar main → dev
 
@@ -68,5 +63,4 @@ feat/x ──PR──▶ dev ──promote manual──▶ main ──sync auto�
 
 ## Configuracion del repositorio
 
-- **Ramas `main` y `dev` protegidas**: solo se puede pushear desde PRs, requieren que los checks `backend`, `frontend`, `e2e` y `check-labels` pasen
-- **Labels requeridos**: solo en PRs de `dev` → `main` (los de promocion): `major` (rojo), `minor` (azul), `patch` (verde)
+- **Ramas `main` y `dev` protegidas**: solo se puede pushear desde PRs, requieren que los checks `backend`, `frontend` y `e2e` pasen

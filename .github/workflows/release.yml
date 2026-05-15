@@ -1,49 +1,49 @@
 name: Release
 
 on:
-  push:
-    branches: [main]
-
-env:
-  REGISTRY: ghcr.io
-  IMAGE_NAME: ${{ github.repository }}/api
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Tipo de version'
+        required: true
+        type: choice
+        options:
+          - patch
+          - minor
+          - major
 
 jobs:
   release:
     runs-on: ubuntu-latest
     permissions:
       contents: write
-      packages: write
-    if: startsWith(github.event.head_commit.message, 'Merge pull request')
-
+      pull-requests: write
     steps:
       - uses: actions/checkout@v4
         with:
+          ref: dev
           fetch-depth: 0
 
-      - name: Extract PR number
-        id: pr
+      - name: Check if dev is ahead of main
+        id: check
         run: |
-          PR_NUMBER=$(echo "${{ github.event.head_commit.message }}" | grep -oP 'Merge pull request #\K\d+')
-          echo "number=${PR_NUMBER}" >> $GITHUB_OUTPUT
-          echo "PR number: ${PR_NUMBER}"
+          git fetch origin dev main
+          DIFF=$(git rev-list origin/main..origin/dev --count)
+          echo "commits_ahead=${DIFF}" >> $GITHUB_OUTPUT
+          echo "dev esta ${DIFF} commits por delante de main"
 
-      - name: Get PR labels and determine bump
-        id: labels
+      - name: Close existing release PRs
+        if: steps.check.outputs.commits_ahead != '0'
         run: |
-          LABELS=$(gh pr view ${{ steps.pr.outputs.number }} --json labels --jq '.labels[].name')
-          echo "PR labels: ${LABELS}"
-          if echo "${LABELS}" | grep -q "major"; then
-            echo "bump=major" >> $GITHUB_OUTPUT
-          elif echo "${LABELS}" | grep -q "minor"; then
-            echo "bump=minor" >> $GITHUB_OUTPUT
-          else
-            echo "bump=patch" >> $GITHUB_OUTPUT
-          fi
+          gh pr list --head dev --base main --state open --json number --jq '.[].number' | while read num; do
+            echo "Cerrando PR de release existente #${num}"
+            gh pr close "${num}" --comment "Reemplazado por un nuevo PR de release."
+          done
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Compute next version from tags
+      - name: Compute next version
+        if: steps.check.outputs.commits_ahead != '0'
         id: version
         run: |
           LAST_TAG=$(git tag --sort=-v:refname | grep -E '^v[0-9]+\.[0-9]+\.[0-9]+$' | head -1)
@@ -56,59 +56,86 @@ jobs:
           MINOR=$(echo "${LAST_TAG}" | sed 's/v//' | cut -d. -f2)
           PATCH=$(echo "${LAST_TAG}" | sed 's/v//' | cut -d. -f3)
 
-          BUMP="${{ steps.labels.outputs.bump }}"
-          case "${BUMP}" in
+          case "${{ inputs.version }}" in
             major) MAJOR=$((MAJOR + 1)); MINOR=0; PATCH=0 ;;
             minor) MINOR=$((MINOR + 1)); PATCH=0 ;;
-            patch|*) PATCH=$((PATCH + 1)) ;;
+            patch) PATCH=$((PATCH + 1)) ;;
           esac
 
           NEW_VERSION="${MAJOR}.${MINOR}.${PATCH}"
           echo "New version: ${NEW_VERSION}"
-
           echo "version=${NEW_VERSION}" >> $GITHUB_OUTPUT
 
-      - name: Create GitHub Release
+      - name: Bump version in package.json files
+        if: steps.check.outputs.commits_ahead != '0'
         run: |
-          gh release create "v${{ steps.version.outputs.version }}" \
-            --title "v${{ steps.version.outputs.version }}" \
-            --generate-notes \
-            --target main
+          jq --arg v "${{ steps.version.outputs.version }}" '.version = $v' package.json > tmp.json && mv tmp.json package.json
+          jq --arg v "${{ steps.version.outputs.version }}" '.version = $v' api/package.json > tmp.json && mv tmp.json api/package.json
+
+      - name: Create release branch and push
+        if: steps.check.outputs.commits_ahead != '0'
+        run: |
+          BRANCH="release/v${{ steps.version.outputs.version }}"
+          git checkout -b "${BRANCH}"
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add package.json api/package.json
+          git commit -m "chore: bump version to v${{ steps.version.outputs.version }}"
+          git push origin "${BRANCH}"
+          echo "branch=${BRANCH}" >> $GITHUB_OUTPUT
+        id: branch
+
+      - name: Create PR release branch → dev and auto-merge
+        if: steps.check.outputs.commits_ahead != '0'
+        run: |
+          PR_URL=$(gh pr create \
+            --title "chore: bump version to v${{ steps.version.outputs.version }}" \
+            --body "Actualiza version en package.json a v${{ steps.version.outputs.version }} antes del release." \
+            --head "${{ steps.branch.outputs.branch }}" \
+            --base dev)
+
+          PR_NUMBER=$(echo "${PR_URL}" | grep -oP '\d+$')
+          echo "PR a dev creada: ${PR_URL}"
+          echo "dev_pr=${PR_NUMBER}" >> $GITHUB_OUTPUT
+          gh pr merge "${PR_NUMBER}" --auto --merge
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        id: dev_pr
+
+      - name: Wait for dev PR to merge
+        if: steps.check.outputs.commits_ahead != '0'
+        run: |
+          for i in $(seq 1 60); do
+            STATE=$(gh pr view "${{ steps.dev_pr.outputs.dev_pr }}" --json state --jq '.state' 2>/dev/null || echo "OPEN")
+            echo "  Intento $i/60: estado PR dev = ${STATE}"
+            if [ "${STATE}" = "MERGED" ]; then
+              echo "PR a dev mergeada"
+              exit 0
+            fi
+            sleep 10
+          done
+          echo "Timeout esperando merge de PR a dev"
+          exit 1
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - uses: docker/login-action@v3
-        with:
-          registry: ${{ env.REGISTRY }}
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Set lowercase image name
+      - name: Create release PR dev → main and auto-merge
+        if: steps.check.outputs.commits_ahead != '0'
         run: |
-          echo "IMAGE_NAME_LC=$(echo "${IMAGE_NAME}" | tr '[:upper:]' '[:lower:]')" >> $GITHUB_ENV
+          git fetch origin dev
+          PR_URL=$(gh pr create \
+            --title "Release v${{ steps.version.outputs.version }}" \
+            --body $'PR automatizada de release v${{ steps.version.outputs.version }}.\n\nTipo: `${{ inputs.version }}`.' \
+            --head dev \
+            --base main)
 
-      - uses: docker/metadata-action@v5
-        id: meta
-        with:
-          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME_LC }}
-          tags: |
-            type=raw,value=${{ steps.version.outputs.version }}
-            type=raw,value=latest
+          PR_NUMBER=$(echo "${PR_URL}" | grep -oP '\d+$')
+          echo "PR a main creada: ${PR_URL}"
 
-      - uses: docker/setup-buildx-action@v3
+          gh pr merge "${PR_NUMBER}" --auto --merge
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - uses: docker/build-push-action@v6
-        with:
-          context: api
-          push: true
-          tags: ${{ steps.meta.outputs.tags }}
-          labels: ${{ steps.meta.outputs.labels }}
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
-
-      - name: Create tag and push
-        run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
-          git tag "v${{ steps.version.outputs.version }}"
-          git push origin "v${{ steps.version.outputs.version }}"
+      - name: Nothing to promote
+        if: steps.check.outputs.commits_ahead == '0'
+        run: echo "dev no tiene commits nuevos respecto a main, nada que publicar."

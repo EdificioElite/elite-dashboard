@@ -4,28 +4,34 @@ import { useAuthStore } from '../store/auth';
 import Icon from './Icon';
 import SelfPasswordModal from './SelfPasswordModal';
 
-interface HeaderProps {
-  showAdmin?: boolean;
-}
-
-const PAGE_NAV = [
+const USER_NAV = [
   { label: 'Inicio', path: '/inicio' },
   { label: 'Aerotermia', path: '/aerotermia' },
   { label: 'Juntas', path: '/juntas' },
   { label: 'Contactos', path: '/contactos' },
 ];
 
-export default function Header({ showAdmin }: HeaderProps) {
+const ADMIN_NAV = [
+  { label: 'Vecinos', path: '/admin/vecinos' },
+  { label: 'Usuarios', path: '/admin/usuarios' },
+  { label: 'Aerotermia', path: '/admin/aerotermia' },
+];
+
+export default function Header() {
   const { user, logout } = useAuthStore();
   const navigate = useNavigate();
   const location = useLocation();
+  const navItems = user?.is_admin ? [...USER_NAV, ...ADMIN_NAV] : USER_NAV;
   const [open, setOpen] = useState(false);
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
   const [showPasswordModal, setShowPasswordModal] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
   const initials = (user?.vecino_piso || user?.email?.[0] || '?').substring(0, 2).toUpperCase();
-  const isActive = (path: string) => location.pathname === path || (path === '/aerotermia' && location.pathname === '/dashboard');
+  const isActive = (path: string) =>
+    location.pathname === path ||
+    (path === '/aerotermia' && location.pathname === '/dashboard') ||
+    (path === '/admin/aerotermia' && location.pathname === '/admin/aerotermia');
 
   useEffect(() => {
     if (!open) return;
@@ -82,7 +88,7 @@ export default function Header({ showAdmin }: HeaderProps) {
         </button>
 
         <nav className="hidden md:flex items-center gap-1">
-          {PAGE_NAV.map((item) => (
+          {navItems.map((item) => (
             <button
               key={item.path}
               onClick={() => navigate(item.path)}
@@ -103,11 +109,7 @@ export default function Header({ showAdmin }: HeaderProps) {
           <Icon name="menu" size={18} />
         </button>
 
-        {showAdmin && user?.is_admin && (
-          <button onClick={() => navigate('/admin')} className="btn btn-ghost text-xs">
-            Admin
-          </button>
-        )}
+
 
         <div className="relative" ref={dropdownRef}>
           <button
@@ -165,7 +167,7 @@ export default function Header({ showAdmin }: HeaderProps) {
                 <Icon name="x" size={16} />
               </button>
             </div>
-            {PAGE_NAV.map((item) => (
+            {navItems.map((item) => (
               <button
                 key={item.path}
                 onClick={() => { navigate(item.path); setMobileNavOpen(false); }}

@@ -5,6 +5,8 @@ import { signToken } from '../lib/jwt';
 import { authMiddleware } from '../middleware/auth';
 import { rateLimit } from '../middleware/rateLimit';
 import { logger } from '../lib/logger';
+import { createEmailToken, verifyEmailToken, markTokenUsed, hashToken } from '../lib/tokens';
+import { sendResetEmail } from '../lib/email';
 
 const router = Router();
 
@@ -79,20 +81,9 @@ router.put('/auth/password', authMiddleware, rateLimit(5, 60 * 1000), async (req
       return;
     }
 
-    if (newPassword.length < 8) {
-      res.status(400).json({ error: 'La contrasena debe tener al menos 8 caracteres' });
-      return;
-    }
-    if (!/[A-Z]/.test(newPassword)) {
-      res.status(400).json({ error: 'La contrasena debe contener al menos una mayuscula' });
-      return;
-    }
-    if (!/[a-z]/.test(newPassword)) {
-      res.status(400).json({ error: 'La contrasena debe contener al menos una minuscula' });
-      return;
-    }
-    if (!/[0-9]/.test(newPassword)) {
-      res.status(400).json({ error: 'La contrasena debe contener al menos un numero' });
+    const pwdError = validatePassword(newPassword);
+    if (pwdError) {
+      res.status(400).json({ error: pwdError });
       return;
     }
 
@@ -121,6 +112,133 @@ router.put('/auth/password', authMiddleware, rateLimit(5, 60 * 1000), async (req
     res.json({ message: 'Contrasena actualizada' });
   } catch (err) {
     logger.error(err, 'Change password error');
+    res.status(500).json({ error: 'Error interno del servidor' });
+  }
+});
+
+function validatePassword(password: string): string | null {
+  if (password.length < 8) return 'La contrasena debe tener al menos 8 caracteres';
+  if (!/[A-Z]/.test(password)) return 'La contrasena debe contener al menos una mayuscula';
+  if (!/[a-z]/.test(password)) return 'La contrasena debe contener al menos una minuscula';
+  if (!/[0-9]/.test(password)) return 'La contrasena debe contener al menos un numero';
+  return null;
+}
+
+router.get('/auth/verify-token', rateLimit(30, 60 * 1000), async (req: Request, res: Response) => {
+  try {
+    const { token } = req.query;
+    if (!token || typeof token !== 'string') {
+      res.status(400).json({ error: 'Token requerido' });
+      return;
+    }
+    const result = await query(
+      `SELECT email, piso, type, expires_at, used_at FROM email_tokens WHERE token_hash = $1`,
+      [hashToken(token)]
+    );
+    if (result.rows.length === 0) {
+      res.status(400).json({ error: 'Token invalido' });
+      return;
+    }
+    const row = result.rows[0];
+    if (row.used_at) {
+      res.status(400).json({ error: 'Token ya usado' });
+      return;
+    }
+    if (new Date() > new Date(row.expires_at)) {
+      res.status(400).json({ error: 'Token expirado' });
+      return;
+    }
+    res.json({ email: row.email, piso: row.piso, type: row.type });
+  } catch (err) {
+    logger.error(err, 'Verify token error');
+    res.status(500).json({ error: 'Error interno del servidor' });
+  }
+});
+
+router.post('/auth/register', rateLimit(5, 15 * 60 * 1000), async (req: Request, res: Response) => {
+  try {
+    const { token, password } = req.body;
+    if (!token || !password) {
+      res.status(400).json({ error: 'Token y contrasena son requeridos' });
+      return;
+    }
+    const pwdError = validatePassword(password);
+    if (pwdError) {
+      res.status(400).json({ error: pwdError });
+      return;
+    }
+    const tokenData = await verifyEmailToken(token, 'invite');
+    if (!tokenData) {
+      res.status(400).json({ error: 'Token invalido, expirado o ya usado' });
+      return;
+    }
+    const existing = await query('SELECT id FROM usuarios WHERE vecino_piso = $1', [tokenData.piso]);
+    if (existing.rows.length > 0) {
+      res.status(409).json({ error: 'Ya existe un usuario para este piso' });
+      return;
+    }
+    const password_hash = await bcrypt.hash(password, 12);
+    const result = await query(
+      `INSERT INTO usuarios (vecino_piso, email, password_hash) VALUES ($1, $2, $3) RETURNING id, vecino_piso, email, is_admin`,
+      [tokenData.piso, tokenData.email, password_hash]
+    );
+    await markTokenUsed(tokenData.id);
+    const user = result.rows[0];
+    const jwtToken = signToken({
+      userId: user.id,
+      vecinoPiso: user.vecino_piso,
+      email: user.email,
+      isAdmin: user.is_admin,
+    });
+    res.json({ token: jwtToken, user });
+  } catch (err) {
+    logger.error(err, 'Register error');
+    res.status(500).json({ error: 'Error interno del servidor' });
+  }
+});
+
+router.post('/auth/forgot-password', rateLimit(3, 15 * 60 * 1000), async (req: Request, res: Response) => {
+  try {
+    const { email } = req.body;
+    if (!email) {
+      res.status(400).json({ error: 'Email requerido' });
+      return;
+    }
+    const result = await query('SELECT id, email FROM usuarios WHERE email = $1', [email]);
+    if (result.rows.length > 0) {
+      const token = await createEmailToken(email, 'reset');
+      await sendResetEmail(email, token);
+    }
+    res.json({ message: 'Si el email existe en nuestro sistema, recibiras un enlace para restablecer tu contrasena' });
+  } catch (err) {
+    logger.error(err, 'Forgot password error');
+    res.status(500).json({ error: 'Error interno del servidor' });
+  }
+});
+
+router.post('/auth/reset-password', rateLimit(5, 15 * 60 * 1000), async (req: Request, res: Response) => {
+  try {
+    const { token, password } = req.body;
+    if (!token || !password) {
+      res.status(400).json({ error: 'Token y contrasena son requeridos' });
+      return;
+    }
+    const pwdError = validatePassword(password);
+    if (pwdError) {
+      res.status(400).json({ error: pwdError });
+      return;
+    }
+    const tokenData = await verifyEmailToken(token, 'reset');
+    if (!tokenData) {
+      res.status(400).json({ error: 'Token invalido, expirado o ya usado' });
+      return;
+    }
+    const password_hash = await bcrypt.hash(password, 12);
+    await query('UPDATE usuarios SET password_hash = $1 WHERE email = $2', [password_hash, tokenData.email]);
+    await markTokenUsed(tokenData.id);
+    res.json({ message: 'Contrasena actualizada correctamente' });
+  } catch (err) {
+    logger.error(err, 'Reset password error');
     res.status(500).json({ error: 'Error interno del servidor' });
   }
 });

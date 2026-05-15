@@ -15,6 +15,7 @@ interface AuthState {
   login: (email: string, password: string) => Promise<void>;
   logout: () => void;
   checkAuth: () => Promise<void>;
+  registerFromInvite: (token: string, password: string) => Promise<void>;
 }
 
 export const useAuthStore = create<AuthState>((set) => ({
@@ -49,5 +50,14 @@ export const useAuthStore = create<AuthState>((set) => ({
       localStorage.removeItem('token');
       set({ token: null, user: null, loading: false });
     }
+  },
+
+  registerFromInvite: async (token: string, password: string) => {
+    const data = await apiFetch<{ token: string; user: User }>('/auth/register', {
+      method: 'POST',
+      body: JSON.stringify({ token, password }),
+    });
+    localStorage.setItem('token', data.token);
+    set({ token: data.token, user: data.user });
   },
 }));

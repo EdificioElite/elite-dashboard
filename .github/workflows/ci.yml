@@ -4,32 +4,12 @@ on:
   push:
     branches: [main, dev]
   pull_request:
-    types: [opened, synchronize, reopened, labeled, unlabeled]
+    types: [opened, synchronize, reopened]
     branches: [main, dev]
 
 jobs:
-  check-labels:
-    runs-on: ubuntu-latest
-    if: github.event_name == 'pull_request' && github.event.pull_request.base.ref == 'main'
-    permissions:
-      contents: read
-      pull-requests: read
-    steps:
-      - name: Check semver label
-        run: |
-          LABELS=$(gh api repos/${{ github.repository }}/pulls/${{ github.event.pull_request.number }} --jq '.labels[].name')
-          if echo "${LABELS}" | grep -qE "^(major|minor|patch)$"; then
-            echo "Label valida encontrada"
-          else
-            echo "Error: el PR necesita un label major, minor o patch"
-            exit 1
-          fi
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
   backend:
     runs-on: ubuntu-latest
-    if: github.event_name != 'pull_request' || (github.event.action != 'labeled' && github.event.action != 'unlabeled')
     defaults:
       run:
         working-directory: api
@@ -46,7 +26,6 @@ jobs:
 
   frontend:
     runs-on: ubuntu-latest
-    if: github.event_name != 'pull_request' || (github.event.action != 'labeled' && github.event.action != 'unlabeled')
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -60,7 +39,6 @@ jobs:
 
   e2e:
     runs-on: ubuntu-latest
-    if: github.event_name != 'pull_request' || (github.event.action != 'labeled' && github.event.action != 'unlabeled')
     timeout-minutes: 15
     steps:
       - uses: actions/checkout@v4

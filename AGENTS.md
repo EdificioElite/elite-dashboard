@@ -2,6 +2,8 @@
 
 Instrucciones para agentes de IA que trabajen en este proyecto.
 
+> **Contexto del proyecto:** Ver [README.md](./README.md) para arquitectura, tech stack, estructura del proyecto y guia de despliegue.
+
 ## Comandos
 
 ### Frontend
@@ -19,7 +21,7 @@ npm run preview      # Previsualizar build de produccion
 cd api && npm install   # Instalar dependencias
 cd api && npm run dev   # Servidor de desarrollo con tsx (:3001)
 cd api && npm run build # Compilar TypeScript a dist/
-cd api && npm run migrate # Ejecutar migraciones SQL
+cd api && npm run migrate # Ejecutar migraciones SQL (solo humanas)
 ```
 
 ### Verificacion
@@ -40,6 +42,14 @@ cd api && npx tsc --noEmit     # Verificar backend compila
 - Variables de entorno: nunca commitear `.env`, usar `.env.example` como plantilla
 - Estilos con Tailwind CSS, no CSS custom
 - Tailwind config: `content` incluye `./index.html` y `./src/**/*.{js,ts,jsx,tsx}`
+
+## Base de datos
+
+- **Las migraciones SQL en los entornos reales (dev.edificioelite.com, www.edificioelite.com) las ejecuta un humano, NUNCA un agente de IA.** Los archivos de migracion en `api/migrations/` deben ser commiteados por el agente para que el humano los revise y ejecute manualmente en esos entornos. En docker-compose local o entorno de desarrollo local, el agente puede ejecutar migraciones sin problema.
+- Las tablas de n8n (`contadores`, `facturas`, `facturaelectrica`, `consumos`) son de solo lectura para el dashboard.
+- La tabla `vecinos` es propiedad del dashboard. `n8nuser` solo tiene lectura sobre ella.
+- El dashboard es propietario de las tablas `usuarios`, `vecinos` y `email_tokens`.
+- Los cambios de permisos (GRANTs) van en las migraciones — un humano los aplica.
 
 ## Testing
 
@@ -66,26 +76,13 @@ cd api && npm test        # Backend tests (vitest + supertest)
 
 ## Flujo de trabajo
 
-- **Siempre trabajar en ramas**: `feat/`, `fix/`, `docs/`, `chore/` desde `dev`
+Ver [CONTRIBUTING.md](./CONTRIBUTING.md) para las reglas de ramas, PRs, entornos y CI/CD.
+
+Como agente, ademas:
+- **Siempre trabajar en ramas** `feat/`, `fix/`, `docs/`, `chore/` desde `dev`
 - **Siempre crear PR** para mergear a `dev`. Nunca push directo a `dev` ni a `main`.
-- **Labels semver** (`major`, `minor`, `patch`) solo se exigen en PRs de `dev` → `main`
-- Para promocionar a produccion, ejecutar manualmente el workflow `Promote dev to main`
-  - Esto crea automaticamente un PR de `dev` → `main`
-  - Asignar label `major`, `minor` o `patch` a ese PR antes de mergearlo
-- Tras merge a `main`, el workflow `Sync main to dev` crea automaticamente un PR de `main` → `dev`
-  para sincronizar version bumps, hotfixes y releases de vuelta a dev
-
-### Ramas protegidas
-
-`main` y `dev` requieren PR antes de merge y que pasen los checks:
-`backend`, `frontend`, `e2e`, `check-labels`
-
-### Entornos
-
-| Rama | Entorno | URL | Backend |
-|---|---|---|---|
-| `dev` | Preview/Dev | dev.edificioelite.com | api-dev.edificioelite.com |
-| `main` | Production | www.edificioelite.com | api.edificioelite.com |
+- **Siempre verificar que la CI esta en verde** (`gh pr checks`) antes de pedir review humana. Si e2e, backend o frontend fallan, analizar los logs y corregir.
+- **Siempre revisar los comentarios de Copilot en el PR** y resolver los issues que señale. Copilot revisa automaticamente cada PR y deja comentarios inline (puede tardar unos minutos). Revisar Copilot despues de la CI, no antes.
 
 ## Debugging / Logs
 
@@ -98,22 +95,6 @@ Si algo falla en los entornos dev o prod, consulta los logs en Grafana (MCP conf
 
 Usa las herramientas `grafana_query_loki_logs`, `grafana_list_loki_label_names`, etc.
 NO especules sobre la causa de un fallo sin revisar los logs primero.
-
-## CI/CD
-
-GitHub Actions (`.github/workflows/ci.yml`) ejecuta en cada push y PR a `main` y `dev`:
-- Backend: typecheck + tests
-- Frontend: tests + build
-- E2E: stack docker-compose + Playwright
-
-Release (`.github/workflows/release.yml`) se ejecuta en merge a main:
-- Solo si el commit empieza por "Merge pull request"
-- Bump semver segun label de la PR
-- Tag + GitHub Release + Docker image
-
-Promote (`.github/workflows/promote.yml`): workflow_dispatch manual para crear PR de dev → main
-
-Sync (`.github/workflows/sync.yml`): auto back-merge main → dev tras cada release
 
 ## Superpowers
 
