@@ -1,16 +1,21 @@
 name: CI
 
 on:
-  workflow_dispatch:
   push:
     branches: [main, dev]
   pull_request:
     types: [opened, synchronize, reopened]
     branches: [main, dev]
+  pull_request_target:
+    types: [opened, synchronize]
+    branches: [dev]
 
 jobs:
   backend:
     runs-on: ubuntu-latest
+    if: |
+      github.event_name != 'pull_request_target' ||
+      startsWith(github.event.pull_request.head.ref, 'release/')
     defaults:
       run:
         working-directory: api
@@ -27,6 +32,9 @@ jobs:
 
   frontend:
     runs-on: ubuntu-latest
+    if: |
+      github.event_name != 'pull_request_target' ||
+      startsWith(github.event.pull_request.head.ref, 'release/')
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -40,6 +48,9 @@ jobs:
 
   e2e:
     runs-on: ubuntu-latest
+    if: |
+      github.event_name != 'pull_request_target' ||
+      startsWith(github.event.pull_request.head.ref, 'release/')
     timeout-minutes: 15
     steps:
       - uses: actions/checkout@v4
