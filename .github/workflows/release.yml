@@ -72,6 +72,15 @@ jobs:
           jq --arg v "${{ steps.version.outputs.version }}" '.version = $v' package.json > tmp.json && mv tmp.json package.json
           jq --arg v "${{ steps.version.outputs.version }}" '.version = $v' api/package.json > tmp.json && mv tmp.json api/package.json
 
+      - name: Clean up existing release branch
+        if: steps.check.outputs.commits_ahead != '0'
+        run: |
+          BRANCH="release/v${{ steps.version.outputs.version }}"
+          if git ls-remote --exit-code --heads origin "${BRANCH}" > /dev/null 2>&1; then
+            echo "Borrando rama remota existente: ${BRANCH}"
+            git push origin --delete "${BRANCH}"
+          fi
+
       - name: Create release branch and push
         if: steps.check.outputs.commits_ahead != '0'
         id: branch
