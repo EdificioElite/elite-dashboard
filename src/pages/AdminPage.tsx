@@ -5,6 +5,7 @@ import { useAuthStore } from '../store/auth';
 import Header from '../components/Header';
 import Icon from '../components/Icon';
 import EditUserModal from '../components/EditUserModal';
+import EditVecinoModal from '../components/EditVecinoModal';
 import ChangePasswordModal from '../components/ChangePasswordModal';
 import DeleteUserModal from '../components/DeleteUserModal';
 
@@ -15,6 +16,10 @@ interface Vecino {
   email: string | null;
   vecino_email: string | null;
   is_admin: boolean;
+  coeficiente: string | null;
+  enviar_email: boolean;
+  device_identification: string | null;
+  serial_number: string | null;
 }
 
 export default function AdminPage() {
@@ -34,6 +39,7 @@ export default function AdminPage() {
   const [editingVecino, setEditingVecino] = useState<Vecino | null>(null);
   const [changingPassword, setChangingPassword] = useState<Vecino | null>(null);
   const [deletingVecino, setDeletingVecino] = useState<Vecino | null>(null);
+  const [editingVecinoData, setEditingVecinoData] = useState<Vecino | null>(null);
   const [inviteMessage, setInviteMessage] = useState('');
   const [inviteError, setInviteError] = useState(false);
   const [editingVecinoEmail, setEditingVecinoEmail] = useState<string | null>(null);
@@ -51,9 +57,11 @@ export default function AdminPage() {
     setFormError('');
     setFormSuccess('');
     try {
+      const body: Record<string, string> = { email, password };
+      if (vecinoPiso) body.vecino_piso = vecinoPiso;
       await apiFetch('/admin/usuarios', {
         method: 'POST',
-        body: JSON.stringify({ email, password, vecino_piso: vecinoPiso }),
+        body: JSON.stringify(body),
       });
       setFormSuccess('Usuario creado correctamente');
       setEmail('');
@@ -226,10 +234,9 @@ export default function AdminPage() {
                     id="vecinoPiso"
                     value={vecinoPiso}
                     onChange={(e) => setVecinoPiso(e.target.value)}
-                    required
                     className="input-card"
                   >
-                    <option value="">Seleccionar piso...</option>
+                    <option value="">Sin piso (usuario global)...</option>
                     {vecinos
                       .filter((v) => !v.email)
                       .map((v) => (
@@ -304,8 +311,8 @@ export default function AdminPage() {
                   <tr>
                     <th>Piso</th>
                     <th>Nombre</th>
-                    <th>Email</th>
-                    <th>Admin</th>
+                    <th>Email login</th>
+                    <th>Rol</th>
                     <th className="text-center">Acciones</th>
                   </tr>
                 </thead>
@@ -328,44 +335,52 @@ export default function AdminPage() {
                       </td>
                       <td>
                         <div className="flex items-center justify-center gap-1">
-                           {!v.user_id ? (
-                             v.vecino_email ? (
-                               <button
-                                 onClick={() => handleInvite(v.piso)}
-                                 className="btn btn-ghost p-2 text-accent hover:text-accent/80"
-                                 title="Enviar invitacion"
-                               >
-                                 <Icon name="mail" size={15} />
-                               </button>
-                             ) : (
-                               editingVecinoEmail === v.piso ? (
-                                 <span className="flex items-center gap-1">
-                                   <input
-                                     type="email"
-                                     value={editingVecinoEmailValue}
-                                     onChange={(e) => setEditingVecinoEmailValue(e.target.value)}
-                                     onKeyDown={(e) => { if (e.key === 'Enter') handleSaveVecinoEmail(); if (e.key === 'Escape') setEditingVecinoEmail(null); }}
-                                     className="input-card text-xs py-0.5 px-1.5 w-32"
-                                     placeholder="email..."
-                                     autoFocus
-                                   />
-                                   <button onClick={handleSaveVecinoEmail} className="btn btn-ghost p-1 text-sage" title="Guardar"><Icon name="check" size={12} /></button>
-                                   <button onClick={() => setEditingVecinoEmail(null)} className="btn btn-ghost p-1 text-rise" title="Cancelar"><Icon name="x" size={12} /></button>
-                                 </span>
-                               ) : (
-                                 <span className="text-[11px] text-cocoa/25">
-                                   Sin email{' '}
-                                   <button
-                                     onClick={() => { setEditingVecinoEmail(v.piso); setEditingVecinoEmailValue(''); }}
-                                     className="btn btn-ghost p-1 -m-1 text-cocoa/40 hover:text-accent inline-flex align-middle"
-                                     title="Asignar email"
-                                   >
-                                     <Icon name="edit" size={12} />
-                                   </button>
-                                 </span>
-                               )
-                             )
+                          {/* Editar vecino (todos los campos) */}
+                          <button
+                            onClick={() => setEditingVecinoData(v)}
+                            className="btn btn-ghost p-2 text-cocoa/40 hover:text-accent-2"
+                            title="Editar vecino"
+                          >
+                            <Icon name="users" size={15} />
+                          </button>
+
+                          {/* Email facturas: editar inline o invitar */}
+                          {v.vecino_email ? (
+                            <button
+                              onClick={() => handleInvite(v.piso)}
+                              className="btn btn-ghost p-2 text-accent hover:text-accent/80"
+                              title="Enviar invitacion"
+                            >
+                              <Icon name="mail" size={15} />
+                            </button>
                           ) : (
+                            editingVecinoEmail === v.piso ? (
+                              <span className="flex items-center gap-1">
+                                <input
+                                  type="email"
+                                  value={editingVecinoEmailValue}
+                                  onChange={(e) => setEditingVecinoEmailValue(e.target.value)}
+                                  onKeyDown={(e) => { if (e.key === 'Enter') handleSaveVecinoEmail(); if (e.key === 'Escape') setEditingVecinoEmail(null); }}
+                                  className="input-card text-xs py-0.5 px-1.5 w-32"
+                                  placeholder="email facturas..."
+                                  autoFocus
+                                />
+                                <button onClick={handleSaveVecinoEmail} className="btn btn-ghost p-1 text-sage" title="Guardar"><Icon name="check" size={12} /></button>
+                                <button onClick={() => setEditingVecinoEmail(null)} className="btn btn-ghost p-1 text-rise" title="Cancelar"><Icon name="x" size={12} /></button>
+                              </span>
+                            ) : (
+                              <button
+                                onClick={() => { setEditingVecinoEmail(v.piso); setEditingVecinoEmailValue(''); }}
+                                className="btn btn-ghost p-2 text-cocoa/40 hover:text-accent"
+                                title="Asignar email facturas"
+                              >
+                                <Icon name="mail" size={15} />
+                              </button>
+                            )
+                          )}
+
+                          {/* Acciones de usuario (solo si tiene user_id) */}
+                          {v.user_id ? (
                             <>
                               <button
                                 onClick={() => setEditingVecino(v)}
@@ -391,6 +406,8 @@ export default function AdminPage() {
                                 </button>
                               )}
                             </>
+                          ) : (
+                            <span className="text-[11px] text-cocoa/25 w-[72px] text-center">—</span>
                           )}
                         </div>
                       </td>
@@ -407,6 +424,25 @@ export default function AdminPage() {
           </div>
         </div>
       </main>
+
+      {editingVecinoData && (
+        <EditVecinoModal
+          vecino={{
+            piso: editingVecinoData.piso,
+            nombre: editingVecinoData.nombre,
+            email: editingVecinoData.vecino_email,
+            coeficiente: editingVecinoData.coeficiente,
+            enviar_email: editingVecinoData.enviar_email || false,
+            device_identification: editingVecinoData.device_identification,
+            serial_number: editingVecinoData.serial_number,
+          }}
+          onClose={() => setEditingVecinoData(null)}
+          onSaved={() => {
+            setEditingVecinoData(null);
+            apiFetch<Vecino[]>('/admin/vecinos').then(setVecinos).catch(console.error);
+          }}
+        />
+      )}
 
       {editingVecino && (
         <EditUserModal

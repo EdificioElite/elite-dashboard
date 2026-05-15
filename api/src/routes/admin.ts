@@ -13,7 +13,8 @@ const router = Router();
 router.get('/admin/vecinos', authMiddleware, adminMiddleware, async (_req: Request, res: Response) => {
   try {
     const result = await query(`
-      SELECT v.piso, v.nombre, u.id as user_id, u.email, v.email as vecino_email, u.is_admin
+      SELECT v.piso, v.nombre, u.id as user_id, u.email, v.email as vecino_email, u.is_admin,
+             v.coeficiente, v.enviar_email, v.device_identification, v.serial_number
       FROM vecinos v
       LEFT JOIN usuarios u ON u.vecino_piso = v.piso
       ORDER BY v.piso
