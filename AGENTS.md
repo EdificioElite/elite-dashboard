@@ -81,8 +81,8 @@ Ver [CONTRIBUTING.md](./CONTRIBUTING.md) para las reglas de ramas, PRs, entornos
 Como agente, ademas:
 - **Siempre trabajar en ramas** `feat/`, `fix/`, `docs/`, `chore/` desde `dev`
 - **Siempre crear PR** para mergear a `dev`. Nunca push directo a `dev` ni a `main`.
-- **Siempre revisar los comentarios de Copilot en el PR** y resolver los issues que señale antes de pedir review humana. Copilot revisa automaticamente cada PR y deja comentarios inline.
 - **Siempre verificar que la CI esta en verde** (`gh pr checks`) antes de pedir review humana. Si e2e, backend o frontend fallan, analizar los logs y corregir.
+- **Siempre revisar los comentarios de Copilot en el PR** y resolver los issues que señale. Copilot revisa automaticamente cada PR y deja comentarios inline (puede tardar unos minutos). Revisar Copilot despues de la CI, no antes.
 
 ## Debugging / Logs
 

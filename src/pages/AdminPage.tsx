@@ -346,13 +346,17 @@ export default function AdminPage() {
 
                           {/* Email facturas: editar inline o invitar */}
                           {v.vecino_email ? (
-                            <button
-                              onClick={() => handleInvite(v.piso)}
-                              className="btn btn-ghost p-2 text-accent hover:text-accent/80"
-                              title="Enviar invitacion"
-                            >
-                              <Icon name="mail" size={15} />
-                            </button>
+                            !v.user_id ? (
+                              <button
+                                onClick={() => handleInvite(v.piso)}
+                                className="btn btn-ghost p-2 text-accent hover:text-accent/80"
+                                title="Enviar invitacion"
+                              >
+                                <Icon name="mail" size={15} />
+                              </button>
+                            ) : (
+                              <span className="text-[11px] text-cocoa/25" title={v.vecino_email}>{v.vecino_email}</span>
+                            )
                           ) : (
                             editingVecinoEmail === v.piso ? (
                               <span className="flex items-center gap-1">
