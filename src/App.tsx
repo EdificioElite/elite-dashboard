@@ -4,8 +4,10 @@ import { useAuthStore } from './store/auth';
 import LoginPage from './pages/LoginPage';
 import InicioPage from './pages/InicioPage';
 import DashboardPage from './pages/DashboardPage';
-import AdminPage from './pages/AdminPage';
-import AdminVecinoPage from './pages/AdminVecinoPage';
+import VecinosPage from './pages/VecinosPage';
+import UsuariosPage from './pages/UsuariosPage';
+import AdminAerotermiaPage from './pages/AdminAerotermiaPage';
+import AdminConsumoPage from './pages/AdminConsumoPage';
 import JuntasGeneralesPage from './pages/JuntasGeneralesPage';
 import ContactosPage from './pages/ContactosPage';
 import RegistroPage from './pages/RegistroPage';
@@ -57,11 +59,28 @@ export default function App() {
           <Route path="/dashboard" element={<Navigate to="/aerotermia" replace />} />
           <Route path="/juntas" element={<ProtectedRoute><JuntasGeneralesPage /></ProtectedRoute>} />
           <Route path="/contactos" element={<ProtectedRoute><ContactosPage /></ProtectedRoute>} />
+          <Route path="/admin" element={<Navigate to="/admin/vecinos" replace />} />
           <Route
-            path="/admin"
+            path="/admin/vecinos"
             element={
               <ProtectedRoute adminOnly>
-                <AdminPage />
+                <VecinosPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/admin/usuarios"
+            element={
+              <ProtectedRoute adminOnly>
+                <UsuariosPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/admin/aerotermia"
+            element={
+              <ProtectedRoute adminOnly>
+                <AdminAerotermiaPage />
               </ProtectedRoute>
             }
           />
@@ -69,7 +88,7 @@ export default function App() {
             path="/admin/vecino/:piso"
             element={
               <ProtectedRoute adminOnly>
-                <AdminVecinoPage />
+                <AdminConsumoPage />
               </ProtectedRoute>
             }
           />
