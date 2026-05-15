@@ -18,6 +18,8 @@ jobs:
     permissions:
       contents: write
       pull-requests: write
+    env:
+      GH_TOKEN: ${{ secrets.RELEASE_TOKEN || secrets.GITHUB_TOKEN }}
     steps:
       - uses: actions/checkout@v4
         with:
@@ -39,9 +41,6 @@ jobs:
             echo "Cerrando PR de release existente #${num}"
             gh pr close "${num}" --comment "Reemplazado por un nuevo PR de release."
           done
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
       - name: Compute next version
         if: steps.check.outputs.commits_ahead != '0'
         id: version
@@ -98,8 +97,6 @@ jobs:
           echo "PR a dev creada: ${PR_URL}"
           echo "dev_pr=${PR_NUMBER}" >> $GITHUB_OUTPUT
           gh pr merge "${PR_NUMBER}" --auto --merge
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         id: dev_pr
 
       - name: Wait for dev PR to merge
@@ -116,8 +113,6 @@ jobs:
           done
           echo "Timeout esperando merge de PR a dev"
           exit 1
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Create release PR dev → main and auto-merge
         if: steps.check.outputs.commits_ahead != '0'
@@ -133,8 +128,6 @@ jobs:
           echo "PR a main creada: ${PR_URL}"
 
           gh pr merge "${PR_NUMBER}" --auto --merge
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Nothing to promote
         if: steps.check.outputs.commits_ahead == '0'
