@@ -38,6 +38,11 @@ export default function VecinosPage() {
   const [newDeviceId, setNewDeviceId] = useState('');
   const [newSerialNumber, setNewSerialNumber] = useState('');
 
+  const [inviteMessage, setInviteMessage] = useState('');
+  const [inviteError, setInviteError] = useState(false);
+  const [editingVecinoEmail, setEditingVecinoEmail] = useState<string | null>(null);
+  const [editingVecinoEmailValue, setEditingVecinoEmailValue] = useState('');
+
   const fetchVecinos = () => {
     apiFetch<Vecino[]>('/admin/vecinos').then(setVecinos).catch(console.error).finally(() => setLoading(false));
   };
@@ -71,6 +76,32 @@ export default function VecinosPage() {
     }
   };
 
+  const handleInvite = async (piso: string) => {
+    setInviteMessage('');
+    setInviteError(false);
+    try {
+      await apiFetch('/admin/invitar', { method: 'POST', body: JSON.stringify({ piso }) });
+      setInviteMessage('Invitacion enviada correctamente');
+    } catch (err: any) {
+      setInviteMessage(err.message || 'Error al enviar invitacion');
+      setInviteError(true);
+    }
+  };
+
+  const handleSaveVecinoEmail = async () => {
+    if (!editingVecinoEmail || !editingVecinoEmailValue) return;
+    try {
+      await apiFetch(`/admin/vecinos/${editingVecinoEmail}`, {
+        method: 'PUT',
+        body: JSON.stringify({ email: editingVecinoEmailValue }),
+      });
+      setEditingVecinoEmail(null);
+      fetchVecinos();
+    } catch (err: any) {
+      alert(err.message || 'Error al guardar email');
+    }
+  };
+
   const filtered = vecinos.filter(v =>
     v.piso.toLowerCase().includes(search.toLowerCase()) ||
     (v.nombre && v.nombre.toLowerCase().includes(search.toLowerCase()))
@@ -87,6 +118,22 @@ export default function VecinosPage() {
   return (
     <div className="page-in">
       <Header />
+
+      {(inviteMessage) && (
+          <div className="max-w-[1180px] mx-auto px-6 pt-2">
+            <div
+              className="px-4 py-3 rounded-xl text-sm flex items-center gap-2"
+              style={
+                inviteError
+                  ? { background: 'rgba(163,64,42,.08)', color: '#a3402a' }
+                  : { background: 'rgba(91,122,74,.1)', color: '#5b7a4a' }
+              }
+            >
+              <Icon name={inviteError ? 'alertTriangle' : 'check'} size={14} />
+              {inviteMessage}
+            </div>
+          </div>
+        )}
 
       <main className="max-w-[1180px] mx-auto px-6 flex flex-col gap-[22px] pb-10">
         <div className="pt-2 flex items-start justify-between flex-wrap gap-4">
@@ -196,6 +243,27 @@ export default function VecinosPage() {
                         <button onClick={() => navigate(`/admin/vecino/${v.piso}`)} className="btn btn-ghost p-2 text-accent hover:text-accent/80" title="Ver aerotermia">
                           <Icon name="chart" size={15} />
                         </button>
+                        {v.vecino_email ? (
+                          !v.user_id ? (
+                            <button onClick={() => handleInvite(v.piso)} className="btn btn-ghost p-2 text-accent hover:text-accent/80" title="Enviar invitacion">
+                              <Icon name="mail" size={15} />
+                            </button>
+                          ) : (
+                            <span className="text-[11px] text-cocoa/25 w-[24px] text-center" title={v.vecino_email}>✓</span>
+                          )
+                        ) : (
+                          editingVecinoEmail === v.piso ? (
+                            <span className="flex items-center gap-1">
+                              <input type="email" value={editingVecinoEmailValue} onChange={e => setEditingVecinoEmailValue(e.target.value)} onKeyDown={e => { if (e.key === 'Enter') handleSaveVecinoEmail(); if (e.key === 'Escape') setEditingVecinoEmail(null); }} className="input-card text-xs py-0.5 px-1.5 w-32" placeholder="email..." autoFocus />
+                              <button onClick={handleSaveVecinoEmail} className="btn btn-ghost p-1 text-sage" title="Guardar"><Icon name="check" size={12} /></button>
+                              <button onClick={() => setEditingVecinoEmail(null)} className="btn btn-ghost p-1 text-rise" title="Cancelar"><Icon name="x" size={12} /></button>
+                            </span>
+                          ) : (
+                            <button onClick={() => { setEditingVecinoEmail(v.piso); setEditingVecinoEmailValue(''); }} className="btn btn-ghost p-2 text-cocoa/40 hover:text-accent" title="Asignar email facturas">
+                              <Icon name="mail" size={15} />
+                            </button>
+                          )
+                        )}
                         <button onClick={() => setEditingVecinoData(v)} className="btn btn-ghost p-2 text-cocoa/40 hover:text-accent-2" title="Editar vecino">
                           <Icon name="edit" size={15} />
                         </button>
