@@ -2,6 +2,8 @@
 
 Instrucciones para agentes de IA que trabajen en este proyecto.
 
+> **Contexto del proyecto:** Ver [README.md](./README.md) para arquitectura, tech stack, estructura del proyecto y guia de despliegue.
+
 ## Comandos
 
 ### Frontend
