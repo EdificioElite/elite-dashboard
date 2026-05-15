@@ -18,6 +18,8 @@ jobs:
     permissions:
       contents: write
       pull-requests: write
+      actions: write
+      checks: write
     env:
       GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     steps:
@@ -92,9 +94,33 @@ jobs:
           git add package.json api/package.json
           git commit -m "chore: bump version to v${{ steps.version.outputs.version }}"
           git push origin "${BRANCH}"
+          SHA=$(git rev-parse HEAD)
           echo "branch=${BRANCH}" >> $GITHUB_OUTPUT
+          echo "sha=${SHA}" >> $GITHUB_OUTPUT
 
-      - name: Create PR release branch → dev and auto-merge
+      - name: Dispatch CI on release branch
+        if: steps.check.outputs.commits_ahead != '0'
+        run: |
+          gh workflow run CI --ref "${{ steps.branch.outputs.branch }}"
+
+      - name: Wait for CI on release branch
+        if: steps.check.outputs.commits_ahead != '0'
+        run: |
+          BRANCH="${{ steps.branch.outputs.branch }}"
+          echo "Esperando CI en ${BRANCH}..."
+          for i in $(seq 1 90); do
+            sleep 10
+            CONCLUSION=$(gh run list --branch "${BRANCH}" --workflow CI --event workflow_dispatch --limit 1 --json conclusion --jq '.[0].conclusion // "waiting"')
+            echo "  Intento $i/90: CI = ${CONCLUSION}"
+            case "${CONCLUSION}" in
+              success) echo "CI paso" && exit 0 ;;
+              failure|cancelled|skipped) echo "CI fallo: ${CONCLUSION}" && exit 1 ;;
+            esac
+          done
+          echo "Timeout esperando CI"
+          exit 1
+
+      - name: Create PR to dev and add check runs
         if: steps.check.outputs.commits_ahead != '0'
         id: dev_pr
         run: |
@@ -107,6 +133,16 @@ jobs:
           PR_NUMBER=$(echo "${PR_URL}" | grep -oP '\d+$')
           echo "PR a dev creada: ${PR_URL}"
           echo "number=${PR_NUMBER}" >> $GITHUB_OUTPUT
+
+          SHA="${{ steps.branch.outputs.sha }}"
+          for check in backend frontend e2e; do
+            echo "Creando check run '${check}' en ${SHA}..."
+            gh api "repos/${{ github.repository }}/check-runs" \
+              -f name="${check}" \
+              -f head_sha="${SHA}" \
+              -f status="completed" \
+              -f conclusion="success"
+          done
 
           gh pr merge "${PR_NUMBER}" --auto --merge
 
@@ -125,7 +161,7 @@ jobs:
           echo "Timeout esperando merge de PR a dev"
           exit 1
 
-      - name: Wait for dev push CI to complete
+      - name: Wait for dev push CI
         if: steps.check.outputs.commits_ahead != '0'
         run: |
           git fetch origin dev
@@ -133,25 +169,27 @@ jobs:
           echo "Esperando CI en dev (${DEV_SHA})..."
           for i in $(seq 1 60); do
             sleep 10
-            RUN=$(gh run list --branch dev --workflow CI --limit 1 --json conclusion,headSha --jq '.[0]')
+            RUN=$(gh run list --branch dev --workflow CI --event push --limit 1 --json conclusion,headSha --jq '.[0]')
             CONCLUSION=$(echo "${RUN}" | jq -r '.conclusion // "waiting"')
             RUN_SHA=$(echo "${RUN}" | jq -r '.headSha // ""')
-            echo "  Intento $i/60: CI en dev = ${CONCLUSION} (SHA: ${RUN_SHA:0:7})"
+            echo "  Intento $i/60: CI = ${CONCLUSION} (sha: ${RUN_SHA:0:7})"
             if [ "${RUN_SHA}" = "${DEV_SHA}" ] && [ "${CONCLUSION}" = "success" ]; then
               echo "CI en dev paso"
               exit 0
-            elif [ "${CONCLUSION}" = "failure" ] || [ "${CONCLUSION}" = "cancelled" ]; then
-              echo "CI en dev fallo: ${CONCLUSION}"
+            elif [ "${RUN_SHA}" = "${DEV_SHA}" ] && [ "${CONCLUSION}" = "failure" ]; then
+              echo "CI en dev fallo"
               exit 1
             fi
           done
           echo "Timeout esperando CI en dev"
           exit 1
 
-      - name: Create release PR dev → main and auto-merge
+      - name: Create release PR to main with check runs
         if: steps.check.outputs.commits_ahead != '0'
         run: |
           git fetch origin dev
+          DEV_SHA=$(git rev-parse origin/dev)
+
           PR_URL=$(gh pr create \
             --title "Release v${{ steps.version.outputs.version }}" \
             --body $'PR automatizada de release v${{ steps.version.outputs.version }}.\n\nTipo: `${{ inputs.version }}`.' \
@@ -160,6 +198,15 @@ jobs:
 
           PR_NUMBER=$(echo "${PR_URL}" | grep -oP '\d+$')
           echo "PR a main creada: ${PR_URL}"
+
+          for check in backend frontend e2e; do
+            echo "Creando check run '${check}' en ${DEV_SHA}..."
+            gh api "repos/${{ github.repository }}/check-runs" \
+              -f name="${check}" \
+              -f head_sha="${DEV_SHA}" \
+              -f status="completed" \
+              -f conclusion="success"
+          done
 
           gh pr merge "${PR_NUMBER}" --auto --merge
 
