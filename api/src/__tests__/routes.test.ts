@@ -900,4 +900,105 @@ describe('Admin routes', () => {
       expect(res.body.message).toContain('Invitacion enviada');
     });
   });
+
+  describe('PUT /api/admin/vecinos/:piso', () => {
+    beforeEach(() => {
+      vi.resetAllMocks();
+    });
+
+    it('returns 403 for non-admin user', async () => {
+      const app = createApp();
+      const res = await request(app)
+        .put('/api/admin/vecinos/1A')
+        .set('Authorization', `Bearer ${userToken(false)}`)
+        .send({ nombre: 'Nuevo nombre' });
+      expect(res.status).toBe(403);
+    });
+
+    it('returns 400 when no fields provided', async () => {
+      const app = createApp();
+      const res = await request(app)
+        .put('/api/admin/vecinos/1A')
+        .set('Authorization', `Bearer ${userToken(true)}`)
+        .send({});
+      expect(res.status).toBe(400);
+      expect(res.body.error).toMatch(/campo/);
+    });
+
+    it('updates vecino nombre for admin', async () => {
+      mockQuery.mockResolvedValueOnce({ rows: [{ piso: '1A', nombre: 'Nuevo nombre', email: 'v@e.com' }] });
+      const app = createApp();
+      const res = await request(app)
+        .put('/api/admin/vecinos/1A')
+        .set('Authorization', `Bearer ${userToken(true)}`)
+        .send({ nombre: 'Nuevo nombre' });
+      expect(res.status).toBe(200);
+      expect(res.body.nombre).toBe('Nuevo nombre');
+      expect(mockQuery).toHaveBeenCalledWith(
+        expect.stringContaining('UPDATE vecinos'),
+        expect.arrayContaining(['Nuevo nombre', '1A'])
+      );
+    });
+
+    it('updates vecino email for admin', async () => {
+      mockQuery.mockResolvedValueOnce({ rows: [{ piso: '1A', nombre: 'V1', email: 'new@email.com' }] });
+      const app = createApp();
+      const res = await request(app)
+        .put('/api/admin/vecinos/1A')
+        .set('Authorization', `Bearer ${userToken(true)}`)
+        .send({ email: 'new@email.com' });
+      expect(res.status).toBe(200);
+      expect(res.body.email).toBe('new@email.com');
+    });
+
+    it('updates vecino coeficiente for admin', async () => {
+      mockQuery.mockResolvedValueOnce({ rows: [{ piso: '1A', nombre: 'V1', email: 'v@e.com', coeficiente: '0.30' }] });
+      const app = createApp();
+      const res = await request(app)
+        .put('/api/admin/vecinos/1A')
+        .set('Authorization', `Bearer ${userToken(true)}`)
+        .send({ coeficiente: '0.30' });
+      expect(res.status).toBe(200);
+    });
+
+    it('updates vecino enviar_email for admin', async () => {
+      mockQuery.mockResolvedValueOnce({ rows: [{ piso: '1A', nombre: 'V1', email: 'v@e.com', enviar_email: true }] });
+      const app = createApp();
+      const res = await request(app)
+        .put('/api/admin/vecinos/1A')
+        .set('Authorization', `Bearer ${userToken(true)}`)
+        .send({ enviar_email: true });
+      expect(res.status).toBe(200);
+    });
+
+    it('updates vecino device_identification for admin', async () => {
+      mockQuery.mockResolvedValueOnce({ rows: [{ piso: '1A', nombre: 'V1', email: 'v@e.com', device_identification: 'DEVID99' }] });
+      const app = createApp();
+      const res = await request(app)
+        .put('/api/admin/vecinos/1A')
+        .set('Authorization', `Bearer ${userToken(true)}`)
+        .send({ device_identification: 'DEVID99' });
+      expect(res.status).toBe(200);
+    });
+
+    it('updates vecino serial_number for admin', async () => {
+      mockQuery.mockResolvedValueOnce({ rows: [{ piso: '1A', nombre: 'V1', email: 'v@e.com', serial_number: '1234' }] });
+      const app = createApp();
+      const res = await request(app)
+        .put('/api/admin/vecinos/1A')
+        .set('Authorization', `Bearer ${userToken(true)}`)
+        .send({ serial_number: '1234' });
+      expect(res.status).toBe(200);
+    });
+
+    it('returns 404 when vecino not found', async () => {
+      mockQuery.mockResolvedValueOnce({ rows: [] });
+      const app = createApp();
+      const res = await request(app)
+        .put('/api/admin/vecinos/99Z')
+        .set('Authorization', `Bearer ${userToken(true)}`)
+        .send({ nombre: 'X' });
+      expect(res.status).toBe(404);
+    });
+  });
 });
