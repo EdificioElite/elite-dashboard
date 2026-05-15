@@ -173,15 +173,17 @@ router.post('/admin/usuarios', authMiddleware, adminMiddleware, async (req: Requ
   try {
     const { email, password, vecino_piso } = req.body;
 
-    if (!email || !password || !vecino_piso) {
-      res.status(400).json({ error: 'email, password y vecino_piso son requeridos' });
+    if (!email || !password) {
+      res.status(400).json({ error: 'email y password son requeridos' });
       return;
     }
 
-    const vecino = await query('SELECT piso FROM vecinos WHERE piso = $1', [vecino_piso]);
-    if (vecino.rows.length === 0) {
-      res.status(400).json({ error: 'El piso indicado no existe en el edificio' });
-      return;
+    if (vecino_piso) {
+      const vecino = await query('SELECT piso FROM vecinos WHERE piso = $1', [vecino_piso]);
+      if (vecino.rows.length === 0) {
+        res.status(400).json({ error: 'El piso indicado no existe en el edificio' });
+        return;
+      }
     }
 
     const password_hash = await bcrypt.hash(password, 12);
@@ -190,7 +192,7 @@ router.post('/admin/usuarios', authMiddleware, adminMiddleware, async (req: Requ
       `INSERT INTO usuarios (vecino_piso, email, password_hash)
        VALUES ($1, $2, $3)
        RETURNING id, vecino_piso, email, is_admin, created_at`,
-      [vecino_piso, email, password_hash]
+      [vecino_piso || null, email, password_hash]
     );
 
     res.status(201).json(result.rows[0]);

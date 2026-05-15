@@ -655,6 +655,18 @@ describe('Admin routes', () => {
       expect(res.status).toBe(400);
       expect(res.body.error).toBe('El piso indicado no existe en el edificio');
     });
+
+    it('creates user without vecino_piso (global user)', async () => {
+      mockQuery.mockResolvedValueOnce({ rows: [{ id: 10, vecino_piso: null, email: 'gestor@elite.com', is_admin: true, created_at: new Date().toISOString() }] });
+      const app = createApp();
+      const res = await request(app)
+        .post('/api/admin/usuarios')
+        .set('Authorization', `Bearer ${userToken(true)}`)
+        .send({ email: 'gestor@elite.com', password: 'password123' });
+      expect(res.status).toBe(201);
+      expect(res.body.vecino_piso).toBeNull();
+      expect(res.body.email).toBe('gestor@elite.com');
+    });
   });
 
   describe('GET /api/admin/usuarios', () => {
