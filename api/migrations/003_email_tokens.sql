@@ -24,5 +24,5 @@ BEGIN
     GRANT ALL PRIVILEGES ON TABLE public.email_tokens TO dashboard_api_dev;
     GRANT USAGE, SELECT ON SEQUENCE public.email_tokens_id_seq TO dashboard_api_dev;
   END IF;
-END
+END;
 $$;

@@ -11,5 +11,5 @@ BEGIN
   IF EXISTS (SELECT FROM pg_catalog.pg_roles WHERE rolname = 'n8nuser_dev') THEN
     GRANT SELECT ON public.vecinos TO n8nuser_dev;
   END IF;
-END
+END;
 $$;

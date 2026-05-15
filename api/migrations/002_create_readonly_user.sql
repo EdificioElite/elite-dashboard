@@ -23,8 +23,6 @@ BEGIN
     GRANT SELECT ON public.vecinos TO dashboard_api;
     GRANT SELECT ON public.contadores TO dashboard_api;
     GRANT SELECT ON public.facturas TO dashboard_api;
-    GRANT SELECT ON public.facturaelectrica TO dashboard_api;
-    GRANT SELECT ON public.consumos TO dashboard_api;
     ALTER TABLE IF EXISTS public.usuarios OWNER TO dashboard_api;
     GRANT ALL PRIVILEGES ON TABLE public.usuarios TO dashboard_api;
     GRANT USAGE, SELECT ON SEQUENCE public.usuarios_id_seq TO dashboard_api;
@@ -46,8 +44,6 @@ BEGIN
     GRANT SELECT ON public.vecinos TO dashboard_api_dev;
     GRANT SELECT ON public.contadores TO dashboard_api_dev;
     GRANT SELECT ON public.facturas TO dashboard_api_dev;
-    GRANT SELECT ON public.facturaelectrica TO dashboard_api_dev;
-    GRANT SELECT ON public.consumos TO dashboard_api_dev;
     GRANT ALL PRIVILEGES ON TABLE public.usuarios TO dashboard_api_dev;
     GRANT USAGE, SELECT ON SEQUENCE public.usuarios_id_seq TO dashboard_api_dev;
     GRANT UPDATE (email) ON public.vecinos TO dashboard_api_dev;
