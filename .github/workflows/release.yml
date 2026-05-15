@@ -72,18 +72,57 @@ jobs:
           jq --arg v "${{ steps.version.outputs.version }}" '.version = $v' package.json > tmp.json && mv tmp.json package.json
           jq --arg v "${{ steps.version.outputs.version }}" '.version = $v' api/package.json > tmp.json && mv tmp.json api/package.json
 
-      - name: Commit and push to dev
+      - name: Create release branch and push
         if: steps.check.outputs.commits_ahead != '0'
         run: |
+          BRANCH="release/v${{ steps.version.outputs.version }}"
+          git checkout -b "${BRANCH}"
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git add package.json api/package.json
           git commit -m "chore: bump version to v${{ steps.version.outputs.version }}"
-          git push origin dev
+          git push origin "${BRANCH}"
+          echo "branch=${BRANCH}" >> $GITHUB_OUTPUT
+        id: branch
 
-      - name: Create release PR and enable auto-merge
+      - name: Create PR release branch → dev and auto-merge
         if: steps.check.outputs.commits_ahead != '0'
         run: |
+          PR_URL=$(gh pr create \
+            --title "chore: bump version to v${{ steps.version.outputs.version }}" \
+            --body "Actualiza version en package.json a v${{ steps.version.outputs.version }} antes del release." \
+            --head "${{ steps.branch.outputs.branch }}" \
+            --base dev)
+
+          PR_NUMBER=$(echo "${PR_URL}" | grep -oP '\d+$')
+          echo "PR a dev creada: ${PR_URL}"
+          echo "dev_pr=${PR_NUMBER}" >> $GITHUB_OUTPUT
+          gh pr merge "${PR_NUMBER}" --auto --merge
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        id: dev_pr
+
+      - name: Wait for dev PR to merge
+        if: steps.check.outputs.commits_ahead != '0'
+        run: |
+          for i in $(seq 1 60); do
+            STATE=$(gh pr view "${{ steps.dev_pr.outputs.dev_pr }}" --json state --jq '.state' 2>/dev/null || echo "OPEN")
+            echo "  Intento $i/60: estado PR dev = ${STATE}"
+            if [ "${STATE}" = "MERGED" ]; then
+              echo "PR a dev mergeada"
+              exit 0
+            fi
+            sleep 10
+          done
+          echo "Timeout esperando merge de PR a dev"
+          exit 1
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Create release PR dev → main and auto-merge
+        if: steps.check.outputs.commits_ahead != '0'
+        run: |
+          git fetch origin dev
           PR_URL=$(gh pr create \
             --title "Release v${{ steps.version.outputs.version }}" \
             --body $'PR automatizada de release v${{ steps.version.outputs.version }}.\n\nTipo: `${{ inputs.version }}`.' \
@@ -91,7 +130,7 @@ jobs:
             --base main)
 
           PR_NUMBER=$(echo "${PR_URL}" | grep -oP '\d+$')
-          echo "PR creada: ${PR_URL}"
+          echo "PR a main creada: ${PR_URL}"
 
           gh pr merge "${PR_NUMBER}" --auto --merge
         env:
