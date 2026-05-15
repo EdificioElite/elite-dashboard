@@ -45,7 +45,7 @@ cd api && npx tsc --noEmit     # Verificar backend compila
 
 ## Base de datos
 
-- **Las migraciones SQL las ejecuta un humano, NUNCA un agente de IA.** Los archivos de migracion en `api/migrations/` deben ser commiteados por el agente para que el humano los revise y ejecute manualmente en dev y prod.
+- **Las migraciones SQL en los entornos reales (dev.edificioelite.com, www.edificioelite.com) las ejecuta un humano, NUNCA un agente de IA.** Los archivos de migracion en `api/migrations/` deben ser commiteados por el agente para que el humano los revise y ejecute manualmente en esos entornos. En docker-compose local o entorno de desarrollo local, el agente puede ejecutar migraciones sin problema.
 - Las tablas de n8n (`contadores`, `facturas`, `facturaelectrica`, `consumos`) son de solo lectura para el dashboard.
 - La tabla `vecinos` es propiedad del dashboard. `n8nuser` solo tiene lectura sobre ella.
 - El dashboard es propietario de las tablas `usuarios`, `vecinos` y `email_tokens`.
