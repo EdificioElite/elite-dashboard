@@ -1013,4 +1013,61 @@ describe('Admin routes', () => {
       expect(res.status).toBe(404);
     });
   });
+
+  describe('POST /api/admin/vecinos', () => {
+    beforeEach(() => {
+      vi.resetAllMocks();
+    });
+
+    it('returns 403 for non-admin user', async () => {
+      const app = createApp();
+      const res = await request(app)
+        .post('/api/admin/vecinos')
+        .set('Authorization', `Bearer ${userToken(false)}`)
+        .send({ piso: '7A', nombre: 'Vecino 7A' });
+      expect(res.status).toBe(403);
+    });
+
+    it('returns 401 without token', async () => {
+      const app = createApp();
+      const res = await request(app)
+        .post('/api/admin/vecinos')
+        .send({ piso: '7A' });
+      expect(res.status).toBe(401);
+    });
+
+    it('returns 400 when piso is missing', async () => {
+      const app = createApp();
+      const res = await request(app)
+        .post('/api/admin/vecinos')
+        .set('Authorization', `Bearer ${userToken(true)}`)
+        .send({ nombre: 'Sin piso' });
+      expect(res.status).toBe(400);
+    });
+
+    it('creates vecino for admin', async () => {
+      mockQuery.mockResolvedValueOnce({ rows: [{ piso: '7A', nombre: 'Vecino 7A', email: 'vecino7a@elite.com', coeficiente: null, enviar_email: false, device_identification: null, serial_number: null }] });
+      const app = createApp();
+      const res = await request(app)
+        .post('/api/admin/vecinos')
+        .set('Authorization', `Bearer ${userToken(true)}`)
+        .send({ piso: '7A', nombre: 'Vecino 7A', email: 'vecino7a@elite.com' });
+      expect(res.status).toBe(201);
+      expect(res.body.piso).toBe('7A');
+      expect(res.body.nombre).toBe('Vecino 7A');
+      expect(res.body.email).toBe('vecino7a@elite.com');
+    });
+
+    it('returns 409 when piso already exists', async () => {
+      const err = new Error('duplicate') as any;
+      err.code = '23505';
+      mockQuery.mockRejectedValueOnce(err);
+      const app = createApp();
+      const res = await request(app)
+        .post('/api/admin/vecinos')
+        .set('Authorization', `Bearer ${userToken(true)}`)
+        .send({ piso: '1A', nombre: 'Duplicado' });
+      expect(res.status).toBe(409);
+    });
+  });
 });

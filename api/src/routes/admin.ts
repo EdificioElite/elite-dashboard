@@ -61,6 +61,30 @@ router.put('/admin/vecinos/:piso', authMiddleware, adminMiddleware, async (req: 
   }
 });
 
+router.post('/admin/vecinos', authMiddleware, adminMiddleware, async (req: Request, res: Response) => {
+  try {
+    const { piso, nombre, email, coeficiente, enviar_email, device_identification, serial_number } = req.body;
+    if (!piso) {
+      res.status(400).json({ error: 'Piso requerido' });
+      return;
+    }
+    const result = await query(
+      `INSERT INTO vecinos (piso, nombre, email, coeficiente, enviar_email, device_identification, serial_number)
+       VALUES ($1, $2, $3, $4, $5, $6, $7)
+       RETURNING piso, nombre, email, coeficiente, enviar_email, device_identification, serial_number`,
+      [piso, nombre || null, email || null, coeficiente || null, enviar_email || false, device_identification || null, serial_number || null]
+    );
+    res.status(201).json(result.rows[0]);
+  } catch (err: any) {
+    if (err.code === '23505') {
+      res.status(409).json({ error: 'El piso ya existe' });
+      return;
+    }
+    logger.error(err, 'Admin create vecino error');
+    res.status(500).json({ error: 'Error interno del servidor' });
+  }
+});
+
 router.get('/admin/vecinos/:piso', authMiddleware, adminMiddleware, async (req: Request, res: Response) => {
   try {
     const { piso } = req.params;
