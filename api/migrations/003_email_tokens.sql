@@ -9,6 +9,8 @@ CREATE TABLE IF NOT EXISTS email_tokens (
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
+ALTER TABLE IF EXISTS public.email_tokens OWNER TO dashboard_api;
+
 CREATE INDEX IF NOT EXISTS idx_email_tokens_type_email ON email_tokens(type, email);
 CREATE INDEX IF NOT EXISTS idx_email_tokens_type_piso ON email_tokens(type, piso);
 

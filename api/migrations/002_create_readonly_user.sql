@@ -14,37 +14,47 @@ BEGIN
 END
 $$;
 
--- Permisos de solo lectura sobre tablas de n8n
-GRANT CONNECT ON DATABASE elite TO dashboard_api;
-GRANT CONNECT ON DATABASE elite TO dashboard_api_dev;
-GRANT USAGE ON SCHEMA public TO dashboard_api;
-GRANT USAGE ON SCHEMA public TO dashboard_api_dev;
+-- Permisos para dashboard_api (prod)
+DO $$
+BEGIN
+  IF EXISTS (SELECT FROM pg_catalog.pg_roles WHERE rolname = 'dashboard_api') THEN
+    GRANT CONNECT ON DATABASE elite TO dashboard_api;
+    GRANT USAGE ON SCHEMA public TO dashboard_api;
+    GRANT SELECT ON public.vecinos TO dashboard_api;
+    GRANT SELECT ON public.contadores TO dashboard_api;
+    GRANT SELECT ON public.facturas TO dashboard_api;
+    GRANT SELECT ON public.facturaelectrica TO dashboard_api;
+    GRANT SELECT ON public.consumos TO dashboard_api;
+    ALTER TABLE IF EXISTS public.usuarios OWNER TO dashboard_api;
+    GRANT ALL PRIVILEGES ON TABLE public.usuarios TO dashboard_api;
+    GRANT USAGE, SELECT ON SEQUENCE public.usuarios_id_seq TO dashboard_api;
+    GRANT UPDATE (email) ON public.vecinos TO dashboard_api;
+    ALTER DEFAULT PRIVILEGES FOR ROLE dashboard_api IN SCHEMA public
+      GRANT ALL PRIVILEGES ON TABLES TO dashboard_api;
+    ALTER DEFAULT PRIVILEGES FOR ROLE dashboard_api IN SCHEMA public
+      GRANT USAGE, SELECT ON SEQUENCES TO dashboard_api;
+  END IF;
+END
+$$;
 
--- Lectura sobre tablas n8n (datos de vecinos, contadores, facturas)
-GRANT SELECT ON public.vecinos TO dashboard_api;
-GRANT SELECT ON public.vecinos TO dashboard_api_dev;
-GRANT SELECT ON public.contadores TO dashboard_api;
-GRANT SELECT ON public.contadores TO dashboard_api_dev;
-GRANT SELECT ON public.facturas TO dashboard_api;
-GRANT SELECT ON public.facturas TO dashboard_api_dev;
-
--- La tabla usuarios es gestionada por el dashboard (migraciones, inserciones)
-ALTER TABLE IF EXISTS public.usuarios OWNER TO dashboard_api;
-GRANT ALL PRIVILEGES ON TABLE public.usuarios TO dashboard_api;
-GRANT ALL PRIVILEGES ON TABLE public.usuarios TO dashboard_api_dev;
-GRANT USAGE, SELECT ON SEQUENCE public.usuarios_id_seq TO dashboard_api;
-GRANT USAGE, SELECT ON SEQUENCE public.usuarios_id_seq TO dashboard_api_dev;
-
--- El dashboard necesita actualizar el email de vecinos para enviar invitaciones
-GRANT UPDATE (email) ON public.vecinos TO dashboard_api;
-GRANT UPDATE (email) ON public.vecinos TO dashboard_api_dev;
-
--- Permisos por defecto para futuras tablas que cree dashboard_api
-ALTER DEFAULT PRIVILEGES FOR ROLE dashboard_api IN SCHEMA public
-  GRANT ALL PRIVILEGES ON TABLES TO dashboard_api;
-ALTER DEFAULT PRIVILEGES FOR ROLE dashboard_api IN SCHEMA public
-  GRANT USAGE, SELECT ON SEQUENCES TO dashboard_api;
-ALTER DEFAULT PRIVILEGES FOR ROLE dashboard_api_dev IN SCHEMA public
-  GRANT ALL PRIVILEGES ON TABLES TO dashboard_api_dev;
-ALTER DEFAULT PRIVILEGES FOR ROLE dashboard_api_dev IN SCHEMA public
-  GRANT USAGE, SELECT ON SEQUENCES TO dashboard_api_dev;
+-- Permisos para dashboard_api_dev (dev)
+DO $$
+BEGIN
+  IF EXISTS (SELECT FROM pg_catalog.pg_roles WHERE rolname = 'dashboard_api_dev') THEN
+    GRANT CONNECT ON DATABASE elite TO dashboard_api_dev;
+    GRANT USAGE ON SCHEMA public TO dashboard_api_dev;
+    GRANT SELECT ON public.vecinos TO dashboard_api_dev;
+    GRANT SELECT ON public.contadores TO dashboard_api_dev;
+    GRANT SELECT ON public.facturas TO dashboard_api_dev;
+    GRANT SELECT ON public.facturaelectrica TO dashboard_api_dev;
+    GRANT SELECT ON public.consumos TO dashboard_api_dev;
+    GRANT ALL PRIVILEGES ON TABLE public.usuarios TO dashboard_api_dev;
+    GRANT USAGE, SELECT ON SEQUENCE public.usuarios_id_seq TO dashboard_api_dev;
+    GRANT UPDATE (email) ON public.vecinos TO dashboard_api_dev;
+    ALTER DEFAULT PRIVILEGES FOR ROLE dashboard_api_dev IN SCHEMA public
+      GRANT ALL PRIVILEGES ON TABLES TO dashboard_api_dev;
+    ALTER DEFAULT PRIVILEGES FOR ROLE dashboard_api_dev IN SCHEMA public
+      GRANT USAGE, SELECT ON SEQUENCES TO dashboard_api_dev;
+  END IF;
+END
+$$;
