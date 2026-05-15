@@ -2,9 +2,9 @@ import { test, expect } from '@playwright/test';
 import { loginAsAdmin, loginAsVecino, logout } from '../fixtures/auth';
 
 test.describe('Login', () => {
-  test('admin login redirects to /admin', async ({ page }) => {
+  test('admin login redirects to /admin/vecinos', async ({ page }) => {
     await loginAsAdmin(page);
-    await expect(page).toHaveURL('/admin');
+    await expect(page).toHaveURL(/\/admin\/vecinos/);
     await expect(page.locator('h1')).toContainText('Vecinos');
   });
 
