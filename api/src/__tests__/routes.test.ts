@@ -1070,4 +1070,60 @@ describe('Admin routes', () => {
       expect(res.status).toBe(409);
     });
   });
+
+  describe('DELETE /api/admin/vecinos/:piso', () => {
+    beforeEach(() => {
+      vi.resetAllMocks();
+    });
+
+    it('returns 403 for non-admin user', async () => {
+      const app = createApp();
+      const res = await request(app)
+        .delete('/api/admin/vecinos/1A')
+        .set('Authorization', `Bearer ${userToken(false)}`);
+      expect(res.status).toBe(403);
+    });
+
+    it('returns 401 without token', async () => {
+      const app = createApp();
+      const res = await request(app)
+        .delete('/api/admin/vecinos/1A');
+      expect(res.status).toBe(401);
+    });
+
+    it('deletes vecino for admin', async () => {
+      mockQuery.mockResolvedValueOnce({ rows: [] }); // UPDATE usuarios
+      mockQuery.mockResolvedValueOnce({ rows: [{ piso: '7A' }] }); // DELETE
+      const app = createApp();
+      const res = await request(app)
+        .delete('/api/admin/vecinos/7A')
+        .set('Authorization', `Bearer ${userToken(true)}`);
+      expect(res.status).toBe(200);
+      expect(res.body.message).toMatch(/eliminado/);
+    });
+
+    it('returns 404 when vecino not found', async () => {
+      mockQuery.mockResolvedValueOnce({ rows: [] }); // UPDATE usuarios
+      mockQuery.mockResolvedValueOnce({ rows: [] }); // DELETE
+      const app = createApp();
+      const res = await request(app)
+        .delete('/api/admin/vecinos/99Z')
+        .set('Authorization', `Bearer ${userToken(true)}`);
+      expect(res.status).toBe(404);
+    });
+
+    it('sets usuario.vecino_piso to NULL when vecino is deleted', async () => {
+      mockQuery.mockResolvedValueOnce({ rows: [] }); // UPDATE usuarios
+      mockQuery.mockResolvedValueOnce({ rows: [{ piso: '7A' }] }); // DELETE
+      const app = createApp();
+      const res = await request(app)
+        .delete('/api/admin/vecinos/7A')
+        .set('Authorization', `Bearer ${userToken(true)}`);
+      expect(res.status).toBe(200);
+      expect(mockQuery).toHaveBeenCalledWith(
+        expect.stringContaining('UPDATE usuarios SET vecino_piso = NULL'),
+        ['7A']
+      );
+    });
+  });
 });

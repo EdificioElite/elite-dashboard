@@ -146,6 +146,29 @@ router.get('/admin/vecinos/:piso', authMiddleware, adminMiddleware, async (req: 
   }
 });
 
+router.delete('/admin/vecinos/:piso', authMiddleware, adminMiddleware, async (req: Request, res: Response) => {
+  try {
+    const { piso } = req.params;
+
+    await query('UPDATE usuarios SET vecino_piso = NULL WHERE vecino_piso = $1', [piso]);
+
+    const result = await query(
+      'DELETE FROM vecinos WHERE piso = $1 RETURNING piso',
+      [piso]
+    );
+
+    if (result.rows.length === 0) {
+      res.status(404).json({ error: 'Vecino no encontrado' });
+      return;
+    }
+
+    res.json({ message: 'Vecino eliminado correctamente' });
+  } catch (err) {
+    logger.error(err, 'Admin delete vecino error');
+    res.status(500).json({ error: 'Error interno del servidor' });
+  }
+});
+
 router.post('/admin/usuarios', authMiddleware, adminMiddleware, async (req: Request, res: Response) => {
   try {
     const { email, password, vecino_piso } = req.body;
