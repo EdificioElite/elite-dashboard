@@ -123,10 +123,8 @@ export default function DashboardPage() {
 
           <section className="glass p-[26px] mt-4">
             <div className="flex items-center gap-3 mb-4">
-              <div className="w-10 h-10 rounded-lg bg-[#1abcfe]/10 flex items-center justify-center">
-                <svg viewBox="0 0 24 24" className="w-5 h-5 text-[#1abcfe]" fill="currentColor">
-                  <path d="M12 2L2 12h3v8h6v-6h2v6h6v-8h3L12 2z"/>
-                </svg>
+              <div className="w-10 h-10 rounded-lg bg-[#1abcfe]/10 flex items-center justify-center overflow-hidden">
+                <img src="/images/home-assistant-icon.png" alt="Home Assistant" className="w-6 h-6" />
               </div>
               <div>
                 <p className="eyebrow">Home Assistant</p>
