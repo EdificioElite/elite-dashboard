@@ -12,7 +12,7 @@ const router = Router();
 
 router.post('/auth/login', rateLimitOnlyOnFailure(5, 60 * 1000), async (req: Request, res: Response) => {
   try {
-    const { email, password } = req.body;
+    const { email, password, source } = req.body;
 
     if (!email || !password) {
       res.status(400).json({ error: 'Email y password son requeridos' });
@@ -44,6 +44,7 @@ router.post('/auth/login', rateLimitOnlyOnFailure(5, 60 * 1000), async (req: Req
       vecinoPiso: user.vecino_piso,
       email: user.email,
       isAdmin: user.is_admin,
+      source,
     });
 
     res.json({
@@ -64,7 +65,7 @@ router.post('/auth/login', rateLimitOnlyOnFailure(5, 60 * 1000), async (req: Req
 router.get('/auth/me', authMiddleware, async (req: Request, res: Response) => {
   try {
     await query('UPDATE usuarios SET ultima_conexion = NOW() WHERE id = $1', [req.user!.userId]);
-    const result = await query('SELECT id, vecino_piso, email, is_admin, ultima_conexion FROM usuarios WHERE id = $1', [req.user!.userId]);
+    const result = await query('SELECT id, vecino_piso, email, is_admin, ultima_conexion, ultima_consulta_ha FROM usuarios WHERE id = $1', [req.user!.userId]);
     if (result.rows.length === 0) {
       res.status(401).json({ error: 'Usuario no encontrado' });
       return;
@@ -76,6 +77,7 @@ router.get('/auth/me', authMiddleware, async (req: Request, res: Response) => {
       email: user.email,
       is_admin: user.is_admin,
       ultima_conexion: user.ultima_conexion,
+      ultima_consulta_ha: user.ultima_consulta_ha,
     });
   } catch (err) {
     logger.error(err, 'Auth me error');
