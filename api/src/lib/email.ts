@@ -32,13 +32,15 @@ const emailStyles = `<style>
   a { color: #005eaa; }
 </style>`;
 
+const frontendLink = config.frontendUrl;
+
 const emailSignature = `Un saludo,
 
-CP Edificio Elite
+CP Edificio Elite (${frontendLink})
 Este es un mensaje automático. Cualquier duda o sugerencia, responda a este email directamente.`;
 
 const emailSignatureHtml = `<p>Un saludo,</p>
-<p><strong>CP Edificio Elite</strong></p>
+<p><strong>CP <a href="${frontendLink}">Edificio Elite</a></strong></p>
 <div class="footer">
   Este es un mensaje automático. Cualquier duda o sugerencia, responda a este email directamente.
 </div>`;
@@ -56,6 +58,8 @@ function wrapHtml(title: string, body: string): string {
 </html>`;
 }
 
+const replyTo = config.adminEmail || undefined;
+
 export async function sendInviteEmail(to: string, piso: string, token: string) {
   const url = `${config.frontendUrl}/registro?token=${token}`;
   if (config.mockEmail) {
@@ -65,10 +69,11 @@ export async function sendInviteEmail(to: string, piso: string, token: string) {
   await transporter.sendMail({
     from: `"Edificio Elite" <${config.smtpUser}>`,
     to,
+    replyTo,
     subject: 'Invitación para registrarte en la página web del Edificio Elite',
-    text: `Hola vecino del piso ${piso},\n\nHas sido invitado a registrarte en la página web del Edificio Elite. En ella podrás consultar tus consumos históricos y en tiempo real de aerotermia, tener a mano información relevante de la comunidad (horarios de piscina, contactos, etc.) y acceder a todas las actas de las juntas.\n\nHaz clic en el siguiente enlace para completar tu registro:\n\n${url}\n\nEste enlace expirará en 30 días.\n\n${emailSignature}`,
+    text: `Hola vecino del piso ${piso},\n\nHas sido invitado a registrarte en la página web del Edificio Elite (${frontendLink}). En ella podrás consultar tus consumos históricos y en tiempo real de aerotermia, tener a mano información relevante de la comunidad (horarios de piscina, contactos, etc.) y acceder a todas las actas de las juntas.\n\nHaz clic en el siguiente enlace para completar tu registro:\n\n${url}\n\nEste enlace expirará en 30 días.\n\n${emailSignature}`,
     html: wrapHtml('', `<p>Hola vecino del piso <strong>${piso}</strong>,</p>
-<p>Has sido invitado a registrarte en la página web del Edificio Elite. En ella podrás consultar tus consumos históricos y en tiempo real de aerotermia, tener a mano información relevante de la comunidad (horarios de piscina, contactos, etc.) y acceder a todas las actas de las juntas.</p>
+<p>Has sido invitado a registrarte en la página web del <a href="${frontendLink}">Edificio Elite</a>. En ella podrás consultar tus consumos históricos y en tiempo real de aerotermia, tener a mano información relevante de la comunidad (horarios de piscina, contactos, etc.) y acceder a todas las actas de las juntas.</p>
 <p>Haz clic en el siguiente enlace para completar tu registro:</p>
 <p><a href="${url}">${url}</a></p>
 <p>Este enlace expirará en 30 días.</p>`),
@@ -84,6 +89,7 @@ export async function sendResetEmail(to: string, token: string) {
   await transporter.sendMail({
     from: `"Edificio Elite" <${config.smtpUser}>`,
     to,
+    replyTo,
     subject: 'Recuperación de contraseña - Edificio Elite',
     text: `Hola,\n\nHas solicitado restablecer tu contraseña. Haz clic en el siguiente enlace para establecer una nueva contraseña:\n\n${url}\n\nEste enlace expirará en 1 hora.\n\nSi no solicitaste este cambio, ignora este email.\n\n${emailSignature}`,
     html: wrapHtml('', `<p>Hola,</p>
