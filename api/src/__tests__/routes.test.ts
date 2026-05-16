@@ -130,9 +130,11 @@ describe('Auth routes', () => {
     });
 
     it('returns user data with valid token', async () => {
-      mockQuery.mockResolvedValueOnce({
-        rows: [{ id: 1, vecino_piso: '1A', email: 'test@test.com', is_admin: false, ultima_conexion: null }],
-      });
+      mockQuery
+        .mockResolvedValueOnce({ rows: [] })
+        .mockResolvedValueOnce({
+          rows: [{ id: 1, vecino_piso: '1A', email: 'test@test.com', is_admin: false, ultima_conexion: null }],
+        });
       const app = createApp();
       const token = userToken();
       const res = await request(app)
