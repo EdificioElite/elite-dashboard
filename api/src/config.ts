@@ -17,6 +17,7 @@ export const config = {
     : 'http://localhost:5173',
   smtpUser: process.env.SMTP_USER || '',
   smtpPass: process.env.SMTP_PASS || '',
+  adminEmail: process.env.ADMIN_EMAIL || '',
   frontendUrl: process.env.FRONTEND_URL || 'http://localhost:5173',
   mockEmail: process.env.MOCK_EMAIL === 'true',
 };
