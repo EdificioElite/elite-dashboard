@@ -130,6 +130,9 @@ describe('Auth routes', () => {
     });
 
     it('returns user data with valid token', async () => {
+      mockQuery.mockResolvedValueOnce({
+        rows: [{ id: 1, vecino_piso: '1A', email: 'test@test.com', is_admin: false, ultima_conexion: null }],
+      });
       const app = createApp();
       const token = userToken();
       const res = await request(app)
@@ -137,6 +140,7 @@ describe('Auth routes', () => {
         .set('Authorization', `Bearer ${token}`);
       expect(res.status).toBe(200);
       expect(res.body.email).toBe('test@test.com');
+      expect(res.body.ultima_conexion).toBeNull();
     });
   });
 

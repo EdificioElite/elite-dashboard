@@ -37,6 +37,8 @@ router.post('/auth/login', rateLimitOnlyOnFailure(5, 60 * 1000), async (req: Req
       return;
     }
 
+    await query('UPDATE usuarios SET ultima_conexion = NOW() WHERE id = $1', [user.id]);
+
     const token = signToken({
       userId: user.id,
       vecinoPiso: user.vecino_piso,
@@ -59,13 +61,25 @@ router.post('/auth/login', rateLimitOnlyOnFailure(5, 60 * 1000), async (req: Req
   }
 });
 
-router.get('/auth/me', authMiddleware, (req: Request, res: Response) => {
-  res.json({
-    id: req.user!.userId,
-    vecino_piso: req.user!.vecinoPiso,
-    email: req.user!.email,
-    is_admin: req.user!.isAdmin,
-  });
+router.get('/auth/me', authMiddleware, async (req: Request, res: Response) => {
+  try {
+    const result = await query('SELECT id, vecino_piso, email, is_admin, ultima_conexion FROM usuarios WHERE id = $1', [req.user!.userId]);
+    if (result.rows.length === 0) {
+      res.status(401).json({ error: 'Usuario no encontrado' });
+      return;
+    }
+    const user = result.rows[0];
+    res.json({
+      id: user.id,
+      vecino_piso: user.vecino_piso,
+      email: user.email,
+      is_admin: user.is_admin,
+      ultima_conexion: user.ultima_conexion,
+    });
+  } catch (err) {
+    logger.error(err, 'Auth me error');
+    res.status(500).json({ error: 'Error interno del servidor' });
+  }
 });
 
 router.put('/auth/password', authMiddleware, rateLimit(10, 60 * 1000), async (req: Request, res: Response) => {
