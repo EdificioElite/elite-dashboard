@@ -63,6 +63,7 @@ router.post('/auth/login', rateLimitOnlyOnFailure(5, 60 * 1000), async (req: Req
 
 router.get('/auth/me', authMiddleware, async (req: Request, res: Response) => {
   try {
+    await query('UPDATE usuarios SET ultima_conexion = NOW() WHERE id = $1', [req.user!.userId]);
     const result = await query('SELECT id, vecino_piso, email, is_admin, ultima_conexion FROM usuarios WHERE id = $1', [req.user!.userId]);
     if (result.rows.length === 0) {
       res.status(401).json({ error: 'Usuario no encontrado' });
