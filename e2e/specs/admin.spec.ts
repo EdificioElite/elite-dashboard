@@ -142,8 +142,8 @@ test.describe('Admin', () => {
     await expect(page.locator('tbody')).toBeVisible();
     await expect(page.locator('th').filter({ hasText: /Ult\.\s+conexion/ })).toBeVisible();
 
-    const vecino4Row = page.locator('tr', { hasText: 'vecino4@elite.com' });
-    await expect(vecino4Row).toContainText('—');
+    const vecino1Row = page.locator('tr', { hasText: 'vecino1@elite.com' });
+    await expect(vecino1Row).toContainText('—');
   });
 
   test('ultima_conexion updates after vecino logs in', async ({ page }) => {
