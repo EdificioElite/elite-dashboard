@@ -139,7 +139,7 @@ test.describe('Admin', () => {
 
   test('shows ultima_conexion column with null for users who never logged in', async ({ page }) => {
     await page.goto('/admin/usuarios');
-    await expect(page.locator('th')).toContainText('Ult. conexion');
+    await expect(page.getByRole('columnheader', { name: 'Ult. conexion' })).toBeVisible();
 
     const vecino4Row = page.locator('tr', { hasText: 'vecino4@elite.com' });
     await expect(vecino4Row).toContainText('—');
@@ -147,6 +147,7 @@ test.describe('Admin', () => {
 
   test('ultima_conexion updates after vecino logs in', async ({ page }) => {
     await page.goto('/admin/usuarios');
+    await expect(page.locator('tbody')).toBeVisible();
     const vecino1Row = page.locator('tr', { hasText: 'vecino1@elite.com' });
     await expect(vecino1Row).toContainText('—');
 
@@ -157,6 +158,7 @@ test.describe('Admin', () => {
     await loginAsAdmin(page);
 
     await page.goto('/admin/usuarios');
+    await expect(page.locator('tbody')).toBeVisible();
     const vecino1RowAfter = page.locator('tr', { hasText: 'vecino1@elite.com' });
     await expect(vecino1RowAfter).not.toContainText('—');
     await expect(vecino1RowAfter).toContainText(/\d{2}\/\d{2}\/\d{4}, \d{2}:\d{2}/);
