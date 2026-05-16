@@ -6,7 +6,7 @@ interface User {
   vecino_piso: string;
   email: string;
   is_admin: boolean;
-  ultima_conexion?: string;
+  ultima_conexion: string | null;
 }
 
 interface AuthState {

@@ -62,19 +62,24 @@ router.post('/auth/login', rateLimitOnlyOnFailure(5, 60 * 1000), async (req: Req
 });
 
 router.get('/auth/me', authMiddleware, async (req: Request, res: Response) => {
-  const result = await query('SELECT id, vecino_piso, email, is_admin, ultima_conexion FROM usuarios WHERE id = $1', [req.user!.userId]);
-  if (result.rows.length === 0) {
-    res.status(401).json({ error: 'Usuario no encontrado' });
-    return;
+  try {
+    const result = await query('SELECT id, vecino_piso, email, is_admin, ultima_conexion FROM usuarios WHERE id = $1', [req.user!.userId]);
+    if (result.rows.length === 0) {
+      res.status(401).json({ error: 'Usuario no encontrado' });
+      return;
+    }
+    const user = result.rows[0];
+    res.json({
+      id: user.id,
+      vecino_piso: user.vecino_piso,
+      email: user.email,
+      is_admin: user.is_admin,
+      ultima_conexion: user.ultima_conexion,
+    });
+  } catch (err) {
+    logger.error(err, 'Auth me error');
+    res.status(500).json({ error: 'Error interno del servidor' });
   }
-  const user = result.rows[0];
-  res.json({
-    id: user.id,
-    vecino_piso: user.vecino_piso,
-    email: user.email,
-    is_admin: user.is_admin,
-    ultima_conexion: user.ultima_conexion,
-  });
 });
 
 router.put('/auth/password', authMiddleware, rateLimit(10, 60 * 1000), async (req: Request, res: Response) => {
