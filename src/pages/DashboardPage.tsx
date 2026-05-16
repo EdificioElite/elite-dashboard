@@ -125,7 +125,7 @@ export default function DashboardPage() {
             <div className="flex items-center gap-3 mb-4">
               <div className="w-10 h-10 rounded-lg bg-[#1abcfe]/10 flex items-center justify-center">
                 <svg viewBox="0 0 24 24" className="w-5 h-5 text-[#1abcfe]" fill="currentColor">
-                  <path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm0 22c-5.523 0-10-4.477-10-10S6.477 2 12 2s10 4.477 10 10-4.477 10-10 10zm-2-14h4v2h-4V8zm0 4h4v6h-4v-6z"/>
+                  <path d="M12 2L2 12h3v8h6v-6h2v6h6v-8h3L12 2z"/>
                 </svg>
               </div>
               <div>
@@ -137,7 +137,7 @@ export default function DashboardPage() {
             <p className="text-cocoa/70 text-sm leading-relaxed mb-4">
               Lleva los datos de tu aerotermia a Home Assistant para automatizar tu casa. La integración{' '}
               <strong>Elite Climate</strong> expone los consumos de calefacción, refrigeración, ACS, temperaturas
-              y potencia en tiempo real como entidades en Home Assistant, actualizándose cada 5 minutos.
+              y potencia en tiempo real como entidades en Home Assistant.
             </p>
 
             <div className="flex flex-wrap items-center gap-3">
