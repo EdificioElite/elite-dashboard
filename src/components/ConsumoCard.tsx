@@ -1,4 +1,5 @@
 import Icon from './Icon';
+import Sparkline from './Sparkline';
 
 interface ConsumoActual {
   timestamp: string;
@@ -15,6 +16,9 @@ interface ConsumoActual {
   temp_impulsion: number | null;
   temp_retorno: number | null;
   power_w: number | null;
+  sparkline_calor?: number[];
+  sparkline_frio?: number[];
+  sparkline_acs?: number[];
 }
 
 function deltaStr(desdeInicio: number | null, decimals: number): string {
@@ -27,7 +31,7 @@ export default function ConsumoCard({ data }: { data: ConsumoActual | null }) {
 
   if (!data) {
     return (
-      <div className="glass p-[26px]">
+      <div className="glass glass-hover p-[26px]">
         <div className="flex items-center gap-3 mb-4">
           <div className="w-7 h-7 rounded-lg flex items-center justify-center shrink-0" style={{ background: 'var(--accent)' }}>
             <Icon name="activity" size={14} className="text-cream" />
@@ -40,7 +44,7 @@ export default function ConsumoCard({ data }: { data: ConsumoActual | null }) {
   }
 
   return (
-    <div className="glass p-[26px] scroll-mt-20" id="envivo">
+    <div className="glass glass-hover p-[26px] scroll-mt-20" id="envivo">
       <div className="flex items-center gap-3 mb-5">
         <div className="w-7 h-7 rounded-lg flex items-center justify-center shrink-0" style={{ background: 'var(--accent)' }}>
           <Icon name="activity" size={14} className="text-cream" />
@@ -58,6 +62,7 @@ export default function ConsumoCard({ data }: { data: ConsumoActual | null }) {
             {Number(data.kwh_calor_abs).toLocaleString('es-ES', { maximumFractionDigits: 0 })}
           </div>
           <div className="font-mono text-[11px] text-cocoa/40 font-num mt-0.5">kWh</div>
+          {data.sparkline_calor && <div className="mt-1"><Sparkline data={data.sparkline_calor} color="var(--calor)" /></div>}
           <div className="text-[11px] mt-1 opacity-50" style={{ color: 'var(--calor)' }}>
             {deltaStr(data.kwh_calor_mes_inicio, 0)}
           </div>
@@ -68,6 +73,7 @@ export default function ConsumoCard({ data }: { data: ConsumoActual | null }) {
             {Number(data.kwh_frio_abs).toLocaleString('es-ES', { maximumFractionDigits: 0 })}
           </div>
           <div className="font-mono text-[11px] text-cocoa/40 font-num mt-0.5">kWh</div>
+          {data.sparkline_frio && <div className="mt-1"><Sparkline data={data.sparkline_frio} color="var(--frio)" /></div>}
           <div className="text-[11px] mt-1 opacity-50" style={{ color: 'var(--frio)' }}>
             {deltaStr(data.kwh_frio_mes_inicio, 0)}
           </div>
@@ -78,6 +84,7 @@ export default function ConsumoCard({ data }: { data: ConsumoActual | null }) {
             {Number(data.m3_acs_abs).toLocaleString('es-ES', { maximumFractionDigits: 2 })}
           </div>
           <div className="font-mono text-[11px] text-cocoa/40 font-num mt-0.5">m³</div>
+          {data.sparkline_acs && <div className="mt-1"><Sparkline data={data.sparkline_acs} color="var(--sage)" /></div>}
           <div className="text-[11px] mt-1 opacity-50" style={{ color: 'var(--sage)' }}>
             {deltaStr(data.m3_acs_mes_inicio, 1)}
           </div>
