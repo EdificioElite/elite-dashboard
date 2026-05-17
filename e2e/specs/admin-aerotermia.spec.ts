@@ -26,7 +26,7 @@ test.describe('Admin Aerotermia Dashboard', () => {
     await expect(page.getByText('24h').first()).toBeVisible({ timeout: 10000 });
     await expect(page.getByText('7 dias').first()).toBeVisible();
     await expect(page.getByText('30 dias').first()).toBeVisible();
-    await expect(page.getByText('1 ano').first()).toBeVisible();
+    await expect(page.getByText('1 año').first()).toBeVisible();
     await expect(page.getByText('Desde:').first()).toBeVisible();
     await expect(page.getByText('Hasta:').first()).toBeVisible();
   });
@@ -35,7 +35,7 @@ test.describe('Admin Aerotermia Dashboard', () => {
     await expect(page.getByText('Distribucion por vecino')).toBeVisible({ timeout: 15000 });
     await expect(page.getByText('Consumo por vecino')).toBeVisible();
     await expect(page.getByText('Historico — Global')).toBeVisible();
-    await expect(page.getByText('Desglose por factura')).toBeVisible();
+    await expect(page.getByText('Facturas electricas')).toBeVisible();
     await expect(page.getByText('Heatmap mensual')).toBeVisible();
   });
 
@@ -54,8 +54,8 @@ test.describe('Admin Aerotermia Dashboard', () => {
   });
 
   test('preset 1a changes selection', async ({ page }) => {
-    await page.getByText('1 ano').first().click();
-    await expect(page.getByText('1 ano').first()).toHaveClass(/text-cocoa bg-accent\/12/);
+    await page.getByText('1 año').first().click();
+    await expect(page.getByText('1 año').first()).toHaveClass(/text-cocoa bg-accent\/12/);
   });
 
   test('factura selector has options', async ({ page }) => {
