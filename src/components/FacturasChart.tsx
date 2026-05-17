@@ -6,6 +6,7 @@ interface Factura {
   id_factura: string;
   periodo: string;
   importe_total: number;
+  importe_fijo: number;
   kwh_calor: number;
   kwh_frio: number;
   kwh_acs: number;
@@ -50,6 +51,7 @@ function tooltipContent(props: any) {
   return (
     <div style={TOOLTIP_STYLE}>
       <div style={{ fontWeight: 500, marginBottom: 6 }}>{f.periodoLabel}</div>
+      {row('Fijo', fmtMoney(f.importe_fijo), '#8b7355')}
       {row('Calefacción', fmtMoney(f.importe_calor), '#c0392b')}
       {row('Refrigeración', fmtMoney(f.importe_frio), '#5b8ba0')}
       {row('ACS', fmtMoney(f.importe_acs), '#6f8a5c')}
@@ -100,10 +102,13 @@ export default function FacturasChart({ data, headerRight }: { data: Factura[]; 
 
       <div className="flex items-center gap-4 mb-4 text-[11px] text-cocoa/40">
         <span className="flex items-center gap-1.5">
-          <span className="w-2 h-2 rounded-sm" style={{ background: '#c0392b' }} /> Calefacción
+          <span className="w-2 h-2 rounded-sm" style={{ background: '#8b7355' }} /> Fijo
         </span>
         <span className="flex items-center gap-1.5">
-          <span className="w-2 h-2 rounded-sm" style={{ background: '#5b8ba0' }} /> Refrigeración
+          <span className="w-2 h-2 rounded-sm" style={{ background: '#c0392b' }} /> Calefaccion
+        </span>
+        <span className="flex items-center gap-1.5">
+          <span className="w-2 h-2 rounded-sm" style={{ background: '#5b8ba0' }} /> Refrigeracion
         </span>
         <span className="flex items-center gap-1.5">
           <span className="w-2 h-2 rounded-sm" style={{ background: '#6f8a5c' }} /> ACS
@@ -116,6 +121,7 @@ export default function FacturasChart({ data, headerRight }: { data: Factura[]; 
           <XAxis dataKey="periodoLabel" fontSize={10} tick={{ fill: 'rgba(58,47,36,.44)' }} axisLine={false} tickLine={false} interval={0} angle={-45} textAnchor="end" height={40} />
           <YAxis fontSize={10} tick={{ fill: 'rgba(58,47,36,.44)', fontFamily: "'JetBrains Mono', monospace" }} axisLine={false} tickLine={false} width={45} tickFormatter={(v: number) => `${v.toFixed(0)}`} />
           <Tooltip content={tooltipContent} cursor={{ fill: 'rgba(58,47,36,.04)' }} />
+          <Bar dataKey="importe_fijo" stackId="a" fill="#8b7355" radius={[0, 0, 0, 0]} />
           <Bar dataKey="importe_calor" stackId="a" fill="#c0392b" radius={[0, 0, 0, 0]} />
           <Bar dataKey="importe_frio" stackId="a" fill="#5b8ba0" radius={[0, 0, 0, 0]} />
           <Bar dataKey="importe_acs" stackId="a" fill="#6f8a5c" radius={[4, 4, 0, 0]} />

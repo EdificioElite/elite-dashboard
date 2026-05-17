@@ -367,6 +367,7 @@ router.get('/admin/vecinos/:piso/facturas', authMiddleware, adminMiddleware, asy
         f.id_factura,
         f.fecha_factura_creacion AS periodo,
         f.importe_vivienda_total AS importe_total,
+        f.importe_vivienda_fijo AS importe_fijo,
         f.kwh_vivienda_calor AS kwh_calor,
         f.kwh_vivienda_frio AS kwh_frio,
         f.kwh_vivienda_acs AS kwh_acs,

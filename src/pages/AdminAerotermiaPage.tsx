@@ -24,6 +24,7 @@ interface FacturaGlobal {
   piso: string;
   periodo: string;
   importe_total: number;
+  importe_fijo: number;
   kwh_calor: number;
   kwh_frio: number;
   kwh_acs: number;
@@ -64,7 +65,7 @@ export default function AdminAerotermiaPage() {
     }
   };
 
-  useEffect(() => { setRange('7d'); }, []);
+  useEffect(() => { setRange('3m'); }, []);
 
   const desde = desdeInput ? fromDatetimeLocal(desdeInput) : '';
   const hasta = hastaInput ? fromDatetimeLocal(hastaInput) : '';
@@ -149,6 +150,7 @@ export default function AdminAerotermiaPage() {
       const prev = map.get(f.id_factura);
       if (prev) {
         prev.importe_total += Number(f.importe_total);
+        prev.importe_fijo += Number(f.importe_fijo);
         prev.kwh_calor += Number(f.kwh_calor);
         prev.kwh_frio += Number(f.kwh_frio);
         prev.kwh_acs += Number(f.kwh_acs);
@@ -160,6 +162,7 @@ export default function AdminAerotermiaPage() {
         map.set(f.id_factura, {
           ...f,
           importe_total: Number(f.importe_total),
+          importe_fijo: Number(f.importe_fijo),
           kwh_calor: Number(f.kwh_calor),
           kwh_frio: Number(f.kwh_frio),
           kwh_acs: Number(f.kwh_acs),

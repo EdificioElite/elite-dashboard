@@ -31,6 +31,7 @@ interface Factura {
   id_factura: string;
   periodo: string;
   importe_total: number;
+  importe_fijo: number;
   kwh_calor: number;
   kwh_frio: number;
   kwh_acs: number;
