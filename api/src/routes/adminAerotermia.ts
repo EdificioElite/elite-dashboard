@@ -137,6 +137,7 @@ router.get('/admin/aerotermia/cop', authMiddleware, adminMiddleware, async (_req
         fe.id,
         fe.startdate,
         fe.enddate,
+        fe.amount,
         fe.kwh_electricos,
         MAX(f.kwh_total_viviendas)::numeric AS kwh_termicos,
         CASE WHEN fe.kwh_electricos > 0

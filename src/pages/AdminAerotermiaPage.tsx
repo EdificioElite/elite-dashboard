@@ -6,7 +6,7 @@ import HistoricoCharts from '../components/HistoricoCharts';
 import FacturasChart from '../components/FacturasChart';
 import PieChartCard from '../components/PieChartCard';
 import ConsumoVecinosChart from '../components/ConsumoVecinosChart';
-import FacturaSelector from '../components/FacturaSelector';
+import FacturaElectricaTable from '../components/FacturaElectricaTable';
 import HeatmapChart from '../components/HeatmapChart';
 import CopChart from '../components/CopChart';
 import { toDatetimeLocal, fromDatetimeLocal, applyPreset, Preset } from '../lib/dates';
@@ -39,6 +39,7 @@ interface CopDatum {
   id: string;
   startdate: string;
   enddate: string;
+  amount: number | null;
   kwh_electricos: number | null;
   kwh_termicos: number | null;
   cop: number | null;
@@ -313,7 +314,7 @@ export default function AdminAerotermiaPage() {
 
           <CopChart data={copData} />
 
-          <FacturaSelector facturas={facturas} />
+          <FacturaElectricaTable data={copData} />
 
           <HeatmapChart data={heatmapData} />
         </div>
