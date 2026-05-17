@@ -169,15 +169,6 @@ export default function AdminAerotermiaPage() {
     return Array.from(map.values()).sort((a, b) => b.periodo.localeCompare(a.periodo));
   }, [facturas]);
 
-  const uniqueFacturas = useMemo(() => {
-    const seen = new Set<string>();
-    return facturas.filter((f) => {
-      if (seen.has(f.id_factura)) return false;
-      seen.add(f.id_factura);
-      return true;
-    }).map((f) => ({ id_factura: f.id_factura, periodo: f.periodo }));
-  }, [facturas]);
-
   const heatmapData = useMemo(() => {
     return facturas.map((f) => {
       const d = new Date(f.periodo);
@@ -287,7 +278,7 @@ export default function AdminAerotermiaPage() {
 
           <CopChart data={copData} />
 
-          <FacturaSelector facturas={uniqueFacturas} />
+          <FacturaSelector facturas={facturas} />
 
           <HeatmapChart data={heatmapData} />
         </div>

@@ -1,37 +1,50 @@
-import { useState, useEffect } from 'react';
-import { apiFetch } from '../api/client';
-import { fmtMoney, fmtMonth } from '../lib/format';
+import { useState, useMemo } from 'react';
+import { fmtMoney } from '../lib/format';
 
-interface FacturaOption {
+interface FacturaGlobal {
   id_factura: string;
-  periodo: string;
-}
-
-interface FacturaDetalle {
   piso: string;
+  periodo: string;
   kwh_calor: number;
   kwh_frio: number;
   kwh_acs: number;
   m3_acs: number;
   importe_total: number;
+  fecha_factura_inicio?: string;
+  fecha_factura_fin?: string;
 }
 
-export default function FacturaSelector({ facturas }: { facturas: FacturaOption[] }) {
-  const [selected, setSelected] = useState('');
-  const [detalle, setDetalle] = useState<FacturaDetalle[]>([]);
-  const [loading, setLoading] = useState(false);
+function formatPeriodo(inicio?: string, fin?: string): string {
+  if (!inicio) return '';
+  const dInicio = new Date(inicio);
+  if (!fin) return dInicio.toLocaleDateString('es-ES', { month: 'short', year: 'numeric' });
+  const dFin = new Date(fin);
+  const inicioStr = dInicio.toLocaleDateString('es-ES', { day: 'numeric', month: 'short' });
+  const finStr = dFin.toLocaleDateString('es-ES', { day: 'numeric', month: 'short', year: 'numeric' });
+  return `${inicioStr} — ${finStr}`;
+}
 
-  useEffect(() => {
-    if (!selected) {
-      setDetalle([]);
-      return;
-    }
-    setLoading(true);
-    apiFetch<FacturaDetalle[]>(`/admin/aerotermia/facturas/${encodeURIComponent(selected)}`)
-      .then(setDetalle)
-      .catch(() => setDetalle([]))
-      .finally(() => setLoading(false));
-  }, [selected]);
+export default function FacturaSelector({ facturas }: { facturas: FacturaGlobal[] }) {
+  const [selected, setSelected] = useState('');
+
+  const periodos = useMemo(() => {
+    const seen = new Set<string>();
+    return facturas
+      .filter((f) => {
+        const key = f.fecha_factura_inicio || '';
+        if (!key || seen.has(key)) return false;
+        seen.add(key);
+        return true;
+      })
+      .sort((a, b) => (b.fecha_factura_inicio || '').localeCompare(a.fecha_factura_inicio || ''));
+  }, [facturas]);
+
+  const detalle = useMemo(() => {
+    if (!selected) return [];
+    return facturas
+      .filter((f) => f.fecha_factura_inicio === selected)
+      .sort((a, b) => a.piso.localeCompare(b.piso));
+  }, [facturas, selected]);
 
   if (facturas.length === 0) {
     return (
@@ -65,18 +78,16 @@ export default function FacturaSelector({ facturas }: { facturas: FacturaOption[
           onChange={(e) => setSelected(e.target.value)}
           className="input-card text-xs py-2 px-3 min-w-[220px]"
         >
-          <option value="">Seleccionar factura...</option>
-          {facturas.map((f) => (
-            <option key={f.id_factura} value={f.id_factura}>
-              {f.id_factura} — {fmtMonth(f.periodo)}
+          <option value="">Seleccionar periodo...</option>
+          {periodos.map((p) => (
+            <option key={p.fecha_factura_inicio} value={p.fecha_factura_inicio || ''}>
+              {formatPeriodo(p.fecha_factura_inicio, p.fecha_factura_fin)}
             </option>
           ))}
         </select>
       </div>
 
-      {loading ? (
-        <p className="text-sm text-cocoa/44 py-8">Cargando...</p>
-      ) : selected && detalle.length > 0 ? (
+      {selected && detalle.length > 0 ? (
         <div className="overflow-x-auto -mx-2">
           <table className="table-glass">
             <thead>
@@ -100,11 +111,19 @@ export default function FacturaSelector({ facturas }: { facturas: FacturaOption[
                   <td className="font-mono text-xs text-right font-medium font-num">{fmtMoney(d.importe_total)}</td>
                 </tr>
               ))}
+              <tr className="border-t border-cocoa/6">
+                <td className="font-medium text-cocoa text-xs">Total</td>
+                <td className="font-mono text-xs font-num font-medium">{detalle.reduce((s, d) => s + Number(d.kwh_calor), 0).toFixed(0)}</td>
+                <td className="font-mono text-xs font-num font-medium">{detalle.reduce((s, d) => s + Number(d.kwh_frio), 0).toFixed(0)}</td>
+                <td className="font-mono text-xs font-num font-medium">{detalle.reduce((s, d) => s + Number(d.kwh_acs), 0).toFixed(0)}</td>
+                <td className="font-mono text-xs font-num font-medium">{detalle.reduce((s, d) => s + Number(d.m3_acs), 0).toFixed(1)}</td>
+                <td className="font-mono text-xs text-right font-medium font-num">{fmtMoney(detalle.reduce((s, d) => s + Number(d.importe_total), 0))}</td>
+              </tr>
             </tbody>
           </table>
         </div>
       ) : selected ? (
-        <p className="text-sm text-cocoa/44 py-8">Sin datos para esta factura</p>
+        <p className="text-sm text-cocoa/44 py-8">Sin datos para este periodo</p>
       ) : null}
     </div>
   );
