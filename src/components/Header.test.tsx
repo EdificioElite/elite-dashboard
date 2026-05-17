@@ -41,12 +41,12 @@ describe('Header', () => {
 
   it('renders hamburger menu button', () => {
     renderHeader();
-    expect(screen.getByLabelText('Abrir menu')).toBeInTheDocument();
+    expect(screen.getByLabelText('Abrir menú')).toBeInTheDocument();
   });
 
   it('renders user initials avatar button', () => {
     renderHeader();
-    expect(screen.getByTitle('vecino@test.com')).toBeInTheDocument();
+    expect(screen.getByLabelText('Menú de usuario, vecino@test.com')).toBeInTheDocument();
     expect(screen.getByText('1A')).toBeInTheDocument();
   });
 
@@ -54,8 +54,8 @@ describe('Header', () => {
     const { default: userEvent } = await import('@testing-library/user-event');
     const user = userEvent.setup();
     renderHeader();
-    await user.click(screen.getByTitle('vecino@test.com'));
-    expect(screen.getByText('Cambiar contrasena')).toBeInTheDocument();
+    await user.click(screen.getByLabelText('Menú de usuario, vecino@test.com'));
+    expect(screen.getByText('Cambiar contraseña')).toBeInTheDocument();
     expect(screen.getByText('Salir')).toBeInTheDocument();
   });
 
@@ -64,12 +64,12 @@ describe('Header', () => {
     expect(screen.queryByText('Vecinos')).not.toBeInTheDocument();
   });
 
-  it('shows admin nav when user is admin', () => {
+  it('does not show admin nav in header when user is admin', () => {
     mockStore.mockReturnValue({
       user: { vecino_piso: '1A', email: 'admin@test.com', is_admin: true },
       logout: vi.fn(),
     });
     renderHeader();
-    expect(screen.getByText('Vecinos')).toBeInTheDocument();
+    expect(screen.queryByText('Vecinos')).not.toBeInTheDocument();
   });
 });
