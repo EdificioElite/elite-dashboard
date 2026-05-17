@@ -14,7 +14,7 @@ const USER_NAV = [
 const ADMIN_NAV = [
   { label: 'Vecinos', path: '/admin/vecinos' },
   { label: 'Usuarios', path: '/admin/usuarios' },
-  { label: 'Aerotermia', path: '/admin/aerotermia' },
+  { label: 'Admin aerotermia', path: '/admin/aerotermia' },
 ];
 
 export default function Header() {
