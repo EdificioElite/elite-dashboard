@@ -13,6 +13,7 @@ import ContactosPage from './pages/ContactosPage';
 import RegistroPage from './pages/RegistroPage';
 import ForgotPasswordPage from './pages/ForgotPasswordPage';
 import ResetPasswordPage from './pages/ResetPasswordPage';
+import SkipLink from './components/SkipLink';
 import VersionFooter from './components/VersionFooter';
 
 function ProtectedRoute({ children, adminOnly = false }: { children: React.ReactNode; adminOnly?: boolean }) {
@@ -59,7 +60,8 @@ export default function App() {
         <div className="orb o4" />
         <div className="grain" />
       </div>
-      <div className="relative z-10 min-h-screen">
+      <SkipLink />
+      <div id="main-content" className="relative z-10 min-h-screen" role="main">
         <Heartbeat />
         <Routes>
           <Route path="/login" element={<LoginPage />} />
