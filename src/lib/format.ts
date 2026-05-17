@@ -1,5 +1,6 @@
-export function fmtMoney(value: number): string {
-  return value.toLocaleString('es-ES', {
+export function fmtMoney(value: number | null | undefined): string {
+  if (value == null) return '— €';
+  return (typeof value === 'number' ? value : Number(value)).toLocaleString('es-ES', {
     minimumFractionDigits: 2,
     maximumFractionDigits: 2,
   }) + ' €';
