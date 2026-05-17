@@ -1,4 +1,4 @@
-import Header from '../components/Header';
+
 import Icon from '../components/Icon';
 
 const CONTACTS = [
@@ -23,8 +23,6 @@ const CONTACTS = [
 export default function ContactosPage() {
   return (
     <div className="page-in">
-        <Header />
-
       <main className="max-w-[1180px] mx-auto px-6 flex flex-col gap-[22px] pb-10">
         <div className="pt-2">
           <p className="eyebrow">Comunidad</p>

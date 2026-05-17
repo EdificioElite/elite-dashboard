@@ -3,7 +3,7 @@ import { useSearchParams, Link } from 'react-router-dom';
 import { useAuthStore } from '../store/auth';
 import { apiFetch } from '../api/client';
 import { greeting } from '../lib/format';
-import Header from '../components/Header';
+
 import ConsumoCard from '../components/ConsumoCard';
 import HistoricoCharts from '../components/HistoricoCharts';
 import FacturasChart from '../components/FacturasChart';
@@ -93,7 +93,6 @@ export default function DashboardPage() {
   if (loading) {
     return (
       <div>
-        <Header />
         <main className="max-w-[1180px] mx-auto px-6 flex items-center justify-center min-h-[60vh]">
           <div className="text-cocoa/40 text-sm">Cargando tus datos...</div>
         </main>
@@ -103,8 +102,6 @@ export default function DashboardPage() {
 
   return (
     <div className="page-in">
-      <Header />
-
       <main className="max-w-[1180px] mx-auto px-6 flex flex-col gap-[22px] pb-10">
         <div className="pt-2">
           <p className="eyebrow">{viewingAs ? 'Vista admin' : 'Servicios'}</p>
