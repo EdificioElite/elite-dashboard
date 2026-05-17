@@ -1,7 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { apiFetch } from '../api/client';
-import Header from '../components/Header';
 import Icon from '../components/Icon';
 import EditVecinoModal from '../components/EditVecinoModal';
 import DeleteVecinoModal from '../components/DeleteVecinoModal';
@@ -120,12 +119,10 @@ export default function VecinosPage() {
     { label: 'Con usuario', value: vecinos.filter(v => v.user_id).length, icon: 'check', iconColor: 'var(--accent-2)' },
   ];
 
-  if (loading) return <div><Header /><main className="max-w-[1180px] mx-auto px-6 flex items-center justify-center min-h-[60vh]"><div className="text-cocoa/40 text-sm">Cargando...</div></main></div>;
+  if (loading) return <div><main className="max-w-[1180px] mx-auto px-6 flex items-center justify-center min-h-[60vh]"><div className="text-cocoa/40 text-sm">Cargando...</div></main></div>;
 
   return (
     <div className="page-in">
-      <Header />
-
       {(inviteMessage) && (
           <div className="max-w-[1180px] mx-auto px-6 pt-2">
             <div

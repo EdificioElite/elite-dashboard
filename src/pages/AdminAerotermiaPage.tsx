@@ -1,7 +1,6 @@
 import { useEffect, useState, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { apiFetch } from '../api/client';
-import Header from '../components/Header';
 import HistoricoCharts from '../components/HistoricoCharts';
 import FacturasChart from '../components/FacturasChart';
 import PieChartCard from '../components/PieChartCard';
@@ -211,7 +210,6 @@ export default function AdminAerotermiaPage() {
   if (loading) {
     return (
       <div>
-        <Header />
         <main className="max-w-[1180px] mx-auto px-6 flex items-center justify-center min-h-[60vh]">
           <div className="text-cocoa/40 text-sm">Cargando datos del edificio...</div>
         </main>
@@ -221,8 +219,6 @@ export default function AdminAerotermiaPage() {
 
   return (
     <div className="page-in">
-      <Header />
-
       <main className="max-w-[1180px] mx-auto px-6 flex flex-col gap-[22px] pb-10">
         <div className="pt-2">
           <p className="eyebrow">Panel de administracion</p>

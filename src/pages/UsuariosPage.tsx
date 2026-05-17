@@ -1,7 +1,6 @@
 import { useEffect, useState } from 'react';
 import { apiFetch } from '../api/client';
 import { useAuthStore } from '../store/auth';
-import Header from '../components/Header';
 import Icon from '../components/Icon';
 import EditUserModal from '../components/EditUserModal';
 import ChangePasswordModal from '../components/ChangePasswordModal';
@@ -97,12 +96,10 @@ export default function UsuariosPage() {
     { label: 'Con piso', value: usuarios.filter(u => u.vecino_piso).length, icon: 'check', iconColor: 'var(--sage)' },
   ];
 
-  if (loading) return <div><Header /><main className="max-w-[1180px] mx-auto px-6 flex items-center justify-center min-h-[60vh]"><div className="text-cocoa/40 text-sm">Cargando...</div></main></div>;
+  if (loading) return <div><main className="max-w-[1180px] mx-auto px-6 flex items-center justify-center min-h-[60vh]"><div className="text-cocoa/40 text-sm">Cargando...</div></main></div>;
 
   return (
     <div className="page-in">
-      <Header />
-
       <main className="max-w-[1180px] mx-auto px-6 flex flex-col gap-[22px] pb-10">
         <div className="pt-2 flex items-start justify-between flex-wrap gap-4">
           <div>
