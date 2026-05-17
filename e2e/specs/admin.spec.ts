@@ -165,6 +165,45 @@ test.describe('Admin', () => {
     await expect(vecino1RowAfter).toContainText(/\d{2}\/\d{2}\/\d{4}, \d{2}:\d{2}/);
   });
 
+  test('shows Estado column with offline and HA indicators', async ({ page }) => {
+    await page.goto('/admin/usuarios');
+    await expect(page.locator('tbody')).toBeVisible();
+    await expect(page.locator('th').filter({ hasText: /Estado/ })).toBeVisible();
+
+    const vecino2Row = page.locator('tr', { hasText: 'vecino2@elite.com' });
+    await expect(vecino2Row.locator('[title="Offline"]')).toBeVisible();
+    await expect(vecino2Row.locator('[title="No ha usado Home Assistant"]')).toBeVisible();
+  });
+
+  test('online indicator turns green after vecino logs in', async ({ page }) => {
+    await logout(page);
+    await loginAsVecino(page);
+
+    await logout(page);
+    await loginAsAdmin(page);
+
+    await page.goto('/admin/usuarios');
+    await expect(page.locator('tbody')).toBeVisible();
+    const vecino1Row = page.locator('tr', { hasText: 'vecino1@elite.com' });
+    await expect(vecino1Row.locator('[title="Online"]')).toBeVisible({ timeout: 5000 });
+  });
+
+  test('HA check turns green after HA-source login and consumos query', async ({ page }) => {
+    const loginRes = await api.post('/api/auth/login', {
+      data: { email: 'vecino2@elite.com', password: 'password1', source: 'home-assistant' },
+    });
+    const { token } = await loginRes.json();
+
+    await api.get('/api/consumos', {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+
+    await page.goto('/admin/usuarios');
+    await expect(page.locator('tbody')).toBeVisible();
+    const vecino2Row = page.locator('tr', { hasText: 'vecino2@elite.com' });
+    await expect(vecino2Row.locator('.text-green-600')).toBeVisible({ timeout: 5000 });
+  });
+
   test('non-admin cannot access /admin', async ({ page }) => {
     await loginAsVecino(page);
     await page.goto('/admin/vecinos');

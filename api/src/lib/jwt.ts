@@ -6,6 +6,7 @@ export interface JwtPayload {
   vecinoPiso: string;
   email: string;
   isAdmin: boolean;
+  source?: string;
 }
 
 const EXPIRATION = '7d';

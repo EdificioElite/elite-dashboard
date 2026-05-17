@@ -211,7 +211,7 @@ router.post('/admin/usuarios', authMiddleware, adminMiddleware, async (req: Requ
 router.get('/admin/usuarios', authMiddleware, adminMiddleware, async (_req: Request, res: Response) => {
   try {
     const result = await query(`
-      SELECT id, vecino_piso, email, is_admin, created_at, ultima_conexion
+      SELECT id, vecino_piso, email, is_admin, created_at, ultima_conexion, ultima_consulta_ha
       FROM usuarios
       ORDER BY id
     `);

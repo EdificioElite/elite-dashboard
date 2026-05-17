@@ -7,6 +7,7 @@ interface User {
   email: string;
   is_admin: boolean;
   ultima_conexion: string | null;
+  ultima_consulta_ha: string | null;
 }
 
 interface AuthState {
@@ -16,6 +17,7 @@ interface AuthState {
   login: (email: string, password: string) => Promise<void>;
   logout: () => void;
   checkAuth: () => Promise<void>;
+  heartbeat: () => Promise<void>;
   registerFromInvite: (token: string, password: string) => Promise<void>;
 }
 
@@ -51,6 +53,15 @@ export const useAuthStore = create<AuthState>((set) => ({
       localStorage.removeItem('token');
       set({ token: null, user: null, loading: false });
     }
+  },
+
+  heartbeat: async () => {
+    const token = localStorage.getItem('token');
+    if (!token) return;
+    try {
+      const user = await apiFetch<User>('/auth/me');
+      set({ user });
+    } catch {}
   },
 
   registerFromInvite: async (token: string, password: string) => {
