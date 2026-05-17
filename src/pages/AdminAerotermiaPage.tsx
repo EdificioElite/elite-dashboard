@@ -7,6 +7,7 @@ import PieChartCard from '../components/PieChartCard';
 import ConsumoVecinosChart from '../components/ConsumoVecinosChart';
 import FacturaSelector from '../components/FacturaSelector';
 import HeatmapChart from '../components/HeatmapChart';
+import { toDatetimeLocal, fromDatetimeLocal, applyPreset, Preset } from '../lib/dates';
 
 interface ConsumoAgregado {
   timestamp: string;
@@ -36,14 +37,14 @@ export default function AdminAerotermiaPage() {
   const [consumos, setConsumos] = useState<ConsumoAgregado[]>([]);
   const [facturas, setFacturas] = useState<FacturaGlobal[]>([]);
   const [loading, setLoading] = useState(true);
-  const [preset, setPreset] = useState<'24h' | '7d' | '30d' | '1a' | null>('7d');
+  const [preset, setPreset] = useState<Preset | null>('7d');
   const [desdeInput, setDesdeInput] = useState('');
   const [hastaInput, setHastaInput] = useState('');
 
   const setRange = (p: string) => {
-    setPreset(p as '24h' | '7d' | '30d' | '1a');
+    setPreset(p as Preset);
     if (p) {
-      const { desde, hasta } = applyPreset(p as '24h' | '7d' | '30d' | '1a');
+      const { desde, hasta } = applyPreset(p as Preset);
       setDesdeInput(toDatetimeLocal(desde));
       setHastaInput(toDatetimeLocal(hasta));
     }
@@ -69,17 +70,27 @@ export default function AdminAerotermiaPage() {
       .finally(() => setLoading(false));
   }, [desde, hasta]);
 
+  const filteredFacturas = useMemo(() => {
+    if (!desde || !hasta) return facturas;
+    const desdeD = new Date(desde).getTime();
+    const hastaD = new Date(hasta).getTime();
+    return facturas.filter((f) => {
+      const t = new Date(f.periodo).getTime();
+      return t >= desdeD && t <= hastaD;
+    });
+  }, [facturas, desde, hasta]);
+
   const stats = useMemo(() => {
     const totalCalor = consumos.reduce((sum, c) => sum + Number(c.kwh_calor), 0);
     const totalFrio = consumos.reduce((sum, c) => sum + Number(c.kwh_frio), 0);
     const totalAcs = consumos.reduce((sum, c) => sum + Number(c.m3_acs), 0);
-    const totalEuros = facturas.reduce((sum, f) => sum + Number(f.importe_total), 0);
+    const totalEuros = filteredFacturas.reduce((sum, f) => sum + Number(f.importe_total), 0);
     return { totalCalor, totalFrio, totalAcs, totalEuros };
-  }, [consumos, facturas]);
+  }, [consumos, filteredFacturas]);
 
   const pieData = useMemo(() => {
     const map = new Map<string, { kwh_total: number; importe: number }>();
-    facturas.forEach((f) => {
+    filteredFacturas.forEach((f) => {
       const prev = map.get(f.piso) || { kwh_total: 0, importe: 0 };
       map.set(f.piso, {
         kwh_total: prev.kwh_total + Number(f.kwh_calor) + Number(f.kwh_frio) + Number(f.kwh_acs),
@@ -96,11 +107,11 @@ export default function AdminAerotermiaPage() {
       }))
       .filter((d) => d.kwh_total > 0)
       .sort((a, b) => b.kwh_total - a.kwh_total);
-  }, [facturas]);
+  }, [filteredFacturas]);
 
   const vecinosConsumo = useMemo(() => {
     const map = new Map<string, { kwh_calor: number; kwh_frio: number; m3_acs: number; kwh_acs: number }>();
-    facturas.forEach((f) => {
+    filteredFacturas.forEach((f) => {
       const prev = map.get(f.piso) || { kwh_calor: 0, kwh_frio: 0, m3_acs: 0, kwh_acs: 0 };
       map.set(f.piso, {
         kwh_calor: prev.kwh_calor + Number(f.kwh_calor),
@@ -112,7 +123,7 @@ export default function AdminAerotermiaPage() {
     return Array.from(map.entries())
       .map(([piso, v]) => ({ piso, ...v }))
       .sort((a, b) => a.piso.localeCompare(b.piso));
-  }, [facturas]);
+  }, [filteredFacturas]);
 
   const facturasGlobal = useMemo(() => {
     const map = new Map<string, FacturaGlobal>();
@@ -267,32 +278,4 @@ export default function AdminAerotermiaPage() {
       </main>
     </div>
   );
-}
-
-function toDatetimeLocal(iso: string) {
-  const d = new Date(iso);
-  const pad = (n: number) => String(n).padStart(2, '0');
-  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
-}
-
-function toLocalISO(d: Date) {
-  const pad = (n: number) => String(n).padStart(2, '0');
-  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}:00`;
-}
-
-function fromDatetimeLocal(val: string) {
-  return val + ':00';
-}
-
-function applyPreset(preset: '24h' | '7d' | '30d' | '1a'): { desde: string; hasta: string } {
-  const now = new Date();
-  const start = new Date(now);
-  start.setMinutes(0, 0, 0);
-  switch (preset) {
-    case '24h': start.setDate(start.getDate() - 1); return { desde: toLocalISO(start), hasta: toLocalISO(now) };
-    case '7d': start.setDate(start.getDate() - 7); start.setHours(0, 0, 0, 0); return { desde: toLocalISO(start), hasta: toLocalISO(now) };
-    case '30d': start.setDate(start.getDate() - 30); start.setHours(0, 0, 0, 0); return { desde: toLocalISO(start), hasta: toLocalISO(now) };
-    case '1a': start.setFullYear(start.getFullYear() - 1); start.setHours(0, 0, 0, 0); return { desde: toLocalISO(start), hasta: toLocalISO(now) };
-    default: start.setDate(start.getDate() - 7); start.setHours(0, 0, 0, 0); return { desde: toLocalISO(start), hasta: toLocalISO(now) };
-  }
 }
