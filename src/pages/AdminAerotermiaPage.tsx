@@ -51,6 +51,7 @@ export default function AdminAerotermiaPage() {
   const [preset, setPreset] = useState<Preset | null>('7d');
   const [desdeInput, setDesdeInput] = useState('');
   const [hastaInput, setHastaInput] = useState('');
+  const [pisoFacturas, setPisoFacturas] = useState<string>('');
 
   const setRange = (p: string) => {
     setPreset(p as Preset);
@@ -140,8 +141,9 @@ export default function AdminAerotermiaPage() {
   }, [filteredFacturas]);
 
   const facturasGlobal = useMemo(() => {
+    const source = pisoFacturas ? facturas.filter((f) => f.piso === pisoFacturas) : facturas;
     const map = new Map<string, FacturaGlobal>();
-    facturas.forEach((f) => {
+    source.forEach((f) => {
       const prev = map.get(f.id_factura);
       if (prev) {
         prev.importe_total += Number(f.importe_total);
@@ -182,6 +184,10 @@ export default function AdminAerotermiaPage() {
         m3_acs: Number(f.m3_acs),
       };
     });
+  }, [facturas]);
+
+  const pisosUnicos = useMemo(() => {
+    return [...new Set(facturas.map((f) => f.piso))].sort();
   }, [facturas]);
 
   if (loading) {
@@ -274,7 +280,15 @@ export default function AdminAerotermiaPage() {
 
           <HistoricoCharts endpoint="/admin/aerotermia/consumos" title="Historico — Global" />
 
-          <FacturasChart data={facturasGlobal} />
+          <FacturasChart
+            data={facturasGlobal}
+            headerRight={
+              <select value={pisoFacturas} onChange={(e) => setPisoFacturas(e.target.value)} className="input-card text-xs py-2 px-3 min-w-[140px]">
+                <option value="">Todos los pisos</option>
+                {pisosUnicos.map((p) => <option key={p} value={p}>Piso {p}</option>)}
+              </select>
+            }
+          />
 
           <CopChart data={copData} />
 

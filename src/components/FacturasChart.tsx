@@ -66,7 +66,7 @@ function tooltipContent(props: any) {
   );
 }
 
-export default function FacturasChart({ data }: { data: Factura[] }) {
+export default function FacturasChart({ data, headerRight }: { data: Factura[]; headerRight?: React.ReactNode }) {
   if (data.length === 0) {
     return (
       <div className="glass p-[26px]">
@@ -88,11 +88,14 @@ export default function FacturasChart({ data }: { data: Factura[] }) {
 
   return (
     <div className="glass p-[26px]">
-      <div className="flex items-center gap-3 mb-4">
-        <div className="w-7 h-7 rounded-lg flex items-center justify-center shrink-0" style={{ background: 'var(--accent)' }}>
-          <Icon name="dollar" size={14} className="text-cream" />
+      <div className="flex items-center justify-between mb-4 flex-wrap gap-3">
+        <div className="flex items-center gap-3">
+          <div className="w-7 h-7 rounded-lg flex items-center justify-center shrink-0" style={{ background: 'var(--accent)' }}>
+            <Icon name="dollar" size={14} className="text-cream" />
+          </div>
+          <span className="eyebrow">Facturas</span>
         </div>
-        <span className="eyebrow">Facturas</span>
+        {headerRight}
       </div>
 
       <div className="flex items-center gap-4 mb-4 text-[11px] text-cocoa/40">
