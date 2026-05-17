@@ -28,22 +28,22 @@ jobs:
           ref: dev
           fetch-depth: 0
 
-      - name: Check if dev is ahead of main (by content)
+      - name: Check if dev has new content relative to main
         id: check
         run: |
           git fetch origin dev main
           DEV_TREE=$(git rev-parse origin/dev^{tree})
           MAIN_TREE=$(git rev-parse origin/main^{tree})
           if [ "${DEV_TREE}" != "${MAIN_TREE}" ]; then
-            echo "commits_ahead=1" >> $GITHUB_OUTPUT
+            echo "content_differs=1" >> $GITHUB_OUTPUT
             echo "dev tiene contenido diferente a main, creando release"
           else
-            echo "commits_ahead=0" >> $GITHUB_OUTPUT
+            echo "content_differs=0" >> $GITHUB_OUTPUT
             echo "dev y main tienen el mismo contenido, nada que publicar"
           fi
 
       - name: Close existing release PRs
-        if: steps.check.outputs.commits_ahead != '0'
+        if: steps.check.outputs.content_differs != '0'
         run: |
           gh pr list --head dev --base main --state open --json number --jq '.[].number' | while read num; do
             echo "Cerrando PR de release existente #${num}"
@@ -51,7 +51,7 @@ jobs:
           done
 
       - name: Compute next version
-        if: steps.check.outputs.commits_ahead != '0'
+        if: steps.check.outputs.content_differs != '0'
         id: version
         run: |
           LAST_TAG=$(git tag --sort=-v:refname | grep -E '^v[0-9]+\.[0-9]+\.[0-9]+$' | head -1)
@@ -75,22 +75,26 @@ jobs:
           echo "version=${NEW_VERSION}" >> $GITHUB_OUTPUT
 
       - name: Bump version in package.json files
-        if: steps.check.outputs.commits_ahead != '0'
+        if: steps.check.outputs.content_differs != '0'
         run: |
           jq --arg v "${{ steps.version.outputs.version }}" '.version = $v' package.json > tmp.json && mv tmp.json package.json
           jq --arg v "${{ steps.version.outputs.version }}" '.version = $v' api/package.json > tmp.json && mv tmp.json api/package.json
 
       - name: Clean up existing release branch
-        if: steps.check.outputs.commits_ahead != '0'
+        if: steps.check.outputs.content_differs != '0'
         run: |
           BRANCH="release/v${{ steps.version.outputs.version }}"
           if git ls-remote --exit-code --heads origin "${BRANCH}" > /dev/null 2>&1; then
             echo "Borrando rama remota existente: ${BRANCH}"
-            git push origin --delete "${BRANCH}" || true
+            if git push origin --delete "${BRANCH}" 2>/dev/null; then
+              echo "Rama eliminada"
+            else
+              echo "AVISO: no se pudo borrar ${BRANCH}, el push siguiente fallara si ya existe"
+            fi
           fi
 
       - name: Create release branch and push
-        if: steps.check.outputs.commits_ahead != '0'
+        if: steps.check.outputs.content_differs != '0'
         id: branch
         run: |
           BRANCH="release/v${{ steps.version.outputs.version }}"
@@ -105,12 +109,12 @@ jobs:
           echo "sha=${SHA}" >> $GITHUB_OUTPUT
 
       - name: Dispatch CI on release branch
-        if: steps.check.outputs.commits_ahead != '0'
+        if: steps.check.outputs.content_differs != '0'
         run: |
           gh workflow run CI --ref "${{ steps.branch.outputs.branch }}"
 
       - name: Wait for CI on release branch
-        if: steps.check.outputs.commits_ahead != '0'
+        if: steps.check.outputs.content_differs != '0'
         timeout-minutes: 15
         run: |
           BRANCH="${{ steps.branch.outputs.branch }}"
@@ -128,7 +132,7 @@ jobs:
           exit 1
 
       - name: Create PR to dev and merge
-        if: steps.check.outputs.commits_ahead != '0'
+        if: steps.check.outputs.content_differs != '0'
         run: |
           PR_URL=$(gh pr create \
             --title "chore: bump version to v${{ steps.version.outputs.version }}" \
@@ -142,7 +146,7 @@ jobs:
           gh pr merge "${PR_NUMBER}" --squash
 
       - name: Create release PR to main and merge
-        if: steps.check.outputs.commits_ahead != '0'
+        if: steps.check.outputs.content_differs != '0'
         run: |
           git fetch origin dev
 
@@ -158,17 +162,30 @@ jobs:
           gh pr merge "${PR_NUMBER}" --squash
 
       - name: Create tag and GitHub release
-        if: steps.check.outputs.commits_ahead != '0'
+        if: steps.check.outputs.content_differs != '0'
         run: |
-          git fetch origin main
-          MAIN_SHA=$(git rev-parse origin/main)
-          git tag "v${{ steps.version.outputs.version }}" "${MAIN_SHA}"
-          git push origin "v${{ steps.version.outputs.version }}"
+          TAG="v${{ steps.version.outputs.version }}"
 
-          gh release create "v${{ steps.version.outputs.version }}" \
-            --title "v${{ steps.version.outputs.version }}" \
-            --generate-notes
+          # Tag (skip si ya existe para evitar fallo en re-ejecucion)
+          if git rev-parse "${TAG}" >/dev/null 2>&1; then
+            echo "Tag ${TAG} ya existe, saltando creacion de tag"
+          else
+            git fetch origin main
+            MAIN_SHA=$(git rev-parse origin/main)
+            git tag "${TAG}" "${MAIN_SHA}"
+            git push origin "${TAG}"
+          fi
+
+          # GitHub release (skip si ya existe)
+          if gh release view "${TAG}" >/dev/null 2>&1; then
+            echo "Release ${TAG} ya existe, saltando"
+          else
+            gh release create "${TAG}" \
+              --title "${TAG}" \
+              --target main \
+              --generate-notes
+          fi
 
       - name: Nothing to promote
-        if: steps.check.outputs.commits_ahead == '0'
+        if: steps.check.outputs.content_differs == '0'
         run: echo "dev y main tienen el mismo contenido, nada que publicar."
