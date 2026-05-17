@@ -9,13 +9,12 @@ interface HeatmapDatum {
   m3_acs: number;
 }
 
-function colorScale(value: number, min: number, max: number): string {
-  if (max === min) return 'rgba(200,160,40,0.6)';
-  const intensity = (value - min) / (max - min);
-  const r = Math.round(intensity * 220);
-  const g = Math.round(160 - intensity * 120);
-  const b = Math.round(100 - intensity * 85);
-  return `rgba(${r},${g},${b},0.6)`;
+function heatColor(value: number, max: number): string {
+  const t = max > 0 ? Math.min(value / max, 1) : 0;
+  const r = Math.round(255 * Math.min(1, t * 1.3));
+  const g = Math.round(220 * (1 - t * 0.85));
+  const b = Math.round(200 * (1 - t * 0.9));
+  return `rgb(${r},${g},${b})`;
 }
 
 export default function HeatmapChart({ data }: { data: HeatmapDatum[] }) {
@@ -37,7 +36,7 @@ export default function HeatmapChart({ data }: { data: HeatmapDatum[] }) {
 
   if (data.length === 0) {
     return (
-      <div className="glass p-[26px]">
+    <div className="glass p-[26px]" aria-label="Mapa de calor de consumo mensual por piso y mes">
         <div className="flex items-center gap-3 mb-4">
           <div className="w-7 h-7 rounded-lg flex items-center justify-center shrink-0" style={{ background: 'var(--accent)' }}>
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#fff8ee" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
@@ -52,7 +51,7 @@ export default function HeatmapChart({ data }: { data: HeatmapDatum[] }) {
   }
 
   return (
-    <div className="glass p-[26px]">
+    <div className="glass p-[26px]" aria-label="Mapa de calor de consumo mensual por piso y mes">
       <div className="flex items-center gap-3 mb-4">
         <div className="w-7 h-7 rounded-lg flex items-center justify-center shrink-0" style={{ background: 'var(--accent)' }}>
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#fff8ee" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
@@ -64,7 +63,7 @@ export default function HeatmapChart({ data }: { data: HeatmapDatum[] }) {
       </div>
 
       <div className="overflow-x-auto">
-        <table className="w-full text-xs border-collapse">
+        <table className="w-full text-xs border-separate" style={{ borderSpacing: '3px' }}>
           <thead>
             <tr>
               <th className="text-left font-medium text-cocoa/40 uppercase tracking-wider py-1 pr-3 text-[10px]">Piso</th>
@@ -82,14 +81,16 @@ export default function HeatmapChart({ data }: { data: HeatmapDatum[] }) {
                 {periodos.map((periodo) => {
                   const val = matrix.get(`${piso}__${periodo}`) ?? 0;
                   return (
-                    <td key={periodo} className="p-1">
-                      <div
-                        className="rounded-md flex items-center justify-center min-w-[48px] h-[36px] font-mono text-[10px] text-cocoa/70 transition-colors cursor-default hover:ring-1 hover:ring-accent/20"
-                        style={{ background: colorScale(val, minKwh, maxKwh) }}
-                        title={`${piso} - ${periodo}: ${val.toFixed(1)} kWh`}
-                      >
-                        {val > 0 ? val.toFixed(0) : '—'}
-                      </div>
+                    <td
+                      key={periodo}
+                      className="text-center font-mono text-[10px] text-cocoa/70 min-w-[48px] h-[36px] cursor-default"
+                      style={{
+                        background: heatColor(val, maxKwh),
+                        borderRadius: '4px',
+                      }}
+                      title={`Piso ${piso}: ${val} kWh`}
+                    >
+                      {val > 0 ? val.toFixed(0) : '—'}
                     </td>
                   );
                 })}
@@ -102,11 +103,11 @@ export default function HeatmapChart({ data }: { data: HeatmapDatum[] }) {
       <div className="flex items-center gap-2 mt-4 justify-end text-[10px] text-cocoa/40">
         <span>Min</span>
         <div className="flex h-3 rounded-sm overflow-hidden">
-          <div className="w-5" style={{ background: colorScale(minKwh + (maxKwh - minKwh) * 0.1, minKwh, maxKwh) }} />
-          <div className="w-5" style={{ background: colorScale(minKwh + (maxKwh - minKwh) * 0.3, minKwh, maxKwh) }} />
-          <div className="w-5" style={{ background: colorScale(minKwh + (maxKwh - minKwh) * 0.5, minKwh, maxKwh) }} />
-          <div className="w-5" style={{ background: colorScale(minKwh + (maxKwh - minKwh) * 0.7, minKwh, maxKwh) }} />
-          <div className="w-5" style={{ background: colorScale(minKwh + (maxKwh - minKwh) * 0.9, minKwh, maxKwh) }} />
+          <div className="w-5" style={{ background: heatColor(maxKwh * 0.1, maxKwh) }} />
+          <div className="w-5" style={{ background: heatColor(maxKwh * 0.3, maxKwh) }} />
+          <div className="w-5" style={{ background: heatColor(maxKwh * 0.5, maxKwh) }} />
+          <div className="w-5" style={{ background: heatColor(maxKwh * 0.7, maxKwh) }} />
+          <div className="w-5" style={{ background: heatColor(maxKwh * 0.9, maxKwh) }} />
         </div>
         <span>Max</span>
       </div>
