@@ -78,9 +78,9 @@ export default function ConsumoVecinosChart({ data }: { data: VecinoConsumo[] })
           <XAxis dataKey="piso" fontSize={10} tick={{ fill: 'rgba(58,47,36,.44)' }} axisLine={false} tickLine={false} />
           <YAxis fontSize={10} tick={{ fill: 'rgba(58,47,36,.44)', fontFamily: "'JetBrains Mono', monospace" }} axisLine={false} tickLine={false} width={45} />
           <Tooltip content={tooltipContent} cursor={{ fill: 'rgba(58,47,36,.04)' }} />
-          <Bar dataKey="kwh_calor" fill="#c0392b" radius={[3, 3, 0, 0]} />
-          <Bar dataKey="kwh_frio" fill="#5b8ba0" radius={[3, 3, 0, 0]} />
-          <Bar dataKey="kwh_acs" fill="#6f8a5c" radius={[3, 3, 0, 0]} />
+          <Bar dataKey="kwh_calor" stackId="a" fill="#c0392b" radius={[0, 0, 0, 0]} />
+          <Bar dataKey="kwh_frio" stackId="a" fill="#5b8ba0" radius={[0, 0, 0, 0]} />
+          <Bar dataKey="kwh_acs" stackId="a" fill="#6f8a5c" radius={[3, 3, 0, 0]} />
         </BarChart>
       </ResponsiveContainer>
     </div>

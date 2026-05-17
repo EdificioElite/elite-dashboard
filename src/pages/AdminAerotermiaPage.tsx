@@ -262,9 +262,13 @@ export default function AdminAerotermiaPage() {
                 className={`text-[11px] font-medium uppercase tracking-[0.05em] px-2.5 py-1.5 rounded-md transition-colors ${preset === '30d' ? 'text-cocoa bg-accent/12' : 'text-cocoa/40 hover:text-cocoa'}`}
               >30 dias</button>
               <button
+                onClick={() => setRange('3m')}
+                className={`text-[11px] font-medium uppercase tracking-[0.05em] px-2.5 py-1.5 rounded-md transition-colors ${preset === '3m' ? 'text-cocoa bg-accent/12' : 'text-cocoa/40 hover:text-cocoa'}`}
+              >3 meses</button>
+              <button
                 onClick={() => setRange('1a')}
                 className={`text-[11px] font-medium uppercase tracking-[0.05em] px-2.5 py-1.5 rounded-md transition-colors ${preset === '1a' ? 'text-cocoa bg-accent/12' : 'text-cocoa/40 hover:text-cocoa'}`}
-              >1 ano</button>
+              >1 año</button>
             </div>
             <div className="flex items-center gap-2">
               <label className="text-[11px] font-medium uppercase tracking-wider text-cocoa/40 shrink-0">Desde:</label>

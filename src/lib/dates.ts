@@ -13,7 +13,7 @@ export function fromDatetimeLocal(val: string) {
   return val + ':00';
 }
 
-export type Preset = '24h' | '7d' | '30d' | '1a';
+export type Preset = '24h' | '7d' | '30d' | '3m' | '1a';
 
 export function applyPreset(preset: Preset): { desde: string; hasta: string } {
   const now = new Date();
@@ -23,6 +23,7 @@ export function applyPreset(preset: Preset): { desde: string; hasta: string } {
     case '24h': start.setDate(start.getDate() - 1); return { desde: toLocalISO(start), hasta: toLocalISO(now) };
     case '7d': start.setDate(start.getDate() - 7); start.setHours(0, 0, 0, 0); return { desde: toLocalISO(start), hasta: toLocalISO(now) };
     case '30d': start.setDate(start.getDate() - 30); start.setHours(0, 0, 0, 0); return { desde: toLocalISO(start), hasta: toLocalISO(now) };
+    case '3m': start.setMonth(start.getMonth() - 3); start.setHours(0, 0, 0, 0); return { desde: toLocalISO(start), hasta: toLocalISO(now) };
     case '1a': start.setFullYear(start.getFullYear() - 1); start.setHours(0, 0, 0, 0); return { desde: toLocalISO(start), hasta: toLocalISO(now) };
     default: start.setDate(start.getDate() - 7); start.setHours(0, 0, 0, 0); return { desde: toLocalISO(start), hasta: toLocalISO(now) };
   }
