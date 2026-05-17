@@ -4,6 +4,7 @@ import { query } from '../db';
 import { authMiddleware } from '../middleware/auth';
 import { adminMiddleware } from '../middleware/admin';
 import { rateLimit } from '../middleware/rateLimit';
+
 import { logger } from '../lib/logger';
 import { createEmailToken } from '../lib/tokens';
 import { sendInviteEmail } from '../lib/email';
@@ -210,7 +211,7 @@ router.post('/admin/usuarios', authMiddleware, adminMiddleware, async (req: Requ
 router.get('/admin/usuarios', authMiddleware, adminMiddleware, async (_req: Request, res: Response) => {
   try {
     const result = await query(`
-      SELECT id, vecino_piso, email, is_admin, created_at
+      SELECT id, vecino_piso, email, is_admin, created_at, ultima_conexion, ultima_consulta_ha
       FROM usuarios
       ORDER BY id
     `);
@@ -326,7 +327,7 @@ router.delete('/admin/usuarios/:id', authMiddleware, adminMiddleware, async (req
   }
 });
 
-router.post('/admin/invitar', authMiddleware, adminMiddleware, rateLimit(10, 60 * 60 * 1000), async (req: Request, res: Response) => {
+router.post('/admin/invitar', authMiddleware, adminMiddleware, rateLimit(100, 60 * 60 * 1000), async (req: Request, res: Response) => {
   try {
     const { piso } = req.body;
     if (!piso) {

@@ -13,6 +13,8 @@ interface Usuario {
   email: string;
   is_admin: boolean;
   created_at: string;
+  ultima_conexion: string | null;
+  ultima_consulta_ha: string | null;
 }
 
 export default function UsuariosPage() {
@@ -59,6 +61,35 @@ export default function UsuariosPage() {
     u.email.toLowerCase().includes(search.toLowerCase()) ||
     (u.vecino_piso && u.vecino_piso.toLowerCase().includes(search.toLowerCase()))
   );
+
+  const formatUltimaConexion = (date: string | null) => {
+    if (!date) return '—';
+    return new Date(date).toLocaleString('es-ES', {
+      timeZone: 'Europe/Madrid',
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+    });
+  };
+
+  const isOnline = (date: string | null) => {
+    if (!date) return false;
+    return Date.now() - new Date(date).getTime() < 5 * 60 * 1000;
+  };
+
+  const formatHaTooltip = (date: string | null) => {
+    if (!date) return null;
+    return 'Ultima consulta HA: ' + new Date(date).toLocaleString('es-ES', {
+      timeZone: 'Europe/Madrid',
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+    });
+  };
 
   const stats = [
     { label: 'Usuarios', value: usuarios.length, icon: 'users', iconColor: 'var(--accent)' },
@@ -151,6 +182,8 @@ export default function UsuariosPage() {
                   <th>Email</th>
                   <th>Piso</th>
                   <th>Rol</th>
+                  <th className="text-center">Estado</th>
+                  <th className="text-center">Ult. conexion</th>
                   <th className="text-center">Acciones</th>
                 </tr>
               </thead>
@@ -160,6 +193,25 @@ export default function UsuariosPage() {
                     <td className="text-sm text-cocoa">{u.email}</td>
                     <td className="text-sm text-cocoa/60">{u.vecino_piso || '—'}</td>
                     <td>{u.is_admin ? <span className="chip chip-accent">Admin</span> : <span className="chip">Vecino</span>}</td>
+                    <td className="text-center">
+                      <span className="inline-flex items-center gap-1.5">
+                        <span
+                          className="inline-block w-2 h-2 rounded-full shrink-0"
+                          style={{ background: isOnline(u.ultima_conexion) ? '#4caf50' : '#ccc' }}
+                          title={isOnline(u.ultima_conexion) ? 'Online' : 'Offline'}
+                        />
+                        {u.ultima_consulta_ha ? (
+                          <span className="text-green-600 cursor-help" title={formatHaTooltip(u.ultima_consulta_ha) || undefined}>
+                            <Icon name="check" size={13} />
+                          </span>
+                        ) : (
+                          <span className="text-red-400" title="No ha usado Home Assistant">
+                            <Icon name="x" size={13} />
+                          </span>
+                        )}
+                      </span>
+                    </td>
+                    <td className="text-sm text-cocoa/60 text-center">{formatUltimaConexion(u.ultima_conexion)}</td>
                     <td>
                       <div className="flex items-center justify-center gap-1">
                         <button onClick={() => setEditingUser(u)} className="btn btn-ghost p-2 text-cocoa/40 hover:text-cocoa" title="Editar usuario"><Icon name="edit" size={15} /></button>

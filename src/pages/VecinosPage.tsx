@@ -88,6 +88,13 @@ export default function VecinosPage() {
     }
   };
 
+  useEffect(() => {
+    if (inviteMessage) {
+      const timer = setTimeout(() => setInviteMessage(''), 4000);
+      return () => clearTimeout(timer);
+    }
+  }, [inviteMessage]);
+
   const handleSaveVecinoEmail = async () => {
     if (!editingVecinoEmail || !editingVecinoEmailValue) return;
     try {

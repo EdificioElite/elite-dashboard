@@ -60,6 +60,10 @@ router.get('/consumos', authMiddleware, async (req: Request, res: Response) => {
 
     const result = await query(sql, params);
     res.json(result.rows);
+
+    if (req.user!.source === 'home-assistant') {
+      query('UPDATE usuarios SET ultima_consulta_ha = NOW() WHERE id = $1', [req.user!.userId]).catch(() => {});
+    }
   } catch (err) {
     logger.error(err, 'Consumos error');
     res.status(500).json({ error: 'Error interno del servidor' });
@@ -129,6 +133,10 @@ router.get('/consumo-actual', authMiddleware, async (req: Request, res: Response
     }
 
     res.json(result.rows[0]);
+
+    if (req.user!.source === 'home-assistant') {
+      query('UPDATE usuarios SET ultima_consulta_ha = NOW() WHERE id = $1', [req.user!.userId]).catch(() => {});
+    }
   } catch (err) {
     logger.error(err, 'Consumo actual error');
     res.status(500).json({ error: 'Error interno del servidor' });

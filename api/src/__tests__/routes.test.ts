@@ -18,6 +18,7 @@ vi.mock('../db', () => ({
 
 vi.mock('../middleware/rateLimit', () => ({
   rateLimit: () => (_req: Request, _res: Response, next: NextFunction) => next(),
+  rateLimitOnlyOnFailure: () => (_req: Request, _res: Response, next: NextFunction) => next(),
 }));
 
 vi.mock('../lib/tokens', () => ({
@@ -129,6 +130,11 @@ describe('Auth routes', () => {
     });
 
     it('returns user data with valid token', async () => {
+      mockQuery
+        .mockResolvedValueOnce({ rows: [] })
+        .mockResolvedValueOnce({
+          rows: [{ id: 1, vecino_piso: '1A', email: 'test@test.com', is_admin: false, ultima_conexion: null, ultima_consulta_ha: null }],
+        });
       const app = createApp();
       const token = userToken();
       const res = await request(app)
@@ -136,6 +142,8 @@ describe('Auth routes', () => {
         .set('Authorization', `Bearer ${token}`);
       expect(res.status).toBe(200);
       expect(res.body.email).toBe('test@test.com');
+      expect(res.body.ultima_conexion).toBeNull();
+      expect(res.body.ultima_consulta_ha).toBeNull();
     });
   });
 
@@ -686,7 +694,7 @@ describe('Admin routes', () => {
 
     it('returns users for admin', async () => {
       mockQuery.mockResolvedValueOnce({
-        rows: [{ id: 1, vecino_piso: '1A', email: 'a@a.com', is_admin: true, created_at: '2026-01-01' }],
+        rows: [{ id: 1, vecino_piso: '1A', email: 'a@a.com', is_admin: true, created_at: '2026-01-01', ultima_conexion: null, ultima_consulta_ha: null }],
       });
       const app = createApp();
       const res = await request(app)

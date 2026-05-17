@@ -3,16 +3,16 @@ import bcrypt from 'bcrypt';
 import { query } from '../db';
 import { signToken } from '../lib/jwt';
 import { authMiddleware } from '../middleware/auth';
-import { rateLimit } from '../middleware/rateLimit';
+import { rateLimit, rateLimitOnlyOnFailure } from '../middleware/rateLimit';
 import { logger } from '../lib/logger';
 import { createEmailToken, verifyEmailToken, markTokenUsed, hashToken } from '../lib/tokens';
 import { sendResetEmail } from '../lib/email';
 
 const router = Router();
 
-router.post('/auth/login', rateLimit(3, 60 * 1000), async (req: Request, res: Response) => {
+router.post('/auth/login', rateLimitOnlyOnFailure(5, 60 * 1000), async (req: Request, res: Response) => {
   try {
-    const { email, password } = req.body;
+    const { email, password, source } = req.body;
 
     if (!email || !password) {
       res.status(400).json({ error: 'Email y password son requeridos' });
@@ -37,11 +37,14 @@ router.post('/auth/login', rateLimit(3, 60 * 1000), async (req: Request, res: Re
       return;
     }
 
+    await query('UPDATE usuarios SET ultima_conexion = NOW() WHERE id = $1', [user.id]);
+
     const token = signToken({
       userId: user.id,
       vecinoPiso: user.vecino_piso,
       email: user.email,
       isAdmin: user.is_admin,
+      source,
     });
 
     res.json({
@@ -59,16 +62,30 @@ router.post('/auth/login', rateLimit(3, 60 * 1000), async (req: Request, res: Re
   }
 });
 
-router.get('/auth/me', authMiddleware, (req: Request, res: Response) => {
-  res.json({
-    id: req.user!.userId,
-    vecino_piso: req.user!.vecinoPiso,
-    email: req.user!.email,
-    is_admin: req.user!.isAdmin,
-  });
+router.get('/auth/me', authMiddleware, async (req: Request, res: Response) => {
+  try {
+    await query('UPDATE usuarios SET ultima_conexion = NOW() WHERE id = $1', [req.user!.userId]);
+    const result = await query('SELECT id, vecino_piso, email, is_admin, ultima_conexion, ultima_consulta_ha FROM usuarios WHERE id = $1', [req.user!.userId]);
+    if (result.rows.length === 0) {
+      res.status(401).json({ error: 'Usuario no encontrado' });
+      return;
+    }
+    const user = result.rows[0];
+    res.json({
+      id: user.id,
+      vecino_piso: user.vecino_piso,
+      email: user.email,
+      is_admin: user.is_admin,
+      ultima_conexion: user.ultima_conexion,
+      ultima_consulta_ha: user.ultima_consulta_ha,
+    });
+  } catch (err) {
+    logger.error(err, 'Auth me error');
+    res.status(500).json({ error: 'Error interno del servidor' });
+  }
 });
 
-router.put('/auth/password', authMiddleware, rateLimit(5, 60 * 1000), async (req: Request, res: Response) => {
+router.put('/auth/password', authMiddleware, rateLimit(10, 60 * 1000), async (req: Request, res: Response) => {
   try {
     const { currentPassword, newPassword } = req.body;
 
@@ -124,7 +141,7 @@ function validatePassword(password: string): string | null {
   return null;
 }
 
-router.get('/auth/verify-token', rateLimit(30, 60 * 1000), async (req: Request, res: Response) => {
+router.get('/auth/verify-token', rateLimit(60, 60 * 1000), async (req: Request, res: Response) => {
   try {
     const { token } = req.query;
     if (!token || typeof token !== 'string') {
@@ -155,7 +172,7 @@ router.get('/auth/verify-token', rateLimit(30, 60 * 1000), async (req: Request, 
   }
 });
 
-router.post('/auth/register', rateLimit(5, 15 * 60 * 1000), async (req: Request, res: Response) => {
+router.post('/auth/register', rateLimit(10, 15 * 60 * 1000), async (req: Request, res: Response) => {
   try {
     const { token, password } = req.body;
     if (!token || !password) {
@@ -197,7 +214,7 @@ router.post('/auth/register', rateLimit(5, 15 * 60 * 1000), async (req: Request,
   }
 });
 
-router.post('/auth/forgot-password', rateLimit(3, 15 * 60 * 1000), async (req: Request, res: Response) => {
+router.post('/auth/forgot-password', rateLimit(6, 15 * 60 * 1000), async (req: Request, res: Response) => {
   try {
     const { email } = req.body;
     if (!email) {
@@ -216,7 +233,7 @@ router.post('/auth/forgot-password', rateLimit(3, 15 * 60 * 1000), async (req: R
   }
 });
 
-router.post('/auth/reset-password', rateLimit(5, 15 * 60 * 1000), async (req: Request, res: Response) => {
+router.post('/auth/reset-password', rateLimit(10, 15 * 60 * 1000), async (req: Request, res: Response) => {
   try {
     const { token, password } = req.body;
     if (!token || !password) {

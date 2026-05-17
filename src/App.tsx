@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { useAuthStore } from './store/auth';
 import LoginPage from './pages/LoginPage';
 import InicioPage from './pages/InicioPage';
@@ -32,6 +32,17 @@ function ProtectedRoute({ children, adminOnly = false }: { children: React.React
   return <>{children}</>;
 }
 
+function Heartbeat() {
+  const location = useLocation();
+  const heartbeat = useAuthStore((s) => s.heartbeat);
+
+  useEffect(() => {
+    heartbeat();
+  }, [location, heartbeat]);
+
+  return null;
+}
+
 export default function App() {
   const checkAuth = useAuthStore((s) => s.checkAuth);
 
@@ -49,6 +60,7 @@ export default function App() {
         <div className="grain" />
       </div>
       <div className="relative z-10 min-h-screen">
+        <Heartbeat />
         <Routes>
           <Route path="/login" element={<LoginPage />} />
           <Route path="/registro" element={<RegistroPage />} />
