@@ -62,7 +62,7 @@ describe('AdminAerotermiaPage', () => {
       expect(screen.getByText('Consumo por vecino')).toBeInTheDocument();
       expect(screen.getByText('Historico — Global')).toBeInTheDocument();
       expect(screen.getAllByText('No hay facturas disponibles').length).toBeGreaterThan(0);
-      expect(screen.getByText('Desglose por factura')).toBeInTheDocument();
+      expect(screen.getByText('No hay facturas electricas disponibles')).toBeInTheDocument();
       expect(screen.getByText('Heatmap mensual')).toBeInTheDocument();
     });
   });
