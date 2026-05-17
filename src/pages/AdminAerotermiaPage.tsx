@@ -300,7 +300,7 @@ export default function AdminAerotermiaPage() {
 
           <ConsumoVecinosChart data={vecinosConsumo} />
 
-          <HistoricoCharts endpoint="/admin/aerotermia/consumos" title="Historico — Global" />
+          <HistoricoCharts endpoint="/admin/aerotermia/consumos" title="Historico — Global" desde={desde} hasta={hasta} />
 
           <div className="glass p-[26px]">
             <div className="flex items-center justify-between flex-wrap gap-3">

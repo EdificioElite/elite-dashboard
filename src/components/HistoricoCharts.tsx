@@ -124,7 +124,8 @@ function ChartLine({ data, color, unit, dashed, decimals = 2 }: ChartLineProps) 
   );
 }
 
-export default function HistoricoCharts({ endpoint, title }: { endpoint?: string; title?: string }) {
+export default function HistoricoCharts({ endpoint, title, desde: extDesde, hasta: extHasta }: { endpoint?: string; title?: string; desde?: string; hasta?: string }) {
+  const external = extDesde && extHasta;
   const [preset, setPreset] = useState<Preset>('7d');
   const [desdeInput, setDesdeInput] = useState('');
   const [hastaInput, setHastaInput] = useState('');
@@ -139,10 +140,10 @@ export default function HistoricoCharts({ endpoint, title }: { endpoint?: string
     }
   };
 
-  useEffect(() => { setRange('7d'); }, []);
+  useEffect(() => { if (!external) setRange('7d'); }, [external]);
 
-  const desde = desdeInput ? fromDatetimeLocal(desdeInput) : '';
-  const hasta = hastaInput ? fromDatetimeLocal(hastaInput) : '';
+  const desde = external ? extDesde! : (desdeInput ? fromDatetimeLocal(desdeInput) : '');
+  const hasta = external ? extHasta! : (hastaInput ? fromDatetimeLocal(hastaInput) : '');
 
   useEffect(() => {
     if (!desde || !hasta) return;
@@ -187,9 +188,10 @@ export default function HistoricoCharts({ endpoint, title }: { endpoint?: string
           </div>
           <span className="eyebrow">{title || 'Historico'}</span>
         </div>
-        <SegmentedControl options={PRESETS} value={preset ?? ''} onChange={(k) => setRange(k)} />
+        {!external && <SegmentedControl options={PRESETS} value={preset ?? ''} onChange={(k) => setRange(k)} />}
       </div>
 
+      {!external && (
       <div className="flex flex-col sm:flex-row sm:items-center gap-3 mb-5">
         <div className="flex items-center gap-2">
           <label className="text-[11px] font-medium uppercase tracking-wider text-cocoa/40 shrink-0">Desde:</label>
@@ -200,6 +202,7 @@ export default function HistoricoCharts({ endpoint, title }: { endpoint?: string
           <input type="datetime-local" value={hastaInput} onChange={(e) => { setHastaInput(e.target.value); setPreset(null); }} className="input-card text-xs py-1.5 px-3 w-full sm:w-auto" />
         </div>
       </div>
+      )}
 
       {data.length === 0 ? (
         <p className="text-sm text-cocoa/44 py-8">No hay datos en este periodo</p>
