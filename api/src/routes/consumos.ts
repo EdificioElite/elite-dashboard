@@ -8,7 +8,9 @@ const router = Router();
 router.get('/consumos', authMiddleware, async (req: Request, res: Response) => {
   try {
     const { desde, hasta } = req.query;
-    const vecinoPiso = req.user!.vecinoPiso;
+    const pisoQuery = req.query.piso as string | undefined;
+    const isAdmin = req.user!.isAdmin;
+    const vecinoPiso = (isAdmin && pisoQuery) ? pisoQuery : req.user!.vecinoPiso;
 
     const MAX_POINTS = 500;
 
@@ -72,7 +74,9 @@ router.get('/consumos', authMiddleware, async (req: Request, res: Response) => {
 
 router.get('/consumo-actual', authMiddleware, async (req: Request, res: Response) => {
   try {
-    const vecinoPiso = req.user!.vecinoPiso;
+    const pisoQuery = req.query.piso as string | undefined;
+    const isAdmin = req.user!.isAdmin;
+    const vecinoPiso = (isAdmin && pisoQuery) ? pisoQuery : req.user!.vecinoPiso;
 
     const result = await query(
       `WITH latest AS (

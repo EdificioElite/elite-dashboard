@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { useSearchParams, Link } from 'react-router-dom';
 import { useAuthStore } from '../store/auth';
 import { apiFetch } from '../api/client';
 import { greeting } from '../lib/format';
@@ -7,6 +8,7 @@ import ConsumoCard from '../components/ConsumoCard';
 import HistoricoCharts from '../components/HistoricoCharts';
 import FacturasChart from '../components/FacturasChart';
 import FacturasTable from '../components/FacturasTable';
+import Icon from '../components/Icon';
 
 interface Consumo {
   timestamp: string;
@@ -48,12 +50,16 @@ const SECTION_NAV = [
 
 export default function DashboardPage() {
   const { user } = useAuthStore();
+  const [searchParams] = useSearchParams();
   const [consumoActual, setConsumoActual] = useState<Consumo | null>(null);
   const [facturas, setFacturas] = useState<Factura[]>([]);
   const [loading, setLoading] = useState(true);
 
+  const pisoParam = searchParams.get('piso');
+  const viewingAs = user?.is_admin && pisoParam ? pisoParam : null;
+
   const { saludo } = greeting();
-  const nombre = user?.vecino_piso || user?.email?.split('@')[0] || 'vecino';
+  const nombre = viewingAs ? `Piso ${viewingAs}` : (user?.vecino_piso || user?.email?.split('@')[0] || 'vecino');
 
   const scrollTo = (id: string) => {
     const el = document.getElementById(id);
@@ -63,9 +69,13 @@ export default function DashboardPage() {
   useEffect(() => {
     async function fetchData() {
       try {
+        const pisoQs = viewingAs ? `?piso=${encodeURIComponent(viewingAs)}` : '';
+        const facturasEndpoint = viewingAs
+          ? `/admin/vecinos/${viewingAs}/facturas`
+          : '/facturas';
         const [actual, facturasData] = await Promise.all([
-          apiFetch<Consumo | null>('/consumo-actual'),
-          apiFetch<Factura[]>('/facturas'),
+          apiFetch<Consumo | null>(`/consumo-actual${pisoQs}`),
+          apiFetch<Factura[]>(facturasEndpoint),
         ]);
         setConsumoActual(actual);
         setFacturas(facturasData);
@@ -76,7 +86,7 @@ export default function DashboardPage() {
       }
     }
     fetchData();
-  }, []);
+  }, [viewingAs]);
 
   if (loading) {
     return (
@@ -95,7 +105,13 @@ export default function DashboardPage() {
 
       <main className="max-w-[1180px] mx-auto px-6 flex flex-col gap-[22px] pb-10">
         <div className="pt-2">
-          <p className="eyebrow">Servicios</p>
+          <p className="eyebrow">{viewingAs ? 'Vista admin' : 'Servicios'}</p>
+          {viewingAs && (
+            <Link to="/admin/aerotermia" className="btn btn-ghost text-xs mb-2 inline-flex items-center gap-1">
+              <Icon name="chevronLeft" size={14} />
+              Volver a Aerotermia Admin
+            </Link>
+          )}
           <h1 className="font-display text-[40px] font-medium text-cocoa mt-1" style={{ letterSpacing: '-0.02em' }}>
             {saludo}, {nombre}.
           </h1>
@@ -115,7 +131,10 @@ export default function DashboardPage() {
 
         <div className="stagger flex flex-col gap-[22px]">
           <ConsumoCard data={consumoActual} />
-          <HistoricoCharts />
+          <HistoricoCharts
+            endpoint={viewingAs ? `/admin/vecinos/${viewingAs}` : undefined}
+            title={viewingAs ? `Historico — Piso ${viewingAs}` : undefined}
+          />
           <div id="facturas" className="scroll-mt-20">
             <FacturasChart data={facturas} />
           </div>
