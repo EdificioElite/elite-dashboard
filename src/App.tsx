@@ -13,6 +13,8 @@ import ContactosPage from './pages/ContactosPage';
 import RegistroPage from './pages/RegistroPage';
 import ForgotPasswordPage from './pages/ForgotPasswordPage';
 import ResetPasswordPage from './pages/ResetPasswordPage';
+import Header from './components/Header';
+import Sidebar from './components/Sidebar';
 import SkipLink from './components/SkipLink';
 import VersionFooter from './components/VersionFooter';
 
@@ -30,6 +32,27 @@ function ProtectedRoute({ children, adminOnly = false }: { children: React.React
   if (!user) return <Navigate to="/login" replace />;
   if (adminOnly && !user.is_admin) return <Navigate to="/inicio" replace />;
 
+  return <>{children}</>;
+}
+
+function AuthLayout({ children }: { children: React.ReactNode }) {
+  const { user } = useAuthStore();
+  const isAdmin = user?.is_admin;
+
+  return (
+    <>
+      <Header />
+      <div className="flex">
+        {isAdmin && <Sidebar />}
+        <main id="main-content" className="flex-1 min-w-0">
+          {children}
+        </main>
+      </div>
+    </>
+  );
+}
+
+function GuestLayout({ children }: { children: React.ReactNode }) {
   return <>{children}</>;
 }
 
@@ -53,6 +76,7 @@ export default function App() {
 
   return (
     <BrowserRouter>
+      <SkipLink />
       <div className="bg-stage" aria-hidden>
         <div className="orb o1" />
         <div className="orb o2" />
@@ -60,52 +84,29 @@ export default function App() {
         <div className="orb o4" />
         <div className="grain" />
       </div>
-      <SkipLink />
       <div id="main-content" className="relative z-10 min-h-screen" role="main">
         <Heartbeat />
         <Routes>
-          <Route path="/login" element={<LoginPage />} />
-          <Route path="/registro" element={<RegistroPage />} />
-          <Route path="/recuperar-contrasena" element={<ForgotPasswordPage />} />
-          <Route path="/resetear-contrasena" element={<ResetPasswordPage />} />
-          <Route path="/inicio" element={<ProtectedRoute><InicioPage /></ProtectedRoute>} />
-          <Route path="/aerotermia" element={<ProtectedRoute><DashboardPage /></ProtectedRoute>} />
+          {/* Guest routes */}
+          <Route path="/login" element={<GuestLayout><LoginPage /></GuestLayout>} />
+          <Route path="/registro" element={<GuestLayout><RegistroPage /></GuestLayout>} />
+          <Route path="/recuperar-contrasena" element={<GuestLayout><ForgotPasswordPage /></GuestLayout>} />
+          <Route path="/resetear-contrasena" element={<GuestLayout><ResetPasswordPage /></GuestLayout>} />
+
+          {/* Authenticated routes */}
+          <Route path="/inicio" element={<ProtectedRoute><AuthLayout><InicioPage /></AuthLayout></ProtectedRoute>} />
+          <Route path="/aerotermia" element={<ProtectedRoute><AuthLayout><DashboardPage /></AuthLayout></ProtectedRoute>} />
           <Route path="/dashboard" element={<Navigate to="/aerotermia" replace />} />
-          <Route path="/juntas" element={<ProtectedRoute><JuntasGeneralesPage /></ProtectedRoute>} />
-          <Route path="/contactos" element={<ProtectedRoute><ContactosPage /></ProtectedRoute>} />
+          <Route path="/juntas" element={<ProtectedRoute><AuthLayout><JuntasGeneralesPage /></AuthLayout></ProtectedRoute>} />
+          <Route path="/contactos" element={<ProtectedRoute><AuthLayout><ContactosPage /></AuthLayout></ProtectedRoute>} />
+
+          {/* Admin routes */}
           <Route path="/admin" element={<Navigate to="/admin/vecinos" replace />} />
-          <Route
-            path="/admin/vecinos"
-            element={
-              <ProtectedRoute adminOnly>
-                <VecinosPage />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/admin/usuarios"
-            element={
-              <ProtectedRoute adminOnly>
-                <UsuariosPage />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/admin/aerotermia"
-            element={
-              <ProtectedRoute adminOnly>
-                <AdminAerotermiaPage />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/admin/vecino/:piso"
-            element={
-              <ProtectedRoute adminOnly>
-                <AdminConsumoPage />
-              </ProtectedRoute>
-            }
-          />
+          <Route path="/admin/vecinos" element={<ProtectedRoute adminOnly><AuthLayout><VecinosPage /></AuthLayout></ProtectedRoute>} />
+          <Route path="/admin/usuarios" element={<ProtectedRoute adminOnly><AuthLayout><UsuariosPage /></AuthLayout></ProtectedRoute>} />
+          <Route path="/admin/aerotermia" element={<ProtectedRoute adminOnly><AuthLayout><AdminAerotermiaPage /></AuthLayout></ProtectedRoute>} />
+          <Route path="/admin/vecino/:piso" element={<ProtectedRoute adminOnly><AuthLayout><AdminConsumoPage /></AuthLayout></ProtectedRoute>} />
+
           <Route path="/" element={<Navigate to="/inicio" replace />} />
           <Route path="*" element={<Navigate to="/inicio" replace />} />
         </Routes>
