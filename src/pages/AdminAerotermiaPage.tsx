@@ -7,6 +7,7 @@ import PieChartCard from '../components/PieChartCard';
 import ConsumoVecinosChart from '../components/ConsumoVecinosChart';
 import FacturaSelector from '../components/FacturaSelector';
 import HeatmapChart from '../components/HeatmapChart';
+import CopChart from '../components/CopChart';
 import { toDatetimeLocal, fromDatetimeLocal, applyPreset, Preset } from '../lib/dates';
 
 interface ConsumoAgregado {
@@ -33,9 +34,19 @@ interface FacturaGlobal {
   fecha_factura_fin?: string;
 }
 
+interface CopDatum {
+  id: string;
+  startdate: string;
+  enddate: string;
+  kwh_electricos: number | null;
+  kwh_termicos: number | null;
+  cop: number | null;
+}
+
 export default function AdminAerotermiaPage() {
   const [consumos, setConsumos] = useState<ConsumoAgregado[]>([]);
   const [facturas, setFacturas] = useState<FacturaGlobal[]>([]);
+  const [copData, setCopData] = useState<CopDatum[]>([]);
   const [loading, setLoading] = useState(true);
   const [preset, setPreset] = useState<Preset | null>('7d');
   const [desdeInput, setDesdeInput] = useState('');
@@ -59,6 +70,9 @@ export default function AdminAerotermiaPage() {
     apiFetch<FacturaGlobal[]>('/admin/aerotermia/facturas')
       .then(setFacturas)
       .catch(() => setFacturas([]));
+    apiFetch<CopDatum[]>('/admin/aerotermia/cop')
+      .then(setCopData)
+      .catch(() => setCopData([]));
   }, []);
 
   useEffect(() => {
@@ -270,6 +284,8 @@ export default function AdminAerotermiaPage() {
           <HistoricoCharts endpoint="/admin/aerotermia/consumos" title="Historico — Global" />
 
           <FacturasChart data={facturasGlobal} />
+
+          <CopChart data={copData} />
 
           <FacturaSelector facturas={uniqueFacturas} />
 

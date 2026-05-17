@@ -130,4 +130,29 @@ router.get('/admin/aerotermia/facturas/:id_factura', authMiddleware, adminMiddle
   }
 });
 
+router.get('/admin/aerotermia/cop', authMiddleware, adminMiddleware, async (_req: Request, res: Response) => {
+  try {
+    const result = await query(`
+      SELECT
+        fe.id,
+        fe.startdate,
+        fe.enddate,
+        fe.kwh_electricos,
+        MAX(f.kwh_total_viviendas)::numeric AS kwh_termicos,
+        CASE WHEN fe.kwh_electricos > 0
+          THEN ROUND(MAX(f.kwh_total_viviendas)::numeric / fe.kwh_electricos::numeric, 2)
+          ELSE NULL
+        END AS cop
+      FROM facturaelectrica fe
+      LEFT JOIN facturas f ON f.id_factura_electrica = fe.id
+      GROUP BY fe.id, fe.startdate, fe.enddate, fe.kwh_electricos
+      ORDER BY fe.startdate DESC
+    `);
+    res.json(result.rows);
+  } catch (err) {
+    logger.error(err, 'Admin aerotermia COP error');
+    res.status(500).json({ error: 'Error interno del servidor' });
+  }
+});
+
 export default router;

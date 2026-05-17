@@ -37,7 +37,7 @@ app.use(promBundle({
     [/^\/api\/admin\/usuarios\/\d+\/password$/, '/api/admin/usuarios/:id/password'],
     [/^\/api\/admin\/aerotermia\/consumos$/, '/api/admin/aerotermia/consumos'],
     [/^\/api\/admin\/aerotermia\/facturas$/, '/api/admin/aerotermia/facturas'],
-    [/^\/api\/admin\/aerotermia\/facturas\/[^/]+$/, '/api/admin/aerotermia/facturas/:id_factura'],
+    [/^\/api\/admin\/aerotermia\/cop$/, '/api/admin/aerotermia/cop'],
   ],
   autoregister: false,
 }));
