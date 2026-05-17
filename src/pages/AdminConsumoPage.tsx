@@ -21,12 +21,14 @@ interface Factura {
   id_factura: string;
   periodo: string;
   importe_total: number;
+  importe_fijo: number;
   kwh_calor: number;
   kwh_frio: number;
   kwh_acs: number;
   m3_acs: number;
   importe_calor: number;
   importe_frio: number;
+  importe_variable_acs: number;
   importe_acs: number;
 }
 

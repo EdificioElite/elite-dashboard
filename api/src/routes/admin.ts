@@ -358,4 +358,37 @@ router.post('/admin/invitar', authMiddleware, adminMiddleware, rateLimit(100, 60
   }
 });
 
+router.get('/admin/vecinos/:piso/facturas', authMiddleware, adminMiddleware, async (req: Request, res: Response) => {
+  try {
+    const { piso } = req.params;
+
+    const result = await query(
+      `SELECT
+        f.id_factura,
+        f.fecha_factura_creacion AS periodo,
+        f.importe_vivienda_total AS importe_total,
+        f.importe_vivienda_fijo AS importe_fijo,
+        f.kwh_vivienda_calor AS kwh_calor,
+        f.kwh_vivienda_frio AS kwh_frio,
+        f.kwh_vivienda_acs AS kwh_acs,
+        f.m3_vivienda_acs AS m3_acs,
+        f.importe_vivienda_variable_calor AS importe_calor,
+        f.importe_vivienda_variable_frio AS importe_frio,
+        f.importe_vivienda_variable_acs AS importe_variable_acs,
+        f.importe_vivienda_acs AS importe_acs,
+        f.fecha_factura_inicio,
+        f.fecha_factura_fin
+      FROM facturas f
+      WHERE f.piso = $1
+      ORDER BY f.fecha_factura_creacion DESC`,
+      [piso]
+    );
+
+    res.json(result.rows);
+  } catch (err) {
+    logger.error(err, 'Admin vecino facturas error');
+    res.status(500).json({ error: 'Error interno del servidor' });
+  }
+});
+
 export default router;

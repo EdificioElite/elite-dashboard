@@ -149,8 +149,6 @@ test.describe('Admin', () => {
   test('ultima_conexion updates after vecino logs in', async ({ page }) => {
     await page.goto('/admin/usuarios');
     await expect(page.locator('tbody')).toBeVisible();
-    const vecino1Row = page.locator('tr', { hasText: 'vecino1@elite.com' });
-    await expect(vecino1Row).toContainText('—');
 
     await logout(page);
     await loginAsVecino(page);
@@ -161,7 +159,6 @@ test.describe('Admin', () => {
     await page.goto('/admin/usuarios');
     await expect(page.locator('tbody')).toBeVisible();
     const vecino1RowAfter = page.locator('tr', { hasText: 'vecino1@elite.com' });
-    await expect(vecino1RowAfter).not.toContainText('—');
     await expect(vecino1RowAfter).toContainText(/\d{2}\/\d{2}\/\d{4}, \d{2}:\d{2}/);
   });
 

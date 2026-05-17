@@ -12,8 +12,8 @@ describe('FacturasTable', () => {
     render(
       <FacturasTable
         data={[
-          { id_factura: '1', periodo: '2026-01-01', importe_total: 80.5, kwh_calor: 100, kwh_frio: 30, kwh_acs: 50, m3_acs: 2.5, importe_calor: 40, importe_frio: 10, importe_acs: 30.5 },
-          { id_factura: '2', periodo: '2026-02-01', importe_total: 90.0, kwh_calor: 110, kwh_frio: 25, kwh_acs: 55, m3_acs: 2.8, importe_calor: 45, importe_frio: 8, importe_acs: 37.0 },
+          { id_factura: '1', periodo: '2026-01-01', importe_total: 80.5, importe_fijo: 20, kwh_calor: 100, kwh_frio: 30, kwh_acs: 50, m3_acs: 2.5, importe_calor: 40, importe_frio: 10, importe_variable_acs: 15, importe_acs: 30.5 },
+          { id_factura: '2', periodo: '2026-02-01', importe_total: 90.0, importe_fijo: 20, kwh_calor: 110, kwh_frio: 25, kwh_acs: 55, m3_acs: 2.8, importe_calor: 45, importe_frio: 8, importe_variable_acs: 18, importe_acs: 37.0 },
         ]}
       />
     );
@@ -26,7 +26,7 @@ describe('FacturasTable', () => {
   it('renders column headers', () => {
     render(
       <FacturasTable
-        data={[{ id_factura: '1', periodo: '2026-01-01', importe_total: 80.5, kwh_calor: 100, kwh_frio: 30, kwh_acs: 50, m3_acs: 2.5, importe_calor: 40, importe_frio: 10, importe_acs: 30.5 }]}
+        data={[{ id_factura: '1', periodo: '2026-01-01', importe_total: 80.5, importe_fijo: 20, kwh_calor: 100, kwh_frio: 30, kwh_acs: 50, m3_acs: 2.5, importe_calor: 40, importe_frio: 10, importe_variable_acs: 15, importe_acs: 30.5 }]}
       />
     );
     expect(screen.getByText('Periodo')).toBeInTheDocument();
