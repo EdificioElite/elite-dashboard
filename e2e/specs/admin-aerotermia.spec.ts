@@ -23,10 +23,10 @@ test.describe('Admin Aerotermia Dashboard', () => {
   });
 
   test('shows date range presets and inputs', async ({ page }) => {
-    await expect(page.getByText('24h')).toBeVisible({ timeout: 10000 });
-    await expect(page.getByText('7 dias')).toBeVisible();
-    await expect(page.getByText('30 dias')).toBeVisible();
-    await expect(page.getByText('1 ano')).toBeVisible();
+    await expect(page.getByText('24h').first()).toBeVisible({ timeout: 10000 });
+    await expect(page.getByText('7 dias').first()).toBeVisible();
+    await expect(page.getByText('30 dias').first()).toBeVisible();
+    await expect(page.getByText('1 ano').first()).toBeVisible();
     await expect(page.getByText('Desde:')).toBeVisible();
     await expect(page.getByText('Hasta:')).toBeVisible();
   });
@@ -44,21 +44,18 @@ test.describe('Admin Aerotermia Dashboard', () => {
   });
 
   test('preset 24h changes selection', async ({ page }) => {
-    await page.getByText('24h').click();
-    const btn = page.locator('button', { hasText: '24h' });
-    await expect(btn).toHaveClass(/text-cocoa bg-accent\/12/);
+    await page.getByText('24h').first().click();
+    await expect(page.getByText('24h').first()).toHaveClass(/text-cocoa bg-accent\/12/);
   });
 
   test('preset 30d changes selection', async ({ page }) => {
-    await page.getByText('30 dias').click();
-    const btn = page.locator('button', { hasText: '30 dias' });
-    await expect(btn).toHaveClass(/text-cocoa bg-accent\/12/);
+    await page.getByText('30 dias').first().click();
+    await expect(page.getByText('30 dias').first()).toHaveClass(/text-cocoa bg-accent\/12/);
   });
 
   test('preset 1a changes selection', async ({ page }) => {
-    await page.getByText('1 ano').click();
-    const btn = page.locator('button', { hasText: '1 ano' });
-    await expect(btn).toHaveClass(/text-cocoa bg-accent\/12/);
+    await page.getByText('1 ano').first().click();
+    await expect(page.getByText('1 ano').first()).toHaveClass(/text-cocoa bg-accent\/12/);
   });
 
   test('factura selector has options', async ({ page }) => {
