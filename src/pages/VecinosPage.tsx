@@ -151,6 +151,8 @@ export default function VecinosPage() {
           </button>
         </div>
 
+        <section aria-label="Gestión de vecinos">
+
         <div className="grid grid-cols-3 gap-[16px]">
           {stats.map(s => (
             <div key={s.label} className="glass p-[20px] glass-hover">
@@ -225,13 +227,14 @@ export default function VecinosPage() {
 
           <div className="overflow-x-auto -mx-2">
             <table className="table-glass">
+              <caption className="sr-only">Tabla de vecinos del edificio</caption>
               <thead>
                 <tr>
-                  <th>Piso</th>
-                  <th>Nombre</th>
-                  <th>Email facturas</th>
-                  <th>Coeficiente</th>
-                  <th className="text-center">Acciones</th>
+                  <th scope="col">Piso</th>
+                  <th scope="col">Nombre</th>
+                  <th scope="col">Email facturas</th>
+                  <th scope="col">Coeficiente</th>
+                  <th scope="col" className="text-center">Acciones</th>
                 </tr>
               </thead>
               <tbody>
@@ -282,6 +285,7 @@ export default function VecinosPage() {
             {filtered.length === 0 && <div className="text-sm text-cocoa/40 py-8 text-center">No se encontraron vecinos</div>}
           </div>
         </div>
+        </section>
       </main>
 
       {editingVecinoData && (

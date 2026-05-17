@@ -265,6 +265,8 @@ export default function AdminAerotermiaPage() {
           </p>
         </div>
 
+        <section aria-label="Panel de aerotermia">
+
         <div className="flex flex-col sm:flex-row sm:items-center gap-3 glass p-[26px]">
           <span className="eyebrow shrink-0">Periodo</span>
           <div className="flex items-center gap-2">
@@ -408,6 +410,7 @@ export default function AdminAerotermiaPage() {
             )}
           </div>
         </div>
+        </section>
       </main>
     </div>
   );

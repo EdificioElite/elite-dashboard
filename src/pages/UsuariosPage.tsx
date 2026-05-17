@@ -113,6 +113,8 @@ export default function UsuariosPage() {
           </button>
         </div>
 
+        <section aria-label="Gestión de usuarios">
+
         <div className="grid grid-cols-3 gap-[16px]">
           {stats.map(s => (
             <div key={s.label} className="glass p-[20px] glass-hover">
@@ -174,14 +176,15 @@ export default function UsuariosPage() {
 
           <div className="overflow-x-auto -mx-2">
             <table className="table-glass">
+              <caption className="sr-only">Tabla de usuarios del sistema</caption>
               <thead>
                 <tr>
-                  <th>Email</th>
-                  <th>Piso</th>
-                  <th>Rol</th>
-                  <th className="text-center">Estado</th>
-                  <th className="text-center">Ult. conexion</th>
-                  <th className="text-center">Acciones</th>
+                  <th scope="col">Email</th>
+                  <th scope="col">Piso</th>
+                  <th scope="col">Rol</th>
+                  <th scope="col" className="text-center">Estado</th>
+                  <th scope="col" className="text-center">Ult. conexion</th>
+                  <th scope="col" className="text-center">Acciones</th>
                 </tr>
               </thead>
               <tbody>
@@ -238,6 +241,7 @@ export default function UsuariosPage() {
             </table>
           </div>
         </div>
+        </section>
       </main>
 
       {editingUser && (
