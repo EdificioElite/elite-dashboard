@@ -8,6 +8,7 @@ import authRoutes from './routes/auth';
 import consumosRoutes from './routes/consumos';
 import facturasRoutes from './routes/facturas';
 import adminRoutes from './routes/admin';
+import adminAerotermiaRoutes from './routes/adminAerotermia';
 import testRoutes from './routes/test';
 
 const app = express();
@@ -31,8 +32,12 @@ app.use(promBundle({
   metricsPath: '/metrics',
   normalizePath: [
     [/^\/api\/admin\/vecinos\/[^/]+$/, '/api/admin/vecinos/:piso'],
+    [/^\/api\/admin\/vecinos\/[^/]+\/facturas$/, '/api/admin/vecinos/:piso/facturas'],
     [/^\/api\/admin\/usuarios\/\d+$/, '/api/admin/usuarios/:id'],
     [/^\/api\/admin\/usuarios\/\d+\/password$/, '/api/admin/usuarios/:id/password'],
+    [/^\/api\/admin\/aerotermia\/consumos$/, '/api/admin/aerotermia/consumos'],
+    [/^\/api\/admin\/aerotermia\/facturas$/, '/api/admin/aerotermia/facturas'],
+    [/^\/api\/admin\/aerotermia\/facturas\/[^/]+$/, '/api/admin/aerotermia/facturas/:id_factura'],
   ],
   autoregister: false,
 }));
@@ -41,6 +46,7 @@ app.use('/api', authRoutes);
 app.use('/api', consumosRoutes);
 app.use('/api', facturasRoutes);
 app.use('/api', adminRoutes);
+app.use('/api', adminAerotermiaRoutes);
 if (config.mockEmail) {
   app.use('/api', testRoutes);
 }
