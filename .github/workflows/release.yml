@@ -17,9 +17,6 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: write
-      pull-requests: write
-      actions: write
-      checks: write
     env:
       GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     steps:
@@ -28,30 +25,7 @@ jobs:
           ref: dev
           fetch-depth: 0
 
-      - name: Check if dev has new content relative to main
-        id: check
-        run: |
-          git fetch origin dev main
-          DEV_TREE=$(git rev-parse origin/dev^{tree})
-          MAIN_TREE=$(git rev-parse origin/main^{tree})
-          if [ "${DEV_TREE}" != "${MAIN_TREE}" ]; then
-            echo "content_differs=1" >> $GITHUB_OUTPUT
-            echo "dev tiene contenido diferente a main, creando release"
-          else
-            echo "content_differs=0" >> $GITHUB_OUTPUT
-            echo "dev y main tienen el mismo contenido, nada que publicar"
-          fi
-
-      - name: Close existing release PRs
-        if: steps.check.outputs.content_differs != '0'
-        run: |
-          gh pr list --head dev --base main --state open --json number --jq '.[].number' | while read num; do
-            echo "Cerrando PR de release existente #${num}"
-            gh pr close "${num}" --comment "Reemplazado por un nuevo PR de release."
-          done
-
       - name: Compute next version
-        if: steps.check.outputs.content_differs != '0'
         id: version
         run: |
           LAST_TAG=$(git tag --sort=-v:refname | grep -E '^v[0-9]+\.[0-9]+\.[0-9]+$' | head -1)
@@ -74,106 +48,25 @@ jobs:
           echo "New version: ${NEW_VERSION}"
           echo "version=${NEW_VERSION}" >> $GITHUB_OUTPUT
 
-      - name: Bump version in package.json files
-        if: steps.check.outputs.content_differs != '0'
-        run: |
-          jq --arg v "${{ steps.version.outputs.version }}" '.version = $v' package.json > tmp.json && mv tmp.json package.json
-          jq --arg v "${{ steps.version.outputs.version }}" '.version = $v' api/package.json > tmp.json && mv tmp.json api/package.json
-
-      - name: Clean up existing release branch
-        if: steps.check.outputs.content_differs != '0'
-        run: |
-          BRANCH="release/v${{ steps.version.outputs.version }}"
-          if git ls-remote --exit-code --heads origin "${BRANCH}" > /dev/null 2>&1; then
-            echo "Borrando rama remota existente: ${BRANCH}"
-            if git push origin --delete "${BRANCH}" 2>/dev/null; then
-              echo "Rama eliminada"
-            else
-              echo "AVISO: no se pudo borrar ${BRANCH}, el push siguiente fallara si ya existe"
-            fi
-          fi
-
-      - name: Create release branch and push
-        if: steps.check.outputs.content_differs != '0'
-        id: branch
-        run: |
-          BRANCH="release/v${{ steps.version.outputs.version }}"
-          git checkout -b "${BRANCH}"
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add package.json api/package.json
-          git commit -m "chore: bump version to v${{ steps.version.outputs.version }}"
-          git push origin "${BRANCH}"
-          SHA=$(git rev-parse HEAD)
-          echo "branch=${BRANCH}" >> $GITHUB_OUTPUT
-          echo "sha=${SHA}" >> $GITHUB_OUTPUT
-
-      - name: Create PR to dev and merge
-        if: steps.check.outputs.content_differs != '0'
-        run: |
-          PR_URL=$(gh pr create \
-            --title "chore: bump version to v${{ steps.version.outputs.version }}" \
-            --body "Actualiza version en package.json a v${{ steps.version.outputs.version }} antes del release." \
-            --head "${{ steps.branch.outputs.branch }}" \
-            --base dev)
-
-          PR_NUMBER=$(echo "${PR_URL}" | grep -oP '\d+$')
-          echo "PR a dev creada: ${PR_URL}"
-
-          SHA="${{ steps.branch.outputs.sha }}"
-          for check in backend frontend e2e; do
-            echo "Creando check run '${check}' en ${SHA}..."
-            gh api "repos/${{ github.repository }}/check-runs" \
-              -f name="${check}" \
-              -f head_sha="${SHA}" \
-              -f status="completed" \
-              -f conclusion="success"
-          done
-
-          sleep 3
-          gh pr merge "${PR_NUMBER}" --squash
-
-      - name: Create release PR to main and merge
-        if: steps.check.outputs.content_differs != '0'
-        run: |
-          git fetch origin dev
-
-          PR_URL=$(gh pr create \
-            --title "Release v${{ steps.version.outputs.version }}" \
-            --body $'PR automatizada de release v${{ steps.version.outputs.version }}.\n\nTipo: `${{ inputs.version }}`.' \
-            --head dev \
-            --base main)
-
-          PR_NUMBER=$(echo "${PR_URL}" | grep -oP '\d+$')
-          echo "PR a main creada: ${PR_URL}"
-
-          gh pr merge "${PR_NUMBER}" --squash
-
       - name: Create tag and GitHub release
-        if: steps.check.outputs.content_differs != '0'
         run: |
           TAG="v${{ steps.version.outputs.version }}"
 
-          # Tag (skip si ya existe para evitar fallo en re-ejecucion)
           if git rev-parse "${TAG}" >/dev/null 2>&1; then
-            echo "Tag ${TAG} ya existe, saltando creacion de tag"
-          else
-            git fetch origin main
-            MAIN_SHA=$(git rev-parse origin/main)
-            git tag "${TAG}" "${MAIN_SHA}"
-            git push origin "${TAG}"
+            echo "Tag ${TAG} ya existe, abortando"
+            exit 1
           fi
 
-          # GitHub release (skip si ya existe)
-          if gh release view "${TAG}" >/dev/null 2>&1; then
-            echo "Release ${TAG} ya existe, saltando"
-          else
-            gh release create "${TAG}" \
-              --title "${TAG}" \
-              --target main \
-              --generate-notes
-          fi
+          git fetch origin dev
+          DEV_SHA=$(git rev-parse origin/dev)
 
-      - name: Nothing to promote
-        if: steps.check.outputs.content_differs == '0'
-        run: echo "dev y main tienen el mismo contenido, nada que publicar."
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+          git tag "${TAG}" "${DEV_SHA}"
+          git push origin "${TAG}"
+
+          gh release create "${TAG}" \
+            --title "${TAG}" \
+            --target "${DEV_SHA}" \
+            --generate-notes
