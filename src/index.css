@@ -4,33 +4,32 @@
 
 @layer base {
   :root {
-    --bg-base: #f5ecdc;
-    --bg-tint-1: #e7c89a;
-    --bg-tint-2: #d4ad7c;
-    --bg-tint-3: #ead7b8;
-    --ink: #3a2f24;
-    --ink-soft: rgba(58, 47, 36, 0.68);
-    --ink-mute: rgba(58, 47, 36, 0.44);
-    --line: rgba(58, 47, 36, 0.10);
-    --line-soft: rgba(58, 47, 36, 0.06);
-    --accent: #b88a5e;
-    --accent-2: #4d4035;
-    --accent-soft: #e7c89a;
-    --sage: #6f8a5c;
-    --sage-dark: #5b7a4a;
-    --calor: #c0392b;
-    --frio: #5b8ba0;
-    --glass-bg: rgba(255, 250, 243, 0.55);
-    --glass-bg-strong: rgba(255, 250, 243, 0.78);
-    --glass-stroke: rgba(255, 255, 255, 0.65);
-    --glass-blur: 22px;
-    --glass-shadow: 0 1px 0 rgba(255, 255, 255, 0.6) inset,
-      0 24px 60px -20px rgba(80, 50, 30, 0.22),
-      0 8px 18px -10px rgba(80, 50, 30, 0.12);
+    --bg-base: #FFFBF5;
+    --bg-tint-1: #EDE0CC;
+    --bg-tint-2: #D4C4A8;
+    --bg-tint-3: #E8D5C0;
+    --ink: #1E140A;
+    --ink-soft: rgba(30, 20, 10, 0.70);
+    --ink-mute: rgba(30, 20, 10, 0.48);
+    --line: rgba(30, 20, 10, 0.10);
+    --line-soft: rgba(30, 20, 10, 0.06);
+    --accent: #A6754B;
+    --accent-dark: #8C5E3A;
+    --accent-soft: #C9A87C;
+    --sage: #5D7A4A;
+    --sage-dark: #4A6338;
+    --calor: #B53228;
+    --frio: #4A7A8C;
+    --glass-bg: rgba(255, 251, 245, 0.85);
+    --glass-bg-strong: rgba(255, 251, 245, 0.92);
+    --glass-stroke: rgba(30, 20, 10, 0.06);
+    --glass-blur: 12px;
+    --glass-shadow: 0 1px 3px rgba(30, 20, 10, 0.04);
     --radius-xl: 28px;
     --radius-lg: 20px;
     --radius-md: 14px;
     --radius-sm: 10px;
+    --focus-ring: 0 0 0 3px rgba(166, 117, 75, 0.35);
   }
 
   * {
@@ -47,8 +46,22 @@
   }
 
   ::selection {
-    background: rgba(184, 138, 94, 0.22);
+    background: rgba(166, 117, 75, 0.22);
     color: var(--ink);
+  }
+
+  :focus-visible {
+    outline: none;
+    box-shadow: var(--focus-ring);
+    border-radius: 4px;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+    }
   }
 }
 
