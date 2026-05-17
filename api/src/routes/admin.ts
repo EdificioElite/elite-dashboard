@@ -374,6 +374,7 @@ router.get('/admin/vecinos/:piso/facturas', authMiddleware, adminMiddleware, asy
         f.m3_vivienda_acs AS m3_acs,
         f.importe_vivienda_variable_calor AS importe_calor,
         f.importe_vivienda_variable_frio AS importe_frio,
+        f.importe_vivienda_variable_acs AS importe_variable_acs,
         f.importe_vivienda_acs AS importe_acs,
         f.fecha_factura_inicio,
         f.fecha_factura_fin

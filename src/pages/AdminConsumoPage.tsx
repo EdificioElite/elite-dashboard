@@ -28,6 +28,7 @@ interface Factura {
   m3_acs: number;
   importe_calor: number;
   importe_frio: number;
+  importe_variable_acs: number;
   importe_acs: number;
 }
 

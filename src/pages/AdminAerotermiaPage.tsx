@@ -31,6 +31,7 @@ interface FacturaGlobal {
   m3_acs: number;
   importe_calor: number;
   importe_frio: number;
+  importe_variable_acs: number;
   importe_acs: number;
   fecha_factura_inicio?: string;
   fecha_factura_fin?: string;
@@ -157,6 +158,7 @@ export default function AdminAerotermiaPage() {
         prev.m3_acs += Number(f.m3_acs);
         prev.importe_calor += Number(f.importe_calor);
         prev.importe_frio += Number(f.importe_frio);
+        prev.importe_variable_acs += Number(f.importe_variable_acs);
         prev.importe_acs += Number(f.importe_acs);
       } else {
         map.set(f.id_factura, {
@@ -169,6 +171,7 @@ export default function AdminAerotermiaPage() {
           m3_acs: Number(f.m3_acs),
           importe_calor: Number(f.importe_calor),
           importe_frio: Number(f.importe_frio),
+          importe_variable_acs: Number(f.importe_variable_acs),
           importe_acs: Number(f.importe_acs),
         });
       }
