@@ -145,7 +145,7 @@ export default function AdminAerotermiaPage() {
   }, [filteredFacturas]);
 
   const facturasGlobal = useMemo(() => {
-    const source = pisoFacturas ? facturas.filter((f) => f.piso === pisoFacturas) : facturas;
+    const source = pisoFacturas ? filteredFacturas.filter((f) => f.piso === pisoFacturas) : filteredFacturas;
     const map = new Map<string, FacturaGlobal>();
     source.forEach((f) => {
       const prev = map.get(f.id_factura);
@@ -177,10 +177,10 @@ export default function AdminAerotermiaPage() {
       }
     });
     return Array.from(map.values()).sort((a, b) => b.periodo.localeCompare(a.periodo));
-  }, [facturas, pisoFacturas]);
+  }, [filteredFacturas, pisoFacturas]);
 
   const heatmapData = useMemo(() => {
-    return facturas.map((f) => {
+    return filteredFacturas.map((f) => {
       const d = new Date(f.periodo);
       const periodo = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
       return {
@@ -192,11 +192,21 @@ export default function AdminAerotermiaPage() {
         m3_acs: Number(f.m3_acs),
       };
     });
-  }, [facturas]);
+  }, [filteredFacturas]);
 
   const pisosUnicos = useMemo(() => {
-    return [...new Set(facturas.map((f) => f.piso))].sort();
-  }, [facturas]);
+    return [...new Set(filteredFacturas.map((f) => f.piso))].sort();
+  }, [filteredFacturas]);
+
+  const filteredCopData = useMemo(() => {
+    if (!desde || !hasta) return copData;
+    const desdeD = new Date(desde).getTime();
+    const hastaD = new Date(hasta).getTime();
+    return copData.filter((c) => {
+      const t = new Date(c.startdate).getTime();
+      return t >= desdeD && t <= hastaD;
+    });
+  }, [copData, desde, hasta]);
 
   if (loading) {
     return (
@@ -320,9 +330,9 @@ export default function AdminAerotermiaPage() {
             }
           />
 
-          <CopChart data={copData} />
+          <CopChart data={filteredCopData} />
 
-          <FacturaElectricaTable data={copData} />
+          <FacturaElectricaTable data={filteredCopData} />
 
           <HeatmapChart data={heatmapData} />
         </div>
