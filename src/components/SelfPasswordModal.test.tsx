@@ -105,7 +105,7 @@ describe('SelfPasswordModal', () => {
   it('closes on backdrop click', async () => {
     const user = userEvent.setup();
     render(<SelfPasswordModal onClose={onClose} />);
-    await user.click(screen.getByRole('dialog'));
+    await user.click(screen.getByRole('dialog').parentElement!);
     expect(onClose).toHaveBeenCalled();
   });
 });
