@@ -70,4 +70,14 @@ node -e "
   seed().catch(e => { console.error(e); process.exit(1); });
 "
 
+echo "Seeding facturaelectrica..."
+node -e "
+  const { Pool } = require('pg');
+  const fs = require('fs');
+  const pool = new Pool({ connectionString: process.env.DATABASE_URL });
+  pool.query(fs.readFileSync('/app/init/04-seed-facturaelectrica.sql', 'utf-8'))
+    .then(() => { console.log('Facturaelectrica seed complete'); return pool.end(); })
+    .catch(e => { console.error(e); process.exit(1); });
+"
+
 echo "Init complete"
