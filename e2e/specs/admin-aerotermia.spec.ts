@@ -79,7 +79,7 @@ test.describe('Admin Aerotermia Dashboard', () => {
 
   test('navigates to aerotermia from header', async ({ page }) => {
     await page.goto('/admin/vecinos');
-    await page.getByRole('button', { name: 'Aerotermia' }).last().click();
+    await page.getByRole('button', { name: 'Admin aerotermia' }).click();
     await expect(page).toHaveURL('/admin/aerotermia');
   });
 });
