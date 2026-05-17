@@ -115,7 +115,7 @@ export default function UsuariosPage() {
 
         <div className="grid grid-cols-3 gap-[16px]">
           {stats.map(s => (
-            <div key={s.label} className="glass p-[20px]">
+            <div key={s.label} className="glass p-[20px] glass-hover">
               <div className="flex items-center gap-2.5 mb-2">
                 <div className="w-6 h-6 rounded-lg flex items-center justify-center shrink-0" style={{ background: s.iconColor }}>
                   <Icon name={s.icon} size={12} className="text-cream" />
@@ -189,14 +189,28 @@ export default function UsuariosPage() {
                   <tr key={u.id} className="row-stagger" style={{ animationDelay: `${i * 40}ms` }}>
                     <td className="text-sm text-cocoa">{u.email}</td>
                     <td className="text-sm text-cocoa/60">{u.vecino_piso || '—'}</td>
-                    <td>{u.is_admin ? <span className="chip chip-accent">Admin</span> : <span className="chip">Vecino</span>}</td>
+                    <td>
+                      <button
+                        onClick={() => setEditingUser(u)}
+                        className={`toggle-track ${u.is_admin ? 'on' : ''}`}
+                        aria-label={u.is_admin ? 'Quitar admin' : 'Hacer admin'}
+                        role="switch"
+                        aria-checked={u.is_admin}
+                        title="Editar rol"
+                      >
+                        <span className="toggle-thumb" />
+                      </button>
+                    </td>
                     <td className="text-center">
                       <span className="inline-flex items-center gap-1.5">
-                        <span
-                          className="inline-block w-2 h-2 rounded-full shrink-0"
-                          style={{ background: isOnline(u.ultima_conexion) ? '#4caf50' : '#ccc' }}
-                          title={isOnline(u.ultima_conexion) ? 'Online' : 'Offline'}
-                        />
+                        {isOnline(u.ultima_conexion) ? (
+                          <>
+                            <span className="live-dot" title="Online" />
+                            <span className="text-[11px] text-sage font-medium">Ahora</span>
+                          </>
+                        ) : (
+                          <span className="inline-block w-2 h-2 rounded-full shrink-0" style={{ background: '#ccc' }} title="Offline" />
+                        )}
                         {u.ultima_consulta_ha ? (
                           <span className="text-green-600 cursor-help" title={formatHaTooltip(u.ultima_consulta_ha) || undefined}>
                             <Icon name="check" size={13} />

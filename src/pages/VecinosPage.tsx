@@ -146,15 +146,14 @@ export default function VecinosPage() {
             <h1 className="font-display text-[40px] font-medium text-cocoa mt-1" style={{ letterSpacing: '-0.02em' }}>Vecinos</h1>
             <p className="text-sm text-cocoa/60 mt-1.5 max-w-lg">Gestiona los vecinos del edificio.</p>
           </div>
-          <button onClick={() => setShowForm(!showForm)} className={`btn ${showForm ? 'btn-ghost' : 'btn-primary'}`}>
-            <Icon name={showForm ? 'x' : 'plus'} size={14} />
-            {showForm ? 'Cancelar' : 'Crear vecino'}
+          <button onClick={() => setShowForm(!showForm)} className="btn btn-secondary mb-4">
+            {showForm ? 'Cancelar' : 'Añadir vecino'}
           </button>
         </div>
 
         <div className="grid grid-cols-3 gap-[16px]">
           {stats.map(s => (
-            <div key={s.label} className="glass p-[20px]">
+            <div key={s.label} className="glass p-[20px] glass-hover">
               <div className="flex items-center gap-2.5 mb-2">
                 <div className="w-6 h-6 rounded-lg flex items-center justify-center shrink-0" style={{ background: s.iconColor }}>
                   <Icon name={s.icon} size={12} className="text-cream" />
@@ -259,8 +258,8 @@ export default function VecinosPage() {
                           editingVecinoEmail === v.piso ? (
                             <span className="flex items-center gap-1">
                               <input type="email" value={editingVecinoEmailValue} onChange={e => setEditingVecinoEmailValue(e.target.value)} onKeyDown={e => { if (e.key === 'Enter') handleSaveVecinoEmail(); if (e.key === 'Escape') setEditingVecinoEmail(null); }} className="input-card text-xs py-0.5 px-1.5 w-32" placeholder="email..." autoFocus />
-                              <button onClick={handleSaveVecinoEmail} className="btn btn-ghost p-1 text-sage" title="Guardar"><Icon name="check" size={12} /></button>
-                              <button onClick={() => setEditingVecinoEmail(null)} className="btn btn-ghost p-1 text-rise" title="Cancelar"><Icon name="x" size={12} /></button>
+                              <button onClick={handleSaveVecinoEmail} className="btn btn-ghost p-1 text-sage" title="Guardar email"><Icon name="check" size={12} /></button>
+                              <button onClick={() => setEditingVecinoEmail(null)} className="btn btn-ghost p-1 text-rise" title="Cancelar edicion email"><Icon name="x" size={12} /></button>
                             </span>
                           ) : (
                             <button onClick={() => { setEditingVecinoEmail(v.piso); setEditingVecinoEmailValue(''); }} className="btn btn-ghost p-2 text-cocoa/40 hover:text-accent" title="Asignar email facturas">
