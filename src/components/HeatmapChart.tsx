@@ -18,7 +18,7 @@ function heatColor(value: number, max: number): string {
 }
 
 export default function HeatmapChart({ data }: { data: HeatmapDatum[] }) {
-  const { pisos, periodos, matrix, minKwh, maxKwh } = useMemo(() => {
+  const { pisos, periodos, matrix, maxKwh } = useMemo(() => {
     const uniquePisos = [...new Set(data.map((d) => d.piso))].sort();
     const uniquePeriodos = [...new Set(data.map((d) => d.periodo))].sort();
     const map = new Map<string, number>();

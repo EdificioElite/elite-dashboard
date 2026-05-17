@@ -1,5 +1,5 @@
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
-import { fmtMoney } from '../lib/format';
+
 import Icon from './Icon';
 import ChartTooltip from './ChartTooltip';
 

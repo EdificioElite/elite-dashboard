@@ -77,7 +77,7 @@ interface ChartLineProps {
   decimals?: number;
 }
 
-function ChartLine({ data, color, unit, dashed, decimals = 2 }: ChartLineProps) {
+function ChartLine({ data, color, dashed }: ChartLineProps) {
   const domain = useMemo(() => computeDomain(data.map((d) => d.value)), [data]);
 
   return (
