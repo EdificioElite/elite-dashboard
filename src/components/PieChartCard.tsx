@@ -1,5 +1,5 @@
-import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer, Legend } from 'recharts';
-import { fmtMoney } from '../lib/format';
+import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer, Legend, Label } from 'recharts';
+import ChartTooltip from './ChartTooltip';
 
 interface PieSlice {
   piso: string;
@@ -8,32 +8,7 @@ interface PieSlice {
   importe: number;
 }
 
-const COLORS = ['#c0392b', '#5b8ba0', '#6f8a5c', '#b88a5e', '#8b6f5a', '#4a7c92', '#9b6b43', '#3a7d6e'];
-
-const TOOLTIP_STYLE = {
-  background: 'rgba(58,47,36,.92)',
-  border: 'none',
-  borderRadius: '10px',
-  color: '#f5ecdc',
-  fontSize: '11.5px',
-  fontFamily: "'Manrope', sans-serif",
-  padding: '10px 12px',
-  boxShadow: '0 4px 16px rgba(0,0,0,.15)',
-};
-
-function tooltipContent(props: any) {
-  const { active, payload } = props;
-  if (!active || !payload || !payload[0]) return null;
-  const d = payload[0].payload as PieSlice;
-  return (
-    <div style={TOOLTIP_STYLE}>
-      <div style={{ fontWeight: 500, marginBottom: 4 }}>Piso {d.piso}</div>
-      <div style={{ color: 'rgba(245,236,220,.7)' }}>{d.porcentaje.toFixed(1)}%</div>
-      <div style={{ color: 'rgba(245,236,220,.7)' }}>{d.kwh_total.toFixed(1)} kWh</div>
-      <div style={{ color: 'rgba(245,236,220,.7)' }}>{fmtMoney(d.importe)}</div>
-    </div>
-  );
-}
+const COLORS = ['#B53228', '#4A7A8C', '#5D7A4A', '#A6754B', '#8B6B4A', '#4A7A8C', '#A6754B', '#5D7A4A'];
 
 function legendContent(props: any) {
   const { payload } = props;
@@ -70,8 +45,10 @@ export default function PieChartCard({ data }: { data: PieSlice[] }) {
     );
   }
 
+  const total = data.reduce((sum, d) => sum + d.kwh_total, 0);
+
   return (
-    <div className="glass p-[26px]">
+    <div className="glass p-[26px]" aria-label="Gráfica de distribución de consumo por vecino">
       <div className="flex items-center gap-3 mb-4">
         <div className="w-7 h-7 rounded-lg flex items-center justify-center shrink-0" style={{ background: 'var(--accent)' }}>
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#fff8ee" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
@@ -87,7 +64,7 @@ export default function PieChartCard({ data }: { data: PieSlice[] }) {
             data={data}
             cx="50%"
             cy="50%"
-            innerRadius={55}
+            innerRadius="70%"
             outerRadius={110}
             paddingAngle={3}
             dataKey="kwh_total"
@@ -96,8 +73,13 @@ export default function PieChartCard({ data }: { data: PieSlice[] }) {
             {data.map((_entry, index) => (
               <Cell key={index} fill={COLORS[index % COLORS.length]} stroke="transparent" />
             ))}
+            <Label
+              value={total}
+              position="center"
+              style={{ fontFamily: "'Fraunces', serif", fontSize: '24px', fontWeight: 500, fill: '#1E140A' }}
+            />
           </Pie>
-          <Tooltip content={tooltipContent} />
+          <Tooltip content={<ChartTooltip />} />
           <Legend content={legendContent} />
         </PieChart>
       </ResponsiveContainer>

@@ -1,4 +1,5 @@
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, ReferenceLine } from 'recharts';
+import ChartTooltip from './ChartTooltip';
 
 interface CopDatum {
   id: string;
@@ -9,38 +10,9 @@ interface CopDatum {
   cop: number | null;
 }
 
-const TOOLTIP_STYLE = {
-  background: 'rgba(58,47,36,.92)',
-  border: 'none',
-  borderRadius: '10px',
-  color: '#f5ecdc',
-  fontSize: '11.5px',
-  fontFamily: "'Manrope', sans-serif",
-  padding: '10px 12px',
-  boxShadow: '0 4px 16px rgba(0,0,0,.15)',
-};
-
 function labelMes(fecha: string): string {
   const d = new Date(fecha);
   return d.toLocaleDateString('es-ES', { month: 'short', year: '2-digit' });
-}
-
-function tooltipContent(props: any) {
-  const { active, payload } = props;
-  if (!active || !payload || !payload[0]) return null;
-  const d = payload[0].payload as CopDatum;
-  return (
-    <div style={TOOLTIP_STYLE}>
-      <div style={{ fontWeight: 500, marginBottom: 4 }}>{labelMes(d.startdate)}</div>
-      <div style={{ color: 'rgba(245,236,220,.7)' }}>COP: {d.cop != null ? d.cop.toFixed(2) : '—'}</div>
-      <div style={{ color: 'rgba(245,236,220,.5)', fontSize: '10px' }}>
-        {d.kwh_termicos != null ? (Number(d.kwh_termicos) / 1).toFixed(0) : '—'} kWh term
-      </div>
-      <div style={{ color: 'rgba(245,236,220,.5)', fontSize: '10px' }}>
-        {d.kwh_electricos != null ? d.kwh_electricos.toLocaleString() : '—'} kWh elec
-      </div>
-    </div>
-  );
 }
 
 export default function CopChart({ data }: { data: CopDatum[] }) {
@@ -51,7 +23,7 @@ export default function CopChart({ data }: { data: CopDatum[] }) {
 
   if (data.length === 0 || chartData.length === 0) {
     return (
-      <div className="glass p-[26px]">
+    <div className="glass p-[26px]" aria-label="Gráfica de coeficiente de rendimiento (COP)">
         <div className="flex items-center gap-3 mb-4">
           <div className="w-7 h-7 rounded-lg flex items-center justify-center shrink-0" style={{ background: 'var(--accent)' }}>
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#fff8ee" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
@@ -97,15 +69,15 @@ export default function CopChart({ data }: { data: CopDatum[] }) {
             domain={[0, Math.max(maxCop * 1.15, 2)]}
             width={35}
           />
-          <Tooltip content={tooltipContent} />
-          <ReferenceLine y={1} stroke="rgba(58,47,36,.15)" strokeDasharray="4 3" />
+          <Tooltip content={<ChartTooltip labelFormatter={(l) => labelMes(l)} />} />
+          <ReferenceLine y={1} stroke="#1E140A" strokeDasharray="4 4" strokeOpacity={0.2} />
           <Line
             type="monotone"
             dataKey="cop"
-            stroke="var(--accent)"
+            stroke="#A6754B"
             strokeWidth={2}
-            dot={{ r: 3, fill: '#fff8ee', stroke: 'var(--accent)', strokeWidth: 1.5 }}
-            activeDot={{ r: 5, fill: '#fff8ee', stroke: 'var(--accent)', strokeWidth: 2 }}
+            dot={{ r: 3, fill: '#fff8ee', stroke: '#A6754B', strokeWidth: 1.5 }}
+            activeDot={{ r: 5, fill: '#fff8ee', stroke: '#A6754B', strokeWidth: 2 }}
           />
         </LineChart>
       </ResponsiveContainer>
