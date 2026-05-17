@@ -303,20 +303,27 @@ export default function AdminAerotermiaPage() {
           <HistoricoCharts endpoint="/admin/aerotermia/consumos" title="Historico — Global" desde={desde} hasta={hasta} />
 
           <div className="glass p-[26px]">
-            <div className="flex items-center justify-between flex-wrap gap-3">
-              <div className="flex items-center gap-3">
-                <div className="w-7 h-7 rounded-lg flex items-center justify-center shrink-0" style={{ background: 'var(--accent)' }}>
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#fff8ee" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" /><circle cx="9" cy="7" r="4" /><path d="M23 21v-2a4 4 0 0 0-3-3.87" /><path d="M16 3.13a4 4 0 0 1 0 7.75" /></svg>
-                </div>
-                <span className="eyebrow">Ver dashboard de vecino</span>
+            <div className="flex items-center gap-3 mb-4">
+              <div className="w-7 h-7 rounded-lg flex items-center justify-center shrink-0" style={{ background: 'var(--accent)' }}>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#fff8ee" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" /><circle cx="9" cy="7" r="4" /><path d="M23 21v-2a4 4 0 0 0-3-3.87" /><path d="M16 3.13a4 4 0 0 1 0 7.75" /></svg>
               </div>
-              <div className="flex items-center gap-2 flex-wrap">
-                {pisosUnicos.map((p) => (
-                  <Link key={p} to={`/aerotermia?piso=${p}`} className="text-[11px] font-medium uppercase tracking-[0.05em] text-cocoa/50 hover:text-cocoa hover:bg-accent/8 px-2.5 py-1.5 rounded-md transition-colors">
-                    Piso {p}
-                  </Link>
-                ))}
-              </div>
+              <span className="eyebrow">Dashboards de vecinos</span>
+            </div>
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3">
+              {pisosUnicos.map((p) => (
+                <Link
+                  key={p}
+                  to={`/aerotermia?piso=${p}`}
+                  className="group relative flex flex-col items-center justify-center gap-1.5 p-4 rounded-xl bg-cream/30 hover:bg-cream/60 border border-cocoa/6 hover:border-accent/20 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-sm"
+                >
+                  <span className="font-display text-[28px] font-medium text-cocoa group-hover:text-accent transition-colors leading-none" style={{ letterSpacing: '-0.02em' }}>
+                    {p}
+                  </span>
+                  <span className="text-[10px] font-medium uppercase tracking-wider text-cocoa/30 group-hover:text-cocoa/50 transition-colors">
+                    ver datos
+                  </span>
+                </Link>
+              ))}
             </div>
           </div>
 
