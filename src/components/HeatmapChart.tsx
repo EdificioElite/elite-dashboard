@@ -13,11 +13,10 @@ function colorScale(value: number, max: number): string {
   if (max === 0) return 'rgba(128,128,128,0.05)';
   const intensity = value / max;
   if (intensity === 0) return 'rgba(128,128,128,0.05)';
-  const r = Math.round(56 + intensity * 192);
-  const g = Math.round(161 - intensity * 56);
-  const b = Math.round(105 - intensity * 83);
-  const alpha = 0.2 + intensity * 0.8;
-  return `rgba(${r},${g},${b},${alpha})`;
+  const r = Math.round(intensity * 220);
+  const g = Math.round(160 - intensity * 120);
+  const b = Math.round(100 - intensity * 85);
+  return `rgba(${r},${g},${b},0.6)`;
 }
 
 export default function HeatmapChart({ data }: { data: HeatmapDatum[] }) {
