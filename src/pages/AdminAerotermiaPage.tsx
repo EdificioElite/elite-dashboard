@@ -170,7 +170,7 @@ export default function AdminAerotermiaPage() {
       }
     });
     return Array.from(map.values()).sort((a, b) => b.periodo.localeCompare(a.periodo));
-  }, [facturas]);
+  }, [facturas, pisoFacturas]);
 
   const heatmapData = useMemo(() => {
     return facturas.map((f) => {
