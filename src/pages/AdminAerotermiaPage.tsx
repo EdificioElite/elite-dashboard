@@ -220,6 +220,7 @@ export default function AdminAerotermiaPage() {
         </div>
 
         <div className="stagger flex flex-col gap-[22px]">
+          <div className="border border-cocoa/8 rounded-2xl p-5 flex flex-col gap-[22px]">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-[16px]">
             {[
               { label: 'Total kWh calor', value: stats.totalCalor.toFixed(1), unit: 'kWh', iconBg: 'var(--calor)' },
@@ -279,6 +280,7 @@ export default function AdminAerotermiaPage() {
           <ConsumoVecinosChart data={vecinosConsumo} />
 
           <HistoricoCharts endpoint="/admin/aerotermia/consumos" title="Historico — Global" />
+          </div>
 
           <FacturasChart
             data={facturasGlobal}

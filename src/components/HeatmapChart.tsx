@@ -10,13 +10,13 @@ interface HeatmapDatum {
 }
 
 function colorScale(value: number, max: number): string {
-  if (max === 0) return 'rgba(184,138,94,0.05)';
+  if (max === 0) return 'rgba(128,128,128,0.05)';
   const intensity = value / max;
-  if (intensity === 0) return 'rgba(184,138,94,0.05)';
-  const r = 184;
-  const g = Math.round(138 * (1 - intensity * 0.7));
-  const b = Math.round(94 * (1 - intensity * 0.8));
-  const alpha = 0.15 + intensity * 0.85;
+  if (intensity === 0) return 'rgba(128,128,128,0.05)';
+  const r = Math.round(56 + intensity * 192);
+  const g = Math.round(161 - intensity * 56);
+  const b = Math.round(105 - intensity * 83);
+  const alpha = 0.2 + intensity * 0.8;
   return `rgba(${r},${g},${b},${alpha})`;
 }
 
