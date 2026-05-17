@@ -9,10 +9,9 @@ interface HeatmapDatum {
   m3_acs: number;
 }
 
-function colorScale(value: number, max: number): string {
-  if (max === 0) return 'rgba(128,128,128,0.05)';
-  const intensity = value / max;
-  if (intensity === 0) return 'rgba(128,128,128,0.05)';
+function colorScale(value: number, min: number, max: number): string {
+  if (max === min) return 'rgba(200,160,40,0.6)';
+  const intensity = (value - min) / (max - min);
   const r = Math.round(intensity * 220);
   const g = Math.round(160 - intensity * 120);
   const b = Math.round(100 - intensity * 85);
@@ -20,18 +19,20 @@ function colorScale(value: number, max: number): string {
 }
 
 export default function HeatmapChart({ data }: { data: HeatmapDatum[] }) {
-  const { pisos, periodos, matrix, maxKwh } = useMemo(() => {
+  const { pisos, periodos, matrix, minKwh, maxKwh } = useMemo(() => {
     const uniquePisos = [...new Set(data.map((d) => d.piso))].sort();
     const uniquePeriodos = [...new Set(data.map((d) => d.periodo))].sort();
     const map = new Map<string, number>();
+    let min = Infinity;
     let max = 0;
     data.forEach((d) => {
       const key = `${d.piso}__${d.periodo}`;
       const total = d.kwh_calor + d.kwh_frio + d.kwh_acs;
       map.set(key, total);
+      if (total < min) min = total;
       if (total > max) max = total;
     });
-    return { pisos: uniquePisos, periodos: uniquePeriodos, matrix: map, maxKwh: max };
+    return { pisos: uniquePisos, periodos: uniquePeriodos, matrix: map, minKwh: min === Infinity ? 0 : min, maxKwh: max };
   }, [data]);
 
   if (data.length === 0) {
@@ -84,7 +85,7 @@ export default function HeatmapChart({ data }: { data: HeatmapDatum[] }) {
                     <td key={periodo} className="p-1">
                       <div
                         className="rounded-md flex items-center justify-center min-w-[48px] h-[36px] font-mono text-[10px] text-cocoa/70 transition-colors cursor-default hover:ring-1 hover:ring-accent/20"
-                        style={{ background: colorScale(val, maxKwh) }}
+                        style={{ background: colorScale(val, minKwh, maxKwh) }}
                         title={`${piso} - ${periodo}: ${val.toFixed(1)} kWh`}
                       >
                         {val > 0 ? val.toFixed(0) : '—'}
@@ -101,11 +102,11 @@ export default function HeatmapChart({ data }: { data: HeatmapDatum[] }) {
       <div className="flex items-center gap-2 mt-4 justify-end text-[10px] text-cocoa/40">
         <span>Min</span>
         <div className="flex h-3 rounded-sm overflow-hidden">
-          <div className="w-5" style={{ background: colorScale(maxKwh * 0.1, maxKwh) }} />
-          <div className="w-5" style={{ background: colorScale(maxKwh * 0.3, maxKwh) }} />
-          <div className="w-5" style={{ background: colorScale(maxKwh * 0.5, maxKwh) }} />
-          <div className="w-5" style={{ background: colorScale(maxKwh * 0.7, maxKwh) }} />
-          <div className="w-5" style={{ background: colorScale(maxKwh * 0.9, maxKwh) }} />
+          <div className="w-5" style={{ background: colorScale(minKwh + (maxKwh - minKwh) * 0.1, minKwh, maxKwh) }} />
+          <div className="w-5" style={{ background: colorScale(minKwh + (maxKwh - minKwh) * 0.3, minKwh, maxKwh) }} />
+          <div className="w-5" style={{ background: colorScale(minKwh + (maxKwh - minKwh) * 0.5, minKwh, maxKwh) }} />
+          <div className="w-5" style={{ background: colorScale(minKwh + (maxKwh - minKwh) * 0.7, minKwh, maxKwh) }} />
+          <div className="w-5" style={{ background: colorScale(minKwh + (maxKwh - minKwh) * 0.9, minKwh, maxKwh) }} />
         </div>
         <span>Max</span>
       </div>
