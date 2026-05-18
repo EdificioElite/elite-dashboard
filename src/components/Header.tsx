@@ -4,6 +4,12 @@ import { useAuthStore } from '../store/auth';
 import Icon from './Icon';
 import SelfPasswordModal from './SelfPasswordModal';
 
+const ADMIN_NAV = [
+  { label: 'Vecinos', path: '/admin/vecinos' },
+  { label: 'Usuarios', path: '/admin/usuarios' },
+  { label: 'Aerotermia', path: '/admin/aerotermia' },
+];
+
 const USER_NAV = [
   { label: 'Inicio', path: '/inicio' },
   { label: 'Aerotermia', path: '/aerotermia' },
@@ -82,7 +88,7 @@ export default function Header() {
         </button>
 
         {!isAdmin && (
-          <nav className="hidden md:flex items-center gap-1" role="navigation" aria-label="Navegación principal">
+          <nav className="hidden" role="navigation" aria-label="Navegacion principal">
             {USER_NAV.map((item) => (
               <button
                 key={item.path}
@@ -166,19 +172,38 @@ export default function Header() {
             className="fixed left-0 top-0 bottom-0 z-[80] w-[260px] bg-cream border-r border-cocoa/6 p-4 flex flex-col gap-1 md:hidden"
             style={{ animation: 'slideInLeft 250ms ease-out' }}
             role="dialog"
-            aria-label="Menú de navegación"
+            aria-label="Menu de navegacion"
           >
             <div className="flex items-center justify-between mb-3">
-              <span className="eyebrow">Menú</span>
+              <span className="eyebrow">Menu</span>
               <button
                 onClick={() => setMobileNavOpen(false)}
                 className="p-2 rounded-lg text-cocoa/50 hover:text-cocoa bg-transparent border-none cursor-pointer"
-                aria-label="Cerrar menú"
+                aria-label="Cerrar menu"
                 style={{ minWidth: '44px', minHeight: '44px' }}
               >
                 <Icon name="x" size={18} />
               </button>
             </div>
+            {isAdmin && (
+              <>
+                <div className="eyebrow px-3 pt-3 pb-1 mt-2 border-t border-cocoa/6">Admin</div>
+                {ADMIN_NAV.map((item) => (
+                  <button
+                    key={item.path}
+                    onClick={() => { navigate(item.path); setMobileNavOpen(false); }}
+                    className={`w-full text-left px-3 py-2.5 text-[14px] font-medium rounded-lg transition-colors ${
+                      isActive(item.path)
+                        ? 'text-cocoa bg-accent/12 font-semibold'
+                        : 'text-cocoa/55 hover:text-cocoa hover:bg-cocoa/4'
+                    }`}
+                  >
+                    {item.label}
+                  </button>
+                ))}
+                <div className="eyebrow px-3 pt-3 pb-1 mt-1">Edificio</div>
+              </>
+            )}
             {USER_NAV.map((item) => (
               <button
                 key={item.path}

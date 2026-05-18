@@ -1,4 +1,5 @@
 import { useMemo } from 'react';
+import Icon from './Icon';
 
 interface HeatmapDatum {
   piso: string;
@@ -39,9 +40,7 @@ export default function HeatmapChart({ data }: { data: HeatmapDatum[] }) {
     <div className="glass p-[26px]" aria-label="Mapa de calor de consumo mensual por piso y mes">
         <div className="flex items-center gap-3 mb-4">
           <div className="w-7 h-7 rounded-lg flex items-center justify-center shrink-0" style={{ background: 'var(--accent)' }}>
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#fff8ee" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-              <rect x="3" y="3" width="7" height="7" /><rect x="14" y="3" width="7" height="7" /><rect x="3" y="14" width="7" height="7" /><rect x="14" y="14" width="7" height="7" />
-            </svg>
+            <Icon name="flame" size={14} className="text-cream" />
           </div>
           <span className="eyebrow">Heatmap mensual</span>
         </div>
@@ -54,9 +53,7 @@ export default function HeatmapChart({ data }: { data: HeatmapDatum[] }) {
     <div className="glass p-[26px]" aria-label="Mapa de calor de consumo mensual por piso y mes">
       <div className="flex items-center gap-3 mb-4">
         <div className="w-7 h-7 rounded-lg flex items-center justify-center shrink-0" style={{ background: 'var(--accent)' }}>
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#fff8ee" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-            <rect x="3" y="3" width="7" height="7" /><rect x="14" y="3" width="7" height="7" /><rect x="3" y="14" width="7" height="7" /><rect x="14" y="14" width="7" height="7" />
-          </svg>
+          <Icon name="flame" size={14} className="text-cream" />
         </div>
         <span className="eyebrow">Heatmap mensual</span>
         <span className="text-[11px] text-cocoa/40 font-num">kWh totales</span>
@@ -90,7 +87,7 @@ export default function HeatmapChart({ data }: { data: HeatmapDatum[] }) {
                       }}
                       title={`Piso ${piso}: ${val} kWh`}
                     >
-                      {val > 0 ? val.toFixed(0) : '—'}
+                      {val > 0 ? val.toFixed(0) : '0'}
                     </td>
                   );
                 })}

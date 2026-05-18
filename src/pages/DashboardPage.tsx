@@ -131,38 +131,37 @@ export default function DashboardPage() {
 
         <div className="stagger flex flex-col gap-[22px]">
           <ConsumoCard data={consumoActual} />
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
-            <HistoricoCharts
-              endpoint={viewingAs ? `/admin/vecinos/${viewingAs}` : undefined}
-              title={viewingAs ? `Historico — Piso ${viewingAs}` : undefined}
-            />
-            <div id="facturas" className="scroll-mt-20">
-              <FacturasChart data={facturas} />
-            </div>
+          <HistoricoCharts
+            endpoint={viewingAs ? `/admin/vecinos/${viewingAs}` : undefined}
+            title={viewingAs ? `Historico — Piso ${viewingAs}` : undefined}
+          />
+          <div id="facturas" className="scroll-mt-20">
+            <FacturasChart data={facturas} />
           </div>
           <FacturasTable data={facturas} />
 
-          <button
-            onClick={() => setShowHA(!showHA)}
-            className="glass glass-hover p-5 flex items-center justify-between w-full text-left"
-          >
+          <div className="glass p-[26px]">
+            <button
+              onClick={() => setShowHA(!showHA)}
+              className="flex items-center justify-between w-full text-left bg-transparent border-none cursor-pointer p-0"
+            >
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 rounded-lg bg-[#1abcfe]/10 flex items-center justify-center overflow-hidden">
                 <img src="/images/home-assistant-icon.png" alt="Home Assistant" className="w-6 h-6" />
               </div>
               <div>
                 <p className="eyebrow">Home Assistant</p>
-                <h3 className="font-display text-[22px] font-medium text-cocoa">Integración oficial para tu hogar</h3>
+                <h3 className="font-display text-[22px] font-medium text-cocoa">Integracion oficial para tu hogar</h3>
               </div>
             </div>
             <Icon name={showHA ? 'chevronUp' : 'chevronDown'} size={18} className="text-cocoa/40 shrink-0" />
           </button>
 
           {showHA && (
-            <section className="glass p-[26px]">
+            <div className="mt-5 pt-5 border-t border-cocoa/6">
               <p className="text-cocoa/70 text-sm leading-relaxed mb-4">
-                Lleva los datos de tu aerotermia a Home Assistant para automatizar tu casa. La integración{' '}
-                <strong>Elite Climate</strong> expone los consumos de calefacción, refrigeración, ACS, temperaturas
+                Lleva los datos de tu aerotermia a Home Assistant para automatizar tu casa. La integracion{' '}
+                <strong>Elite Climate</strong> expone los consumos de calefaccion, refrigeracion, ACS, temperaturas
                 y potencia en tiempo real como entidades en Home Assistant.
               </p>
 
@@ -195,8 +194,9 @@ export default function DashboardPage() {
               <p className="text-cocoa/30 text-[11px] mt-4">
                 Requiere Home Assistant 2024.1 o superior y HACS instalado.
               </p>
-            </section>
+            </div>
           )}
+          </div>
         </div>
       </main>
     </div>

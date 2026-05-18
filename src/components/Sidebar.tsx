@@ -1,4 +1,5 @@
 import { useNavigate, useLocation } from 'react-router-dom';
+import { useAuthStore } from '../store/auth';
 
 interface NavItem {
   label: string;
@@ -21,6 +22,8 @@ const EDIFICIO_SECTION: NavItem[] = [
 export default function Sidebar() {
   const navigate = useNavigate();
   const location = useLocation();
+  const user = useAuthStore((s) => s.user);
+  const isAdmin = user?.is_admin;
 
   const isActive = (path: string) =>
     location.pathname === path ||
@@ -34,7 +37,7 @@ export default function Sidebar() {
       aria-label="Navegación principal"
     >
       <nav className="flex flex-col gap-6 p-4 pt-6">
-        <Section label="Admin" items={ADMIN_SECTION} isActive={isActive} onClick={(p) => navigate(p)} />
+        {isAdmin && <Section label="Admin" items={ADMIN_SECTION} isActive={isActive} onClick={(p) => navigate(p)} />}
         <Section label="Edificio" items={EDIFICIO_SECTION} isActive={isActive} onClick={(p) => navigate(p)} />
       </nav>
     </aside>

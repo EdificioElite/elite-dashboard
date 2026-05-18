@@ -69,7 +69,7 @@ export default function FacturasChart({ data, headerRight }: { data: Factura[]; 
           <span className="w-2 h-2 rounded-sm" style={{ background: '#5D7A4A' }} /> ACS (energia)
         </span>
         <span className="flex items-center gap-1.5">
-          <span className="w-2 h-2 rounded-sm" style={{ background: '#5D7A4A' }} /> ACS (agua)
+          <span className="w-2 h-2 rounded-sm" style={{ background: '#2D8A4A' }} /> ACS (agua)
         </span>
       </div>
 
@@ -77,7 +77,7 @@ export default function FacturasChart({ data, headerRight }: { data: Factura[]; 
         <BarChart data={chartData} margin={{ top: 4, right: 8, left: 8, bottom: 4 }}>
           <CartesianGrid strokeDasharray="2 4" stroke="rgba(58,47,36,.06)" vertical={false} />
           <XAxis dataKey="periodoLabel" fontSize={10} tick={{ fill: 'rgba(58,47,36,.44)' }} axisLine={false} tickLine={false} interval={0} angle={-45} textAnchor="end" height={40} />
-          <YAxis fontSize={10} tick={{ fill: 'rgba(58,47,36,.44)', fontFamily: "'JetBrains Mono', monospace" }} axisLine={false} tickLine={false} width={45} tickFormatter={(v: number) => `${v.toFixed(0)}`} />
+          <YAxis fontSize={10} tick={{ fill: 'rgba(58,47,36,.44)', fontFamily: "'JetBrains Mono', monospace" }} axisLine={false} tickLine={false} width={55} tickFormatter={(v: number) => `${v.toFixed(0)} €`} />
           <Tooltip content={<ChartTooltip />} cursor={{ fill: 'rgba(58,47,36,.04)' }} />
           <Bar dataKey="importe_fijo" stackId="a" fill="#A6754B" radius={[0, 0, 0, 0]} />
           <Bar dataKey="importe_calor" stackId="a" fill="#B53228" radius={[0, 0, 0, 0]} />
