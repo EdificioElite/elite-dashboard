@@ -55,7 +55,7 @@ describe('Header', () => {
     const user = userEvent.setup();
     renderHeader();
     await user.click(screen.getByLabelText('Menú de usuario, vecino@test.com'));
-    expect(screen.getByText('Cambiar contraseña')).toBeInTheDocument();
+    expect(screen.getByText('Cambiar contrasena')).toBeInTheDocument();
     expect(screen.getByText('Salir')).toBeInTheDocument();
   });
 

@@ -35,8 +35,8 @@ test.describe('Admin Aerotermia Dashboard', () => {
     await expect(page.getByText('Distribucion por vecino')).toBeVisible({ timeout: 15000 });
     await expect(page.getByText('Consumo por vecino')).toBeVisible();
     await expect(page.getByText('Historico — Global')).toBeVisible();
-    await expect(page.getByText('Facturas electricas')).toBeVisible();
-    await expect(page.getByText('Heatmap mensual')).toBeVisible();
+    await expect(page.getByText('Facturas')).toBeVisible();
+    await expect(page.getByText('Heatmap')).toBeVisible();
   });
 
   test('shows facturas chart section', async ({ page }) => {

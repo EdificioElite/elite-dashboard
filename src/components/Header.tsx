@@ -140,7 +140,7 @@ export default function Header() {
                 className="w-full text-left px-4 py-2.5 text-[13px] text-cocoa/70 hover:text-cocoa hover:bg-accent/5 bg-transparent border-none cursor-pointer font-sans"
                 role="menuitem"
               >
-                Cambiar contraseña
+                Cambiar contrasena
               </button>
               <button
                 onClick={handleLogout}
