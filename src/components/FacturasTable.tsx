@@ -1,4 +1,4 @@
-import { fmtMonth, fmtMonthShort, capitalizar, fmtMoney } from '../lib/format';
+import { capitalizar } from '../lib/format';
 import Icon from './Icon';
 
 interface Factura {
@@ -16,6 +16,22 @@ interface Factura {
   importe_acs: number;
 }
 
+function fmt(val: number, decimals: number, unit: string): string {
+  return Number(val).toLocaleString('es-ES', { minimumFractionDigits: decimals, maximumFractionDigits: decimals }) + ' ' + unit;
+}
+
+function periodoLabel(f: Factura): string {
+  const d = new Date(f.periodo);
+  return capitalizar(d.toLocaleDateString('es-ES', { month: 'short', year: '2-digit' }));
+}
+
+interface RowDef {
+  label: string;
+  accessor: (f: Factura) => string;
+  bold?: boolean;
+  section?: string;
+}
+
 export default function FacturasTable({ data }: { data: Factura[] }) {
   if (data.length === 0) {
     return (
@@ -31,6 +47,19 @@ export default function FacturasTable({ data }: { data: Factura[] }) {
     );
   }
 
+  const rows: RowDef[] = [
+    { label: 'kWh calor', accessor: (f) => fmt(f.kwh_calor, 0, 'kWh'), section: 'Consumos' },
+    { label: 'kWh frio', accessor: (f) => fmt(f.kwh_frio, 0, 'kWh') },
+    { label: 'kWh ACS', accessor: (f) => fmt(f.kwh_acs, 0, 'kWh') },
+    { label: 'm³ ACS', accessor: (f) => fmt(f.m3_acs, 1, 'm³') },
+    { label: 'Fijo', accessor: (f) => fmt(f.importe_fijo, 2, '€'), section: 'Importes' },
+    { label: 'Calefaccion', accessor: (f) => fmt(f.importe_calor, 2, '€') },
+    { label: 'Refrigeracion', accessor: (f) => fmt(f.importe_frio, 2, '€') },
+    { label: 'ACS variable', accessor: (f) => fmt(f.importe_variable_acs, 2, '€') },
+    { label: 'ACS agua', accessor: (f) => fmt(f.importe_acs, 2, '€') },
+    { label: 'Total', accessor: (f) => fmt(f.importe_total, 2, '€'), bold: true },
+  ];
+
   return (
     <div className="glass p-[26px]">
       <div className="flex items-center gap-3 mb-5">
@@ -41,40 +70,38 @@ export default function FacturasTable({ data }: { data: Factura[] }) {
       </div>
 
       <div className="overflow-x-auto -mx-2">
-        <table className="table-glass">
+        <table className="w-full text-xs border-separate" style={{ borderSpacing: 0 }}>
           <thead>
             <tr>
-              <th>Periodo</th>
-              <th className="hidden sm:table-cell">kWh Cal.</th>
-              <th className="hidden sm:table-cell">kWh Frio</th>
-              <th className="hidden sm:table-cell">kWh ACS</th>
-              <th>m³ ACS</th>
-              <th className="hidden md:table-cell">Fijo</th>
-              <th className="hidden md:table-cell">Calef.</th>
-              <th className="hidden md:table-cell">Refrig.</th>
-              <th className="hidden md:table-cell">ACS var.</th>
-              <th className="hidden md:table-cell">ACS agua</th>
-              <th className="text-right">Total</th>
+              <th className="sticky left-0 z-10 bg-cream text-left font-medium text-cocoa/40 uppercase tracking-wider py-2 pr-4 text-[10px] border-b border-cocoa/6" style={{ minWidth: '100px' }} />
+              {data.map((f) => (
+                <th key={f.id_factura} className="text-center font-medium text-cocoa/40 uppercase tracking-wider py-2 px-3 text-[10px] border-b border-cocoa/6 whitespace-nowrap min-w-[80px]">
+                  {periodoLabel(f)}
+                </th>
+              ))}
             </tr>
           </thead>
           <tbody>
-            {data.map((f, i) => (
-              <tr key={f.id_factura} className="row-stagger" style={{ animationDelay: `${i * 40}ms` }}>
-                <td className="font-medium text-cocoa">
-                  <span className="hidden sm:inline">{fmtMonth(f.periodo)}</span>
-                  <span className="sm:hidden">{capitalizar(fmtMonthShort(f.periodo))}</span>
-                </td>
-                <td className="font-mono text-xs font-num hidden sm:table-cell">{Number(f.kwh_calor).toFixed(0)}</td>
-                <td className="font-mono text-xs font-num hidden sm:table-cell">{Number(f.kwh_frio).toFixed(0)}</td>
-                <td className="font-mono text-xs font-num hidden sm:table-cell">{Number(f.kwh_acs).toFixed(0)}</td>
-                <td className="font-mono text-xs font-num">{Number(f.m3_acs).toFixed(1)}</td>
-                <td className="font-mono text-xs font-num hidden md:table-cell">{fmtMoney(f.importe_fijo)}</td>
-                <td className="font-mono text-xs font-num hidden md:table-cell">{fmtMoney(f.importe_calor)}</td>
-                <td className="font-mono text-xs font-num hidden md:table-cell">{fmtMoney(f.importe_frio)}</td>
-                <td className="font-mono text-xs font-num hidden md:table-cell">{fmtMoney(f.importe_variable_acs)}</td>
-                <td className="font-mono text-xs font-num hidden md:table-cell">{fmtMoney(f.importe_acs)}</td>
-                <td className="font-mono text-xs text-right font-medium font-num">{fmtMoney(f.importe_total)}</td>
-              </tr>
+            {rows.map((row) => (
+              <>
+                {row.section && (
+                  <tr key={`sec-${row.section}`}>
+                    <td colSpan={data.length + 1} className="pt-4 pb-1">
+                      <span className="text-[10px] font-bold uppercase tracking-[0.08em] text-cocoa/30">{row.section}</span>
+                    </td>
+                  </tr>
+                )}
+                <tr key={row.label}>
+                  <td className={`sticky left-0 z-10 bg-cream py-1.5 pr-4 text-cocoa/60 text-[11px] ${row.bold ? 'font-semibold text-cocoa border-t border-cocoa/8' : ''}`} style={{ minWidth: '100px' }}>
+                    {row.label}
+                  </td>
+                  {data.map((f) => (
+                    <td key={f.id_factura} className={`text-center font-mono text-[11px] text-cocoa/80 py-1.5 px-3 font-num whitespace-nowrap ${row.bold ? 'font-semibold text-cocoa border-t border-cocoa/8' : ''}`}>
+                      {row.accessor(f)}
+                    </td>
+                  ))}
+                </tr>
+              </>
             ))}
           </tbody>
         </table>
