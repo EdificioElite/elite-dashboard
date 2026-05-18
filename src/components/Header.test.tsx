@@ -26,12 +26,10 @@ describe('Header', () => {
     });
   });
 
-  it('renders page nav links', () => {
+  it('does not render nav links in header (moved to sidebar)', () => {
     renderHeader();
-    expect(screen.getByText('Inicio')).toBeInTheDocument();
-    expect(screen.getByText('Aerotermia')).toBeInTheDocument();
-    expect(screen.getByText('Juntas')).toBeInTheDocument();
-    expect(screen.getByText('Contactos')).toBeInTheDocument();
+    expect(screen.queryByText('Inicio')).not.toBeInTheDocument();
+    expect(screen.queryByText('Aerotermia')).not.toBeInTheDocument();
   });
 
   it('renders logo', () => {

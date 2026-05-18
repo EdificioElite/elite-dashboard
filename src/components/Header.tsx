@@ -87,24 +87,6 @@ export default function Header() {
             className="h-7 w-auto"
           />
         </button>
-
-        {!isAdmin && (
-          <nav className="hidden" role="navigation" aria-label="Navegacion principal">
-            {USER_NAV.map((item) => (
-              <button
-                key={item.path}
-                onClick={() => navigate(item.path)}
-                className={`text-[11.5px] font-semibold uppercase tracking-[0.05em] px-3 py-1.5 rounded-md transition-colors ${
-                  isActive(item.path)
-                    ? 'text-cocoa bg-accent/12'
-                    : 'text-cocoa/45 hover:text-cocoa hover:bg-cocoa/4'
-                }`}
-              >
-                {item.label}
-              </button>
-            ))}
-          </nav>
-        )}
       </div>
 
       <div className="flex items-center gap-3">
