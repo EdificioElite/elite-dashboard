@@ -43,8 +43,6 @@ jobs:
             echo "Cerrando PR de release existente #${num}"
             gh pr close "${num}" --comment "Reemplazado por un nuevo PR de release."
           done
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Compute next version
         if: steps.check.outputs.commits_ahead != '0'
