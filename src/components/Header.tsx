@@ -164,12 +164,12 @@ export default function Header() {
       {mobileNavOpen && (
         <>
           <div
-            className="fixed inset-0 z-[70] bg-black/25 backdrop-blur-sm md:hidden"
+            className="fixed inset-0 z-[70] bg-black/50 md:hidden"
             onClick={() => setMobileNavOpen(false)}
             aria-hidden="true"
           />
           <div
-            className="fixed left-0 top-0 bottom-0 z-[80] w-[260px] bg-cream border-r border-cocoa/6 p-4 flex flex-col gap-1 md:hidden"
+            className="fixed left-0 top-0 bottom-0 z-[80] w-[260px] bg-white border-r border-cocoa/10 p-4 flex flex-col gap-1 md:hidden shadow-2xl"
             style={{ animation: 'slideInLeft 250ms ease-out' }}
             role="dialog"
             aria-label="Menu de navegacion"
