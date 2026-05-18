@@ -180,7 +180,7 @@ export default function DashboardPage() {
               </div>
               <div>
                 <p className="eyebrow">Home Assistant</p>
-                <h3 className="font-display text-[22px] font-medium text-cocoa">Integracion oficial para tu hogar</h3>
+                <h3 className="font-display text-[22px] font-medium text-cocoa">Integración oficial para tu hogar</h3>
               </div>
             </div>
             <Icon name={showHA ? 'chevronUp' : 'chevronDown'} size={18} className="text-cocoa/40 shrink-0" />

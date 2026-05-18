@@ -1,23 +1,7 @@
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuthStore } from '../store/auth';
-
-interface NavItem {
-  label: string;
-  path: string;
-}
-
-const ADMIN_SECTION: NavItem[] = [
-  { label: 'Vecinos', path: '/admin/vecinos' },
-  { label: 'Usuarios', path: '/admin/usuarios' },
-  { label: 'Aerotermia', path: '/admin/aerotermia' },
-];
-
-const EDIFICIO_SECTION: NavItem[] = [
-  { label: 'Inicio', path: '/inicio' },
-  { label: 'Aerotermia', path: '/aerotermia' },
-  { label: 'Juntas', path: '/juntas' },
-  { label: 'Contactos', path: '/contactos' },
-];
+import { ADMIN_NAV, EDIFICIO_NAV } from '../lib/nav';
+import type { NavItem } from '../lib/nav';
 
 export default function Sidebar() {
   const navigate = useNavigate();
@@ -37,8 +21,8 @@ export default function Sidebar() {
       aria-label="Navegación principal"
     >
       <nav className="flex flex-col gap-6 p-4 pt-6">
-        {isAdmin && <Section label="Admin" items={ADMIN_SECTION} isActive={isActive} onClick={(p) => navigate(p)} />}
-        <Section label="Edificio" items={EDIFICIO_SECTION} isActive={isActive} onClick={(p) => navigate(p)} />
+        {isAdmin && <Section label="Admin" items={ADMIN_NAV} isActive={isActive} onClick={(p) => navigate(p)} />}
+        <Section label="Edificio" items={EDIFICIO_NAV} isActive={isActive} onClick={(p) => navigate(p)} />
       </nav>
     </aside>
   );

@@ -2,21 +2,9 @@ import { useState, useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuthStore } from '../store/auth';
+import { ADMIN_NAV, EDIFICIO_NAV } from '../lib/nav';
 import Icon from './Icon';
 import SelfPasswordModal from './SelfPasswordModal';
-
-const ADMIN_NAV = [
-  { label: 'Vecinos', path: '/admin/vecinos' },
-  { label: 'Usuarios', path: '/admin/usuarios' },
-  { label: 'Aerotermia', path: '/admin/aerotermia' },
-];
-
-const USER_NAV = [
-  { label: 'Inicio', path: '/inicio' },
-  { label: 'Aerotermia', path: '/aerotermia' },
-  { label: 'Juntas', path: '/juntas' },
-  { label: 'Contactos', path: '/contactos' },
-];
 
 export default function Header() {
   const { user, logout } = useAuthStore();
@@ -155,14 +143,14 @@ export default function Header() {
             className="fixed left-0 top-0 bottom-0 z-[80] w-[260px] border-r border-cocoa/10 p-4 flex flex-col gap-1 md:hidden"
             style={{ animation: 'slideInLeft 250ms ease-out', background: '#FFFFFF', boxShadow: '8px 0 30px rgba(0,0,0,.15)' }}
             role="dialog"
-            aria-label="Menu de navegacion"
+            aria-label="Menú de navegación"
           >
             <div className="flex items-center justify-between mb-3">
-              <span className="eyebrow">Menu</span>
+              <span className="eyebrow">Menú</span>
               <button
                 onClick={() => setMobileNavOpen(false)}
                 className="p-2 rounded-lg text-cocoa/50 hover:text-cocoa bg-transparent border-none cursor-pointer"
-                aria-label="Cerrar menu"
+                aria-label="Cerrar menú"
                 style={{ minWidth: '44px', minHeight: '44px' }}
               >
                 <Icon name="x" size={18} />
@@ -187,7 +175,7 @@ export default function Header() {
                 <div className="eyebrow px-3 pt-3 pb-1 mt-1">Edificio</div>
               </>
             )}
-            {USER_NAV.map((item) => (
+            {EDIFICIO_NAV.map((item) => (
               <button
                 key={item.path}
                 onClick={() => { navigate(item.path); setMobileNavOpen(false); }}

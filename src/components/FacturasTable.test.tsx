@@ -22,8 +22,8 @@ describe('FacturasTable', () => {
     expect(screen.getByText('kWh ACS')).toBeInTheDocument();
     expect(screen.getByText('m³ ACS')).toBeInTheDocument();
     expect(screen.getByText('Fijo')).toBeInTheDocument();
-    expect(screen.getByText('Calefaccion')).toBeInTheDocument();
-    expect(screen.getByText('Refrigeracion')).toBeInTheDocument();
+    expect(screen.getByText('Calefacción')).toBeInTheDocument();
+    expect(screen.getByText('Refrigeración')).toBeInTheDocument();
     expect(screen.getByText('ACS variable')).toBeInTheDocument();
     expect(screen.getByText('ACS agua')).toBeInTheDocument();
     expect(screen.getByText('Total')).toBeInTheDocument();

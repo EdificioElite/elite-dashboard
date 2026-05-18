@@ -1,3 +1,4 @@
+import { Fragment } from 'react';
 import { capitalizar } from '../lib/format';
 import Icon from './Icon';
 
@@ -53,8 +54,8 @@ export default function FacturasTable({ data }: { data: Factura[] }) {
     { label: 'kWh ACS', accessor: (f) => fmt(f.kwh_acs, 0, 'kWh') },
     { label: 'm³ ACS', accessor: (f) => fmt(f.m3_acs, 1, 'm³') },
     { label: 'Fijo', accessor: (f) => fmt(f.importe_fijo, 2, '€'), section: 'Importes' },
-    { label: 'Calefaccion', accessor: (f) => fmt(f.importe_calor, 2, '€') },
-    { label: 'Refrigeracion', accessor: (f) => fmt(f.importe_frio, 2, '€') },
+    { label: 'Calefacción', accessor: (f) => fmt(f.importe_calor, 2, '€') },
+    { label: 'Refrigeración', accessor: (f) => fmt(f.importe_frio, 2, '€') },
     { label: 'ACS variable', accessor: (f) => fmt(f.importe_variable_acs, 2, '€') },
     { label: 'ACS agua', accessor: (f) => fmt(f.importe_acs, 2, '€') },
     { label: 'Total', accessor: (f) => fmt(f.importe_total, 2, '€'), bold: true },
@@ -83,7 +84,7 @@ export default function FacturasTable({ data }: { data: Factura[] }) {
           </thead>
           <tbody>
             {rows.map((row) => (
-              <>
+              <Fragment key={row.label}>
                 {row.section && (
                   <tr key={`sec-${row.section}`}>
                     <td colSpan={data.length + 1} className="pt-4 pb-1">
@@ -101,7 +102,7 @@ export default function FacturasTable({ data }: { data: Factura[] }) {
                     </td>
                   ))}
                 </tr>
-              </>
+              </Fragment>
             ))}
           </tbody>
         </table>

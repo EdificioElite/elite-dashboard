@@ -61,6 +61,7 @@ export default function Icon({ name, size = 20, className = '', label }: IconPro
     <svg
       className={className}
       aria-label={label}
+      aria-hidden={!label ? true : undefined}
       role={label ? 'img' : undefined}
       width={size}
       height={size}

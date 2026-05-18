@@ -62,8 +62,8 @@ function FacturasTooltip({ active, payload, label }: {
       <div>
         <div style={{ fontSize: '10px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.06em', opacity: 0.4, marginBottom: 4 }}>Importes</div>
         <Row label="Fijo" value={fmtNumber(d.importe_fijo) + ' €'} />
-        <Row label="Calefaccion" value={fmtNumber(d.importe_calor) + ' €'} />
-        <Row label="Refrigeracion" value={fmtNumber(d.importe_frio) + ' €'} />
+        <Row label="Calefacción" value={fmtNumber(d.importe_calor) + ' €'} />
+        <Row label="Refrigeración" value={fmtNumber(d.importe_frio) + ' €'} />
         <Row label="ACS variable" value={fmtNumber(d.importe_variable_acs) + ' €'} />
         <Row label="ACS agua" value={fmtNumber(d.importe_acs) + ' €'} />
         <div style={{ borderTop: '1px solid rgba(30,20,10,0.08)', marginTop: 4, paddingTop: 4 }}>
@@ -143,7 +143,7 @@ export default function FacturasChart({ data, headerRight }: { data: Factura[]; 
           <Bar dataKey="importe_calor" stackId="a" fill="#B53228" radius={[0, 0, 0, 0]} />
           <Bar dataKey="importe_frio" stackId="a" fill="#4A7A8C" radius={[0, 0, 0, 0]} />
           <Bar dataKey="importe_variable_acs" stackId="a" fill="#5D7A4A" radius={[0, 0, 0, 0]} />
-          <Bar dataKey="importe_acs" stackId="a" fill="#5D7A4A" radius={[4, 4, 0, 0]} />
+          <Bar dataKey="importe_acs" stackId="a" fill="#2D8A4A" radius={[4, 4, 0, 0]} />
         </BarChart>
       </ResponsiveContainer>
     </div>
