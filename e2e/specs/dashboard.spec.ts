@@ -34,7 +34,7 @@ test.describe('Dashboard', () => {
 
   test('shows user piso and email', async ({ page }) => {
     await expect(page.locator('h1')).toContainText('2A');
-    await page.click('.sticky button.rounded-full');
-    await expect(page.locator('.sticky .absolute')).toContainText('vecino1@elite.com');
+  await page.click('button.rounded-full');
+  await expect(page.locator('[role="menu"]')).toContainText('vecino1@elite.com');
   });
 });

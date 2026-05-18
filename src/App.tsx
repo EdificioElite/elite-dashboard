@@ -44,7 +44,7 @@ function AuthLayout({ children }: { children: React.ReactNode }) {
       <Header />
       <div className="flex">
         {isAdmin && <Sidebar />}
-        <main id="main-content" className="flex-1 min-w-0">
+        <main className="flex-1 min-w-0">
           {children}
         </main>
       </div>
