@@ -11,17 +11,11 @@ const USER_NAV = [
   { label: 'Contactos', path: '/contactos' },
 ];
 
-const ADMIN_NAV = [
-  { label: 'Vecinos', path: '/admin/vecinos' },
-  { label: 'Usuarios', path: '/admin/usuarios' },
-  { label: 'Admin aerotermia', path: '/admin/aerotermia' },
-];
-
 export default function Header() {
   const { user, logout } = useAuthStore();
   const navigate = useNavigate();
   const location = useLocation();
-  const navItems = user?.is_admin ? [...USER_NAV, ...ADMIN_NAV] : USER_NAV;
+  const isAdmin = user?.is_admin;
   const [open, setOpen] = useState(false);
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
   const [showPasswordModal, setShowPasswordModal] = useState(false);
@@ -30,8 +24,7 @@ export default function Header() {
   const initials = (user?.vecino_piso || user?.email?.[0] || '?').substring(0, 2).toUpperCase();
   const isActive = (path: string) =>
     location.pathname === path ||
-    (path === '/aerotermia' && location.pathname === '/dashboard') ||
-    (path === '/admin/aerotermia' && location.pathname === '/admin/aerotermia');
+    (path === '/aerotermia' && location.pathname === '/dashboard');
 
   useEffect(() => {
     if (!open) return;
@@ -71,77 +64,88 @@ export default function Header() {
 
   return (
     <header
-      className="sticky top-0 z-50 glass m-4 px-6 py-3 flex items-center justify-between"
-      style={{ borderRadius: 'var(--radius-lg)', margin: '16px 24px' }}
+      className="sticky top-0 z-50 flex items-center justify-between px-6 border-b border-cocoa/6 bg-cream/80 backdrop-blur-sm"
+      style={{ height: '52px' }}
+      role="banner"
     >
       <div className="flex items-center gap-4">
         <button
           onClick={() => navigate('/inicio')}
-          className="bg-transparent border-none cursor-pointer p-0"
+          className="bg-transparent border-none cursor-pointer p-0 shrink-0"
           aria-label="Ir a Inicio"
         >
           <img
             src="/images/elite/Logotipo PNG.png"
             alt="Edificio Elite"
-            className="h-8 w-auto"
+            className="h-7 w-auto"
           />
         </button>
 
-        <nav className="hidden md:flex items-center gap-1">
-          {navItems.map((item) => (
-            <button
-              key={item.path}
-              onClick={() => navigate(item.path)}
-              className={`text-[11.5px] font-medium uppercase tracking-[0.05em] hover:text-cocoa hover:bg-accent/8 px-2 py-1 rounded-md transition-colors ${isActive(item.path) ? 'text-cocoa bg-accent/12' : 'text-cocoa/40'}`}
-            >
-              {item.label}
-            </button>
-          ))}
-        </nav>
+        {!isAdmin && (
+          <nav className="hidden md:flex items-center gap-1" role="navigation" aria-label="Navegación principal">
+            {USER_NAV.map((item) => (
+              <button
+                key={item.path}
+                onClick={() => navigate(item.path)}
+                className={`text-[11.5px] font-semibold uppercase tracking-[0.05em] px-3 py-1.5 rounded-md transition-colors ${
+                  isActive(item.path)
+                    ? 'text-cocoa bg-accent/12'
+                    : 'text-cocoa/45 hover:text-cocoa hover:bg-cocoa/4'
+                }`}
+              >
+                {item.label}
+              </button>
+            ))}
+          </nav>
+        )}
       </div>
 
       <div className="flex items-center gap-3">
         <button
           onClick={() => setMobileNavOpen(true)}
-          className="md:hidden btn btn-ghost p-2 text-cocoa/40 hover:text-cocoa"
-          aria-label="Abrir menu"
+          className="md:hidden p-2 rounded-lg text-cocoa/50 hover:text-cocoa bg-transparent border-none cursor-pointer"
+          aria-label="Abrir menú"
+          style={{ minWidth: '44px', minHeight: '44px' }}
         >
-          <Icon name="menu" size={18} />
+          <Icon name="menu" size={20} />
         </button>
-
-
 
         <div className="relative" ref={dropdownRef}>
           <button
             onClick={() => setOpen(!open)}
-            className="w-[30px] h-[30px] rounded-full flex items-center justify-center text-[11.5px] font-bold text-cream border-none cursor-pointer"
-            style={{ background: 'linear-gradient(135deg, var(--accent-soft), var(--accent))' }}
-            title={user?.email}
+            className="w-[30px] h-[30px] rounded-full flex items-center justify-center text-[11px] font-bold text-cream border-none cursor-pointer"
+            style={{ background: 'linear-gradient(135deg, var(--accent), var(--accent-dark))' }}
+            aria-label={`Menú de usuario, ${user?.email || ''}`}
+            aria-expanded={open}
+            aria-haspopup="true"
           >
             {initials}
           </button>
 
           {open && (
             <div
-              className="absolute right-0 top-[38px] z-30 min-w-[180px] py-2 rounded-xl"
+              className="absolute right-0 top-[38px] z-30 min-w-[200px] py-2 rounded-xl"
               style={{
-                background: 'rgba(255,250,243,.96)',
-                border: '.5px solid rgba(255,255,255,.65)',
-                boxShadow: '0 12px 40px rgba(80,50,30,.15)',
+                background: 'rgba(255,251,245,.97)',
+                border: '1px solid var(--glass-stroke)',
+                boxShadow: '0 12px 40px rgba(30,20,10,.12)',
               }}
+              role="menu"
             >
-              <div className="px-4 py-2 text-[11px] text-cocoa/35 border-b border-cocoa/6 font-mono">
+              <div className="px-4 py-2 text-[11px] text-cocoa/40 border-b border-cocoa/6 font-mono">
                 {user?.email}
               </div>
               <button
                 onClick={() => { setOpen(false); setShowPasswordModal(true); }}
-                className="w-full text-left px-4 py-2 text-[12.5px] text-cocoa/70 hover:text-cocoa hover:bg-white/5 bg-transparent border-none cursor-pointer font-sans"
+                className="w-full text-left px-4 py-2.5 text-[13px] text-cocoa/70 hover:text-cocoa hover:bg-accent/5 bg-transparent border-none cursor-pointer font-sans"
+                role="menuitem"
               >
                 Cambiar contrasena
               </button>
               <button
                 onClick={handleLogout}
-                className="w-full text-left px-4 py-2 text-[12.5px] text-rise hover:bg-accent/6 bg-transparent border-none cursor-pointer font-sans"
+                className="w-full text-left px-4 py-2.5 text-[13px] text-rise hover:bg-rise/5 bg-transparent border-none cursor-pointer font-sans"
+                role="menuitem"
               >
                 Salir
               </button>
@@ -150,34 +154,46 @@ export default function Header() {
         </div>
       </div>
 
+      {/* Mobile nav drawer */}
       {mobileNavOpen && (
-        <div className="fixed inset-0 z-[70] flex flex-col" style={{ background: 'rgba(58,47,36,0.4)', backdropFilter: 'blur(12px)' }} onClick={() => setMobileNavOpen(false)}>
+        <>
           <div
-            className="ml-auto m-4 glass p-6 w-[260px] flex flex-col gap-1"
-            onClick={(e) => e.stopPropagation()}
-            style={{ borderRadius: 'var(--radius-lg)' }}
+            className="fixed inset-0 z-[70] bg-black/25 backdrop-blur-sm md:hidden"
+            onClick={() => setMobileNavOpen(false)}
+            aria-hidden="true"
+          />
+          <div
+            className="fixed left-0 top-0 bottom-0 z-[80] w-[260px] bg-cream border-r border-cocoa/6 p-4 flex flex-col gap-1 md:hidden"
+            style={{ animation: 'slideInLeft 250ms ease-out' }}
+            role="dialog"
+            aria-label="Menú de navegación"
           >
             <div className="flex items-center justify-between mb-3">
-              <span className="eyebrow">Menu</span>
+              <span className="eyebrow">Menú</span>
               <button
                 onClick={() => setMobileNavOpen(false)}
-                className="btn btn-ghost p-2 text-cocoa/40 hover:text-cocoa"
-                aria-label="Cerrar menu"
+                className="p-2 rounded-lg text-cocoa/50 hover:text-cocoa bg-transparent border-none cursor-pointer"
+                aria-label="Cerrar menú"
+                style={{ minWidth: '44px', minHeight: '44px' }}
               >
-                <Icon name="x" size={16} />
+                <Icon name="x" size={18} />
               </button>
             </div>
-            {navItems.map((item) => (
+            {USER_NAV.map((item) => (
               <button
                 key={item.path}
                 onClick={() => { navigate(item.path); setMobileNavOpen(false); }}
-                className={`w-full text-left px-3 py-2.5 text-[14px] font-medium rounded-lg transition-colors ${isActive(item.path) ? 'text-cocoa bg-accent/12' : 'text-cocoa/60 hover:text-cocoa hover:bg-accent/6'}`}
+                className={`w-full text-left px-3 py-2.5 text-[14px] font-medium rounded-lg transition-colors ${
+                  isActive(item.path)
+                    ? 'text-cocoa bg-accent/12 font-semibold'
+                    : 'text-cocoa/55 hover:text-cocoa hover:bg-cocoa/4'
+                }`}
               >
                 {item.label}
               </button>
             ))}
           </div>
-        </div>
+        </>
       )}
 
       {showPasswordModal && <SelfPasswordModal onClose={() => setShowPasswordModal(false)} />}

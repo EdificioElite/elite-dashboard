@@ -7,18 +7,18 @@ export default {
   theme: {
     extend: {
       colors: {
-        cream: '#f5ecdc',
-        sand: '#e7c89a',
-        camel: '#d4ad7c',
-        wheat: '#ead7b8',
-        cocoa: '#3a2f24',
-        accent: '#b88a5e',
-        'accent-dark': '#4d4035',
-        sage: '#6f8a5c',
-        'sage-dark': '#5b7a4a',
-        'rise': '#a3402a',
-        'calor': '#c0392b',
-        'frio': '#5b8ba0',
+        cream: '#FFFBF5',
+        sand: '#EDE0CC',
+        camel: '#C9A87C',
+        wheat: '#E8D5C0',
+        cocoa: '#1E140A',
+        accent: '#A6754B',
+        'accent-dark': '#8C5E3A',
+        sage: '#5D7A4A',
+        'sage-dark': '#4A6338',
+        rise: '#8A2A1E',
+        calor: '#B53228',
+        frio: '#4A7A8C',
       },
       fontFamily: {
         sans: ["'Manrope'", 'ui-sans-serif', 'system-ui', 'sans-serif'],
@@ -33,7 +33,13 @@ export default {
       },
       boxShadow: {
         glass:
-          '0 1px 0 rgba(255,255,255,.6) inset, 0 24px 60px -20px rgba(80,50,30,.22), 0 8px 18px -10px rgba(80,50,30,.12)',
+          '0 1px 0 rgba(255,255,255,.5) inset, 0 12px 32px -16px rgba(30,20,10,.12), 0 4px 12px -6px rgba(30,20,10,.08)',
+      },
+      minHeight: {
+        touch: '44px',
+      },
+      minWidth: {
+        touch: '44px',
       },
     },
   },

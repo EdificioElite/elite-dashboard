@@ -7,6 +7,7 @@ api/.env
 .idea/
 *.log
 docs/n8n-database.md
+docs/Factura*
 e2e/test-results/
 .superpowers/
 .worktrees/

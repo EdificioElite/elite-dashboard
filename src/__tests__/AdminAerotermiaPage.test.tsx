@@ -1,5 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, waitFor } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { MemoryRouter } from 'react-router-dom';
 import AdminAerotermiaPage from '../pages/AdminAerotermiaPage';
 
@@ -63,6 +64,17 @@ describe('AdminAerotermiaPage', () => {
       expect(screen.getByText('Historico — Global')).toBeInTheDocument();
       expect(screen.getAllByText('No hay facturas disponibles').length).toBeGreaterThan(0);
       expect(screen.getByText('No hay facturas electricas disponibles')).toBeInTheDocument();
+    });
+  });
+
+  it('shows heatmap section when toggled open', async () => {
+    mockApiFetch.mockResolvedValue([]);
+    renderPage();
+    await waitFor(() => {
+      expect(screen.getByText('Heatmap de consumo')).toBeInTheDocument();
+    });
+    await userEvent.click(screen.getByText('Heatmap de consumo'));
+    await waitFor(() => {
       expect(screen.getByText('Heatmap mensual')).toBeInTheDocument();
     });
   });

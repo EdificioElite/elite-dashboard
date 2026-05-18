@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Icon from './Icon';
 import { deleteUser } from '../api/client';
 
@@ -12,6 +12,16 @@ interface Props {
 export default function DeleteUserModal({ userId, userName, onClose, onDeleted }: Props) {
   const [error, setError] = useState('');
   const [deleting, setDeleting] = useState(false);
+
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') onClose();
+    };
+    document.addEventListener('keydown', handler);
+    return () => document.removeEventListener('keydown', handler);
+  }, [onClose]);
+
+  const handleBackdropClick = () => onClose();
 
   const handleDelete = async () => {
     setError('');
@@ -27,8 +37,8 @@ export default function DeleteUserModal({ userId, userName, onClose, onDeleted }
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ background: 'rgba(58,47,36,0.3)', backdropFilter: 'blur(4px)' }}>
-      <div className="glass p-[26px] w-full max-w-[420px] animate-[fadeUp_250ms_ease-out]">
+    <div className="modal-backdrop" onClick={handleBackdropClick}>
+      <div className="modal-panel w-[420px] max-w-[90vw] p-6" onClick={(e) => e.stopPropagation()} role="dialog" aria-modal="true">
         <div className="flex items-center justify-between mb-5">
           <div className="flex items-center gap-3">
             <div className="w-7 h-7 rounded-lg flex items-center justify-center shrink-0" style={{ background: '#a3402a' }}>

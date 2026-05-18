@@ -44,14 +44,12 @@ export default function LoginPage() {
       />
 
       {/* Card */}
-      <div className="relative z-10 glass p-8 w-full max-w-[380px]">
-        <div className="flex justify-center mb-5">
-          <img
-            src="/images/elite/Logotipo PNG.png"
-            alt="Edificio Elite"
-            className="h-[100px] w-auto"
-          />
-        </div>
+      <div className="relative z-10 glass p-8 w-full max-w-[400px]">
+        <img
+          src="/images/elite/Logotipo PNG.png"
+          alt="Edificio Elite"
+          className="h-12 w-auto mx-auto mb-6"
+        />
 
         <h1
           className="font-display text-[26px] font-medium text-center text-cocoa mb-7"
@@ -61,13 +59,8 @@ export default function LoginPage() {
         </h1>
 
         {error && (
-          <div
-            className="mb-5 px-4 py-3 rounded-xl text-sm flex items-center gap-2 text-rise"
-            style={{ background: 'rgba(163,64,42,.08)' }}
-          >
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-              <circle cx="12" cy="12" r="10"/><path d="M12 8v4"/><path d="M12 16h.01"/>
-            </svg>
+          <div className="flex items-center gap-2 p-3 rounded-lg bg-rise/5 border border-rise/20 text-rise text-sm mb-4" role="alert">
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="7" stroke="currentColor" strokeWidth="1.5"/><path d="M8 4.5V8.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/><circle cx="8" cy="11.5" r="0.75" fill="currentColor"/></svg>
             {error}
           </div>
         )}
@@ -86,6 +79,7 @@ export default function LoginPage() {
               className="input-card"
               placeholder="vecino@email.com"
               autoComplete="email"
+              autoFocus
             />
           </div>
 
@@ -108,7 +102,7 @@ export default function LoginPage() {
           <button
             type="submit"
             disabled={loading}
-            className="btn btn-primary w-full uppercase tracking-[0.04em] mt-2"
+            className="btn btn-primary w-full min-h-[44px] uppercase tracking-[0.04em] mt-2"
           >
             {loading ? 'Entrando...' : 'Entrar'}
           </button>

@@ -35,8 +35,8 @@ test.describe('Admin Aerotermia Dashboard', () => {
     await expect(page.getByText('Distribucion por vecino')).toBeVisible({ timeout: 15000 });
     await expect(page.getByText('Consumo por vecino')).toBeVisible();
     await expect(page.getByText('Historico — Global')).toBeVisible();
-    await expect(page.getByText('Facturas electricas')).toBeVisible();
-    await expect(page.getByText('Heatmap mensual')).toBeVisible();
+    await expect(page.getByRole('button', { name: 'Facturas' })).toBeVisible();
+    await expect(page.getByText('Heatmap')).toBeVisible();
   });
 
   test('shows facturas chart section', async ({ page }) => {
@@ -64,7 +64,7 @@ test.describe('Admin Aerotermia Dashboard', () => {
   });
 
   test('non-admin cannot access admin aerotermia', async ({ page }) => {
-    await page.click('.sticky button.rounded-full');
+    await page.click('button.rounded-full');
     await page.click('text=Salir');
     await page.waitForURL('/login');
 
@@ -79,7 +79,7 @@ test.describe('Admin Aerotermia Dashboard', () => {
 
   test('navigates to aerotermia from header', async ({ page }) => {
     await page.goto('/admin/vecinos');
-    await page.getByRole('button', { name: 'Admin aerotermia' }).click();
+    await page.getByRole('button', { name: 'Aerotermia' }).first().click();
     await expect(page).toHaveURL('/admin/aerotermia');
   });
 });

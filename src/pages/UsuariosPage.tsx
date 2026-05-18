@@ -1,7 +1,6 @@
 import { useEffect, useState } from 'react';
 import { apiFetch } from '../api/client';
 import { useAuthStore } from '../store/auth';
-import Header from '../components/Header';
 import Icon from '../components/Icon';
 import EditUserModal from '../components/EditUserModal';
 import ChangePasswordModal from '../components/ChangePasswordModal';
@@ -97,12 +96,10 @@ export default function UsuariosPage() {
     { label: 'Con piso', value: usuarios.filter(u => u.vecino_piso).length, icon: 'check', iconColor: 'var(--sage)' },
   ];
 
-  if (loading) return <div><Header /><main className="max-w-[1180px] mx-auto px-6 flex items-center justify-center min-h-[60vh]"><div className="text-cocoa/40 text-sm">Cargando...</div></main></div>;
+  if (loading) return <div><main className="max-w-[1180px] mx-auto px-6 flex items-center justify-center min-h-[60vh]"><div className="text-cocoa/40 text-sm">Cargando...</div></main></div>;
 
   return (
     <div className="page-in">
-      <Header />
-
       <main className="max-w-[1180px] mx-auto px-6 flex flex-col gap-[22px] pb-10">
         <div className="pt-2 flex items-start justify-between flex-wrap gap-4">
           <div>
@@ -116,9 +113,11 @@ export default function UsuariosPage() {
           </button>
         </div>
 
+        <section aria-label="Gestión de usuarios">
+
         <div className="grid grid-cols-3 gap-[16px]">
           {stats.map(s => (
-            <div key={s.label} className="glass p-[20px]">
+            <div key={s.label} className="glass p-[20px] glass-hover">
               <div className="flex items-center gap-2.5 mb-2">
                 <div className="w-6 h-6 rounded-lg flex items-center justify-center shrink-0" style={{ background: s.iconColor }}>
                   <Icon name={s.icon} size={12} className="text-cream" />
@@ -177,14 +176,15 @@ export default function UsuariosPage() {
 
           <div className="overflow-x-auto -mx-2">
             <table className="table-glass">
+              <caption className="sr-only">Tabla de usuarios del sistema</caption>
               <thead>
                 <tr>
-                  <th>Email</th>
-                  <th>Piso</th>
-                  <th>Rol</th>
-                  <th className="text-center">Estado</th>
-                  <th className="text-center">Ult. conexion</th>
-                  <th className="text-center">Acciones</th>
+                  <th scope="col">Email</th>
+                  <th scope="col">Piso</th>
+                  <th scope="col">Rol</th>
+                  <th scope="col" className="text-center">Estado</th>
+                  <th scope="col" className="text-center">Ult. conexion</th>
+                  <th scope="col" className="text-center">Acciones</th>
                 </tr>
               </thead>
               <tbody>
@@ -192,14 +192,28 @@ export default function UsuariosPage() {
                   <tr key={u.id} className="row-stagger" style={{ animationDelay: `${i * 40}ms` }}>
                     <td className="text-sm text-cocoa">{u.email}</td>
                     <td className="text-sm text-cocoa/60">{u.vecino_piso || '—'}</td>
-                    <td>{u.is_admin ? <span className="chip chip-accent">Admin</span> : <span className="chip">Vecino</span>}</td>
+                    <td>
+                      <button
+                        onClick={() => setEditingUser(u)}
+                        className={`toggle-track ${u.is_admin ? 'on' : ''}`}
+                        aria-label={u.is_admin ? 'Quitar admin' : 'Hacer admin'}
+                        role="switch"
+                        aria-checked={u.is_admin}
+                        title="Editar rol"
+                      >
+                        <span className="toggle-thumb" />
+                      </button>
+                    </td>
                     <td className="text-center">
                       <span className="inline-flex items-center gap-1.5">
-                        <span
-                          className="inline-block w-2 h-2 rounded-full shrink-0"
-                          style={{ background: isOnline(u.ultima_conexion) ? '#4caf50' : '#ccc' }}
-                          title={isOnline(u.ultima_conexion) ? 'Online' : 'Offline'}
-                        />
+                        {isOnline(u.ultima_conexion) ? (
+                          <>
+                            <span className="live-dot" title="Online" />
+                            <span className="text-[11px] text-sage font-medium">Ahora</span>
+                          </>
+                        ) : (
+                          <span className="inline-block w-2 h-2 rounded-full shrink-0" style={{ background: '#ccc' }} title="Offline" />
+                        )}
                         {u.ultima_consulta_ha ? (
                           <span className="text-green-600 cursor-help" title={formatHaTooltip(u.ultima_consulta_ha) || undefined}>
                             <Icon name="check" size={13} />
@@ -227,6 +241,7 @@ export default function UsuariosPage() {
             </table>
           </div>
         </div>
+        </section>
       </main>
 
       {editingUser && (

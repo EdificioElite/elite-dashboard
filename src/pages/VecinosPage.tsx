@@ -1,7 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { apiFetch } from '../api/client';
-import Header from '../components/Header';
 import Icon from '../components/Icon';
 import EditVecinoModal from '../components/EditVecinoModal';
 import DeleteVecinoModal from '../components/DeleteVecinoModal';
@@ -120,12 +119,10 @@ export default function VecinosPage() {
     { label: 'Con usuario', value: vecinos.filter(v => v.user_id).length, icon: 'check', iconColor: 'var(--accent-2)' },
   ];
 
-  if (loading) return <div><Header /><main className="max-w-[1180px] mx-auto px-6 flex items-center justify-center min-h-[60vh]"><div className="text-cocoa/40 text-sm">Cargando...</div></main></div>;
+  if (loading) return <div><main className="max-w-[1180px] mx-auto px-6 flex items-center justify-center min-h-[60vh]"><div className="text-cocoa/40 text-sm">Cargando...</div></main></div>;
 
   return (
     <div className="page-in">
-      <Header />
-
       {(inviteMessage) && (
           <div className="max-w-[1180px] mx-auto px-6 pt-2">
             <div
@@ -149,15 +146,16 @@ export default function VecinosPage() {
             <h1 className="font-display text-[40px] font-medium text-cocoa mt-1" style={{ letterSpacing: '-0.02em' }}>Vecinos</h1>
             <p className="text-sm text-cocoa/60 mt-1.5 max-w-lg">Gestiona los vecinos del edificio.</p>
           </div>
-          <button onClick={() => setShowForm(!showForm)} className={`btn ${showForm ? 'btn-ghost' : 'btn-primary'}`}>
-            <Icon name={showForm ? 'x' : 'plus'} size={14} />
-            {showForm ? 'Cancelar' : 'Crear vecino'}
+          <button onClick={() => setShowForm(!showForm)} className="btn btn-secondary mb-4">
+            {showForm ? 'Cancelar' : 'Añadir vecino'}
           </button>
         </div>
 
+        <section aria-label="Gestión de vecinos">
+
         <div className="grid grid-cols-3 gap-[16px]">
           {stats.map(s => (
-            <div key={s.label} className="glass p-[20px]">
+            <div key={s.label} className="glass p-[20px] glass-hover">
               <div className="flex items-center gap-2.5 mb-2">
                 <div className="w-6 h-6 rounded-lg flex items-center justify-center shrink-0" style={{ background: s.iconColor }}>
                   <Icon name={s.icon} size={12} className="text-cream" />
@@ -229,13 +227,14 @@ export default function VecinosPage() {
 
           <div className="overflow-x-auto -mx-2">
             <table className="table-glass">
+              <caption className="sr-only">Tabla de vecinos del edificio</caption>
               <thead>
                 <tr>
-                  <th>Piso</th>
-                  <th>Nombre</th>
-                  <th>Email facturas</th>
-                  <th>Coeficiente</th>
-                  <th className="text-center">Acciones</th>
+                  <th scope="col">Piso</th>
+                  <th scope="col">Nombre</th>
+                  <th scope="col">Email facturas</th>
+                  <th scope="col">Coeficiente</th>
+                  <th scope="col" className="text-center">Acciones</th>
                 </tr>
               </thead>
               <tbody>
@@ -262,8 +261,8 @@ export default function VecinosPage() {
                           editingVecinoEmail === v.piso ? (
                             <span className="flex items-center gap-1">
                               <input type="email" value={editingVecinoEmailValue} onChange={e => setEditingVecinoEmailValue(e.target.value)} onKeyDown={e => { if (e.key === 'Enter') handleSaveVecinoEmail(); if (e.key === 'Escape') setEditingVecinoEmail(null); }} className="input-card text-xs py-0.5 px-1.5 w-32" placeholder="email..." autoFocus />
-                              <button onClick={handleSaveVecinoEmail} className="btn btn-ghost p-1 text-sage" title="Guardar"><Icon name="check" size={12} /></button>
-                              <button onClick={() => setEditingVecinoEmail(null)} className="btn btn-ghost p-1 text-rise" title="Cancelar"><Icon name="x" size={12} /></button>
+                              <button onClick={handleSaveVecinoEmail} className="btn btn-ghost p-1 text-sage" title="Guardar email"><Icon name="check" size={12} /></button>
+                              <button onClick={() => setEditingVecinoEmail(null)} className="btn btn-ghost p-1 text-rise" title="Cancelar edicion email"><Icon name="x" size={12} /></button>
                             </span>
                           ) : (
                             <button onClick={() => { setEditingVecinoEmail(v.piso); setEditingVecinoEmailValue(''); }} className="btn btn-ghost p-2 text-cocoa/40 hover:text-accent" title="Asignar email facturas">
@@ -286,6 +285,7 @@ export default function VecinosPage() {
             {filtered.length === 0 && <div className="text-sm text-cocoa/40 py-8 text-center">No se encontraron vecinos</div>}
           </div>
         </div>
+        </section>
       </main>
 
       {editingVecinoData && (
