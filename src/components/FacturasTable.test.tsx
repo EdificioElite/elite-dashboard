@@ -30,10 +30,15 @@ describe('FacturasTable', () => {
       />
     );
     expect(screen.getByText('Periodo')).toBeInTheDocument();
-    expect(screen.getByText('Calefacción')).toBeInTheDocument();
-    expect(screen.getByText('Refrigeración')).toBeInTheDocument();
-    expect(screen.getByText('ACS')).toBeInTheDocument();
+    expect(screen.getByText('kWh Calor')).toBeInTheDocument();
+    expect(screen.getByText('kWh Frio')).toBeInTheDocument();
+    expect(screen.getByText('kWh ACS')).toBeInTheDocument();
     expect(screen.getByText('m³ ACS')).toBeInTheDocument();
-    expect(screen.getByText('Importe')).toBeInTheDocument();
+    expect(screen.getByText('Fijo')).toBeInTheDocument();
+    expect(screen.getByText('Calef.')).toBeInTheDocument();
+    expect(screen.getByText('Refrig.')).toBeInTheDocument();
+    expect(screen.getByText('ACS var.')).toBeInTheDocument();
+    expect(screen.getByText('ACS agua')).toBeInTheDocument();
+    expect(screen.getByText('Total')).toBeInTheDocument();
   });
 });
