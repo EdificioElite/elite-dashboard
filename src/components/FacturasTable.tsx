@@ -45,15 +45,15 @@ export default function FacturasTable({ data }: { data: Factura[] }) {
           <thead>
             <tr>
               <th>Periodo</th>
-              <th className="hidden md:table-cell">kWh Calor</th>
-              <th className="hidden md:table-cell">kWh Frio</th>
-              <th className="hidden md:table-cell">kWh ACS</th>
+              <th className="hidden sm:table-cell">kWh Cal.</th>
+              <th className="hidden sm:table-cell">kWh Frio</th>
+              <th className="hidden sm:table-cell">kWh ACS</th>
               <th>m³ ACS</th>
-              <th className="hidden lg:table-cell">Fijo</th>
-              <th className="hidden lg:table-cell">Calef.</th>
-              <th className="hidden lg:table-cell">Refrig.</th>
-              <th className="hidden lg:table-cell">ACS var.</th>
-              <th className="hidden lg:table-cell">ACS agua</th>
+              <th className="hidden md:table-cell">Fijo</th>
+              <th className="hidden md:table-cell">Calef.</th>
+              <th className="hidden md:table-cell">Refrig.</th>
+              <th className="hidden md:table-cell">ACS var.</th>
+              <th className="hidden md:table-cell">ACS agua</th>
               <th className="text-right">Total</th>
             </tr>
           </thead>
@@ -64,15 +64,15 @@ export default function FacturasTable({ data }: { data: Factura[] }) {
                   <span className="hidden sm:inline">{fmtMonth(f.periodo)}</span>
                   <span className="sm:hidden">{capitalizar(fmtMonthShort(f.periodo))}</span>
                 </td>
-                <td className="font-mono text-xs font-num hidden md:table-cell">{Number(f.kwh_calor).toFixed(0)}</td>
-                <td className="font-mono text-xs font-num hidden md:table-cell">{Number(f.kwh_frio).toFixed(0)}</td>
-                <td className="font-mono text-xs font-num hidden md:table-cell">{Number(f.kwh_acs).toFixed(0)}</td>
+                <td className="font-mono text-xs font-num hidden sm:table-cell">{Number(f.kwh_calor).toFixed(0)}</td>
+                <td className="font-mono text-xs font-num hidden sm:table-cell">{Number(f.kwh_frio).toFixed(0)}</td>
+                <td className="font-mono text-xs font-num hidden sm:table-cell">{Number(f.kwh_acs).toFixed(0)}</td>
                 <td className="font-mono text-xs font-num">{Number(f.m3_acs).toFixed(1)}</td>
-                <td className="font-mono text-xs font-num hidden lg:table-cell">{fmtMoney(f.importe_fijo)}</td>
-                <td className="font-mono text-xs font-num hidden lg:table-cell">{fmtMoney(f.importe_calor)}</td>
-                <td className="font-mono text-xs font-num hidden lg:table-cell">{fmtMoney(f.importe_frio)}</td>
-                <td className="font-mono text-xs font-num hidden lg:table-cell">{fmtMoney(f.importe_variable_acs)}</td>
-                <td className="font-mono text-xs font-num hidden lg:table-cell">{fmtMoney(f.importe_acs)}</td>
+                <td className="font-mono text-xs font-num hidden md:table-cell">{fmtMoney(f.importe_fijo)}</td>
+                <td className="font-mono text-xs font-num hidden md:table-cell">{fmtMoney(f.importe_calor)}</td>
+                <td className="font-mono text-xs font-num hidden md:table-cell">{fmtMoney(f.importe_frio)}</td>
+                <td className="font-mono text-xs font-num hidden md:table-cell">{fmtMoney(f.importe_variable_acs)}</td>
+                <td className="font-mono text-xs font-num hidden md:table-cell">{fmtMoney(f.importe_acs)}</td>
                 <td className="font-mono text-xs text-right font-medium font-num">{fmtMoney(f.importe_total)}</td>
               </tr>
             ))}

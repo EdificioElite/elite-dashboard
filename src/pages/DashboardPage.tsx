@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import { useSearchParams, Link } from 'react-router-dom';
 import { useAuthStore } from '../store/auth';
 import { apiFetch } from '../api/client';
@@ -9,6 +9,7 @@ import HistoricoCharts from '../components/HistoricoCharts';
 import FacturasChart from '../components/FacturasChart';
 import FacturasTable from '../components/FacturasTable';
 import Icon from '../components/Icon';
+import { toDatetimeLocal, fromDatetimeLocal, applyPreset, Preset } from '../lib/dates';
 
 interface Consumo {
   timestamp: string;
@@ -42,14 +43,6 @@ interface Factura {
   importe_acs: number;
 }
 
-const SECTION_NAV = [
-  { label: 'En vivo', target: 'envivo' },
-  { label: 'Calefacción', target: 'calor' },
-  { label: 'Refrigeración', target: 'frio' },
-  { label: 'ACS', target: 'acs' },
-  { label: 'Facturas', target: 'facturas' },
-];
-
 export default function DashboardPage() {
   const { user } = useAuthStore();
   const [searchParams] = useSearchParams();
@@ -61,13 +54,26 @@ export default function DashboardPage() {
   const pisoParam = searchParams.get('piso');
   const viewingAs = user?.is_admin && pisoParam ? pisoParam : null;
 
+  const [preset, setPreset] = useState<Preset | null>('1a');
+  const [desdeInput, setDesdeInput] = useState('');
+  const [hastaInput, setHastaInput] = useState('');
+
   const { saludo } = greeting();
   const nombre = viewingAs ? `Piso ${viewingAs}` : (user?.vecino_piso || user?.email?.split('@')[0] || 'vecino');
 
-  const scrollTo = (id: string) => {
-    const el = document.getElementById(id);
-    if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  const setRange = (p: string) => {
+    setPreset(p as Preset);
+    if (p) {
+      const { desde, hasta } = applyPreset(p as Preset);
+      setDesdeInput(toDatetimeLocal(desde));
+      setHastaInput(toDatetimeLocal(hasta));
+    }
   };
+
+  useEffect(() => { setRange('1a'); }, []);
+
+  const desde = desdeInput ? fromDatetimeLocal(desdeInput) : '';
+  const hasta = hastaInput ? fromDatetimeLocal(hastaInput) : '';
 
   useEffect(() => {
     async function fetchData() {
@@ -90,6 +96,16 @@ export default function DashboardPage() {
     }
     fetchData();
   }, [viewingAs]);
+
+  const filteredFacturas = useMemo(() => {
+    if (!desde || !hasta) return facturas;
+    const desdeD = new Date(desde).getTime();
+    const hastaD = new Date(hasta).getTime();
+    return facturas.filter((f) => {
+      const t = new Date(f.periodo).getTime();
+      return t >= desdeD && t <= hastaD;
+    });
+  }, [facturas, desde, hasta]);
 
   if (loading) {
     return (
@@ -117,16 +133,25 @@ export default function DashboardPage() {
           </h1>
         </div>
 
-        <div className="flex items-center gap-2 flex-wrap">
-          {SECTION_NAV.map((item) => (
-            <button
-              key={item.target}
-              onClick={() => scrollTo(item.target)}
-              className="text-[11px] font-medium uppercase tracking-[0.05em] text-cocoa/40 hover:text-cocoa hover:bg-accent/8 px-2.5 py-1.5 rounded-md transition-colors"
-            >
-              {item.label}
-            </button>
-          ))}
+        <div className="flex flex-col sm:flex-row sm:items-center gap-3 glass p-[26px]">
+          <span className="eyebrow shrink-0">Periodo</span>
+          <div className="flex items-center gap-2 flex-wrap">
+            {[{ key: '24h', label: '24h' }, { key: '7d', label: '7 dias' }, { key: '30d', label: '30 dias' }, { key: '3m', label: '3 meses' }, { key: '1a', label: '1 año' }].map((p) => (
+              <button
+                key={p.key}
+                onClick={() => setRange(p.key)}
+                className={`text-[11px] font-medium uppercase tracking-[0.05em] px-2.5 py-1.5 rounded-md transition-colors ${preset === p.key ? 'text-cocoa bg-accent/12' : 'text-cocoa/40 hover:text-cocoa'}`}
+              >{p.label}</button>
+            ))}
+          </div>
+          <div className="flex items-center gap-2">
+            <label className="text-[11px] font-medium uppercase tracking-wider text-cocoa/40 shrink-0">Desde:</label>
+            <input type="datetime-local" value={desdeInput} onChange={(e) => { setDesdeInput(e.target.value); setPreset(null); }} className="input-card text-xs py-1.5 px-3" />
+          </div>
+          <div className="flex items-center gap-2">
+            <label className="text-[11px] font-medium uppercase tracking-wider text-cocoa/40 shrink-0">Hasta:</label>
+            <input type="datetime-local" value={hastaInput} onChange={(e) => { setHastaInput(e.target.value); setPreset(null); }} className="input-card text-xs py-1.5 px-3" />
+          </div>
         </div>
 
         <div className="stagger flex flex-col gap-[22px]">
@@ -134,11 +159,13 @@ export default function DashboardPage() {
           <HistoricoCharts
             endpoint={viewingAs ? `/admin/vecinos/${viewingAs}` : undefined}
             title={viewingAs ? `Historico — Piso ${viewingAs}` : undefined}
+            desde={desde}
+            hasta={hasta}
           />
           <div id="facturas" className="scroll-mt-20">
-            <FacturasChart data={facturas} />
+            <FacturasChart data={filteredFacturas} />
           </div>
-          <FacturasTable data={facturas} />
+          <FacturasTable data={filteredFacturas} />
 
           <div className="glass p-[26px]">
             <button

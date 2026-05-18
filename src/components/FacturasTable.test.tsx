@@ -30,7 +30,7 @@ describe('FacturasTable', () => {
       />
     );
     expect(screen.getByText('Periodo')).toBeInTheDocument();
-    expect(screen.getByText('kWh Calor')).toBeInTheDocument();
+    expect(screen.getByText('kWh Cal.')).toBeInTheDocument();
     expect(screen.getByText('kWh Frio')).toBeInTheDocument();
     expect(screen.getByText('kWh ACS')).toBeInTheDocument();
     expect(screen.getByText('m³ ACS')).toBeInTheDocument();
