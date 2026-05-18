@@ -84,7 +84,7 @@ jobs:
           echo "PR creada: ${PR_URL}"
           echo "number=${PR_NUMBER}" >> $GITHUB_OUTPUT
 
-          gh pr merge "${PR_NUMBER}" --auto --merge
+          gh pr merge "${PR_NUMBER}" --auto --squash
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
