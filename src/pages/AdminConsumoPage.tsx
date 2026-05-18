@@ -1,7 +1,6 @@
 import { useEffect, useState } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, Link } from 'react-router-dom';
 import { apiFetch } from '../api/client';
-import Header from '../components/Header';
 import Icon from '../components/Icon';
 import HistoricoCharts from '../components/HistoricoCharts';
 import FacturasTable from '../components/FacturasTable';
@@ -21,18 +20,19 @@ interface Factura {
   id_factura: string;
   periodo: string;
   importe_total: number;
+  importe_fijo: number;
   kwh_calor: number;
   kwh_frio: number;
   kwh_acs: number;
   m3_acs: number;
   importe_calor: number;
   importe_frio: number;
+  importe_variable_acs: number;
   importe_acs: number;
 }
 
 export default function AdminConsumoPage() {
   const { piso } = useParams<{ piso: string }>();
-  const navigate = useNavigate();
   const [consumoActual, setConsumoActual] = useState<Consumo | null>(null);
   const [facturas, setFacturas] = useState<Factura[]>([]);
   const [loading, setLoading] = useState(true);
@@ -73,7 +73,6 @@ export default function AdminConsumoPage() {
   if (loading) {
     return (
       <div>
-        <Header />
         <main className="max-w-[1180px] mx-auto px-6 flex items-center justify-center min-h-[60vh]">
           <div className="text-cocoa/40 text-sm">Cargando datos del vecino...</div>
         </main>
@@ -83,15 +82,15 @@ export default function AdminConsumoPage() {
 
   return (
     <div className="page-in">
-      <Header />
-
       <main className="max-w-[1180px] mx-auto px-6 flex flex-col gap-[22px] pb-10">
-        {/* Back + Greeting */}
         <div className="pt-2">
-          <button onClick={() => navigate('/admin')} className="btn btn-ghost text-xs mb-3">
-            <Icon name="chevronLeft" size={14} />
-            Volver a vecinos
-          </button>
+          <div className="flex items-center gap-2 text-sm mb-3">
+            <Link to="/admin/vecinos" className="text-accent hover:text-accent-dark">Admin</Link>
+            <span className="text-cocoa/30">→</span>
+            <Link to="/admin/vecinos" className="text-accent hover:text-accent-dark">Vecinos</Link>
+            <span className="text-cocoa/30">→</span>
+            <span className="text-cocoa/60">Piso {piso}</span>
+          </div>
           <p className="eyebrow">Vecino</p>
           <h1
             className="font-display text-[40px] font-medium text-cocoa mt-1"
@@ -105,10 +104,9 @@ export default function AdminConsumoPage() {
         </div>
 
         <div className="stagger flex flex-col gap-[22px]">
-          {/* Stats */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-[16px]">
             {stats.map((s) => (
-              <div key={s.label} className="glass p-[20px]">
+              <div key={s.label} className="glass p-[20px] glass-hover">
                 <div className="flex items-center gap-2.5 mb-2">
                   <div
                     className="w-6 h-6 rounded-lg flex items-center justify-center shrink-0"
@@ -135,10 +133,8 @@ export default function AdminConsumoPage() {
             ))}
           </div>
 
-          {/* Chart */}
           <HistoricoCharts endpoint={`/admin/vecinos/${piso}`} title={`Historico — Piso ${piso}`} />
 
-          {/* Facturas */}
           <FacturasTable data={facturas} />
         </div>
       </main>

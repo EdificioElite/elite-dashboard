@@ -17,15 +17,15 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: write
+      packages: write
       pull-requests: write
-      actions: write
-      checks: write
     env:
-      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      REGISTRY: ghcr.io
+      IMAGE_NAME: ${{ github.repository }}/api
+
     steps:
       - uses: actions/checkout@v4
         with:
-          ref: dev
           fetch-depth: 0
 
       - name: Check if dev is ahead of main
@@ -68,147 +68,106 @@ jobs:
           echo "New version: ${NEW_VERSION}"
           echo "version=${NEW_VERSION}" >> $GITHUB_OUTPUT
 
-      - name: Bump version in package.json files
+      - name: Create release PR and enable auto-merge
         if: steps.check.outputs.commits_ahead != '0'
+        id: pr
         run: |
-          jq --arg v "${{ steps.version.outputs.version }}" '.version = $v' package.json > tmp.json && mv tmp.json package.json
-          jq --arg v "${{ steps.version.outputs.version }}" '.version = $v' api/package.json > tmp.json && mv tmp.json api/package.json
-
-      - name: Clean up existing release branch
-        if: steps.check.outputs.commits_ahead != '0'
-        run: |
-          BRANCH="release/v${{ steps.version.outputs.version }}"
-          if git ls-remote --exit-code --heads origin "${BRANCH}" > /dev/null 2>&1; then
-            echo "Borrando rama remota existente: ${BRANCH}"
-            git push origin --delete "${BRANCH}"
-          fi
-
-      - name: Create release branch and push
-        if: steps.check.outputs.commits_ahead != '0'
-        id: branch
-        run: |
-          BRANCH="release/v${{ steps.version.outputs.version }}"
-          git checkout -b "${BRANCH}"
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add package.json api/package.json
-          git commit -m "chore: bump version to v${{ steps.version.outputs.version }}"
-          git push origin "${BRANCH}"
-          SHA=$(git rev-parse HEAD)
-          echo "branch=${BRANCH}" >> $GITHUB_OUTPUT
-          echo "sha=${SHA}" >> $GITHUB_OUTPUT
-
-      - name: Dispatch CI on release branch
-        if: steps.check.outputs.commits_ahead != '0'
-        run: |
-          gh workflow run CI --ref "${{ steps.branch.outputs.branch }}"
-
-      - name: Wait for CI on release branch
-        if: steps.check.outputs.commits_ahead != '0'
-        run: |
-          BRANCH="${{ steps.branch.outputs.branch }}"
-          echo "Esperando CI en ${BRANCH}..."
-          for i in $(seq 1 90); do
-            sleep 10
-            CONCLUSION=$(gh run list --branch "${BRANCH}" --workflow CI --event workflow_dispatch --limit 1 --json conclusion --jq '.[0].conclusion // "waiting"')
-            echo "  Intento $i/90: CI = ${CONCLUSION}"
-            case "${CONCLUSION}" in
-              success) echo "CI paso" && exit 0 ;;
-              failure|cancelled|skipped) echo "CI fallo: ${CONCLUSION}" && exit 1 ;;
-            esac
-          done
-          echo "Timeout esperando CI"
-          exit 1
-
-      - name: Create PR to dev and add check runs
-        if: steps.check.outputs.commits_ahead != '0'
-        id: dev_pr
-        run: |
-          PR_URL=$(gh pr create \
-            --title "chore: bump version to v${{ steps.version.outputs.version }}" \
-            --body "Actualiza version en package.json a v${{ steps.version.outputs.version }} antes del release." \
-            --head "${{ steps.branch.outputs.branch }}" \
-            --base dev)
-
-          PR_NUMBER=$(echo "${PR_URL}" | grep -oP '\d+$')
-          echo "PR a dev creada: ${PR_URL}"
-          echo "number=${PR_NUMBER}" >> $GITHUB_OUTPUT
-
-          SHA="${{ steps.branch.outputs.sha }}"
-          for check in backend frontend e2e; do
-            echo "Creando check run '${check}' en ${SHA}..."
-            gh api "repos/${{ github.repository }}/check-runs" \
-              -f name="${check}" \
-              -f head_sha="${SHA}" \
-              -f status="completed" \
-              -f conclusion="success"
-          done
-
-          gh pr merge "${PR_NUMBER}" --auto --merge
-
-      - name: Wait for dev PR to merge
-        if: steps.check.outputs.commits_ahead != '0'
-        run: |
-          for i in $(seq 1 30); do
-            STATE=$(gh pr view "${{ steps.dev_pr.outputs.number }}" --json state --jq '.state' 2>/dev/null || echo "OPEN")
-            echo "  Intento $i/30: estado PR dev = ${STATE}"
-            if [ "${STATE}" = "MERGED" ]; then
-              echo "PR a dev mergeada"
-              exit 0
-            fi
-            sleep 10
-          done
-          echo "Timeout esperando merge de PR a dev"
-          exit 1
-
-      - name: Wait for dev push CI
-        if: steps.check.outputs.commits_ahead != '0'
-        run: |
-          git fetch origin dev
-          DEV_SHA=$(git rev-parse origin/dev)
-          echo "Esperando CI en dev (${DEV_SHA})..."
-          for i in $(seq 1 60); do
-            sleep 10
-            RUN=$(gh run list --branch dev --workflow CI --event push --limit 1 --json conclusion,headSha --jq '.[0]')
-            CONCLUSION=$(echo "${RUN}" | jq -r '.conclusion // "waiting"')
-            RUN_SHA=$(echo "${RUN}" | jq -r '.headSha // ""')
-            echo "  Intento $i/60: CI = ${CONCLUSION} (sha: ${RUN_SHA:0:7})"
-            if [ "${RUN_SHA}" = "${DEV_SHA}" ] && [ "${CONCLUSION}" = "success" ]; then
-              echo "CI en dev paso"
-              exit 0
-            elif [ "${RUN_SHA}" = "${DEV_SHA}" ] && [ "${CONCLUSION}" = "failure" ]; then
-              echo "CI en dev fallo"
-              exit 1
-            fi
-          done
-          echo "Timeout esperando CI en dev"
-          exit 1
-
-      - name: Create release PR to main with check runs
-        if: steps.check.outputs.commits_ahead != '0'
-        run: |
-          git fetch origin dev
-          DEV_SHA=$(git rev-parse origin/dev)
-
           PR_URL=$(gh pr create \
             --title "Release v${{ steps.version.outputs.version }}" \
-            --body $'PR automatizada de release v${{ steps.version.outputs.version }}.\n\nTipo: `${{ inputs.version }}`.' \
+            --body "PR automatizada de release v${{ steps.version.outputs.version }}. Tipo: \`${{ inputs.version }}\`." \
             --head dev \
             --base main)
 
           PR_NUMBER=$(echo "${PR_URL}" | grep -oP '\d+$')
-          echo "PR a main creada: ${PR_URL}"
+          echo "PR creada: ${PR_URL}"
+          echo "number=${PR_NUMBER}" >> $GITHUB_OUTPUT
 
-          for check in backend frontend e2e; do
-            echo "Creando check run '${check}' en ${DEV_SHA}..."
-            gh api "repos/${{ github.repository }}/check-runs" \
-              -f name="${check}" \
-              -f head_sha="${DEV_SHA}" \
-              -f status="completed" \
-              -f conclusion="success"
+          gh pr merge "${PR_NUMBER}" --auto --squash
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Wait for PR to merge
+        if: steps.check.outputs.commits_ahead != '0'
+        timeout-minutes: 10
+        run: |
+          for i in $(seq 1 60); do
+            STATE=$(gh pr view "${{ steps.pr.outputs.number }}" --json state --jq '.state')
+            if [ "${STATE}" = "MERGED" ]; then
+              echo "PR mergeada correctamente"
+              break
+            fi
+            echo "Esperando merge... intento $i/60 (estado: ${STATE})"
+            sleep 10
           done
+          if [ "${STATE}" != "MERGED" ]; then
+            echo "Timeout esperando merge de la PR"
+            exit 1
+          fi
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-          gh pr merge "${PR_NUMBER}" --auto --merge
+      - name: Checkout main for publish
+        if: steps.check.outputs.commits_ahead != '0'
+        run: |
+          git fetch origin main
+          git checkout -B main origin/main
+
+      - name: Create and push tag
+        if: steps.check.outputs.commits_ahead != '0'
+        run: |
+          TAG="v${{ steps.version.outputs.version }}"
+          if git rev-parse "${TAG}" >/dev/null 2>&1; then
+            echo "Tag ${TAG} ya existe, saltando creacion de tag"
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git tag "${TAG}"
+          git push origin "${TAG}"
+
+      - name: Create GitHub Release
+        if: steps.check.outputs.commits_ahead != '0'
+        run: |
+          gh release create "v${{ steps.version.outputs.version }}" \
+            --title "v${{ steps.version.outputs.version }}" \
+            --generate-notes \
+            --target main
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - uses: docker/login-action@v3
+        if: steps.check.outputs.commits_ahead != '0'
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Set lowercase image name
+        if: steps.check.outputs.commits_ahead != '0'
+        run: |
+          echo "IMAGE_NAME_LC=$(echo "${IMAGE_NAME}" | tr '[:upper:]' '[:lower:]')" >> $GITHUB_ENV
+
+      - uses: docker/metadata-action@v5
+        if: steps.check.outputs.commits_ahead != '0'
+        id: meta
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME_LC }}
+          tags: |
+            type=raw,value=${{ steps.version.outputs.version }}
+            type=raw,value=latest
+
+      - uses: docker/setup-buildx-action@v3
+        if: steps.check.outputs.commits_ahead != '0'
+
+      - uses: docker/build-push-action@v6
+        if: steps.check.outputs.commits_ahead != '0'
+        with:
+          context: api
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
 
       - name: Nothing to promote
         if: steps.check.outputs.commits_ahead == '0'

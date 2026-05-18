@@ -1,9 +1,10 @@
 import { useState, useEffect, useMemo } from 'react';
 import {
-  LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
+  LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Area,
 } from 'recharts';
 import { apiFetch } from '../api/client';
 import SegmentedControl from './SegmentedControl';
+import ChartTooltip from './ChartTooltip';
 
 interface Consumo {
   timestamp: string;
@@ -58,17 +59,6 @@ const PRESETS = [
   { key: '1a', label: '1 año' },
 ];
 
-const TOOLTIP_STYLE = {
-  background: 'rgba(58,47,36,.92)',
-  border: 'none',
-  borderRadius: '10px',
-  color: '#f5ecdc',
-  fontSize: '11.5px',
-  fontFamily: "'Manrope', sans-serif",
-  padding: '10px 12px',
-  boxShadow: '0 4px 16px rgba(0,0,0,.15)',
-};
-
 function computeDomain(values: number[]): [number, number] {
   const filtered = values.filter((v) => v != null && !isNaN(v));
   if (filtered.length === 0) return [0, 1];
@@ -87,13 +77,13 @@ interface ChartLineProps {
   decimals?: number;
 }
 
-function ChartLine({ data, color, unit, dashed, decimals = 2 }: ChartLineProps) {
+function ChartLine({ data, color, dashed }: ChartLineProps) {
   const domain = useMemo(() => computeDomain(data.map((d) => d.value)), [data]);
 
   return (
     <ResponsiveContainer width="100%" height={120}>
       <LineChart data={data} margin={{ top: 4, right: 8, left: 0, bottom: 0 }}>
-        <CartesianGrid strokeDasharray="2 4" stroke="rgba(58,47,36,.06)" vertical={false} />
+        <CartesianGrid strokeDasharray="2 4" stroke="rgba(30,20,10,0.12)" vertical={false} />
         <XAxis dataKey="label" fontSize={10} tick={{ fill: 'rgba(58,47,36,.35)' }} axisLine={false} tickLine={false} interval="preserveStartEnd" />
         <YAxis
           fontSize={10}
@@ -102,19 +92,22 @@ function ChartLine({ data, color, unit, dashed, decimals = 2 }: ChartLineProps) 
           domain={domain}
           width={40}
         />
-        <Tooltip
-          contentStyle={TOOLTIP_STYLE}
-          formatter={(value: number) => [`${Number(value).toFixed(decimals)} ${unit}`, '']}
-          labelFormatter={(label: string) => {
-            const item = data.find((d) => d.label === label);
-            return item?.timestamp ? new Date(item.timestamp).toLocaleString('es-ES', { day: 'numeric', month: 'long', hour: '2-digit', minute: '2-digit' }) : label;
-          }}
-        />
+        <Tooltip content={<ChartTooltip labelFormatter={(label: string) => {
+          const item = data.find((d) => d.label === label);
+          return item?.timestamp ? new Date(item.timestamp).toLocaleString('es-ES', { day: 'numeric', month: 'long', hour: '2-digit', minute: '2-digit' }) : label;
+        }} />} />
+        <defs>
+          <linearGradient id="areaGradient" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stopColor={color} stopOpacity={0.12} />
+            <stop offset="100%" stopColor={color} stopOpacity={0} />
+          </linearGradient>
+        </defs>
+        <Area type="monotone" dataKey="value" stroke="none" fill="url(#areaGradient)" />
         <Line
           type="monotone"
           dataKey="value"
           stroke={color}
-          strokeWidth={2}
+          strokeWidth={3}
           strokeDasharray={dashed ? '4 3' : undefined}
           dot={false}
           activeDot={{ r: 4, fill: '#fff8ee', stroke: color, strokeWidth: 1.5 }}
@@ -124,7 +117,8 @@ function ChartLine({ data, color, unit, dashed, decimals = 2 }: ChartLineProps) 
   );
 }
 
-export default function HistoricoCharts({ endpoint, title }: { endpoint?: string; title?: string }) {
+export default function HistoricoCharts({ endpoint, title, desde: extDesde, hasta: extHasta }: { endpoint?: string; title?: string; desde?: string; hasta?: string }) {
+  const external = extDesde && extHasta;
   const [preset, setPreset] = useState<Preset>('7d');
   const [desdeInput, setDesdeInput] = useState('');
   const [hastaInput, setHastaInput] = useState('');
@@ -139,10 +133,10 @@ export default function HistoricoCharts({ endpoint, title }: { endpoint?: string
     }
   };
 
-  useEffect(() => { setRange('7d'); }, []);
+  useEffect(() => { if (!external) setRange('7d'); }, [external]);
 
-  const desde = desdeInput ? fromDatetimeLocal(desdeInput) : '';
-  const hasta = hastaInput ? fromDatetimeLocal(hastaInput) : '';
+  const desde = external ? extDesde! : (desdeInput ? fromDatetimeLocal(desdeInput) : '');
+  const hasta = external ? extHasta! : (hastaInput ? fromDatetimeLocal(hastaInput) : '');
 
   useEffect(() => {
     if (!desde || !hasta) return;
@@ -177,7 +171,7 @@ export default function HistoricoCharts({ endpoint, title }: { endpoint?: string
   );
 
   return (
-    <div className="glass p-[26px]">
+    <div className="glass p-[26px]" aria-label="Gráfica de consumo histórico de calor, frío y ACS">
       <div className="flex items-center justify-between mb-4 flex-wrap gap-3">
         <div className="flex items-center gap-3">
           <div className="w-7 h-7 rounded-lg flex items-center justify-center shrink-0" style={{ background: 'var(--accent)' }}>
@@ -187,9 +181,10 @@ export default function HistoricoCharts({ endpoint, title }: { endpoint?: string
           </div>
           <span className="eyebrow">{title || 'Historico'}</span>
         </div>
-        <SegmentedControl options={PRESETS} value={preset ?? ''} onChange={(k) => setRange(k)} />
+        {!external && <SegmentedControl options={PRESETS} value={preset ?? ''} onChange={(k) => setRange(k)} />}
       </div>
 
+      {!external && (
       <div className="flex flex-col sm:flex-row sm:items-center gap-3 mb-5">
         <div className="flex items-center gap-2">
           <label className="text-[11px] font-medium uppercase tracking-wider text-cocoa/40 shrink-0">Desde:</label>
@@ -200,6 +195,7 @@ export default function HistoricoCharts({ endpoint, title }: { endpoint?: string
           <input type="datetime-local" value={hastaInput} onChange={(e) => { setHastaInput(e.target.value); setPreset(null); }} className="input-card text-xs py-1.5 px-3 w-full sm:w-auto" />
         </div>
       </div>
+      )}
 
       {data.length === 0 ? (
         <p className="text-sm text-cocoa/44 py-8">No hay datos en este periodo</p>
@@ -211,7 +207,7 @@ export default function HistoricoCharts({ endpoint, title }: { endpoint?: string
               <span className="text-[11px] font-medium text-cocoa/40 uppercase tracking-wider">Calefacción</span>
               <span className="text-[10px] text-cocoa/30 font-mono">kWh</span>
             </div>
-            <ChartLine data={calorData} color="#c0392b" unit="kWh" />
+            <ChartLine data={calorData} color="#B53228" unit="kWh" />
           </div>
           <div id="frio" className="scroll-mt-20">
             <div className="flex items-center gap-2 mb-1.5">
@@ -219,7 +215,7 @@ export default function HistoricoCharts({ endpoint, title }: { endpoint?: string
               <span className="text-[11px] font-medium text-cocoa/40 uppercase tracking-wider">Refrigeración</span>
               <span className="text-[10px] text-cocoa/30 font-mono">kWh</span>
             </div>
-            <ChartLine data={frioData} color="#5b8ba0" unit="kWh" />
+            <ChartLine data={frioData} color="#4A7A8C" unit="kWh" />
           </div>
           <div id="acs" className="scroll-mt-20">
             <div className="flex items-center gap-2 mb-1.5">
@@ -227,7 +223,7 @@ export default function HistoricoCharts({ endpoint, title }: { endpoint?: string
               <span className="text-[11px] font-medium text-cocoa/40 uppercase tracking-wider">ACS</span>
               <span className="text-[10px] text-cocoa/30 font-mono">m³</span>
             </div>
-            <ChartLine data={acsData} color="#6f8a5c" unit="m³" dashed decimals={3} />
+            <ChartLine data={acsData} color="#5D7A4A" unit="m³" dashed decimals={3} />
           </div>
         </div>
       )}

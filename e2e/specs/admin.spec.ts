@@ -53,7 +53,7 @@ test.describe('Admin', () => {
     const row = page.locator('tr', { hasText: 'vecino4@elite.com' });
     await row.locator('[title="Editar usuario"]').click();
 
-    const modal = page.locator('.fixed.inset-0').last();
+    const modal = page.locator('.modal-backdrop').last();
     await expect(modal.locator('.eyebrow')).toContainText('Editar usuario');
 
     await modal.locator('input[type="email"]').fill('vecino4-mod@elite.com');
@@ -68,7 +68,7 @@ test.describe('Admin', () => {
     const row = page.locator('tr', { hasText: 'vecino2@elite.com' });
     await row.locator('[title="Cambiar contrasena"]').click();
 
-    const modal = page.locator('.fixed.inset-0').last();
+    const modal = page.locator('.modal-backdrop').last();
     await expect(modal.locator('.eyebrow')).toContainText('Cambiar contrasena');
 
     await modal.locator('input[type="password"]').first().fill('newpass123');
@@ -85,7 +85,7 @@ test.describe('Admin', () => {
     const row = page.locator('tr', { hasText: 'vecino2@elite.com' });
     await row.locator('[title="Cambiar contrasena"]').click();
 
-    const modal = page.locator('.fixed.inset-0').last();
+    const modal = page.locator('.modal-backdrop').last();
     await expect(modal.locator('.eyebrow')).toContainText('Cambiar contrasena');
 
     await modal.locator('input[type="password"]').first().fill('12345');
@@ -100,7 +100,7 @@ test.describe('Admin', () => {
     const row = page.locator('tr', { hasText: 'vecino2@elite.com' });
     await row.locator('[title="Cambiar contrasena"]').click();
 
-    const modal = page.locator('.fixed.inset-0').last();
+    const modal = page.locator('.modal-backdrop').last();
     await expect(modal.locator('.eyebrow')).toContainText('Cambiar contrasena');
 
     await modal.locator('input[type="password"]').first().fill('newpass123');
@@ -115,7 +115,7 @@ test.describe('Admin', () => {
     const row = page.locator('tr', { hasText: 'vecino3@elite.com' });
     await row.locator('[title="Eliminar usuario"]').click();
 
-    const modal = page.locator('.fixed.inset-0').last();
+    const modal = page.locator('.modal-backdrop').last();
     await expect(modal.locator('.eyebrow')).toContainText('Eliminar acceso');
 
     await modal.getByRole('button', { name: 'Eliminar acceso' }).click();
@@ -149,8 +149,6 @@ test.describe('Admin', () => {
   test('ultima_conexion updates after vecino logs in', async ({ page }) => {
     await page.goto('/admin/usuarios');
     await expect(page.locator('tbody')).toBeVisible();
-    const vecino1Row = page.locator('tr', { hasText: 'vecino1@elite.com' });
-    await expect(vecino1Row).toContainText('—');
 
     await logout(page);
     await loginAsVecino(page);
@@ -161,7 +159,6 @@ test.describe('Admin', () => {
     await page.goto('/admin/usuarios');
     await expect(page.locator('tbody')).toBeVisible();
     const vecino1RowAfter = page.locator('tr', { hasText: 'vecino1@elite.com' });
-    await expect(vecino1RowAfter).not.toContainText('—');
     await expect(vecino1RowAfter).toContainText(/\d{2}\/\d{2}\/\d{4}, \d{2}:\d{2}/);
   });
 

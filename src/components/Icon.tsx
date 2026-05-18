@@ -48,25 +48,19 @@ interface IconProps {
   name: string;
   size?: number;
   className?: string;
+  label?: string;
 }
 
-export default function Icon({ name, size = 20, className = '' }: IconProps) {
+export default function Icon({ name, size = 20, className = '', label }: IconProps) {
   const svg = icons[name];
   if (!svg) return null;
 
   return (
-    <svg
-      xmlns="http://www.w3.org/2000/svg"
-      width={size}
-      height={size}
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="1.5"
-      strokeLinecap="round"
-      strokeLinejoin="round"
+    <span
       className={className}
-      aria-hidden="true"
+      aria-label={label}
+      role={label ? 'img' : undefined}
+      style={{ display: 'inline-flex', width: size, height: size }}
       dangerouslySetInnerHTML={{ __html: svg }}
     />
   );

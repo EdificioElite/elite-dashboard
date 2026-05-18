@@ -56,17 +56,22 @@ export default function RegistroPage() {
 
   if (verifying) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-cream">
-        <div className="text-cocoa/40 text-sm">Verificando enlace...</div>
+      <div className="min-h-screen flex items-center justify-center p-4">
+        <div className="glass w-full max-w-[400px] p-8 text-center">
+          <div className="text-cocoa/40 text-sm">Verificando enlace...</div>
+        </div>
       </div>
     );
   }
 
   if (error && !email) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-cream">
-        <div className="glass p-8 w-full max-w-[380px] text-center">
-          <div className="text-rise text-sm">{error}</div>
+      <div className="min-h-screen flex items-center justify-center p-4">
+        <div className="glass w-full max-w-[400px] p-8 text-center">
+          <div className="flex items-center gap-2 p-3 rounded-lg bg-rise/5 border border-rise/20 text-rise text-sm mb-4" role="alert">
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="7" stroke="currentColor" strokeWidth="1.5"/><path d="M8 4.5V8.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/><circle cx="8" cy="11.5" r="0.75" fill="currentColor"/></svg>
+            {error}
+          </div>
         </div>
       </div>
     );
@@ -76,18 +81,14 @@ export default function RegistroPage() {
     <div className="min-h-screen relative flex items-center justify-center p-4">
       <img src="/images/elite/Encabezado.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" />
       <div className="absolute inset-0" style={{ background: `linear-gradient(135deg, rgba(58,47,36,.45), rgba(184,138,94,.25), rgba(245,236,220,.15)), linear-gradient(180deg, transparent 50%, rgba(245,236,220,.6) 100%)` }} />
-      <div className="relative z-10 glass p-8 w-full max-w-[380px]">
-        <div className="flex justify-center mb-5">
-          <img src="/images/elite/Logotipo PNG.png" alt="Edificio Elite" className="h-[100px] w-auto" />
-        </div>
+      <div className="relative z-10 glass p-8 w-full max-w-[400px]">
+        <img src="/images/elite/Logotipo PNG.png" alt="Edificio Elite" className="h-12 w-auto mx-auto mb-6" />
         <h1 className="font-display text-[26px] font-medium text-center text-cocoa mb-7" style={{ letterSpacing: '-0.02em' }}>
           Completa tu registro
         </h1>
         {error && (
-          <div className="mb-5 px-4 py-3 rounded-xl text-sm flex items-center gap-2 text-rise" style={{ background: 'rgba(163,64,42,.08)' }}>
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-              <circle cx="12" cy="12" r="10"/><path d="M12 8v4"/><path d="M12 16h.01"/>
-            </svg>
+          <div className="flex items-center gap-2 p-3 rounded-lg bg-rise/5 border border-rise/20 text-rise text-sm mb-4" role="alert">
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="7" stroke="currentColor" strokeWidth="1.5"/><path d="M8 4.5V8.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/><circle cx="8" cy="11.5" r="0.75" fill="currentColor"/></svg>
             {error}
           </div>
         )}
@@ -102,13 +103,13 @@ export default function RegistroPage() {
           </div>
           <div>
             <label htmlFor="password" className="block text-xs font-semibold uppercase tracking-wider text-cocoa/40 mb-1.5 ml-1">Contrasena</label>
-            <input id="password" type="password" value={password} onChange={(e) => setPassword(e.target.value)} required minLength={8} className="input-card" placeholder="••••••••" autoComplete="new-password" />
+            <input id="password" type="password" value={password} onChange={(e) => setPassword(e.target.value)} required minLength={8} className="input-card" placeholder="••••••••" autoComplete="new-password" autoFocus />
           </div>
           <div>
             <label htmlFor="confirm" className="block text-xs font-semibold uppercase tracking-wider text-cocoa/40 mb-1.5 ml-1">Confirmar contrasena</label>
             <input id="confirm" type="password" value={confirm} onChange={(e) => setConfirm(e.target.value)} required minLength={8} className="input-card" placeholder="••••••••" autoComplete="new-password" />
           </div>
-          <button type="submit" disabled={loading} className="btn btn-primary w-full uppercase tracking-[0.04em] mt-2">
+          <button type="submit" disabled={loading} className="btn btn-primary w-full min-h-[44px] uppercase tracking-[0.04em] mt-2">
             {loading ? 'Registrando...' : 'Registrarse'}
           </button>
         </form>

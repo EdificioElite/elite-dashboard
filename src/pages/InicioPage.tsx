@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { useAuthStore } from '../store/auth';
 import { apiFetch } from '../api/client';
 import { greeting } from '../lib/format';
-import Header from '../components/Header';
+
 import ConsumoCard from '../components/ConsumoCard';
 import Icon from '../components/Icon';
 
@@ -43,9 +43,9 @@ const MEETING_CONTENT = {
 
 function InfoCard({ title, icon, color, children }: { title: string; icon: string; color: string; children: React.ReactNode }) {
   return (
-    <div className="glass p-[26px]">
+    <div className="glass glass-hover p-6">
       <div className="flex items-center gap-3 mb-4">
-        <div className="w-7 h-7 rounded-lg flex items-center justify-center shrink-0" style={{ background: color }}>
+        <div className="w-9 h-9 rounded-lg flex items-center justify-center shrink-0" style={{ background: color }}>
           <Icon name={icon as any} size={14} className="text-cream" />
         </div>
         <span className="eyebrow">{title}</span>
@@ -73,7 +73,6 @@ export default function InicioPage() {
   if (loading) {
     return (
       <div>
-        <Header />
         <main className="max-w-[1180px] mx-auto px-6 flex items-center justify-center min-h-[60vh]">
           <div className="text-cocoa/40 text-sm">Cargando...</div>
         </main>
@@ -83,12 +82,10 @@ export default function InicioPage() {
 
   return (
     <div className="page-in">
-      <Header />
-
       <main className="max-w-[1180px] mx-auto px-6 flex flex-col gap-[22px] pb-10">
-        <div className="pt-2">
+        <div>
           <p className="eyebrow">Inicio</p>
-          <h1 className="font-display text-[40px] font-medium text-cocoa mt-1" style={{ letterSpacing: '-0.02em' }}>
+          <h1 className="font-display text-[38px] font-medium text-cocoa mt-1" style={{ letterSpacing: '-0.02em' }}>
             {saludo}, {nombre}.
           </h1>
         </div>

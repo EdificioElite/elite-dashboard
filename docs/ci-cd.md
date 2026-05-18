@@ -7,7 +7,6 @@
 | CI | `.github/workflows/ci.yml` | Push a main/dev, PR a main/dev |
 | Docker PR | `.github/workflows/docker-pr.yml` | PR open/sync/reopen |
 | Release | `.github/workflows/release.yml` | Manual con selector de version (`workflow_dispatch`) |
-| Publish | `.github/workflows/publish.yml` | Push a main (solo merge commits) |
 | Sync | `.github/workflows/sync.yml` | Push a main (solo merge commits) |
 
 ## Flujo de trabajo
@@ -34,31 +33,29 @@ feat/x ──PR──▶ dev ──release manual──▶ main ──sync auto�
 - Al mergear a `dev`, Vercel despliega automaticamente en `dev.edificioelite.com`
 - La imagen Docker `:dev` se actualiza y Portainer hace pull + redeploy del backend
 
-### 3. Promover a main
+### 3. Promover a main (release)
 
 - Ejecutar manualmente el workflow `Release` (`.github/workflows/release.yml`) seleccionando el tipo de version (`major`, `minor`, `patch`)
-- Esto crea un PR de `dev` → `main` con la version ya incrementada
+- El workflow:
+  1. Calcula `vX.Y.Z` desde el ultimo tag
+  2. Crea un PR de `dev` → `main` y activa auto-merge
+  3. Espera a que el PR se mergee (CI debe pasar: `backend`, `frontend`, `e2e`)
+  4. Crea el tag `vX.Y.Z` en main
+  5. Crea la GitHub Release
+  6. Publica la imagen Docker con tags `:X.Y.Z` y `:latest`
 
-### 4. Mergear a main (release)
-
-- Al hacer merge del PR de release, `publish.yml`:
-  1. Lee la version de `package.json` (ya incrementada por `release.yml`)
-  2. Crea un tag git `vX.Y.Z`
-  3. Crea una release en GitHub
-  4. Publica la imagen Docker con tags `:vX.Y.Z` y `:latest`
-
-### 5. Sincronizar main → dev
+### 4. Sincronizar main → dev
 
 - `sync.yml` crea automaticamente un PR de `main` → `dev` para incorporar version bumps, hotfixes y releases de vuelta a la rama de desarrollo.
 
-### 6. Desplegar en dev (Portainer)
+### 5. Desplegar en dev (Portainer)
 
 - En cada push a un PR, la imagen `:dev` se actualiza
 - Portainer con webhook hace pull + redeploy del stack apuntando a `:dev`
 
-### 7. Desplegar en produccion
+### 6. Desplegar en produccion
 
-- Usar `:latest` o `:vX.Y.Z` en el docker-compose
+- Usar `:latest` o `:X.Y.Z` en el docker-compose
 - Cada release actualiza `:latest` automaticamente
 
 ## Configuracion del repositorio
