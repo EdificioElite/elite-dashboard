@@ -54,7 +54,7 @@ export default function DashboardPage() {
   const pisoParam = searchParams.get('piso');
   const viewingAs = user?.is_admin && pisoParam ? pisoParam : null;
 
-  const [preset, setPreset] = useState<Preset | null>('1a');
+  const [preset, setPreset] = useState<Preset | null>('7d');
   const [desdeInput, setDesdeInput] = useState('');
   const [hastaInput, setHastaInput] = useState('');
 
@@ -70,7 +70,7 @@ export default function DashboardPage() {
     }
   };
 
-  useEffect(() => { setRange('1a'); }, []);
+  useEffect(() => { setRange('7d'); }, []);
 
   const desde = desdeInput ? fromDatetimeLocal(desdeInput) : '';
   const hasta = hastaInput ? fromDatetimeLocal(hastaInput) : '';
@@ -135,10 +135,12 @@ export default function DashboardPage() {
 
         <div className="flex flex-col sm:flex-row sm:items-center gap-3 glass p-[26px]">
           <span className="eyebrow shrink-0">Periodo</span>
-          <div className="flex items-center gap-2 flex-wrap">
+          <div className="flex items-center gap-2 flex-wrap" role="tablist">
             {[{ key: '24h', label: '24h' }, { key: '7d', label: '7 dias' }, { key: '30d', label: '30 dias' }, { key: '3m', label: '3 meses' }, { key: '1a', label: '1 año' }].map((p) => (
               <button
                 key={p.key}
+                role="tab"
+                aria-selected={preset === p.key}
                 onClick={() => setRange(p.key)}
                 className={`text-[11px] font-medium uppercase tracking-[0.05em] px-2.5 py-1.5 rounded-md transition-colors ${preset === p.key ? 'text-cocoa bg-accent/12' : 'text-cocoa/40 hover:text-cocoa'}`}
               >{p.label}</button>
