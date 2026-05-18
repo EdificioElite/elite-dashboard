@@ -34,6 +34,6 @@ GitHub Actions (`.github/workflows/ci.yml`) ejecuta en cada push y PR a `main` y
 
 Release (`.github/workflows/release.yml`): workflow_dispatch manual con selector de version:
 - Crea PR de `dev` → `main` y activa auto-merge
-- Al mergear, publica tag, GitHub Release e imagen Docker `:vX.Y.Z` y `:latest`
+- Al mergear, publica tag, GitHub Release e imagen Docker `:X.Y.Z` y `:latest`
 
 Sync (`.github/workflows/sync.yml`): auto back-merge `main` → `dev` tras cada release

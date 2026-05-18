@@ -42,7 +42,7 @@ feat/x ──PR──▶ dev ──release manual──▶ main ──sync auto�
   3. Espera a que el PR se mergee (CI debe pasar: `backend`, `frontend`, `e2e`)
   4. Crea el tag `vX.Y.Z` en main
   5. Crea la GitHub Release
-  6. Publica la imagen Docker con tags `:vX.Y.Z` y `:latest`
+  6. Publica la imagen Docker con tags `:X.Y.Z` y `:latest`
 
 ### 4. Sincronizar main → dev
 
@@ -55,7 +55,7 @@ feat/x ──PR──▶ dev ──release manual──▶ main ──sync auto�
 
 ### 6. Desplegar en produccion
 
-- Usar `:latest` o `:vX.Y.Z` en el docker-compose
+- Usar `:latest` o `:X.Y.Z` en el docker-compose
 - Cada release actualiza `:latest` automaticamente
 
 ## Configuracion del repositorio
