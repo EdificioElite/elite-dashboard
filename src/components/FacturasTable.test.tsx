@@ -8,7 +8,7 @@ describe('FacturasTable', () => {
     expect(screen.getByText('No hay facturas disponibles')).toBeInTheDocument();
   });
 
-  it('renders facturas table', () => {
+  it('renders facturas with transposed layout', () => {
     render(
       <FacturasTable
         data={[
@@ -17,23 +17,30 @@ describe('FacturasTable', () => {
         ]}
       />
     );
-    expect(screen.getByText('80,50 €')).toBeInTheDocument();
-    expect(screen.getByText('90,00 €')).toBeInTheDocument();
-    expect(screen.getByText('100')).toBeInTheDocument();
-    expect(screen.getByText('50')).toBeInTheDocument();
+    expect(screen.getByText('kWh calor')).toBeInTheDocument();
+    expect(screen.getByText('kWh frio')).toBeInTheDocument();
+    expect(screen.getByText('kWh ACS')).toBeInTheDocument();
+    expect(screen.getByText('m³ ACS')).toBeInTheDocument();
+    expect(screen.getByText('Fijo')).toBeInTheDocument();
+    expect(screen.getByText('Calefacción')).toBeInTheDocument();
+    expect(screen.getByText('Refrigeración')).toBeInTheDocument();
+    expect(screen.getByText('ACS variable')).toBeInTheDocument();
+    expect(screen.getByText('ACS agua')).toBeInTheDocument();
+    expect(screen.getByText('Total')).toBeInTheDocument();
+    expect(screen.getByText('Consumos')).toBeInTheDocument();
+    expect(screen.getByText('Importes')).toBeInTheDocument();
   });
 
-  it('renders column headers', () => {
+  it('renders data values correctly', () => {
     render(
       <FacturasTable
         data={[{ id_factura: '1', periodo: '2026-01-01', importe_total: 80.5, importe_fijo: 20, kwh_calor: 100, kwh_frio: 30, kwh_acs: 50, m3_acs: 2.5, importe_calor: 40, importe_frio: 10, importe_variable_acs: 15, importe_acs: 30.5 }]}
       />
     );
-    expect(screen.getByText('Periodo')).toBeInTheDocument();
-    expect(screen.getByText('Calefacción')).toBeInTheDocument();
-    expect(screen.getByText('Refrigeración')).toBeInTheDocument();
-    expect(screen.getByText('ACS')).toBeInTheDocument();
-    expect(screen.getByText('m³ ACS')).toBeInTheDocument();
-    expect(screen.getByText('Importe')).toBeInTheDocument();
+    expect(screen.getByText('100 kWh')).toBeInTheDocument();
+    expect(screen.getByText('50 kWh')).toBeInTheDocument();
+    expect(screen.getByText('2,5 m³')).toBeInTheDocument();
+    expect(screen.getByText('80,50 €')).toBeInTheDocument();
+    expect(screen.getByText('20,00 €')).toBeInTheDocument();
   });
 });

@@ -79,7 +79,7 @@ router.get('/admin/aerotermia/facturas', authMiddleware, adminMiddleware, async 
       SELECT
         f.id_factura,
         f.piso,
-        f.fecha_factura_creacion AS periodo,
+        f.fecha_factura_inicio AS periodo,
         f.importe_vivienda_total AS importe_total,
         f.importe_vivienda_fijo AS importe_fijo,
         f.kwh_vivienda_calor AS kwh_calor,
@@ -93,7 +93,7 @@ router.get('/admin/aerotermia/facturas', authMiddleware, adminMiddleware, async 
         f.fecha_factura_inicio,
         f.fecha_factura_fin
       FROM facturas f
-      ORDER BY f.fecha_factura_creacion DESC, f.piso ASC
+      ORDER BY f.fecha_factura_inicio DESC, f.piso ASC
     `);
     res.json(result.rows);
   } catch (err) {
@@ -109,7 +109,7 @@ router.get('/admin/aerotermia/facturas/:id_factura', authMiddleware, adminMiddle
     const result = await query(`
       SELECT
         f.piso,
-        f.fecha_factura_creacion AS periodo,
+        f.fecha_factura_inicio AS periodo,
         f.kwh_vivienda_calor AS kwh_calor,
         f.kwh_vivienda_frio AS kwh_frio,
         f.kwh_vivienda_acs AS kwh_acs,

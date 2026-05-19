@@ -26,12 +26,12 @@ describe('Header', () => {
     });
   });
 
-  it('renders page nav links', () => {
+  it('does not render nav links in header (moved to sidebar)', () => {
     renderHeader();
-    expect(screen.getByText('Inicio')).toBeInTheDocument();
-    expect(screen.getByText('Aerotermia')).toBeInTheDocument();
-    expect(screen.getByText('Juntas')).toBeInTheDocument();
-    expect(screen.getByText('Contactos')).toBeInTheDocument();
+    expect(screen.queryByText('Inicio')).not.toBeInTheDocument();
+    expect(screen.queryByText('Aerotermia')).not.toBeInTheDocument();
+    expect(screen.queryByText('Juntas')).not.toBeInTheDocument();
+    expect(screen.queryByText('Contactos')).not.toBeInTheDocument();
   });
 
   it('renders logo', () => {
@@ -62,6 +62,7 @@ describe('Header', () => {
   it('does not show admin nav when user is not admin', () => {
     renderHeader();
     expect(screen.queryByText('Vecinos')).not.toBeInTheDocument();
+    expect(screen.queryByText('Usuarios')).not.toBeInTheDocument();
   });
 
   it('does not show admin nav in header when user is admin', () => {

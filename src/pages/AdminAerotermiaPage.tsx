@@ -332,7 +332,7 @@ export default function AdminAerotermiaPage() {
           </div>
 
           <div className="glass p-[26px]">
-            <SectionHeader id="charts" label="Distribucion por piso" icon="barChart" />
+            <SectionHeader id="charts" label="Distribución por piso" icon="barChart" />
             {sections.charts && (
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-[16px] mt-3">
                 <PieChartCard data={pieData} />
@@ -342,10 +342,10 @@ export default function AdminAerotermiaPage() {
           </div>
 
           <div className="glass p-[26px]">
-            <SectionHeader id="historico" label="Historico global" icon="activity" />
+            <SectionHeader id="historico" label="Histórico global" icon="activity" />
             {sections.historico && (
               <div className="mt-3">
-                <HistoricoCharts endpoint="/admin/aerotermia/consumos" title="Historico — Global" desde={desde} hasta={hasta} />
+                <HistoricoCharts endpoint="/admin/aerotermia/consumos" title="Histórico — Global" desde={desde} hasta={hasta} />
               </div>
             )}
           </div>
@@ -366,7 +366,7 @@ export default function AdminAerotermiaPage() {
                 <div className="glass p-[26px]">
                   <div className="flex items-center gap-3 mb-4">
                     <div className="w-7 h-7 rounded-lg flex items-center justify-center shrink-0" style={{ background: 'var(--accent)' }}>
-                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#fff8ee" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" /><circle cx="9" cy="7" r="4" /><path d="M23 21v-2a4 4 0 0 0-3-3.87" /><path d="M16 3.13a4 4 0 0 1 0 7.75" /></svg>
+                      <Icon name="users" size={14} className="text-cream" />
                     </div>
                     <span className="eyebrow">Dashboards de vecinos</span>
                   </div>

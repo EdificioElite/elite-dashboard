@@ -146,7 +146,8 @@ export default function VecinosPage() {
             <h1 className="font-display text-[40px] font-medium text-cocoa mt-1" style={{ letterSpacing: '-0.02em' }}>Vecinos</h1>
             <p className="text-sm text-cocoa/60 mt-1.5 max-w-lg">Gestiona los vecinos del edificio.</p>
           </div>
-          <button onClick={() => setShowForm(!showForm)} className="btn btn-secondary mb-4">
+          <button onClick={() => setShowForm(!showForm)} className={`btn ${showForm ? 'btn-ghost' : 'btn-primary'}`}>
+            <Icon name={showForm ? 'x' : 'plus'} size={14} />
             {showForm ? 'Cancelar' : 'Añadir vecino'}
           </button>
         </div>
@@ -219,9 +220,9 @@ export default function VecinosPage() {
               <Icon name="users" size={14} className="text-cream" />
             </div>
             <span className="eyebrow">Listado</span>
-            <div className="ml-auto flex items-center gap-2">
-              <Icon name="search" size={14} className="text-cocoa/30" />
-              <input type="text" value={search} onChange={e => setSearch(e.target.value)} placeholder="Buscar vecino..." className="bg-transparent border-none text-sm text-cocoa placeholder-cocoa/25 outline-none w-40" />
+            <div className="ml-auto flex items-center gap-2 px-3 py-1.5 rounded-lg bg-cocoa/[0.03] border border-cocoa/[0.06]">
+              <Icon name="search" size={13} className="text-cocoa/30" />
+              <input type="text" value={search} onChange={e => setSearch(e.target.value)} placeholder="Buscar vecino..." className="bg-transparent border-none text-sm text-cocoa placeholder-cocoa/25 outline-none w-36" />
             </div>
           </div>
 

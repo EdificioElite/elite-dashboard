@@ -32,9 +32,9 @@ test.describe('Admin Aerotermia Dashboard', () => {
   });
 
   test('shows all dashboard sections', async ({ page }) => {
-    await expect(page.getByText('Distribucion por vecino')).toBeVisible({ timeout: 15000 });
+    await expect(page.getByText('Distribución por vecino')).toBeVisible({ timeout: 15000 });
     await expect(page.getByText('Consumo por vecino')).toBeVisible();
-    await expect(page.getByText('Historico — Global')).toBeVisible();
+    await expect(page.getByText('Histórico — Global')).toBeVisible();
     await expect(page.getByRole('button', { name: 'Facturas' })).toBeVisible();
     await expect(page.getByText('Heatmap')).toBeVisible();
   });
@@ -77,8 +77,10 @@ test.describe('Admin Aerotermia Dashboard', () => {
     await expect(page).toHaveURL('/inicio');
   });
 
-  test('navigates to aerotermia from header', async ({ page }) => {
+  test('navigates to aerotermia from sidebar', async ({ page }) => {
     await page.goto('/admin/vecinos');
+    await page.waitForURL('/admin/vecinos');
+    await expect(page.getByText('Vecinos')).toBeVisible({ timeout: 10000 });
     await page.getByRole('button', { name: 'Aerotermia' }).first().click();
     await expect(page).toHaveURL('/admin/aerotermia');
   });

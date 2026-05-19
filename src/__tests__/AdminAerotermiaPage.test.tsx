@@ -59,9 +59,9 @@ describe('AdminAerotermiaPage', () => {
     mockApiFetch.mockResolvedValue([]);
     renderPage();
     await waitFor(() => {
-      expect(screen.getByText('Distribucion por vecino')).toBeInTheDocument();
+      expect(screen.getByText('Distribución por vecino')).toBeInTheDocument();
       expect(screen.getByText('Consumo por vecino')).toBeInTheDocument();
-      expect(screen.getByText('Historico — Global')).toBeInTheDocument();
+      expect(screen.getByText('Histórico — Global')).toBeInTheDocument();
       expect(screen.getAllByText('No hay facturas disponibles').length).toBeGreaterThan(0);
       expect(screen.getByText('No hay facturas electricas disponibles')).toBeInTheDocument();
     });

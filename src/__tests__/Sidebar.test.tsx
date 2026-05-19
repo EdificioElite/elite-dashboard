@@ -1,10 +1,17 @@
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, vi } from 'vitest';
 import { render } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import Sidebar from '../components/Sidebar';
 
+vi.mock('../store/auth', () => ({
+  useAuthStore: vi.fn((selector?: any) => {
+    const state = { user: { is_admin: true }, token: 'test-token', loading: false };
+    return selector ? selector(state) : state;
+  }),
+}));
+
 describe('Sidebar', () => {
-  it('renders admin and edificio sections', () => {
+  it('renders admin and edificio sections when admin', () => {
     const { getByText } = render(
       <MemoryRouter>
         <Sidebar />
