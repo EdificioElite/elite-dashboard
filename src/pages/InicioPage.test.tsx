@@ -41,7 +41,7 @@ describe('InicioPage', () => {
       </MemoryRouter>
     );
     expect(await screen.findByText('Proxima Junta de Vecinos')).toBeInTheDocument();
-    expect(screen.getByText('Junta extraordinaria Lunes 1 de Junio a las 19:00')).toBeInTheDocument();
+    expect(screen.getByText('Proximamente. Fecha y hora por determinar.')).toBeInTheDocument();
   });
 
   it('renders En vivo consumption card', async () => {

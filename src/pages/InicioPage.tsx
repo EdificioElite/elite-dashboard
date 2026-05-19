@@ -43,7 +43,7 @@ const MEETING_CONTENT = {
   title: 'Proxima Junta de Vecinos',
   icon: 'calendar' as const,
   color: '#b88a5e',
-  text: 'Junta extraordinaria Lunes 1 de Junio a las 19:00',
+  text: 'Proximamente. Fecha y hora por determinar.',
 };
 
 function InfoCard({ title, icon, color, children }: { title: string; icon: string; color: string; children: React.ReactNode }) {
