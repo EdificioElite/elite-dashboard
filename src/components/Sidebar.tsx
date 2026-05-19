@@ -15,14 +15,14 @@ export default function Sidebar() {
 
   return (
     <aside
-      className="hidden md:flex flex-col w-[220px] shrink-0 border-r border-cocoa/6 bg-cream/60 backdrop-blur-sm min-h-screen sticky top-[52px]"
+      className="hidden lg:flex flex-col w-[220px] shrink-0 border-r border-cocoa/6 bg-cream/60 backdrop-blur-sm min-h-screen sticky top-[52px]"
       style={{ height: 'calc(100vh - 52px)' }}
       role="navigation"
       aria-label="Navegación principal"
     >
       <nav className="flex flex-col gap-6 p-4 pt-6">
-        {isAdmin && <Section label="Admin" items={ADMIN_NAV} isActive={isActive} onClick={(p) => navigate(p)} />}
         <Section label="Edificio" items={EDIFICIO_NAV} isActive={isActive} onClick={(p) => navigate(p)} />
+        {isAdmin && <Section label="Admin" items={ADMIN_NAV} isActive={isActive} onClick={(p) => navigate(p)} />}
       </nav>
     </aside>
   );

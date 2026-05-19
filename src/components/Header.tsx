@@ -80,7 +80,7 @@ export default function Header() {
       <div className="flex items-center gap-3">
         <button
           onClick={() => setMobileNavOpen(true)}
-          className="md:hidden p-2 rounded-lg text-cocoa/50 hover:text-cocoa bg-transparent border-none cursor-pointer"
+          className="lg:hidden p-2 rounded-lg text-cocoa/50 hover:text-cocoa bg-transparent border-none cursor-pointer"
           aria-label="Abrir menú"
           style={{ minWidth: '44px', minHeight: '44px' }}
         >
@@ -135,12 +135,12 @@ export default function Header() {
       {mobileNavOpen && createPortal(
         <>
           <div
-            className="fixed inset-0 z-[70] bg-black/50 md:hidden"
+            className="fixed inset-0 z-[70] bg-black/50 lg:hidden"
             onClick={() => setMobileNavOpen(false)}
             aria-hidden="true"
           />
           <div
-            className="fixed left-0 top-0 bottom-0 z-[80] w-[260px] border-r border-cocoa/10 p-4 flex flex-col gap-1 md:hidden"
+            className="fixed left-0 top-0 bottom-0 z-[80] w-[260px] border-r border-cocoa/10 p-4 flex flex-col gap-1 lg:hidden"
             style={{ animation: 'slideInLeft 250ms ease-out', background: '#FFFFFF', boxShadow: '8px 0 30px rgba(0,0,0,.15)' }}
             role="dialog"
             aria-modal="true"
