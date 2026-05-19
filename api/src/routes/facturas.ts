@@ -7,7 +7,9 @@ const router = Router();
 
 router.get('/facturas', authMiddleware, async (req: Request, res: Response) => {
   try {
-    const vecinoPiso = req.user!.vecinoPiso;
+    const pisoQuery = req.query.piso as string | undefined;
+    const isAdmin = req.user!.isAdmin;
+    const vecinoPiso = (isAdmin && pisoQuery) ? pisoQuery : req.user!.vecinoPiso;
 
     const result = await query(
       `SELECT

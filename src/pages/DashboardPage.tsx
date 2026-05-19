@@ -77,12 +77,9 @@ export default function DashboardPage() {
     async function fetchData() {
       try {
         const pisoQs = viewingAs ? `?piso=${encodeURIComponent(viewingAs)}` : '';
-        const facturasEndpoint = viewingAs
-          ? `/admin/vecinos/${viewingAs}/facturas`
-          : '/facturas';
         const [actual, facturasData] = await Promise.all([
           apiFetch<Consumo | null>(`/consumo-actual${pisoQs}`),
-          apiFetch<Factura[]>(facturasEndpoint),
+          apiFetch<Factura[]>(`/facturas${pisoQs}`),
         ]);
         setConsumoActual(actual);
         setFacturas(facturasData);
