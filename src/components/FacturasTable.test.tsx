@@ -43,4 +43,22 @@ describe('FacturasTable', () => {
     expect(screen.getByText('80,50 €')).toBeInTheDocument();
     expect(screen.getByText('20,00 €')).toBeInTheDocument();
   });
+
+  it('renders columns in chronological order (oldest left)', () => {
+    render(
+      <FacturasTable
+        data={[
+          { id_factura: '2', periodo: '2026-08-01', importe_total: 90.0, importe_fijo: 20, kwh_calor: 110, kwh_frio: 25, kwh_acs: 55, m3_acs: 2.8, importe_calor: 45, importe_frio: 8, importe_variable_acs: 18, importe_acs: 37.0 },
+          { id_factura: '1', periodo: '2026-06-01', importe_total: 80.5, importe_fijo: 20, kwh_calor: 100, kwh_frio: 30, kwh_acs: 50, m3_acs: 2.5, importe_calor: 40, importe_frio: 10, importe_variable_acs: 15, importe_acs: 30.5 },
+        ]}
+      />
+    );
+    const headers = screen.getAllByRole('columnheader');
+    const headerTexts = headers.map((h) => h.textContent).filter(Boolean) as string[];
+    const junIdx = headerTexts.findIndex((t) => t.toLowerCase().includes('jun'));
+    const agoIdx = headerTexts.findIndex((t) => t.toLowerCase().includes('ago'));
+    expect(junIdx).toBeGreaterThan(-1);
+    expect(agoIdx).toBeGreaterThan(-1);
+    expect(junIdx).toBeLessThan(agoIdx);
+  });
 });
