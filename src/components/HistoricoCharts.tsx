@@ -5,6 +5,7 @@ import {
 import { apiFetch } from '../api/client';
 import SegmentedControl from './SegmentedControl';
 import ChartTooltip from './ChartTooltip';
+import Icon from './Icon';
 
 interface Consumo {
   timestamp: string;
@@ -175,9 +176,7 @@ export default function HistoricoCharts({ endpoint, title, desde: extDesde, hast
       <div className="flex items-center justify-between mb-4 flex-wrap gap-3">
         <div className="flex items-center gap-3">
           <div className="w-7 h-7 rounded-lg flex items-center justify-center shrink-0" style={{ background: 'var(--accent)' }}>
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#fff8ee" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-              <path d="M3 3v18h18"/><path d="m19 9-5 5-4-4-3 3"/>
-            </svg>
+            <Icon name="chart" size={14} className="text-cream" />
           </div>
           <span className="eyebrow">{title || 'Historico'}</span>
         </div>

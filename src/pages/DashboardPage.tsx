@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import { useSearchParams, Link } from 'react-router-dom';
 import { useAuthStore } from '../store/auth';
 import { apiFetch } from '../api/client';
@@ -9,6 +9,7 @@ import HistoricoCharts from '../components/HistoricoCharts';
 import FacturasChart from '../components/FacturasChart';
 import FacturasTable from '../components/FacturasTable';
 import Icon from '../components/Icon';
+import { toDatetimeLocal, fromDatetimeLocal, applyPreset, Preset } from '../lib/dates';
 
 interface Consumo {
   timestamp: string;
@@ -42,14 +43,6 @@ interface Factura {
   importe_acs: number;
 }
 
-const SECTION_NAV = [
-  { label: 'En vivo', target: 'envivo' },
-  { label: 'Calefacción', target: 'calor' },
-  { label: 'Refrigeración', target: 'frio' },
-  { label: 'ACS', target: 'acs' },
-  { label: 'Facturas', target: 'facturas' },
-];
-
 export default function DashboardPage() {
   const { user } = useAuthStore();
   const [searchParams] = useSearchParams();
@@ -61,13 +54,26 @@ export default function DashboardPage() {
   const pisoParam = searchParams.get('piso');
   const viewingAs = user?.is_admin && pisoParam ? pisoParam : null;
 
+  const [preset, setPreset] = useState<Preset | null>('1a');
+  const [desdeInput, setDesdeInput] = useState('');
+  const [hastaInput, setHastaInput] = useState('');
+
   const { saludo } = greeting();
   const nombre = viewingAs ? `Piso ${viewingAs}` : (user?.vecino_piso || user?.email?.split('@')[0] || 'vecino');
 
-  const scrollTo = (id: string) => {
-    const el = document.getElementById(id);
-    if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  const setRange = (p: string) => {
+    setPreset(p as Preset);
+    if (p) {
+      const { desde, hasta } = applyPreset(p as Preset);
+      setDesdeInput(toDatetimeLocal(desde));
+      setHastaInput(toDatetimeLocal(hasta));
+    }
   };
+
+  const desde = desdeInput ? fromDatetimeLocal(desdeInput) : '';
+  const hasta = hastaInput ? fromDatetimeLocal(hastaInput) : '';
+
+  useEffect(() => { setRange('1a'); }, []);
 
   useEffect(() => {
     async function fetchData() {
@@ -90,6 +96,16 @@ export default function DashboardPage() {
     }
     fetchData();
   }, [viewingAs]);
+
+  const filteredFacturas = useMemo(() => {
+    if (!desde || !hasta) return facturas;
+    const desdeD = new Date(desde).getTime();
+    const hastaD = new Date(hasta).getTime();
+    return facturas.filter((f) => {
+      const t = new Date(f.periodo).getTime();
+      return t >= desdeD && t <= hastaD;
+    });
+  }, [facturas, desde, hasta]);
 
   if (loading) {
     return (
@@ -117,35 +133,47 @@ export default function DashboardPage() {
           </h1>
         </div>
 
-        <div className="flex items-center gap-2 flex-wrap">
-          {SECTION_NAV.map((item) => (
-            <button
-              key={item.target}
-              onClick={() => scrollTo(item.target)}
-              className="text-[11px] font-medium uppercase tracking-[0.05em] text-cocoa/40 hover:text-cocoa hover:bg-accent/8 px-2.5 py-1.5 rounded-md transition-colors"
-            >
-              {item.label}
-            </button>
-          ))}
+        <div className="flex flex-col sm:flex-row sm:items-center gap-3 glass p-[26px]">
+          <span className="eyebrow shrink-0">Periodo</span>
+          <div className="flex items-center gap-2 flex-wrap" role="tablist">
+            {[{ key: '24h', label: '24h' }, { key: '7d', label: '7 dias' }, { key: '30d', label: '30 dias' }, { key: '3m', label: '3 meses' }, { key: '1a', label: '1 año' }].map((p) => (
+              <button
+                key={p.key}
+                role="tab"
+                aria-selected={preset === p.key}
+                onClick={() => setRange(p.key)}
+                className={`text-[11px] font-medium uppercase tracking-[0.05em] px-2.5 py-1.5 rounded-md transition-colors ${preset === p.key ? 'text-cocoa bg-accent/12' : 'text-cocoa/40 hover:text-cocoa'}`}
+              >{p.label}</button>
+            ))}
+          </div>
+          <div className="flex items-center gap-2">
+            <label className="text-[11px] font-medium uppercase tracking-wider text-cocoa/40 shrink-0">Desde:</label>
+            <input type="datetime-local" value={desdeInput} onChange={(e) => { setDesdeInput(e.target.value); setPreset(null); }} className="input-card text-xs py-1.5 px-3" />
+          </div>
+          <div className="flex items-center gap-2">
+            <label className="text-[11px] font-medium uppercase tracking-wider text-cocoa/40 shrink-0">Hasta:</label>
+            <input type="datetime-local" value={hastaInput} onChange={(e) => { setHastaInput(e.target.value); setPreset(null); }} className="input-card text-xs py-1.5 px-3" />
+          </div>
         </div>
 
         <div className="stagger flex flex-col gap-[22px]">
           <ConsumoCard data={consumoActual} />
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
-            <HistoricoCharts
-              endpoint={viewingAs ? `/admin/vecinos/${viewingAs}` : undefined}
-              title={viewingAs ? `Historico — Piso ${viewingAs}` : undefined}
-            />
-            <div id="facturas" className="scroll-mt-20">
-              <FacturasChart data={facturas} />
-            </div>
+          <HistoricoCharts
+            endpoint={viewingAs ? `/admin/vecinos/${viewingAs}` : undefined}
+            title={viewingAs ? `Historico — Piso ${viewingAs}` : undefined}
+            desde={desde}
+            hasta={hasta}
+          />
+          <div id="facturas" className="scroll-mt-20">
+            <FacturasChart data={filteredFacturas} />
           </div>
-          <FacturasTable data={facturas} />
+          <FacturasTable data={filteredFacturas} />
 
-          <button
-            onClick={() => setShowHA(!showHA)}
-            className="glass glass-hover p-5 flex items-center justify-between w-full text-left"
-          >
+          <div className="glass p-[26px]">
+            <button
+              onClick={() => setShowHA(!showHA)}
+              className="flex items-center justify-between w-full text-left bg-transparent border-none cursor-pointer p-0"
+            >
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 rounded-lg bg-[#1abcfe]/10 flex items-center justify-center overflow-hidden">
                 <img src="/images/home-assistant-icon.png" alt="Home Assistant" className="w-6 h-6" />
@@ -159,10 +187,10 @@ export default function DashboardPage() {
           </button>
 
           {showHA && (
-            <section className="glass p-[26px]">
+            <div className="mt-5 pt-5 border-t border-cocoa/6">
               <p className="text-cocoa/70 text-sm leading-relaxed mb-4">
-                Lleva los datos de tu aerotermia a Home Assistant para automatizar tu casa. La integración{' '}
-                <strong>Elite Climate</strong> expone los consumos de calefacción, refrigeración, ACS, temperaturas
+                Lleva los datos de tu aerotermia a Home Assistant para automatizar tu casa. La integracion{' '}
+                <strong>Elite Climate</strong> expone los consumos de calefaccion, refrigeracion, ACS, temperaturas
                 y potencia en tiempo real como entidades en Home Assistant.
               </p>
 
@@ -195,8 +223,9 @@ export default function DashboardPage() {
               <p className="text-cocoa/30 text-[11px] mt-4">
                 Requiere Home Assistant 2024.1 o superior y HACS instalado.
               </p>
-            </section>
+            </div>
           )}
+          </div>
         </div>
       </main>
     </div>

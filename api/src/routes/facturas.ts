@@ -12,7 +12,7 @@ router.get('/facturas', authMiddleware, async (req: Request, res: Response) => {
     const result = await query(
       `SELECT
         f.id_factura,
-        f.fecha_factura_creacion AS periodo,
+        f.fecha_factura_inicio AS periodo,
         f.importe_vivienda_total AS importe_total,
         f.importe_vivienda_fijo AS importe_fijo,
         f.kwh_vivienda_calor AS kwh_calor,
@@ -27,7 +27,7 @@ router.get('/facturas', authMiddleware, async (req: Request, res: Response) => {
         f.fecha_factura_fin
       FROM facturas f
       WHERE f.piso = $1
-      ORDER BY f.fecha_factura_creacion DESC`,
+      ORDER BY f.fecha_factura_inicio DESC`,
       [vecinoPiso]
     );
 

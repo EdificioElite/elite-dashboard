@@ -1,15 +1,10 @@
 import { useState, useEffect, useRef } from 'react';
+import { createPortal } from 'react-dom';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuthStore } from '../store/auth';
+import { ADMIN_NAV, EDIFICIO_NAV } from '../lib/nav';
 import Icon from './Icon';
 import SelfPasswordModal from './SelfPasswordModal';
-
-const USER_NAV = [
-  { label: 'Inicio', path: '/inicio' },
-  { label: 'Aerotermia', path: '/aerotermia' },
-  { label: 'Juntas', path: '/juntas' },
-  { label: 'Contactos', path: '/contactos' },
-];
 
 export default function Header() {
   const { user, logout } = useAuthStore();
@@ -80,24 +75,6 @@ export default function Header() {
             className="h-7 w-auto"
           />
         </button>
-
-        {!isAdmin && (
-          <nav className="hidden md:flex items-center gap-1" role="navigation" aria-label="Navegación principal">
-            {USER_NAV.map((item) => (
-              <button
-                key={item.path}
-                onClick={() => navigate(item.path)}
-                className={`text-[11.5px] font-semibold uppercase tracking-[0.05em] px-3 py-1.5 rounded-md transition-colors ${
-                  isActive(item.path)
-                    ? 'text-cocoa bg-accent/12'
-                    : 'text-cocoa/45 hover:text-cocoa hover:bg-cocoa/4'
-                }`}
-              >
-                {item.label}
-              </button>
-            ))}
-          </nav>
-        )}
       </div>
 
       <div className="flex items-center gap-3">
@@ -154,17 +131,17 @@ export default function Header() {
         </div>
       </div>
 
-      {/* Mobile nav drawer */}
-      {mobileNavOpen && (
+      {/* Mobile nav drawer — rendered via portal to escape header stacking context */}
+      {mobileNavOpen && createPortal(
         <>
           <div
-            className="fixed inset-0 z-[70] bg-black/25 backdrop-blur-sm md:hidden"
+            className="fixed inset-0 z-[70] bg-black/50 md:hidden"
             onClick={() => setMobileNavOpen(false)}
             aria-hidden="true"
           />
           <div
-            className="fixed left-0 top-0 bottom-0 z-[80] w-[260px] bg-cream border-r border-cocoa/6 p-4 flex flex-col gap-1 md:hidden"
-            style={{ animation: 'slideInLeft 250ms ease-out' }}
+            className="fixed left-0 top-0 bottom-0 z-[80] w-[260px] border-r border-cocoa/10 p-4 flex flex-col gap-1 md:hidden"
+            style={{ animation: 'slideInLeft 250ms ease-out', background: '#FFFFFF', boxShadow: '8px 0 30px rgba(0,0,0,.15)' }}
             role="dialog"
             aria-label="Menú de navegación"
           >
@@ -179,7 +156,26 @@ export default function Header() {
                 <Icon name="x" size={18} />
               </button>
             </div>
-            {USER_NAV.map((item) => (
+            {isAdmin && (
+              <>
+                <div className="eyebrow px-3 pt-3 pb-1 mt-2 border-t border-cocoa/6">Admin</div>
+                {ADMIN_NAV.map((item) => (
+                  <button
+                    key={item.path}
+                    onClick={() => { navigate(item.path); setMobileNavOpen(false); }}
+                    className={`w-full text-left px-3 py-2.5 text-[14px] font-medium rounded-lg transition-colors ${
+                      isActive(item.path)
+                        ? 'text-cocoa bg-accent/12 font-semibold'
+                        : 'text-cocoa/55 hover:text-cocoa hover:bg-cocoa/4'
+                    }`}
+                  >
+                    {item.label}
+                  </button>
+                ))}
+                <div className="eyebrow px-3 pt-3 pb-1 mt-1">Edificio</div>
+              </>
+            )}
+            {EDIFICIO_NAV.map((item) => (
               <button
                 key={item.path}
                 onClick={() => { navigate(item.path); setMobileNavOpen(false); }}
@@ -193,7 +189,8 @@ export default function Header() {
               </button>
             ))}
           </div>
-        </>
+        </>,
+        document.body
       )}
 
       {showPasswordModal && <SelfPasswordModal onClose={() => setShowPasswordModal(false)} />}

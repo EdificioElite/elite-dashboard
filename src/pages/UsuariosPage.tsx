@@ -209,18 +209,21 @@ export default function UsuariosPage() {
                         {isOnline(u.ultima_conexion) ? (
                           <>
                             <span className="live-dot" title="Online" />
-                            <span className="text-[11px] text-sage font-medium">Ahora</span>
+                            <span className="text-[11px] text-sage font-medium">Online</span>
                           </>
                         ) : (
-                          <span className="inline-block w-2 h-2 rounded-full shrink-0" style={{ background: '#ccc' }} title="Offline" />
+                          <>
+                            <span className="inline-block w-2 h-2 rounded-full shrink-0" style={{ background: '#ccc' }} title="Offline" />
+                            <span className="text-[11px] text-cocoa/40 font-medium">Offline</span>
+                          </>
                         )}
                         {u.ultima_consulta_ha ? (
-                          <span className="text-green-600 cursor-help" title={formatHaTooltip(u.ultima_consulta_ha) || undefined}>
-                            <Icon name="check" size={13} />
+                          <span className="flex items-center gap-1 ml-1 text-green-600 cursor-help" title={formatHaTooltip(u.ultima_consulta_ha) || undefined}>
+                            <Icon name="wifi" size={12} />
                           </span>
                         ) : (
-                          <span className="text-red-400" title="No ha usado Home Assistant">
-                            <Icon name="x" size={13} />
+                          <span className="ml-1" title="No ha usado Home Assistant">
+                            <Icon name="wifi" size={12} className="text-cocoa/20" />
                           </span>
                         )}
                       </span>

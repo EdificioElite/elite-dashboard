@@ -36,14 +36,11 @@ function ProtectedRoute({ children, adminOnly = false }: { children: React.React
 }
 
 function AuthLayout({ children }: { children: React.ReactNode }) {
-  const { user } = useAuthStore();
-  const isAdmin = user?.is_admin;
-
   return (
     <>
       <Header />
       <div className="flex">
-        {isAdmin && <Sidebar />}
+        <Sidebar />
         <main className="flex-1 min-w-0">
           {children}
         </main>
