@@ -17,21 +17,35 @@ describe('ContactosPage', () => {
       </MemoryRouter>
     );
     expect(screen.getByText('Administrador de Fincas')).toBeInTheDocument();
-    expect(screen.getByText('Jose Maria Lopez')).toBeInTheDocument();
-    expect(screen.getByText('+34 666 111 222')).toBeInTheDocument();
-    expect(screen.getByText('josemaria@administracionfincas.es')).toBeInTheDocument();
+    expect(screen.getByText('Martin y Lorente — Juanjo Montalvo')).toBeInTheDocument();
+    expect(screen.getByText('juanjomontalvo@martinylorente.es')).toBeInTheDocument();
+    expect(screen.getByText('www.martinylorente.es')).toBeInTheDocument();
+    expect(screen.getByText('91.796.00.43 / 91.505.53.10 / 91.060.79.46')).toBeInTheDocument();
   });
 
-  it('renders Mantenedor card', () => {
+  it('renders Ness card', () => {
     render(
       <MemoryRouter>
         <ContactosPage />
       </MemoryRouter>
     );
-    expect(screen.getByText('Mantenedor de Climatizacion')).toBeInTheDocument();
-    expect(screen.getByText('Climatizacion Elite S.L.')).toBeInTheDocument();
-    expect(screen.getByText('+34 666 333 444')).toBeInTheDocument();
-    expect(screen.getByText('mantenimiento@climatizacionelite.es')).toBeInTheDocument();
+    expect(screen.getByText('Mantenimiento Aerotermia')).toBeInTheDocument();
+    expect(screen.getByText('Ness')).toBeInTheDocument();
+    expect(screen.getByText('+34 602 22 52 97')).toBeInTheDocument();
+    expect(screen.getByText('+34 917 99 26 88')).toBeInTheDocument();
+    expect(screen.getByText('clientes@ness.es')).toBeInTheDocument();
+  });
+
+  it('renders Cristina card', () => {
+    render(
+      <MemoryRouter>
+        <ContactosPage />
+      </MemoryRouter>
+    );
+    expect(screen.getByText('Limpieza y Paqueteria')).toBeInTheDocument();
+    expect(screen.getByText('Cristina')).toBeInTheDocument();
+    expect(screen.getByText('info@cnlimpiezas.com')).toBeInTheDocument();
+    expect(screen.getByText('634 466 849')).toBeInTheDocument();
   });
 
   it('renders email as mailto links', () => {
@@ -42,7 +56,7 @@ describe('ContactosPage', () => {
     );
     const links = screen.getAllByRole('link');
     const emails = links.filter((l) => l.getAttribute('href')?.startsWith('mailto:'));
-    expect(emails.length).toBe(2);
+    expect(emails.length).toBe(3);
   });
 
   it('renders phone as tel links', () => {
@@ -53,6 +67,6 @@ describe('ContactosPage', () => {
     );
     const links = screen.getAllByRole('link');
     const tels = links.filter((l) => l.getAttribute('href')?.startsWith('tel:'));
-    expect(tels.length).toBe(2);
+    expect(tels.length).toBe(4);
   });
 });
