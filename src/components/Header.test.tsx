@@ -30,6 +30,8 @@ describe('Header', () => {
     renderHeader();
     expect(screen.queryByText('Inicio')).not.toBeInTheDocument();
     expect(screen.queryByText('Aerotermia')).not.toBeInTheDocument();
+    expect(screen.queryByText('Juntas')).not.toBeInTheDocument();
+    expect(screen.queryByText('Contactos')).not.toBeInTheDocument();
   });
 
   it('renders logo', () => {
@@ -60,6 +62,7 @@ describe('Header', () => {
   it('does not show admin nav when user is not admin', () => {
     renderHeader();
     expect(screen.queryByText('Vecinos')).not.toBeInTheDocument();
+    expect(screen.queryByText('Usuarios')).not.toBeInTheDocument();
   });
 
   it('does not show admin nav in header when user is admin', () => {

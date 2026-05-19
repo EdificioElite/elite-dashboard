@@ -20,8 +20,8 @@ describe('ConsumoVecinosChart', () => {
 
   it('renders legend items', () => {
     render(<ConsumoVecinosChart data={mockData} />);
-    expect(screen.getByText('Calefaccion')).toBeInTheDocument();
-    expect(screen.getByText('Refrigeracion')).toBeInTheDocument();
+    expect(screen.getByText('Calefacción')).toBeInTheDocument();
+    expect(screen.getByText('Refrigeración')).toBeInTheDocument();
     expect(screen.getByText('ACS')).toBeInTheDocument();
   });
 });

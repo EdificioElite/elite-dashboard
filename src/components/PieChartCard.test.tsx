@@ -16,7 +16,7 @@ describe('PieChartCard', () => {
 
   it('renders title', () => {
     render(<PieChartCard data={mockData} />);
-    expect(screen.getByText('Distribucion por vecino')).toBeInTheDocument();
+    expect(screen.getByText('Distribución por vecino')).toBeInTheDocument();
   });
 
   it('renders vecino names in legend', () => {

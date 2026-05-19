@@ -178,7 +178,7 @@ export default function HistoricoCharts({ endpoint, title, desde: extDesde, hast
           <div className="w-7 h-7 rounded-lg flex items-center justify-center shrink-0" style={{ background: 'var(--accent)' }}>
             <Icon name="chart" size={14} className="text-cream" />
           </div>
-          <span className="eyebrow">{title || 'Historico'}</span>
+          <span className="eyebrow">{title || 'Histórico'}</span>
         </div>
         {!external && <SegmentedControl options={PRESETS} value={preset ?? ''} onChange={(k) => setRange(k)} />}
       </div>

@@ -332,7 +332,7 @@ export default function AdminAerotermiaPage() {
           </div>
 
           <div className="glass p-[26px]">
-            <SectionHeader id="charts" label="Distribucion por piso" icon="barChart" />
+            <SectionHeader id="charts" label="Distribución por piso" icon="barChart" />
             {sections.charts && (
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-[16px] mt-3">
                 <PieChartCard data={pieData} />
@@ -342,10 +342,10 @@ export default function AdminAerotermiaPage() {
           </div>
 
           <div className="glass p-[26px]">
-            <SectionHeader id="historico" label="Historico global" icon="activity" />
+            <SectionHeader id="historico" label="Histórico global" icon="activity" />
             {sections.historico && (
               <div className="mt-3">
-                <HistoricoCharts endpoint="/admin/aerotermia/consumos" title="Historico — Global" desde={desde} hasta={hasta} />
+                <HistoricoCharts endpoint="/admin/aerotermia/consumos" title="Histórico — Global" desde={desde} hasta={hasta} />
               </div>
             )}
           </div>

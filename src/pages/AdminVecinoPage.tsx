@@ -138,7 +138,7 @@ export default function AdminVecinoPage() {
           </div>
 
           {/* Chart */}
-          <HistoricoCharts endpoint={`/admin/vecinos/${piso}`} title={`Historico — Piso ${piso}`} />
+          <HistoricoCharts endpoint={`/admin/vecinos/${piso}`} title={`Histórico — Piso ${piso}`} />
 
           {/* Facturas */}
           <FacturasTable data={facturas} />

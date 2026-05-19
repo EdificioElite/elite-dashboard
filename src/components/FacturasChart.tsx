@@ -120,13 +120,13 @@ export default function FacturasChart({ data, headerRight }: { data: Factura[]; 
           <span className="w-2 h-2 rounded-sm" style={{ background: '#A6754B' }} /> Fijo
         </span>
         <span className="flex items-center gap-1.5">
-          <span className="w-2 h-2 rounded-sm" style={{ background: '#B53228' }} /> Calefaccion
+          <span className="w-2 h-2 rounded-sm" style={{ background: '#B53228' }} /> Calefacción
         </span>
         <span className="flex items-center gap-1.5">
-          <span className="w-2 h-2 rounded-sm" style={{ background: '#4A7A8C' }} /> Refrigeracion
+          <span className="w-2 h-2 rounded-sm" style={{ background: '#4A7A8C' }} /> Refrigeración
         </span>
         <span className="flex items-center gap-1.5">
-          <span className="w-2 h-2 rounded-sm" style={{ background: '#5D7A4A' }} /> ACS (energia)
+          <span className="w-2 h-2 rounded-sm" style={{ background: '#5D7A4A' }} /> ACS (energía)
         </span>
         <span className="flex items-center gap-1.5">
           <span className="w-2 h-2 rounded-sm" style={{ background: '#2D8A4A' }} /> ACS (agua)

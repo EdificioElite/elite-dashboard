@@ -143,6 +143,7 @@ export default function Header() {
             className="fixed left-0 top-0 bottom-0 z-[80] w-[260px] border-r border-cocoa/10 p-4 flex flex-col gap-1 md:hidden"
             style={{ animation: 'slideInLeft 250ms ease-out', background: '#FFFFFF', boxShadow: '8px 0 30px rgba(0,0,0,.15)' }}
             role="dialog"
+            aria-modal="true"
             aria-label="Menú de navegación"
           >
             <div className="flex items-center justify-between mb-3">

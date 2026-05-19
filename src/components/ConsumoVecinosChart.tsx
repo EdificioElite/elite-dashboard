@@ -38,8 +38,8 @@ export default function ConsumoVecinosChart({ data }: { data: VecinoConsumo[] })
       </div>
 
       <div className="flex items-center gap-4 mb-4 text-[11px] text-cocoa/40">
-        <span className="flex items-center gap-1.5"><span className="w-2 h-2 rounded-sm" style={{ background: '#B53228' }} /> Calefaccion</span>
-        <span className="flex items-center gap-1.5"><span className="w-2 h-2 rounded-sm" style={{ background: '#4A7A8C' }} /> Refrigeracion</span>
+        <span className="flex items-center gap-1.5"><span className="w-2 h-2 rounded-sm" style={{ background: '#B53228' }} /> Calefacción</span>
+        <span className="flex items-center gap-1.5"><span className="w-2 h-2 rounded-sm" style={{ background: '#4A7A8C' }} /> Refrigeración</span>
         <span className="flex items-center gap-1.5"><span className="w-2 h-2 rounded-sm" style={{ background: '#5D7A4A' }} /> ACS</span>
       </div>
 

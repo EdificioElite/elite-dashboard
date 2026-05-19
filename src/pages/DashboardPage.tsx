@@ -55,8 +55,8 @@ export default function DashboardPage() {
   const viewingAs = user?.is_admin && pisoParam ? pisoParam : null;
 
   const [preset, setPreset] = useState<Preset | null>('1a');
-  const [desdeInput, setDesdeInput] = useState('');
-  const [hastaInput, setHastaInput] = useState('');
+  const [desdeInput, setDesdeInput] = useState(() => toDatetimeLocal(applyPreset('1a').desde));
+  const [hastaInput, setHastaInput] = useState(() => toDatetimeLocal(applyPreset('1a').hasta));
 
   const { saludo } = greeting();
   const nombre = viewingAs ? `Piso ${viewingAs}` : (user?.vecino_piso || user?.email?.split('@')[0] || 'vecino');
@@ -72,8 +72,6 @@ export default function DashboardPage() {
 
   const desde = desdeInput ? fromDatetimeLocal(desdeInput) : '';
   const hasta = hastaInput ? fromDatetimeLocal(hastaInput) : '';
-
-  useEffect(() => { setRange('1a'); }, []);
 
   useEffect(() => {
     async function fetchData() {
@@ -135,12 +133,11 @@ export default function DashboardPage() {
 
         <div className="flex flex-col sm:flex-row sm:items-center gap-3 glass p-[26px]">
           <span className="eyebrow shrink-0">Periodo</span>
-          <div className="flex items-center gap-2 flex-wrap" role="tablist">
+          <div className="flex items-center gap-2 flex-wrap" role="group" aria-label="Presets de periodo">
             {[{ key: '24h', label: '24h' }, { key: '7d', label: '7 dias' }, { key: '30d', label: '30 dias' }, { key: '3m', label: '3 meses' }, { key: '1a', label: '1 año' }].map((p) => (
               <button
                 key={p.key}
-                role="tab"
-                aria-selected={preset === p.key}
+                aria-pressed={preset === p.key}
                 onClick={() => setRange(p.key)}
                 className={`text-[11px] font-medium uppercase tracking-[0.05em] px-2.5 py-1.5 rounded-md transition-colors ${preset === p.key ? 'text-cocoa bg-accent/12' : 'text-cocoa/40 hover:text-cocoa'}`}
               >{p.label}</button>
@@ -160,7 +157,7 @@ export default function DashboardPage() {
           <ConsumoCard data={consumoActual} />
           <HistoricoCharts
             endpoint={viewingAs ? `/admin/vecinos/${viewingAs}` : undefined}
-            title={viewingAs ? `Historico — Piso ${viewingAs}` : undefined}
+            title={viewingAs ? `Histórico — Piso ${viewingAs}` : undefined}
             desde={desde}
             hasta={hasta}
           />
@@ -189,8 +186,8 @@ export default function DashboardPage() {
           {showHA && (
             <div className="mt-5 pt-5 border-t border-cocoa/6">
               <p className="text-cocoa/70 text-sm leading-relaxed mb-4">
-                Lleva los datos de tu aerotermia a Home Assistant para automatizar tu casa. La integracion{' '}
-                <strong>Elite Climate</strong> expone los consumos de calefaccion, refrigeracion, ACS, temperaturas
+                Lleva los datos de tu aerotermia a Home Assistant para automatizar tu casa. La integración{' '}
+                <strong>Elite Climate</strong> expone los consumos de calefacción, refrigeración, ACS, temperaturas
                 y potencia en tiempo real como entidades en Home Assistant.
               </p>
 

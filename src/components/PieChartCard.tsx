@@ -37,7 +37,7 @@ export default function PieChartCard({ data }: { data: PieSlice[] }) {
           <div className="w-7 h-7 rounded-lg flex items-center justify-center shrink-0" style={{ background: 'var(--accent)' }}>
             <Icon name="pieChart" size={14} className="text-cream" />
           </div>
-          <span className="eyebrow">Distribucion por vecino</span>
+          <span className="eyebrow">Distribución por vecino</span>
         </div>
         <p className="text-sm text-cocoa/44 py-8">No hay datos en este periodo</p>
       </div>
@@ -58,7 +58,7 @@ export default function PieChartCard({ data }: { data: PieSlice[] }) {
         <div className="w-7 h-7 rounded-lg flex items-center justify-center shrink-0" style={{ background: 'var(--accent)' }}>
           <Icon name="pieChart" size={14} className="text-cream" />
         </div>
-        <span className="eyebrow">Distribucion por vecino</span>
+        <span className="eyebrow">Distribución por vecino</span>
       </div>
 
       <ResponsiveContainer width="100%" height={240}>
