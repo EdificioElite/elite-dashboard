@@ -50,6 +50,17 @@ describe('ContactosPage', () => {
     expect(screen.getByText('634 466 849')).toBeInTheDocument();
   });
 
+  it('renders Presidencia y Junta Directiva card', () => {
+    render(
+      <MemoryRouter>
+        <ContactosPage />
+      </MemoryRouter>
+    );
+    expect(screen.getByText('Presidencia y Junta Directiva')).toBeInTheDocument();
+    expect(screen.getByText('Comunidad de Propietarios')).toBeInTheDocument();
+    expect(screen.getByText('cpedificioelite@gmail.com')).toBeInTheDocument();
+  });
+
   it('renders email as mailto links', () => {
     render(
       <MemoryRouter>
@@ -58,7 +69,7 @@ describe('ContactosPage', () => {
     );
     const links = screen.getAllByRole('link');
     const emails = links.filter((l) => l.getAttribute('href')?.startsWith('mailto:'));
-    expect(emails.length).toBe(3);
+    expect(emails.length).toBe(4);
   });
 
   it('renders phone as tel links', () => {

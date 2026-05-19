@@ -23,6 +23,15 @@ const CONTACTS: ContactEntry[] = [
     ],
   },
   {
+    title: 'Presidencia y Junta Directiva',
+    subtitle: 'Comunidad de Propietarios',
+    icon: 'users',
+    color: '#88619d',
+    details: [
+      { label: 'Email', value: 'cpedificioelite@gmail.com', href: 'mailto:cpedificioelite@gmail.com', icon: 'mail' },
+    ],
+  },
+  {
     title: 'Mantenimiento Aerotermia',
     subtitle: 'Ness',
     icon: 'settings',
