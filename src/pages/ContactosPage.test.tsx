@@ -20,7 +20,9 @@ describe('ContactosPage', () => {
     expect(screen.getByText('Martin y Lorente — Juanjo Montalvo')).toBeInTheDocument();
     expect(screen.getByText('juanjomontalvo@martinylorente.es')).toBeInTheDocument();
     expect(screen.getByText('www.martinylorente.es')).toBeInTheDocument();
-    expect(screen.getByText('91.796.00.43 / 91.505.53.10 / 91.060.79.46')).toBeInTheDocument();
+    expect(screen.getByText('91 796 00 43')).toBeInTheDocument();
+    expect(screen.getByText('91 505 53 10')).toBeInTheDocument();
+    expect(screen.getByText('91 060 79 46')).toBeInTheDocument();
   });
 
   it('renders Ness card', () => {
@@ -67,6 +69,6 @@ describe('ContactosPage', () => {
     );
     const links = screen.getAllByRole('link');
     const tels = links.filter((l) => l.getAttribute('href')?.startsWith('tel:'));
-    expect(tels.length).toBe(4);
+    expect(tels.length).toBe(6);
   });
 });

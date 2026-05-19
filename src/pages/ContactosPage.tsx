@@ -17,7 +17,9 @@ const CONTACTS: ContactEntry[] = [
     details: [
       { label: 'Email', value: 'juanjomontalvo@martinylorente.es', href: 'mailto:juanjomontalvo@martinylorente.es', icon: 'mail' },
       { label: 'Web', value: 'www.martinylorente.es', href: 'https://www.martinylorente.es', icon: 'eye' },
-      { label: 'Telefono', value: '91.796.00.43 / 91.505.53.10 / 91.060.79.46', href: 'tel:917960043', icon: 'phone' },
+      { label: 'Telefono', value: '91 796 00 43', href: 'tel:+34917960043', icon: 'phone' },
+      { label: 'Telefono', value: '91 505 53 10', href: 'tel:+34915055310', icon: 'phone' },
+      { label: 'Telefono', value: '91 060 79 46', href: 'tel:+34910607946', icon: 'phone' },
     ],
   },
   {
