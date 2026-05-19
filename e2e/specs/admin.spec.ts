@@ -43,9 +43,11 @@ test.describe('Admin', () => {
     await expect(page.locator('table')).toBeVisible();
   });
 
-  test('navigates to vecino consumos', async ({ page }) => {
-    await page.locator('[title="Ver aerotermia"]').first().click();
-    await expect(page).toHaveURL(/\/aerotermia\?piso=/, { timeout: 10000 });
+  test('Ver aerotermia button navigates with piso param', async ({ page }) => {
+    const firstRow = page.locator('tbody tr').first();
+    const piso = await firstRow.locator('td').first().textContent();
+    await firstRow.locator('[title="Ver aerotermia"]').click();
+    await expect(page).toHaveURL(new RegExp(`/aerotermia\\?piso=${encodeURIComponent(piso!)}$`), { timeout: 10000 });
   });
 
   test('edits user email and piso', async ({ page }) => {

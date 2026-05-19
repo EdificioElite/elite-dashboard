@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, Navigate, useLocation, useParams } from 'react-router-dom';
 import { useAuthStore } from './store/auth';
 import LoginPage from './pages/LoginPage';
 import InicioPage from './pages/InicioPage';
@@ -63,6 +63,11 @@ function Heartbeat() {
   return null;
 }
 
+function RedirectVecino() {
+  const { piso } = useParams<{ piso: string }>();
+  return <Navigate to={`/aerotermia?piso=${encodeURIComponent(piso!)}`} replace />;
+}
+
 export default function App() {
   const checkAuth = useAuthStore((s) => s.checkAuth);
 
@@ -101,6 +106,7 @@ export default function App() {
           <Route path="/admin/vecinos" element={<ProtectedRoute adminOnly><AuthLayout><VecinosPage /></AuthLayout></ProtectedRoute>} />
           <Route path="/admin/usuarios" element={<ProtectedRoute adminOnly><AuthLayout><UsuariosPage /></AuthLayout></ProtectedRoute>} />
           <Route path="/admin/aerotermia" element={<ProtectedRoute adminOnly><AuthLayout><AdminAerotermiaPage /></AuthLayout></ProtectedRoute>} />
+          <Route path="/admin/vecino/:piso" element={<ProtectedRoute adminOnly><RedirectVecino /></ProtectedRoute>} />
           <Route path="/" element={<Navigate to="/inicio" replace />} />
           <Route path="*" element={<Navigate to="/inicio" replace />} />
         </Routes>
