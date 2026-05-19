@@ -56,13 +56,13 @@ describe('InicioPage', () => {
     expect(screen.getByText('Clave')).toBeInTheDocument();
   });
 
-  it('renders En vivo consumption card', async () => {
+  it('renders Contadores de Aerotermia en vivo consumption card', async () => {
     render(
       <MemoryRouter>
         <InicioPage />
       </MemoryRouter>
     );
-    expect(await screen.findByText('En vivo')).toBeInTheDocument();
+    expect(await screen.findByText('Contadores de Aerotermia en vivo')).toBeInTheDocument();
     expect(screen.getByText('Calefacción')).toBeInTheDocument();
     expect(screen.getByText('Refrigeración')).toBeInTheDocument();
     expect(screen.getByText('ACS')).toBeInTheDocument();

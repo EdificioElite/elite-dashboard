@@ -36,7 +36,7 @@ export default function ConsumoCard({ data }: { data: ConsumoActual | null }) {
           <div className="w-7 h-7 rounded-lg flex items-center justify-center shrink-0" style={{ background: 'var(--accent)' }}>
             <Icon name="activity" size={14} className="text-cream" />
           </div>
-          <span className="eyebrow">En vivo</span>
+          <span className="eyebrow">Contadores de Aerotermia en vivo</span>
         </div>
         <div className="text-sm text-cocoa/44">Esperando datos del contador...</div>
       </div>
@@ -49,7 +49,7 @@ export default function ConsumoCard({ data }: { data: ConsumoActual | null }) {
         <div className="w-7 h-7 rounded-lg flex items-center justify-center shrink-0" style={{ background: 'var(--accent)' }}>
           <Icon name="activity" size={14} className="text-cream" />
         </div>
-        <span className="eyebrow">En vivo</span>
+        <span className="eyebrow">Contadores de Aerotermia en vivo</span>
         <span className="ml-auto text-cocoa/30 text-xs">
           {new Date(data.timestamp).toLocaleString('es-ES', { hour: '2-digit', minute: '2-digit' })}
         </span>
