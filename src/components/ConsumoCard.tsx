@@ -51,7 +51,7 @@ export default function ConsumoCard({ data }: { data: ConsumoActual | null }) {
         </div>
         <span className="eyebrow">Contadores de Aerotermia en vivo</span>
         <span className="ml-auto text-cocoa/30 text-xs">
-          {new Date(data.timestamp).toLocaleString('es-ES', { hour: '2-digit', minute: '2-digit' })}
+          {new Date(data.timestamp).toLocaleString('es-ES', { timeZone: 'Europe/Madrid', hour: '2-digit', minute: '2-digit' })}
         </span>
       </div>
 
@@ -104,9 +104,11 @@ export default function ConsumoCard({ data }: { data: ConsumoActual | null }) {
               </>
             )}
           </div>
-          <div className="font-mono text-[11px] text-cocoa/40 font-num mt-0.5">
-            {isLive ? `${Number(data.power_w).toFixed(0)} W` : '—'}
-          </div>
+          {isLive && (
+            <div className="font-mono text-[11px] text-cocoa/40 font-num mt-0.5">
+              {`${Number(data.power_w).toFixed(0)} W`}
+            </div>
+          )}
           <div className="text-[11px] text-cocoa/40 mt-1">
             Impulsion: <span className="text-rise font-medium">{data.temp_impulsion != null ? `${Number(data.temp_impulsion).toFixed(1)}°C` : '—'}</span>
           </div>

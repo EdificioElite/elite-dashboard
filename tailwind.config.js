@@ -14,6 +14,7 @@ export default {
         cocoa: '#1E140A',
         accent: '#A6754B',
         'accent-dark': '#8C5E3A',
+        'accent-2': '#4A5F7A',
         sage: '#5D7A4A',
         'sage-dark': '#4A6338',
         rise: '#8A2A1E',

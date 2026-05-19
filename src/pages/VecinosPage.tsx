@@ -154,7 +154,7 @@ export default function VecinosPage() {
 
         <section aria-label="Gestión de vecinos">
 
-        <div className="grid grid-cols-3 gap-[16px]">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-[16px]">
           {stats.map(s => (
             <div key={s.label} className="glass p-[20px] glass-hover">
               <div className="flex items-center gap-2.5 mb-2">
@@ -235,7 +235,7 @@ export default function VecinosPage() {
                   <th scope="col">Nombre</th>
                   <th scope="col">Email facturas</th>
                   <th scope="col">Coeficiente</th>
-                  <th scope="col" className="text-center">Acciones</th>
+                  <th scope="col" className="text-center min-w-[175px]">Acciones</th>
                 </tr>
               </thead>
               <tbody>
@@ -261,7 +261,7 @@ export default function VecinosPage() {
                         ) : (
                           editingVecinoEmail === v.piso ? (
                             <span className="flex items-center gap-1">
-                              <input type="email" value={editingVecinoEmailValue} onChange={e => setEditingVecinoEmailValue(e.target.value)} onKeyDown={e => { if (e.key === 'Enter') handleSaveVecinoEmail(); if (e.key === 'Escape') setEditingVecinoEmail(null); }} className="input-card text-xs py-0.5 px-1.5 w-32" placeholder="email..." autoFocus />
+                              <input type="email" value={editingVecinoEmailValue} onChange={e => setEditingVecinoEmailValue(e.target.value)} onKeyDown={e => { if (e.key === 'Enter') handleSaveVecinoEmail(); if (e.key === 'Escape') setEditingVecinoEmail(null); }} className="input-card text-xs py-0.5 px-1.5 w-28" placeholder="email..." autoFocus />
                               <button onClick={handleSaveVecinoEmail} className="btn btn-ghost p-1 text-sage" title="Guardar email"><Icon name="check" size={12} /></button>
                               <button onClick={() => setEditingVecinoEmail(null)} className="btn btn-ghost p-1 text-rise" title="Cancelar edicion email"><Icon name="x" size={12} /></button>
                             </span>

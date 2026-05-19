@@ -115,7 +115,7 @@ export default function UsuariosPage() {
 
         <section aria-label="Gestión de usuarios">
 
-        <div className="grid grid-cols-3 gap-[16px]">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-[16px]">
           {stats.map(s => (
             <div key={s.label} className="glass p-[20px] glass-hover">
               <div className="flex items-center gap-2.5 mb-2">
@@ -184,7 +184,7 @@ export default function UsuariosPage() {
                   <th scope="col">Rol</th>
                   <th scope="col" className="text-center">Estado</th>
                   <th scope="col" className="text-center">Ult. conexion</th>
-                  <th scope="col" className="text-center">Acciones</th>
+                  <th scope="col" className="text-center min-w-[130px]">Acciones</th>
                 </tr>
               </thead>
               <tbody>

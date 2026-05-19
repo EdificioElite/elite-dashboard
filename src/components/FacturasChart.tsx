@@ -115,7 +115,7 @@ export default function FacturasChart({ data, headerRight }: { data: Factura[]; 
         {headerRight}
       </div>
 
-      <div className="flex items-center gap-4 mb-4 text-[11px] text-cocoa/40">
+      <div className="flex items-center gap-4 mb-4 text-[11px] text-cocoa/40 flex-wrap">
         <span className="flex items-center gap-1.5">
           <span className="w-2 h-2 rounded-sm" style={{ background: '#A6754B' }} /> Fijo
         </span>
