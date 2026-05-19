@@ -7,7 +7,6 @@ import DashboardPage from './pages/DashboardPage';
 import VecinosPage from './pages/VecinosPage';
 import UsuariosPage from './pages/UsuariosPage';
 import AdminAerotermiaPage from './pages/AdminAerotermiaPage';
-import AdminConsumoPage from './pages/AdminConsumoPage';
 import JuntasGeneralesPage from './pages/JuntasGeneralesPage';
 import ContactosPage from './pages/ContactosPage';
 import RegistroPage from './pages/RegistroPage';
@@ -102,8 +101,6 @@ export default function App() {
           <Route path="/admin/vecinos" element={<ProtectedRoute adminOnly><AuthLayout><VecinosPage /></AuthLayout></ProtectedRoute>} />
           <Route path="/admin/usuarios" element={<ProtectedRoute adminOnly><AuthLayout><UsuariosPage /></AuthLayout></ProtectedRoute>} />
           <Route path="/admin/aerotermia" element={<ProtectedRoute adminOnly><AuthLayout><AdminAerotermiaPage /></AuthLayout></ProtectedRoute>} />
-          <Route path="/admin/vecino/:piso" element={<ProtectedRoute adminOnly><AuthLayout><AdminConsumoPage /></AuthLayout></ProtectedRoute>} />
-
           <Route path="/" element={<Navigate to="/inicio" replace />} />
           <Route path="*" element={<Navigate to="/inicio" replace />} />
         </Routes>

@@ -247,7 +247,7 @@ export default function VecinosPage() {
                     <td className="text-sm text-cocoa/50">{v.coeficiente || '—'}</td>
                     <td>
                       <div className="flex items-center justify-center gap-1">
-                        <button onClick={() => navigate(`/admin/vecino/${v.piso}`)} className="btn btn-ghost p-2 text-accent hover:text-accent/80" title="Ver aerotermia">
+                        <button onClick={() => navigate(`/aerotermia?piso=${v.piso}`)} className="btn btn-ghost p-2 text-accent hover:text-accent/80" title="Ver aerotermia">
                           <Icon name="chart" size={15} />
                         </button>
                         {v.vecino_email ? (

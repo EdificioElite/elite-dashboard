@@ -45,7 +45,7 @@ test.describe('Admin', () => {
 
   test('navigates to vecino consumos', async ({ page }) => {
     await page.locator('[title="Ver aerotermia"]').first().click();
-    await expect(page).toHaveURL(/\/admin\/vecino\//, { timeout: 10000 });
+    await expect(page).toHaveURL(/\/aerotermia\?piso=/, { timeout: 10000 });
   });
 
   test('edits user email and piso', async ({ page }) => {
