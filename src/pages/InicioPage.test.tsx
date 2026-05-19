@@ -44,6 +44,18 @@ describe('InicioPage', () => {
     expect(screen.getByText('Proximamente. Fecha y hora por determinar.')).toBeInTheDocument();
   });
 
+  it('renders WiFi card', async () => {
+    render(
+      <MemoryRouter>
+        <InicioPage />
+      </MemoryRouter>
+    );
+    expect(await screen.findByText('WiFi de la Comunidad')).toBeInTheDocument();
+    expect(screen.getByText('SSID')).toBeInTheDocument();
+    expect(screen.getByText('Edificio Elite')).toBeInTheDocument();
+    expect(screen.getByText('Clave')).toBeInTheDocument();
+  });
+
   it('renders En vivo consumption card', async () => {
     render(
       <MemoryRouter>

@@ -46,6 +46,14 @@ const MEETING_CONTENT = {
   text: 'Proximamente. Fecha y hora por determinar.',
 };
 
+const WIFI_CONTENT = {
+  title: 'WiFi de la Comunidad',
+  icon: 'wifi' as const,
+  color: '#4a8c9c',
+  ssid: 'Edificio Elite',
+  password: '5dUmpRu9',
+};
+
 function InfoCard({ title, icon, color, children }: { title: string; icon: string; color: string; children: React.ReactNode }) {
   return (
     <div className="glass glass-hover p-6">
@@ -133,6 +141,26 @@ export default function InicioPage() {
 
           <InfoCard title={MEETING_CONTENT.title} icon={MEETING_CONTENT.icon} color={MEETING_CONTENT.color}>
             <p className="text-sm text-cocoa/80">{MEETING_CONTENT.text}</p>
+          </InfoCard>
+
+          <InfoCard title={WIFI_CONTENT.title} icon={WIFI_CONTENT.icon} color={WIFI_CONTENT.color}>
+            <div className="flex flex-col sm:flex-row items-start gap-5">
+              <div className="flex flex-col gap-2 min-w-0">
+                <div className="flex items-center gap-3">
+                  <span className="text-[11px] font-medium uppercase tracking-wider text-cocoa/40 w-20 shrink-0">SSID</span>
+                  <span className="text-sm text-cocoa/80 font-mono font-num">{WIFI_CONTENT.ssid}</span>
+                </div>
+                <div className="flex items-center gap-3">
+                  <span className="text-[11px] font-medium uppercase tracking-wider text-cocoa/40 w-20 shrink-0">Clave</span>
+                  <span className="text-sm text-cocoa/80 font-mono font-num">{WIFI_CONTENT.password}</span>
+                </div>
+              </div>
+              <img
+                src={`https://api.qrserver.com/v1/create-qr-code/?size=160x160&data=${encodeURIComponent(`WIFI:T:WPA;S:${WIFI_CONTENT.ssid};P:${WIFI_CONTENT.password};;`)}`}
+                alt="QR WiFi"
+                className="w-28 h-28 rounded-lg shrink-0 bg-white p-1"
+              />
+            </div>
           </InfoCard>
         </div>
       </main>
