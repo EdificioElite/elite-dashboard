@@ -54,7 +54,7 @@ export default function DashboardPage() {
   const pisoParam = searchParams.get('piso');
   const viewingAs = user?.is_admin && pisoParam ? pisoParam : null;
 
-  const [preset, setPreset] = useState<Preset | null>('7d');
+  const [preset, setPreset] = useState<Preset | null>('1a');
   const [desdeInput, setDesdeInput] = useState('');
   const [hastaInput, setHastaInput] = useState('');
 
@@ -70,10 +70,10 @@ export default function DashboardPage() {
     }
   };
 
-  useEffect(() => { setRange('7d'); }, []);
-
   const desde = desdeInput ? fromDatetimeLocal(desdeInput) : '';
   const hasta = hastaInput ? fromDatetimeLocal(hastaInput) : '';
+
+  useEffect(() => { setRange('1a'); }, []);
 
   useEffect(() => {
     async function fetchData() {
