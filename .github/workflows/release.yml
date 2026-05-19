@@ -18,7 +18,6 @@ jobs:
     permissions:
       contents: write
       packages: write
-      pull-requests: write
     env:
       REGISTRY: ghcr.io
       IMAGE_NAME: ${{ github.repository }}/api
@@ -28,24 +27,7 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Check if dev is ahead of main
-        id: check
-        run: |
-          git fetch origin dev main
-          DIFF=$(git rev-list origin/main..origin/dev --count)
-          echo "commits_ahead=${DIFF}" >> $GITHUB_OUTPUT
-          echo "dev esta ${DIFF} commits por delante de main"
-
-      - name: Close existing release PRs
-        if: steps.check.outputs.commits_ahead != '0'
-        run: |
-          gh pr list --head dev --base main --state open --json number --jq '.[].number' | while read num; do
-            echo "Cerrando PR de release existente #${num}"
-            gh pr close "${num}" --comment "Reemplazado por un nuevo PR de release."
-          done
-
       - name: Compute next version
-        if: steps.check.outputs.commits_ahead != '0'
         id: version
         run: |
           LAST_TAG=$(git tag --sort=-v:refname | grep -E '^v[0-9]+\.[0-9]+\.[0-9]+$' | head -1)
@@ -68,52 +50,7 @@ jobs:
           echo "New version: ${NEW_VERSION}"
           echo "version=${NEW_VERSION}" >> $GITHUB_OUTPUT
 
-      - name: Create release PR and enable auto-merge
-        if: steps.check.outputs.commits_ahead != '0'
-        id: pr
-        run: |
-          PR_URL=$(gh pr create \
-            --title "Release v${{ steps.version.outputs.version }}" \
-            --body "PR automatizada de release v${{ steps.version.outputs.version }}. Tipo: \`${{ inputs.version }}\`." \
-            --head dev \
-            --base main)
-
-          PR_NUMBER=$(echo "${PR_URL}" | grep -oP '\d+$')
-          echo "PR creada: ${PR_URL}"
-          echo "number=${PR_NUMBER}" >> $GITHUB_OUTPUT
-
-          gh pr merge "${PR_NUMBER}" --auto --squash
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Wait for PR to merge
-        if: steps.check.outputs.commits_ahead != '0'
-        timeout-minutes: 10
-        run: |
-          for i in $(seq 1 60); do
-            STATE=$(gh pr view "${{ steps.pr.outputs.number }}" --json state --jq '.state')
-            if [ "${STATE}" = "MERGED" ]; then
-              echo "PR mergeada correctamente"
-              break
-            fi
-            echo "Esperando merge... intento $i/60 (estado: ${STATE})"
-            sleep 10
-          done
-          if [ "${STATE}" != "MERGED" ]; then
-            echo "Timeout esperando merge de la PR"
-            exit 1
-          fi
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Checkout main for publish
-        if: steps.check.outputs.commits_ahead != '0'
-        run: |
-          git fetch origin main
-          git checkout -B main origin/main
-
       - name: Create and push tag
-        if: steps.check.outputs.commits_ahead != '0'
         run: |
           TAG="v${{ steps.version.outputs.version }}"
           if git rev-parse "${TAG}" >/dev/null 2>&1; then
@@ -126,7 +63,6 @@ jobs:
           git push origin "${TAG}"
 
       - name: Create GitHub Release
-        if: steps.check.outputs.commits_ahead != '0'
         run: |
           gh release create "v${{ steps.version.outputs.version }}" \
             --title "v${{ steps.version.outputs.version }}" \
@@ -136,19 +72,16 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - uses: docker/login-action@v3
-        if: steps.check.outputs.commits_ahead != '0'
         with:
           registry: ${{ env.REGISTRY }}
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Set lowercase image name
-        if: steps.check.outputs.commits_ahead != '0'
         run: |
           echo "IMAGE_NAME_LC=$(echo "${IMAGE_NAME}" | tr '[:upper:]' '[:lower:]')" >> $GITHUB_ENV
 
       - uses: docker/metadata-action@v5
-        if: steps.check.outputs.commits_ahead != '0'
         id: meta
         with:
           images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME_LC }}
@@ -157,10 +90,8 @@ jobs:
             type=raw,value=latest
 
       - uses: docker/setup-buildx-action@v3
-        if: steps.check.outputs.commits_ahead != '0'
 
       - uses: docker/build-push-action@v6
-        if: steps.check.outputs.commits_ahead != '0'
         with:
           context: api
           push: true
@@ -168,7 +99,3 @@ jobs:
           labels: ${{ steps.meta.outputs.labels }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
-
-      - name: Nothing to promote
-        if: steps.check.outputs.commits_ahead == '0'
-        run: echo "dev no tiene commits nuevos respecto a main, nada que publicar."

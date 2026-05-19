@@ -3,10 +3,10 @@ name: CI
 on:
   workflow_dispatch:
   push:
-    branches: [main, dev]
+    branches: [main]
   pull_request:
     types: [opened, synchronize, reopened]
-    branches: [main, dev]
+    branches: [main]
 
 jobs:
   backend:
