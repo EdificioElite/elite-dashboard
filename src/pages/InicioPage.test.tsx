@@ -28,10 +28,10 @@ describe('InicioPage', () => {
     );
     expect(await screen.findByText('Piscina')).toBeInTheDocument();
     expect(screen.getByText('Apertura')).toBeInTheDocument();
-    expect(screen.getByText('15 de Junio')).toBeInTheDocument();
+    expect(screen.getByText('20 de junio')).toBeInTheDocument();
     expect(screen.getByText('Cierre')).toBeInTheDocument();
-    expect(screen.getByText('1 de Septiembre')).toBeInTheDocument();
-    expect(screen.getByText('11:00 — 20:00')).toBeInTheDocument();
+    expect(screen.getByText('30 de agosto')).toBeInTheDocument();
+    expect(screen.getByText('Horario')).toBeInTheDocument();
   });
 
   it('renders Proxima Junta card', async () => {

@@ -28,9 +28,14 @@ const POOL_CONTENT = {
   icon: 'sun' as const,
   color: '#5b8ba0',
   lines: [
-    { label: 'Apertura', value: '15 de Junio' },
-    { label: 'Cierre', value: '1 de Septiembre' },
-    { label: 'Horario', value: '11:00 — 20:00' },
+    { label: 'Apertura', value: '20 de junio' },
+    { label: 'Cierre', value: '30 de agosto' },
+  ],
+  note: 'La Junta Directiva queda facultada para ampliar una semana adicional si el presupuesto lo permite.',
+  schedule: [
+    { periodo: '20 jun — 30 jun', manana: '11:00 – 14:00', tarde: '15:00 – 20:00' },
+    { periodo: '1 jul — 14 ago', manana: '12:00 – 14:00', tarde: '15:00 – 21:00' },
+    { periodo: '15 ago — 30 ago', manana: '11:00 – 14:00', tarde: '15:00 – 20:00' },
   ],
 };
 
@@ -102,6 +107,28 @@ export default function InicioPage() {
                 </div>
               ))}
             </div>
+            <div className="mt-4">
+              <p className="text-[10px] font-bold uppercase tracking-[0.08em] text-cocoa/30 mb-2">Horario</p>
+              <table className="w-full text-xs">
+                <thead>
+                  <tr className="text-cocoa/40 uppercase tracking-wider text-[10px]">
+                    <th className="text-left font-medium py-1 pr-2">Periodo</th>
+                    <th className="text-left font-medium py-1 px-2">Mañana</th>
+                    <th className="text-left font-medium py-1 pl-2">Tarde</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {POOL_CONTENT.schedule.map((row) => (
+                    <tr key={row.periodo} className="border-t border-cocoa/6">
+                      <td className="py-1.5 pr-2 text-cocoa/60">{row.periodo}</td>
+                      <td className="py-1.5 px-2 font-mono text-cocoa/80 font-num">{row.manana}</td>
+                      <td className="py-1.5 pl-2 font-mono text-cocoa/80 font-num">{row.tarde}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+            <p className="text-cocoa/30 text-[10px] mt-3 leading-relaxed">{POOL_CONTENT.note}</p>
           </InfoCard>
 
           <InfoCard title={MEETING_CONTENT.title} icon={MEETING_CONTENT.icon} color={MEETING_CONTENT.color}>
