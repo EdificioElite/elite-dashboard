@@ -33,7 +33,7 @@ describe('ConsumoCard', () => {
     expect(screen.getByText('150 W')).toBeInTheDocument();
     expect(screen.getByText('42.0°C')).toBeInTheDocument();
     expect(screen.getByText('32.0°C')).toBeInTheDocument();
-    expect(screen.getByText('En vivo')).toBeInTheDocument();
+    expect(screen.getByText('Contadores de Aerotermia en vivo')).toBeInTheDocument();
   });
 
   it('hides delta when mes_inicio is null', () => {

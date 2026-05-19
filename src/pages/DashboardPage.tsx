@@ -50,7 +50,6 @@ export default function DashboardPage() {
   const [facturas, setFacturas] = useState<Factura[]>([]);
   const [loading, setLoading] = useState(true);
 
-  const [showHA, setShowHA] = useState(false);
   const pisoParam = searchParams.get('piso');
   const viewingAs = user?.is_admin && pisoParam ? pisoParam : null;
 
@@ -77,12 +76,9 @@ export default function DashboardPage() {
     async function fetchData() {
       try {
         const pisoQs = viewingAs ? `?piso=${encodeURIComponent(viewingAs)}` : '';
-        const facturasEndpoint = viewingAs
-          ? `/admin/vecinos/${viewingAs}/facturas`
-          : '/facturas';
         const [actual, facturasData] = await Promise.all([
           apiFetch<Consumo | null>(`/consumo-actual${pisoQs}`),
-          apiFetch<Factura[]>(facturasEndpoint),
+          apiFetch<Factura[]>(`/facturas${pisoQs}`),
         ]);
         setConsumoActual(actual);
         setFacturas(facturasData);
@@ -167,11 +163,7 @@ export default function DashboardPage() {
           <FacturasTable data={filteredFacturas} />
 
           <div className="glass p-[26px]">
-            <button
-              onClick={() => setShowHA(!showHA)}
-              className="flex items-center justify-between w-full text-left bg-transparent border-none cursor-pointer p-0"
-            >
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-3 mb-5">
               <div className="w-10 h-10 rounded-lg bg-[#1abcfe]/10 flex items-center justify-center overflow-hidden">
                 <img src="/images/home-assistant-icon.png" alt="Home Assistant" className="w-6 h-6" />
               </div>
@@ -180,11 +172,8 @@ export default function DashboardPage() {
                 <h3 className="font-display text-[22px] font-medium text-cocoa">Integración oficial para tu hogar</h3>
               </div>
             </div>
-            <Icon name={showHA ? 'chevronUp' : 'chevronDown'} size={18} className="text-cocoa/40 shrink-0" />
-          </button>
 
-          {showHA && (
-            <div className="mt-5 pt-5 border-t border-cocoa/6">
+            <div>
               <p className="text-cocoa/70 text-sm leading-relaxed mb-4">
                 Lleva los datos de tu aerotermia a Home Assistant para automatizar tu casa. La integración{' '}
                 <strong>Elite Climate</strong> expone los consumos de calefacción, refrigeración, ACS, temperaturas
@@ -221,7 +210,6 @@ export default function DashboardPage() {
                 Requiere Home Assistant 2024.1 o superior y HACS instalado.
               </p>
             </div>
-          )}
           </div>
         </div>
       </main>

@@ -1,4 +1,4 @@
-import { Fragment } from 'react';
+import { Fragment, useMemo } from 'react';
 import { capitalizar } from '../lib/format';
 import Icon from './Icon';
 
@@ -48,6 +48,8 @@ export default function FacturasTable({ data }: { data: Factura[] }) {
     );
   }
 
+  const chrono = useMemo(() => [...data].reverse(), [data]);
+
   const rows: RowDef[] = [
     { label: 'kWh calor', accessor: (f) => fmt(f.kwh_calor, 0, 'kWh'), section: 'Consumos' },
     { label: 'kWh frio', accessor: (f) => fmt(f.kwh_frio, 0, 'kWh') },
@@ -75,7 +77,7 @@ export default function FacturasTable({ data }: { data: Factura[] }) {
           <thead>
             <tr>
               <th className="sticky left-0 z-10 bg-cream text-left font-medium text-cocoa/40 uppercase tracking-wider py-2 pr-4 text-[10px] border-b border-cocoa/6" style={{ minWidth: '100px' }} />
-              {data.map((f) => (
+              {chrono.map((f) => (
                 <th key={f.id_factura} className="text-center font-medium text-cocoa/40 uppercase tracking-wider py-2 px-3 text-[10px] border-b border-cocoa/6 whitespace-nowrap min-w-[80px]">
                   {periodoLabel(f)}
                 </th>
@@ -96,7 +98,7 @@ export default function FacturasTable({ data }: { data: Factura[] }) {
                   <td className={`sticky left-0 z-10 bg-cream py-1.5 pr-4 text-cocoa/60 text-[11px] ${row.bold ? 'font-semibold text-cocoa border-t border-cocoa/8' : ''}`} style={{ minWidth: '100px' }}>
                     {row.label}
                   </td>
-                  {data.map((f) => (
+                  {chrono.map((f) => (
                     <td key={f.id_factura} className={`text-center font-mono text-[11px] text-cocoa/80 py-1.5 px-3 font-num whitespace-nowrap ${row.bold ? 'font-semibold text-cocoa border-t border-cocoa/8' : ''}`}>
                       {row.accessor(f)}
                     </td>

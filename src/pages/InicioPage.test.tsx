@@ -28,10 +28,10 @@ describe('InicioPage', () => {
     );
     expect(await screen.findByText('Piscina')).toBeInTheDocument();
     expect(screen.getByText('Apertura')).toBeInTheDocument();
-    expect(screen.getByText('15 de Junio')).toBeInTheDocument();
+    expect(screen.getByText('20 de junio')).toBeInTheDocument();
     expect(screen.getByText('Cierre')).toBeInTheDocument();
-    expect(screen.getByText('1 de Septiembre')).toBeInTheDocument();
-    expect(screen.getByText('11:00 — 20:00')).toBeInTheDocument();
+    expect(screen.getByText('30 de agosto')).toBeInTheDocument();
+    expect(screen.getByText('Horario')).toBeInTheDocument();
   });
 
   it('renders Proxima Junta card', async () => {
@@ -41,16 +41,28 @@ describe('InicioPage', () => {
       </MemoryRouter>
     );
     expect(await screen.findByText('Proxima Junta de Vecinos')).toBeInTheDocument();
-    expect(screen.getByText('Junta extraordinaria Lunes 1 de Junio a las 19:00')).toBeInTheDocument();
+    expect(screen.getByText('Proximamente. Fecha y hora por determinar.')).toBeInTheDocument();
   });
 
-  it('renders En vivo consumption card', async () => {
+  it('renders WiFi card', async () => {
     render(
       <MemoryRouter>
         <InicioPage />
       </MemoryRouter>
     );
-    expect(await screen.findByText('En vivo')).toBeInTheDocument();
+    expect(await screen.findByText('WiFi de la Comunidad')).toBeInTheDocument();
+    expect(screen.getByText('SSID')).toBeInTheDocument();
+    expect(screen.getByText('Edificio Elite')).toBeInTheDocument();
+    expect(screen.getByText('Clave')).toBeInTheDocument();
+  });
+
+  it('renders Contadores de Aerotermia en vivo consumption card', async () => {
+    render(
+      <MemoryRouter>
+        <InicioPage />
+      </MemoryRouter>
+    );
+    expect(await screen.findByText('Contadores de Aerotermia en vivo')).toBeInTheDocument();
     expect(screen.getByText('Calefacción')).toBeInTheDocument();
     expect(screen.getByText('Refrigeración')).toBeInTheDocument();
     expect(screen.getByText('ACS')).toBeInTheDocument();
