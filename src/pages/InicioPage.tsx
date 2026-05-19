@@ -161,6 +161,10 @@ export default function InicioPage() {
                 className="w-28 h-28 rounded-lg shrink-0 bg-white p-1"
               />
             </div>
+            <p className="text-cocoa/30 text-[10px] mt-3 leading-relaxed">
+              Para conectar dispositivos de uso constante (cargadores de coche, etc.) contacta con la Junta Directiva en{' '}
+              <a href="mailto:cpedificioelite@gmail.com" className="text-accent hover:text-accent-dark underline">cpedificioelite@gmail.com</a>.
+            </p>
           </InfoCard>
         </div>
       </main>
