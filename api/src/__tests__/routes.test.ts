@@ -599,6 +599,32 @@ describe('Consumos routes', () => {
       expect(res.body.modo).toBe('desconocido');
     });
 
+    it('returns modo desconocido at boundary 29', async () => {
+      mockQuery.mockResolvedValueOnce({
+        rows: [{ timestamp: '2026-01-01T12:00:00Z', kwh_calor: 2.0, kwh_frio: 0.5, m3_acs: 0.03, kwh_acs: 1.395, temp_impulsion: 29.0, temp_retorno: 22.0 }],
+      });
+      const app = createApp();
+      const token = userToken();
+      const res = await request(app)
+        .get('/api/consumo-actual')
+        .set('Authorization', `Bearer ${token}`);
+      expect(res.status).toBe(200);
+      expect(res.body.modo).toBe('desconocido');
+    });
+
+    it('returns modo desconocido at boundary 21', async () => {
+      mockQuery.mockResolvedValueOnce({
+        rows: [{ timestamp: '2026-01-01T12:00:00Z', kwh_calor: 2.0, kwh_frio: 0.5, m3_acs: 0.03, kwh_acs: 1.395, temp_impulsion: 21.0, temp_retorno: 16.0 }],
+      });
+      const app = createApp();
+      const token = userToken();
+      const res = await request(app)
+        .get('/api/consumo-actual')
+        .set('Authorization', `Bearer ${token}`);
+      expect(res.status).toBe(200);
+      expect(res.body.modo).toBe('desconocido');
+    });
+
     it('returns modo desconocido when temp_impulsion is null', async () => {
       mockQuery.mockResolvedValueOnce({
         rows: [{ timestamp: '2026-01-01T12:00:00Z', kwh_calor: 2.0, kwh_frio: 0.5, m3_acs: 0.03, kwh_acs: 1.395, temp_impulsion: null, temp_retorno: null }],
