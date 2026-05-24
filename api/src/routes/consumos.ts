@@ -82,23 +82,23 @@ router.get('/consumo-actual', authMiddleware, async (req: Request, res: Response
     const vecinoPiso = (isAdmin && pisoQuery) ? pisoQuery : req.user!.vecinoPiso;
 
     const result = await query(
-      `WITH latest AS (
+       `WITH latest AS (
         SELECT
-          ct.datetime_inst_value_0_0_0 AS timestamp,
+          ct.created AS timestamp,
           ct.energy_wh_inst_value_0_0_0,
           ct.energy_manufacturer_specific_02_wh_inst_value_0_0_0,
           ct.volume_m3_inst_value_0_1_0,
           ct.flow_temp_c_inst_value_0_0_0 AS temp_impulsion,
           ct.return_temp_c_inst_value_0_0_0 AS temp_retorno,
           ct.power_w_inst_value_0_0_0 AS power_w,
-          LAG(ct.energy_wh_inst_value_0_0_0) OVER (ORDER BY ct.datetime_inst_value_0_0_0) AS prev_wh_calor,
-          LAG(ct.energy_manufacturer_specific_02_wh_inst_value_0_0_0) OVER (ORDER BY ct.datetime_inst_value_0_0_0) AS prev_wh_frio,
-          LAG(ct.volume_m3_inst_value_0_1_0) OVER (ORDER BY ct.datetime_inst_value_0_0_0) AS prev_m3_acs
+          LAG(ct.energy_wh_inst_value_0_0_0) OVER (ORDER BY ct.created) AS prev_wh_calor,
+          LAG(ct.energy_manufacturer_specific_02_wh_inst_value_0_0_0) OVER (ORDER BY ct.created) AS prev_wh_frio,
+          LAG(ct.volume_m3_inst_value_0_1_0) OVER (ORDER BY ct.created) AS prev_m3_acs
         FROM contadores ct
         JOIN vecinos v ON ct.device_identification = v.device_identification
           AND ct.serial_number::text = v.serial_number
         WHERE v.piso = $1
-        ORDER BY ct.datetime_inst_value_0_0_0 DESC
+        ORDER BY ct.created DESC
       ),
       mes_inicio AS (
         SELECT
@@ -109,8 +109,8 @@ router.get('/consumo-actual', authMiddleware, async (req: Request, res: Response
         JOIN vecinos v ON ct.device_identification = v.device_identification
           AND ct.serial_number::text = v.serial_number
         WHERE v.piso = $1
-          AND ct.datetime_inst_value_0_0_0 <= date_trunc('month', NOW())
-        ORDER BY ct.datetime_inst_value_0_0_0 DESC
+          AND ct.created <= date_trunc('month', NOW())
+        ORDER BY ct.created DESC
         LIMIT 1
       )
       SELECT
