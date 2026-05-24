@@ -5,6 +5,9 @@ import { logger } from '../lib/logger';
 
 const router = Router();
 
+const MODO_CALEFACCION_UMBRAL = 29;
+const MODO_REFRIGERACION_UMBRAL = 21;
+
 router.get('/consumos', authMiddleware, async (req: Request, res: Response) => {
   try {
     const { desde, hasta } = req.query;
@@ -140,9 +143,9 @@ router.get('/consumo-actual', authMiddleware, async (req: Request, res: Response
     const t = row.temp_impulsion as number | null;
     if (t == null) {
       row.modo = 'desconocido';
-    } else if (t > 29) {
+    } else if (t > MODO_CALEFACCION_UMBRAL) {
       row.modo = 'calefaccion';
-    } else if (t < 21) {
+    } else if (t < MODO_REFRIGERACION_UMBRAL) {
       row.modo = 'refrigeracion';
     } else {
       row.modo = 'desconocido';
