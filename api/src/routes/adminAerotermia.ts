@@ -24,7 +24,9 @@ router.get('/admin/aerotermia/consumos', authMiddleware, adminMiddleware, async 
           ct.created AS timestamp,
           ct.energy_wh_inst_value_0_0_0,
           ct.energy_manufacturer_specific_02_wh_inst_value_0_0_0,
-          ct.volume_m3_inst_value_0_1_0
+          ct.volume_m3_inst_value_0_1_0,
+          ct.flow_temp_c_inst_value_0_0_0,
+          ct.return_temp_c_inst_value_0_0_0
         FROM contadores ct
         JOIN vecinos v ON ct.device_identification = v.device_identification
           AND ct.serial_number::text = v.serial_number
@@ -37,7 +39,9 @@ router.get('/admin/aerotermia/consumos', authMiddleware, adminMiddleware, async 
           timestamp,
           (energy_wh_inst_value_0_0_0 - LAG(energy_wh_inst_value_0_0_0) OVER (PARTITION BY piso ORDER BY timestamp)) / 1000.0 AS kwh_calor_raw,
           (energy_manufacturer_specific_02_wh_inst_value_0_0_0 - LAG(energy_manufacturer_specific_02_wh_inst_value_0_0_0) OVER (PARTITION BY piso ORDER BY timestamp)) / 1000.0 AS kwh_frio_raw,
-          (volume_m3_inst_value_0_1_0 - LAG(volume_m3_inst_value_0_1_0) OVER (PARTITION BY piso ORDER BY timestamp)) AS m3_acs_raw
+          (volume_m3_inst_value_0_1_0 - LAG(volume_m3_inst_value_0_1_0) OVER (PARTITION BY piso ORDER BY timestamp)) AS m3_acs_raw,
+          flow_temp_c_inst_value_0_0_0 AS temp_impulsion,
+          return_temp_c_inst_value_0_0_0 AS temp_retorno
         FROM all_readings
       ),
       valid_deltas AS (
@@ -46,7 +50,9 @@ router.get('/admin/aerotermia/consumos', authMiddleware, adminMiddleware, async 
           ROUND(SUM(kwh_calor_raw)::numeric, 3) AS kwh_calor,
           ROUND(SUM(kwh_frio_raw)::numeric, 3) AS kwh_frio,
           ROUND(SUM(m3_acs_raw)::numeric, 3) AS m3_acs,
-          ROUND((SUM(m3_acs_raw) * 46.5)::numeric, 3) AS kwh_acs
+          ROUND((SUM(m3_acs_raw) * 46.5)::numeric, 3) AS kwh_acs,
+          ROUND(AVG(temp_impulsion)::numeric, 1) AS temp_impulsion,
+          ROUND(AVG(temp_retorno)::numeric, 1) AS temp_retorno
         FROM vecino_deltas
         WHERE kwh_calor_raw IS NOT NULL
         GROUP BY date_trunc('hour', timestamp)
@@ -56,7 +62,7 @@ router.get('/admin/aerotermia/consumos', authMiddleware, adminMiddleware, async 
         SELECT *, ROW_NUMBER() OVER (ORDER BY hour) AS rn, COUNT(*) OVER () AS total
         FROM valid_deltas
       )
-      SELECT hour AS timestamp, kwh_calor, kwh_frio, m3_acs, kwh_acs
+      SELECT hour AS timestamp, kwh_calor, kwh_frio, m3_acs, kwh_acs, temp_impulsion, temp_retorno
       FROM counted
       WHERE total <= ${MAX_POINTS}
          OR rn = 1
