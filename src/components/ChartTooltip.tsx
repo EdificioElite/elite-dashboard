@@ -4,9 +4,10 @@ interface ChartTooltipProps {
     name: string;
     value: number;
     color: string;
+    payload?: Record<string, unknown>;
   }>;
   label?: string;
-  labelFormatter?: (label: string) => string;
+  labelFormatter?: (label: string, payload: ChartTooltipProps['payload']) => string;
 }
 
 export default function ChartTooltip({ active, payload, label, labelFormatter }: ChartTooltipProps) {
@@ -27,7 +28,7 @@ export default function ChartTooltip({ active, payload, label, labelFormatter }:
     >
       {label && (
         <div style={{ fontWeight: 600, marginBottom: 6, fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.06em', opacity: 0.5 }}>
-          {labelFormatter ? labelFormatter(label) : label}
+          {labelFormatter ? labelFormatter(label, payload!) : label}
         </div>
       )}
       {payload.map((entry, i) => (

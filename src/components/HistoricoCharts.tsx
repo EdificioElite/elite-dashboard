@@ -47,7 +47,7 @@ function applyPreset(preset: Preset): { desde: string; hasta: string } {
 
 function xAxisFormat(iso: string, spanMs: number): string {
   const d = new Date(iso);
-  if (spanMs <= 24 * 60 * 60 * 1000) return d.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' });
+  if (spanMs <= 26 * 60 * 60 * 1000) return d.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' });
   if (spanMs <= 7 * 24 * 60 * 60 * 1000) return d.toLocaleDateString('es-ES', { weekday: 'short', day: 'numeric' });
   if (spanMs <= 90 * 24 * 60 * 60 * 1000) return d.toLocaleDateString('es-ES', { day: 'numeric', month: 'short' });
   return d.toLocaleDateString('es-ES', { month: 'short', year: '2-digit' });
@@ -93,9 +93,9 @@ function ChartLine({ data, color, dashed }: ChartLineProps) {
           domain={domain}
           width={40}
         />
-        <Tooltip content={<ChartTooltip labelFormatter={(label: string) => {
-          const item = data.find((d) => d.label === label);
-          return item?.timestamp ? new Date(item.timestamp).toLocaleString('es-ES', { day: 'numeric', month: 'long', hour: '2-digit', minute: '2-digit' }) : label;
+        <Tooltip content={<ChartTooltip labelFormatter={(_label: string, payload: any) => {
+          const entry = payload?.[0]?.payload as { timestamp?: string } | undefined;
+          return entry?.timestamp ? new Date(entry.timestamp).toLocaleString('es-ES', { day: 'numeric', month: 'long', hour: '2-digit', minute: '2-digit' }) : _label;
         }} />} />
         <defs>
           <linearGradient id="areaGradient" x1="0" y1="0" x2="0" y2="1">
