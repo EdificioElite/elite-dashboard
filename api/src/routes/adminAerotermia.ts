@@ -24,7 +24,9 @@ router.get('/admin/aerotermia/consumos', authMiddleware, adminMiddleware, async 
           ct.created AS timestamp,
           ct.energy_wh_inst_value_0_0_0,
           ct.energy_manufacturer_specific_02_wh_inst_value_0_0_0,
-          ct.volume_m3_inst_value_0_1_0
+          ct.volume_m3_inst_value_0_1_0,
+          ct.flow_temp_c_inst_value_0_0_0,
+          ct.return_temp_c_inst_value_0_0_0
         FROM contadores ct
         JOIN vecinos v ON ct.device_identification = v.device_identification
           AND ct.serial_number::text = v.serial_number
@@ -52,17 +54,26 @@ router.get('/admin/aerotermia/consumos', authMiddleware, adminMiddleware, async 
         GROUP BY date_trunc('hour', timestamp)
         ORDER BY hour
       ),
+      temp_avgs AS (
+        SELECT
+          date_trunc('hour', timestamp) AS hour,
+          ROUND(AVG(flow_temp_c_inst_value_0_0_0)::numeric, 1) AS temp_impulsion,
+          ROUND(AVG(return_temp_c_inst_value_0_0_0)::numeric, 1) AS temp_retorno
+        FROM all_readings
+        GROUP BY date_trunc('hour', timestamp)
+      ),
       counted AS (
         SELECT *, ROW_NUMBER() OVER (ORDER BY hour) AS rn, COUNT(*) OVER () AS total
         FROM valid_deltas
       )
-      SELECT hour AS timestamp, kwh_calor, kwh_frio, m3_acs, kwh_acs
-      FROM counted
-      WHERE total <= ${MAX_POINTS}
-         OR rn = 1
-         OR rn = total
-         OR rn % GREATEST(1, CEIL(total / ${MAX_POINTS}.0)::int) = 1
-      ORDER BY hour ASC
+      SELECT d.hour AS timestamp, d.kwh_calor, d.kwh_frio, d.m3_acs, d.kwh_acs, t.temp_impulsion, t.temp_retorno
+      FROM counted d
+      LEFT JOIN temp_avgs t ON d.hour = t.hour
+      WHERE d.total <= ${MAX_POINTS}
+         OR d.rn = 1
+         OR d.rn = d.total
+         OR d.rn % GREATEST(1, CEIL(d.total / ${MAX_POINTS}.0)::int) = 1
+      ORDER BY d.hour ASC
     `;
 
     const result = await query(sql, [desde, hasta]);

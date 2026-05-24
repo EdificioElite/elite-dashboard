@@ -7,12 +7,21 @@ import SegmentedControl from './SegmentedControl';
 import ChartTooltip from './ChartTooltip';
 import Icon from './Icon';
 
+function formatTooltipDate(_label: string, payload: { name: string; value: number; color: string; payload?: Record<string, unknown> }[]): string {
+  const entry = payload[0]?.payload as { timestamp?: string } | undefined;
+  return (entry?.timestamp)
+    ? new Date(entry.timestamp).toLocaleString('es-ES', { day: 'numeric', month: 'long', hour: '2-digit', minute: '2-digit' })
+    : _label;
+}
+
 interface Consumo {
   timestamp: string;
   kwh_calor: number;
   kwh_frio: number;
   m3_acs: number;
   kwh_acs: number;
+  temp_impulsion: number | null;
+  temp_retorno: number | null;
 }
 
 type Preset = '24h' | '7d' | '30d' | '1a' | null;
@@ -45,9 +54,11 @@ function applyPreset(preset: Preset): { desde: string; hasta: string } {
   }
 }
 
+const MAX_SPAN_MS_FOR_TIME_LABELS = 26 * 60 * 60 * 1000;
+
 function xAxisFormat(iso: string, spanMs: number): string {
   const d = new Date(iso);
-  if (spanMs <= 24 * 60 * 60 * 1000) return d.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' });
+  if (spanMs <= MAX_SPAN_MS_FOR_TIME_LABELS) return d.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' });
   if (spanMs <= 7 * 24 * 60 * 60 * 1000) return d.toLocaleDateString('es-ES', { weekday: 'short', day: 'numeric' });
   if (spanMs <= 90 * 24 * 60 * 60 * 1000) return d.toLocaleDateString('es-ES', { day: 'numeric', month: 'short' });
   return d.toLocaleDateString('es-ES', { month: 'short', year: '2-digit' });
@@ -93,10 +104,7 @@ function ChartLine({ data, color, dashed }: ChartLineProps) {
           domain={domain}
           width={40}
         />
-        <Tooltip content={<ChartTooltip labelFormatter={(label: string) => {
-          const item = data.find((d) => d.label === label);
-          return item?.timestamp ? new Date(item.timestamp).toLocaleString('es-ES', { day: 'numeric', month: 'long', hour: '2-digit', minute: '2-digit' }) : label;
-        }} />} />
+        <Tooltip content={<ChartTooltip labelFormatter={formatTooltipDate} />} />
         <defs>
           <linearGradient id="areaGradient" x1="0" y1="0" x2="0" y2="1">
             <stop offset="0%" stopColor={color} stopOpacity={0.12} />
@@ -112,6 +120,54 @@ function ChartLine({ data, color, dashed }: ChartLineProps) {
           strokeDasharray={dashed ? '4 3' : undefined}
           dot={false}
           activeDot={{ r: 4, fill: '#fff8ee', stroke: color, strokeWidth: 1.5 }}
+        />
+      </LineChart>
+    </ResponsiveContainer>
+  );
+}
+
+function TempChart({ data }: { data: { label: string; timestamp: string; impulsion: number | null; retorno: number | null }[] }) {
+  const domain = useMemo(() => {
+    const all = data.flatMap((d) => [d.impulsion, d.retorno].filter((v): v is number => v != null && !isNaN(v)));
+    if (all.length === 0) return [0, 60];
+    const min = Math.min(...all);
+    const max = Math.max(...all);
+    const range = max - min;
+    const padding = Math.max(range * 0.15, 2);
+    return [Math.max(0, min - padding), max + padding];
+  }, [data]);
+
+  return (
+    <ResponsiveContainer width="100%" height={120}>
+      <LineChart data={data} margin={{ top: 4, right: 8, left: 0, bottom: 0 }}>
+        <CartesianGrid strokeDasharray="2 4" stroke="rgba(30,20,10,0.12)" vertical={false} />
+        <XAxis dataKey="label" fontSize={10} tick={{ fill: 'rgba(58,47,36,.35)' }} axisLine={false} tickLine={false} interval="preserveStartEnd" />
+        <YAxis
+          fontSize={10}
+          tick={{ fill: 'rgba(58,47,36,.35)', fontFamily: "'JetBrains Mono', monospace" }}
+          axisLine={false} tickLine={false}
+          domain={domain}
+          width={40}
+          tickFormatter={(v: number) => `${v.toFixed(0)}°`}
+        />
+        <Tooltip content={<ChartTooltip labelFormatter={formatTooltipDate} />} />
+        <Line
+          type="monotone"
+          dataKey="impulsion"
+          stroke="#E07B39"
+          strokeWidth={3}
+          dot={false}
+          activeDot={{ r: 4, fill: '#fff8ee', stroke: '#E07B39', strokeWidth: 1.5 }}
+          connectNulls={false}
+        />
+        <Line
+          type="monotone"
+          dataKey="retorno"
+          stroke="#4A7A8C"
+          strokeWidth={3}
+          dot={false}
+          activeDot={{ r: 4, fill: '#fff8ee', stroke: '#4A7A8C', strokeWidth: 1.5 }}
+          connectNulls={false}
         />
       </LineChart>
     </ResponsiveContainer>
@@ -171,6 +227,11 @@ export default function HistoricoCharts({ endpoint, title, desde: extDesde, hast
     [data, formatted]
   );
 
+  const tempData = useMemo(
+    () => data.map((d, i) => ({ ...formatted[i], impulsion: d.temp_impulsion, retorno: d.temp_retorno })),
+    [data, formatted]
+  );
+
   return (
     <div className="glass p-[26px]" aria-label="Gráfica de consumo histórico de calor, frío y ACS">
       <div className="flex items-center justify-between mb-4 flex-wrap gap-3">
@@ -223,6 +284,21 @@ export default function HistoricoCharts({ endpoint, title, desde: extDesde, hast
               <span className="text-[10px] text-cocoa/30 font-mono">m³</span>
             </div>
             <ChartLine data={acsData} color="#5D7A4A" unit="m³" dashed decimals={3} />
+          </div>
+          <div id="temperaturas" className="scroll-mt-20">
+            <div className="flex items-center gap-2 mb-1.5">
+              <span className="text-[11px] font-medium text-cocoa/40 uppercase tracking-wider">Temperaturas</span>
+              <span className="text-[10px] text-cocoa/30 font-mono">°C</span>
+            </div>
+            <div className="flex items-center gap-4 mb-2">
+              <span className="flex items-center gap-1.5 text-[10px] text-cocoa/40">
+                <span className="w-2 h-2 rounded-full shrink-0" style={{ background: '#E07B39' }} /> Impulsión
+              </span>
+              <span className="flex items-center gap-1.5 text-[10px] text-cocoa/40">
+                <span className="w-2 h-2 rounded-full shrink-0" style={{ background: '#4A7A8C' }} /> Retorno
+              </span>
+            </div>
+            <TempChart data={tempData} />
           </div>
         </div>
       )}
