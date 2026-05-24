@@ -35,6 +35,7 @@ describe('ConsumoCard', () => {
     expect(screen.getByText('32.0°C')).toBeInTheDocument();
     expect(screen.getByText('Contadores de Aerotermia en vivo')).toBeInTheDocument();
     expect(screen.getByText('Calefaccion')).toBeInTheDocument();
+    expect(screen.getByText('Calefaccion')).toHaveStyle({ color: '#a3402a' });
   });
 
   it('hides delta when mes_inicio is null', () => {
@@ -79,6 +80,7 @@ describe('ConsumoCard', () => {
       />
     );
     expect(screen.getByText('Refrigeracion')).toBeInTheDocument();
+    expect(screen.getByText('Refrigeracion')).toHaveStyle({ color: '#3b82f6' });
   });
 
   it('displays Desconocido mode in gris', () => {
@@ -95,6 +97,7 @@ describe('ConsumoCard', () => {
       />
     );
     expect(screen.getByText('Desconocido')).toBeInTheDocument();
+    expect(screen.getByText('Desconocido')).toHaveStyle({ color: '#9ca3af' });
   });
 
   it('does not show mode label when modo is absent', () => {
