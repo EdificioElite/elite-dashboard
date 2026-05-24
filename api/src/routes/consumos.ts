@@ -5,6 +5,9 @@ import { logger } from '../lib/logger';
 
 const router = Router();
 
+const MODO_CALEFACCION_UMBRAL = 29;
+const MODO_REFRIGERACION_UMBRAL = 21;
+
 router.get('/consumos', authMiddleware, async (req: Request, res: Response) => {
   try {
     const { desde, hasta } = req.query;
@@ -16,20 +19,20 @@ router.get('/consumos', authMiddleware, async (req: Request, res: Response) => {
 
     let whereSql = `WHERE v.piso = $1`;
     const params: unknown[] = [vecinoPiso];
-    if (desde) { params.push(desde); whereSql += ` AND ct.datetime_inst_value_0_0_0 >= $${params.length}`; }
-    if (hasta) { params.push(hasta); whereSql += ` AND ct.datetime_inst_value_0_0_0 <= $${params.length}`; }
+    if (desde) { params.push(desde); whereSql += ` AND ct.created >= $${params.length}`; }
+    if (hasta) { params.push(hasta); whereSql += ` AND ct.created <= $${params.length}`; }
 
     const sql = `
       WITH counted AS (
         SELECT
-          ct.datetime_inst_value_0_0_0,
+          ct.created,
           ct.energy_wh_inst_value_0_0_0,
           ct.energy_manufacturer_specific_02_wh_inst_value_0_0_0,
           ct.volume_m3_inst_value_0_1_0,
           ct.flow_temp_c_inst_value_0_0_0,
           ct.return_temp_c_inst_value_0_0_0,
           ct.power_w_inst_value_0_0_0,
-          ROW_NUMBER() OVER (ORDER BY ct.datetime_inst_value_0_0_0) AS rn,
+          ROW_NUMBER() OVER (ORDER BY ct.created) AS rn,
           COUNT(*) OVER () AS total
         FROM contadores ct
         JOIN vecinos v ON ct.device_identification = v.device_identification
@@ -45,7 +48,7 @@ router.get('/consumos', authMiddleware, async (req: Request, res: Response) => {
       ),
       with_deltas AS (
         SELECT
-          datetime_inst_value_0_0_0 AS timestamp,
+          created AS timestamp,
           ROUND((energy_wh_inst_value_0_0_0 - LAG(energy_wh_inst_value_0_0_0) OVER w) / 1000.0, 3) AS kwh_calor,
           ROUND((energy_manufacturer_specific_02_wh_inst_value_0_0_0 - LAG(energy_manufacturer_specific_02_wh_inst_value_0_0_0) OVER w) / 1000.0, 3) AS kwh_frio,
           ROUND((volume_m3_inst_value_0_1_0 - LAG(volume_m3_inst_value_0_1_0) OVER w)::numeric, 3) AS m3_acs,
@@ -54,7 +57,7 @@ router.get('/consumos', authMiddleware, async (req: Request, res: Response) => {
           return_temp_c_inst_value_0_0_0 AS temp_retorno,
           power_w_inst_value_0_0_0 AS power_w
         FROM sampled
-        WINDOW w AS (ORDER BY datetime_inst_value_0_0_0)
+        WINDOW w AS (ORDER BY created)
       )
       SELECT * FROM with_deltas WHERE kwh_calor IS NOT NULL
       ORDER BY timestamp ASC
@@ -79,23 +82,23 @@ router.get('/consumo-actual', authMiddleware, async (req: Request, res: Response
     const vecinoPiso = (isAdmin && pisoQuery) ? pisoQuery : req.user!.vecinoPiso;
 
     const result = await query(
-      `WITH latest AS (
+       `WITH latest AS (
         SELECT
-          ct.datetime_inst_value_0_0_0 AS timestamp,
+          ct.created AS timestamp,
           ct.energy_wh_inst_value_0_0_0,
           ct.energy_manufacturer_specific_02_wh_inst_value_0_0_0,
           ct.volume_m3_inst_value_0_1_0,
           ct.flow_temp_c_inst_value_0_0_0 AS temp_impulsion,
           ct.return_temp_c_inst_value_0_0_0 AS temp_retorno,
           ct.power_w_inst_value_0_0_0 AS power_w,
-          LAG(ct.energy_wh_inst_value_0_0_0) OVER (ORDER BY ct.datetime_inst_value_0_0_0) AS prev_wh_calor,
-          LAG(ct.energy_manufacturer_specific_02_wh_inst_value_0_0_0) OVER (ORDER BY ct.datetime_inst_value_0_0_0) AS prev_wh_frio,
-          LAG(ct.volume_m3_inst_value_0_1_0) OVER (ORDER BY ct.datetime_inst_value_0_0_0) AS prev_m3_acs
+          LAG(ct.energy_wh_inst_value_0_0_0) OVER (ORDER BY ct.created) AS prev_wh_calor,
+          LAG(ct.energy_manufacturer_specific_02_wh_inst_value_0_0_0) OVER (ORDER BY ct.created) AS prev_wh_frio,
+          LAG(ct.volume_m3_inst_value_0_1_0) OVER (ORDER BY ct.created) AS prev_m3_acs
         FROM contadores ct
         JOIN vecinos v ON ct.device_identification = v.device_identification
           AND ct.serial_number::text = v.serial_number
         WHERE v.piso = $1
-        ORDER BY ct.datetime_inst_value_0_0_0 DESC
+        ORDER BY ct.created DESC
       ),
       mes_inicio AS (
         SELECT
@@ -106,8 +109,8 @@ router.get('/consumo-actual', authMiddleware, async (req: Request, res: Response
         JOIN vecinos v ON ct.device_identification = v.device_identification
           AND ct.serial_number::text = v.serial_number
         WHERE v.piso = $1
-          AND ct.datetime_inst_value_0_0_0 <= date_trunc('month', NOW())
-        ORDER BY ct.datetime_inst_value_0_0_0 DESC
+          AND ct.created <= date_trunc('month', NOW())
+        ORDER BY ct.created DESC
         LIMIT 1
       )
       SELECT
@@ -136,7 +139,19 @@ router.get('/consumo-actual', authMiddleware, async (req: Request, res: Response
       return;
     }
 
-    res.json(result.rows[0]);
+    const row = result.rows[0] as Record<string, unknown>;
+    const t = row.temp_impulsion as number | null;
+    if (t == null) {
+      row.modo = 'desconocido';
+    } else if (t > MODO_CALEFACCION_UMBRAL) {
+      row.modo = 'calefaccion';
+    } else if (t < MODO_REFRIGERACION_UMBRAL) {
+      row.modo = 'refrigeracion';
+    } else {
+      row.modo = 'desconocido';
+    }
+
+    res.json(row);
 
     if (req.user!.source === 'home-assistant') {
       query('UPDATE usuarios SET ultima_consulta_ha = NOW() WHERE id = $1', [req.user!.userId]).catch(() => {});

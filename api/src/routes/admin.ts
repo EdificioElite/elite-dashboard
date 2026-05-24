@@ -96,20 +96,20 @@ router.get('/admin/vecinos/:piso', authMiddleware, adminMiddleware, async (req: 
 
     let whereSql = `WHERE v.piso = $1`;
     const params: unknown[] = [piso];
-    if (desde) { params.push(desde); whereSql += ` AND ct.datetime_inst_value_0_0_0 >= $${params.length}`; }
-    if (hasta) { params.push(hasta); whereSql += ` AND ct.datetime_inst_value_0_0_0 <= $${params.length}`; }
+    if (desde) { params.push(desde); whereSql += ` AND ct.created >= $${params.length}`; }
+    if (hasta) { params.push(hasta); whereSql += ` AND ct.created <= $${params.length}`; }
 
     const sql = `
       WITH counted AS (
         SELECT
-          ct.datetime_inst_value_0_0_0,
+          ct.created,
           ct.energy_wh_inst_value_0_0_0,
           ct.energy_manufacturer_specific_02_wh_inst_value_0_0_0,
           ct.volume_m3_inst_value_0_1_0,
           ct.flow_temp_c_inst_value_0_0_0,
           ct.return_temp_c_inst_value_0_0_0,
           ct.power_w_inst_value_0_0_0,
-          ROW_NUMBER() OVER (ORDER BY ct.datetime_inst_value_0_0_0) AS rn,
+          ROW_NUMBER() OVER (ORDER BY ct.created) AS rn,
           COUNT(*) OVER () AS total
         FROM contadores ct
         JOIN vecinos v ON ct.device_identification = v.device_identification
@@ -125,7 +125,7 @@ router.get('/admin/vecinos/:piso', authMiddleware, adminMiddleware, async (req: 
       ),
       with_deltas AS (
         SELECT
-          datetime_inst_value_0_0_0 AS timestamp,
+          created AS timestamp,
           ROUND((energy_wh_inst_value_0_0_0 - LAG(energy_wh_inst_value_0_0_0) OVER w) / 1000.0, 3) AS kwh_calor,
           ROUND((energy_manufacturer_specific_02_wh_inst_value_0_0_0 - LAG(energy_manufacturer_specific_02_wh_inst_value_0_0_0) OVER w) / 1000.0, 3) AS kwh_frio,
           ROUND((volume_m3_inst_value_0_1_0 - LAG(volume_m3_inst_value_0_1_0) OVER w)::numeric, 3) AS m3_acs,
@@ -134,7 +134,7 @@ router.get('/admin/vecinos/:piso', authMiddleware, adminMiddleware, async (req: 
           return_temp_c_inst_value_0_0_0 AS temp_retorno,
           power_w_inst_value_0_0_0 AS power_w
         FROM sampled
-        WINDOW w AS (ORDER BY datetime_inst_value_0_0_0)
+        WINDOW w AS (ORDER BY created)
       )
       SELECT * FROM with_deltas WHERE kwh_calor IS NOT NULL
       ORDER BY timestamp ASC
