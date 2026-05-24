@@ -530,8 +530,8 @@ describe('Consumos routes', () => {
         .set('Authorization', `Bearer ${token}`);
       expect(res.status).toBe(200);
       const sqlArg = mockQuery.mock.calls[0][0];
-      expect(sqlArg).toContain('datetime_inst_value_0_0_0 >=');
-      expect(sqlArg).toContain('datetime_inst_value_0_0_0 <=');
+      expect(sqlArg).toContain('created >=');
+      expect(sqlArg).toContain('created <=');
     });
   });
 

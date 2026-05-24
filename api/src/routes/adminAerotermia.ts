@@ -21,15 +21,15 @@ router.get('/admin/aerotermia/consumos', authMiddleware, adminMiddleware, async 
       WITH all_readings AS (
         SELECT
           v.piso,
-          ct.datetime_inst_value_0_0_0 AS timestamp,
+          ct.created AS timestamp,
           ct.energy_wh_inst_value_0_0_0,
           ct.energy_manufacturer_specific_02_wh_inst_value_0_0_0,
           ct.volume_m3_inst_value_0_1_0
         FROM contadores ct
         JOIN vecinos v ON ct.device_identification = v.device_identification
           AND ct.serial_number::text = v.serial_number
-        WHERE ct.datetime_inst_value_0_0_0 >= $1
-          AND ct.datetime_inst_value_0_0_0 <= $2
+        WHERE ct.created >= $1
+          AND ct.created <= $2
       ),
       vecino_deltas AS (
         SELECT
