@@ -136,7 +136,19 @@ router.get('/consumo-actual', authMiddleware, async (req: Request, res: Response
       return;
     }
 
-    res.json(result.rows[0]);
+    const row = result.rows[0] as Record<string, unknown>;
+    const t = row.temp_impulsion as number | null;
+    if (t == null) {
+      row.modo = 'desconocido';
+    } else if (t > 29) {
+      row.modo = 'calefaccion';
+    } else if (t < 21) {
+      row.modo = 'refrigeracion';
+    } else {
+      row.modo = 'desconocido';
+    }
+
+    res.json(row);
 
     if (req.user!.source === 'home-assistant') {
       query('UPDATE usuarios SET ultima_consulta_ha = NOW() WHERE id = $1', [req.user!.userId]).catch(() => {});

@@ -559,6 +559,58 @@ describe('Consumos routes', () => {
       expect(res.status).toBe(200);
       expect(res.body).toBeNull();
     });
+
+    it('returns modo calefaccion when temp_impulsion > 29', async () => {
+      mockQuery.mockResolvedValueOnce({
+        rows: [{ timestamp: '2026-01-01T12:00:00Z', kwh_calor: 2.0, kwh_frio: 0.5, m3_acs: 0.03, kwh_acs: 1.395, temp_impulsion: 42.0, temp_retorno: 35.0 }],
+      });
+      const app = createApp();
+      const token = userToken();
+      const res = await request(app)
+        .get('/api/consumo-actual')
+        .set('Authorization', `Bearer ${token}`);
+      expect(res.status).toBe(200);
+      expect(res.body.modo).toBe('calefaccion');
+    });
+
+    it('returns modo refrigeracion when temp_impulsion < 21', async () => {
+      mockQuery.mockResolvedValueOnce({
+        rows: [{ timestamp: '2026-01-01T12:00:00Z', kwh_calor: 2.0, kwh_frio: 0.5, m3_acs: 0.03, kwh_acs: 1.395, temp_impulsion: 7.0, temp_retorno: 12.0 }],
+      });
+      const app = createApp();
+      const token = userToken();
+      const res = await request(app)
+        .get('/api/consumo-actual')
+        .set('Authorization', `Bearer ${token}`);
+      expect(res.status).toBe(200);
+      expect(res.body.modo).toBe('refrigeracion');
+    });
+
+    it('returns modo desconocido when temp_impulsion between 21 and 29', async () => {
+      mockQuery.mockResolvedValueOnce({
+        rows: [{ timestamp: '2026-01-01T12:00:00Z', kwh_calor: 2.0, kwh_frio: 0.5, m3_acs: 0.03, kwh_acs: 1.395, temp_impulsion: 25.0, temp_retorno: 20.0 }],
+      });
+      const app = createApp();
+      const token = userToken();
+      const res = await request(app)
+        .get('/api/consumo-actual')
+        .set('Authorization', `Bearer ${token}`);
+      expect(res.status).toBe(200);
+      expect(res.body.modo).toBe('desconocido');
+    });
+
+    it('returns modo desconocido when temp_impulsion is null', async () => {
+      mockQuery.mockResolvedValueOnce({
+        rows: [{ timestamp: '2026-01-01T12:00:00Z', kwh_calor: 2.0, kwh_frio: 0.5, m3_acs: 0.03, kwh_acs: 1.395, temp_impulsion: null, temp_retorno: null }],
+      });
+      const app = createApp();
+      const token = userToken();
+      const res = await request(app)
+        .get('/api/consumo-actual')
+        .set('Authorization', `Bearer ${token}`);
+      expect(res.status).toBe(200);
+      expect(res.body.modo).toBe('desconocido');
+    });
   });
 });
 
