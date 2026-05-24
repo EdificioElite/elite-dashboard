@@ -26,10 +26,10 @@ Añadir deteccion automatica del modo de funcionamiento de la aerotermia (calefa
 - `ConsumoCard.tsx`:
   - Añadir `modo` al interface `ConsumoActual`.
   - En la columna "Estado", añadir una linea encima de Impulsion/Retorno que muestre el modo.
-  - Colores:
-    - `calefaccion` → `text-red-600`
-    - `refrigeracion` → `text-blue-600`
-    - `desconocido` → `text-gray-400`
+  - Colores (inline styles para mantener consistencia con el estilo del componente):
+    - `calefaccion` → `#a3402a` (rojo, mismo tono que "Apagado" para cohesion en columna Estado)
+    - `refrigeracion` → `#3b82f6` (azul)
+    - `desconocido` → `#9ca3af` (gris)
 
 ## No se modifica
 
