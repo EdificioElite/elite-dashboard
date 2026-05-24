@@ -16,6 +16,7 @@ interface ConsumoActual {
   temp_impulsion: number | null;
   temp_retorno: number | null;
   power_w: number | null;
+  modo?: "calefaccion" | "refrigeracion" | "desconocido";
   sparkline_calor?: number[];
   sparkline_frio?: number[];
   sparkline_acs?: number[];
@@ -91,6 +92,17 @@ export default function ConsumoCard({ data }: { data: ConsumoActual | null }) {
         </div>
         <div>
           <div className="text-[11px] font-medium uppercase tracking-wider text-cocoa/40 mb-1">Estado</div>
+          {data.modo && (
+            <div className="text-[12px] font-semibold mb-1" style={{
+              color: data.modo === 'calefaccion' ? '#a3402a'
+                : data.modo === 'refrigeracion' ? '#3b82f6'
+                : '#9ca3af',
+            }}>
+              {data.modo === 'calefaccion' ? 'Calefaccion'
+                : data.modo === 'refrigeracion' ? 'Refrigeracion'
+                : 'Desconocido'}
+            </div>
+          )}
           <div className="flex items-center gap-1.5 mb-1">
             {isLive ? (
               <>
