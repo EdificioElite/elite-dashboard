@@ -7,6 +7,13 @@ import SegmentedControl from './SegmentedControl';
 import ChartTooltip from './ChartTooltip';
 import Icon from './Icon';
 
+function formatTooltipDate(_label: string, payload: { name: string; value: number; color: string; payload?: Record<string, unknown> }[]): string {
+  const entry = payload[0]?.payload as { timestamp?: string } | undefined;
+  return (entry?.timestamp)
+    ? new Date(entry.timestamp).toLocaleString('es-ES', { day: 'numeric', month: 'long', hour: '2-digit', minute: '2-digit' })
+    : _label;
+}
+
 interface Consumo {
   timestamp: string;
   kwh_calor: number;
@@ -47,9 +54,11 @@ function applyPreset(preset: Preset): { desde: string; hasta: string } {
   }
 }
 
+const MAX_SPAN_MS_FOR_TIME_LABELS = 26 * 60 * 60 * 1000;
+
 function xAxisFormat(iso: string, spanMs: number): string {
   const d = new Date(iso);
-  if (spanMs <= 26 * 60 * 60 * 1000) return d.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' });
+  if (spanMs <= MAX_SPAN_MS_FOR_TIME_LABELS) return d.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' });
   if (spanMs <= 7 * 24 * 60 * 60 * 1000) return d.toLocaleDateString('es-ES', { weekday: 'short', day: 'numeric' });
   if (spanMs <= 90 * 24 * 60 * 60 * 1000) return d.toLocaleDateString('es-ES', { day: 'numeric', month: 'short' });
   return d.toLocaleDateString('es-ES', { month: 'short', year: '2-digit' });
@@ -95,10 +104,7 @@ function ChartLine({ data, color, dashed }: ChartLineProps) {
           domain={domain}
           width={40}
         />
-        <Tooltip content={<ChartTooltip labelFormatter={(_label: string, payload: any) => {
-          const entry = payload?.[0]?.payload as { timestamp?: string } | undefined;
-          return entry?.timestamp ? new Date(entry.timestamp).toLocaleString('es-ES', { day: 'numeric', month: 'long', hour: '2-digit', minute: '2-digit' }) : _label;
-        }} />} />
+        <Tooltip content={<ChartTooltip labelFormatter={formatTooltipDate} />} />
         <defs>
           <linearGradient id="areaGradient" x1="0" y1="0" x2="0" y2="1">
             <stop offset="0%" stopColor={color} stopOpacity={0.12} />
@@ -144,10 +150,7 @@ function TempChart({ data }: { data: { label: string; timestamp: string; impulsi
           width={40}
           tickFormatter={(v: number) => `${v.toFixed(0)}°`}
         />
-        <Tooltip content={<ChartTooltip labelFormatter={(_label: string, payload: any) => {
-          const entry = payload?.[0]?.payload as { timestamp?: string } | undefined;
-          return entry?.timestamp ? new Date(entry.timestamp).toLocaleString('es-ES', { day: 'numeric', month: 'long', hour: '2-digit', minute: '2-digit' }) : _label;
-        }} />} />
+        <Tooltip content={<ChartTooltip labelFormatter={formatTooltipDate} />} />
         <Line
           type="monotone"
           dataKey="impulsion"
