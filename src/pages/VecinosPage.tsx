@@ -4,6 +4,7 @@ import { apiFetch } from '../api/client';
 import Icon from '../components/Icon';
 import EditVecinoModal from '../components/EditVecinoModal';
 import DeleteVecinoModal from '../components/DeleteVecinoModal';
+import AddVecinoModal from '../components/AddVecinoModal';
 
 interface Vecino {
   piso: string;
@@ -23,19 +24,9 @@ export default function VecinosPage() {
   const [vecinos, setVecinos] = useState<Vecino[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
-  const [showForm, setShowForm] = useState(false);
+  const [showAddModal, setShowAddModal] = useState(false);
   const [editingVecinoData, setEditingVecinoData] = useState<Vecino | null>(null);
   const [deletingVecino, setDeletingVecino] = useState<Vecino | null>(null);
-  const [formError, setFormError] = useState('');
-  const [formSuccess, setFormSuccess] = useState('');
-
-  const [newPiso, setNewPiso] = useState('');
-  const [newNombre, setNewNombre] = useState('');
-  const [newEmail, setNewEmail] = useState('');
-  const [newCoeficiente, setNewCoeficiente] = useState('');
-  const [newEnviarEmail, setNewEnviarEmail] = useState(false);
-  const [newDeviceId, setNewDeviceId] = useState('');
-  const [newSerialNumber, setNewSerialNumber] = useState('');
 
   const [inviteMessage, setInviteMessage] = useState('');
   const [inviteError, setInviteError] = useState(false);
@@ -47,33 +38,6 @@ export default function VecinosPage() {
   };
 
   useEffect(() => { fetchVecinos(); }, []);
-
-  const handleCreate = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setFormError('');
-    setFormSuccess('');
-    try {
-      await apiFetch('/admin/vecinos', {
-        method: 'POST',
-        body: JSON.stringify({
-          piso: newPiso,
-          nombre: newNombre || null,
-          email: newEmail || null,
-          coeficiente: newCoeficiente || null,
-          enviar_email: newEnviarEmail,
-          device_identification: newDeviceId || null,
-          serial_number: newSerialNumber || null,
-        }),
-      });
-      setFormSuccess('Vecino creado');
-      setNewPiso(''); setNewNombre(''); setNewEmail(''); setNewCoeficiente('');
-      setNewEnviarEmail(false); setNewDeviceId(''); setNewSerialNumber('');
-      setShowForm(false);
-      fetchVecinos();
-    } catch (err: any) {
-      setFormError(err.message || 'Error al crear vecino');
-    }
-  };
 
   const handleInvite = async (piso: string) => {
     setInviteMessage('');
@@ -146,9 +110,9 @@ export default function VecinosPage() {
             <h1 className="font-display text-[40px] font-medium text-cocoa mt-1" style={{ letterSpacing: '-0.02em' }}>Vecinos</h1>
             <p className="text-sm text-cocoa/60 mt-1.5 max-w-lg">Gestiona los vecinos del edificio.</p>
           </div>
-          <button onClick={() => setShowForm(!showForm)} className={`btn ${showForm ? 'btn-ghost' : 'btn-primary'}`}>
-            <Icon name={showForm ? 'x' : 'plus'} size={14} />
-            {showForm ? 'Cancelar' : 'Añadir vecino'}
+          <button onClick={() => setShowAddModal(true)} className="btn btn-primary">
+            <Icon name="plus" size={14} />
+            Añadir vecino
           </button>
         </div>
 
@@ -167,52 +131,6 @@ export default function VecinosPage() {
             </div>
           ))}
         </div>
-
-        {showForm && (
-          <div className="glass p-[26px]">
-            <div className="flex items-center gap-3 mb-5">
-              <div className="w-7 h-7 rounded-lg flex items-center justify-center shrink-0" style={{ background: 'var(--accent)' }}>
-                <Icon name="plus" size={14} className="text-cream" />
-              </div>
-              <span className="eyebrow">Nuevo vecino</span>
-            </div>
-            {formError && <div className="mb-4 px-4 py-3 rounded-xl text-sm flex items-center gap-2" style={{ background: 'rgba(163,64,42,.08)', color: '#a3402a' }}><Icon name="alertTriangle" size={14} />{formError}</div>}
-            {formSuccess && <div className="mb-4 px-4 py-3 rounded-xl text-sm flex items-center gap-2" style={{ background: 'rgba(91,122,74,.1)', color: '#5b7a4a' }}><Icon name="check" size={14} />{formSuccess}</div>}
-            <form onSubmit={handleCreate} className="grid grid-cols-1 md:grid-cols-3 gap-4 items-end">
-              <div>
-                <label className="block text-xs font-semibold uppercase tracking-wider text-cocoa/40 mb-1.5">Piso *</label>
-                <input type="text" value={newPiso} onChange={e => setNewPiso(e.target.value)} required className="input-card" placeholder="1A" />
-              </div>
-              <div>
-                <label className="block text-xs font-semibold uppercase tracking-wider text-cocoa/40 mb-1.5">Nombre</label>
-                <input type="text" value={newNombre} onChange={e => setNewNombre(e.target.value)} className="input-card" placeholder="Nombre del vecino" />
-              </div>
-              <div>
-                <label className="block text-xs font-semibold uppercase tracking-wider text-cocoa/40 mb-1.5">Email facturas</label>
-                <input type="email" value={newEmail} onChange={e => setNewEmail(e.target.value)} className="input-card" placeholder="vecino@email.com" />
-              </div>
-              <div>
-                <label className="block text-xs font-semibold uppercase tracking-wider text-cocoa/40 mb-1.5">Coeficiente</label>
-                <input type="text" value={newCoeficiente} onChange={e => setNewCoeficiente(e.target.value)} className="input-card" placeholder="0.20" />
-              </div>
-              <div>
-                <label className="block text-xs font-semibold uppercase tracking-wider text-cocoa/40 mb-1.5">Device ID</label>
-                <input type="text" value={newDeviceId} onChange={e => setNewDeviceId(e.target.value)} className="input-card" placeholder="DEVID001" />
-              </div>
-              <div>
-                <label className="block text-xs font-semibold uppercase tracking-wider text-cocoa/40 mb-1.5">Serial Number</label>
-                <input type="text" value={newSerialNumber} onChange={e => setNewSerialNumber(e.target.value)} className="input-card" placeholder="10000001" />
-              </div>
-              <div className="md:col-span-3 flex items-center gap-3">
-                <input type="checkbox" id="newEnviarEmail" checked={newEnviarEmail} onChange={e => setNewEnviarEmail(e.target.checked)} className="w-4 h-4 rounded accent-[var(--accent)]" />
-                <label htmlFor="newEnviarEmail" className="text-sm text-cocoa/70 cursor-pointer select-none">Enviar facturas por email</label>
-              </div>
-              <div className="md:col-span-3 flex justify-end">
-                <button type="submit" className="btn btn-primary"><Icon name="check" size={14} />Guardar</button>
-              </div>
-            </form>
-          </div>
-        )}
 
         <div className="glass p-[26px]">
           <div className="flex items-center gap-3 mb-5">
@@ -312,6 +230,13 @@ export default function VecinosPage() {
           userId={deletingVecino.user_id}
           onClose={() => setDeletingVecino(null)}
           onDeleted={() => { setDeletingVecino(null); fetchVecinos(); }}
+        />
+      )}
+
+      {showAddModal && (
+        <AddVecinoModal
+          onClose={() => setShowAddModal(false)}
+          onSaved={() => fetchVecinos()}
         />
       )}
     </div>
