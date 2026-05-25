@@ -8,7 +8,7 @@
 
 ## DB: Migración
 
-Archivo: `api/migrations/007_multi_usuario_por_piso.sql`
+Archivo: `api/migrations/008_multi_usuario_por_piso.sql`
 
 ```sql
 ALTER TABLE usuarios DROP CONSTRAINT IF EXISTS usuarios_vecino_piso_key;
@@ -51,7 +51,7 @@ La FK a `vecinos(piso)` se mantiene. La columna `vecino_piso` ya permite NULL.
 ### Nuevo componente: `src/components/InviteUserModal.tsx`
 
 - Basado en `ChangePasswordModal.tsx` (mismo patrón: createPortal, modal-backdrop, modal-panel, Escape, click fuera)
-- Estados: email, vecinoPiso, error, saving, success (con auto-dismiss a los 4s)
+- Estados: email, vecinoPiso, error, saving, success (con auto-dismiss a los 2s)
 - Piso: selector cargado vía `GET /admin/vecinos` al montar el modal
 - Submit: llama a `POST /admin/usuarios` con `{ email, vecino_piso }`
 - Muestra feedback de éxito o error

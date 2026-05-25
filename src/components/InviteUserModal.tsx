@@ -23,7 +23,7 @@ export default function InviteUserModal({ onClose, onSaved }: Props) {
   useEffect(() => {
     apiFetch<VecinoOption[]>('/admin/vecinos')
       .then(setVecinos)
-      .catch(() => {});
+      .catch((err) => { console.error('Error al cargar vecinos', err); });
   }, []);
 
   useEffect(() => {

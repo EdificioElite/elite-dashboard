@@ -13,7 +13,7 @@
 ### Task 1: Migración DB — permitir múltiples usuarios por piso
 
 **Files:**
-- Create: `api/migrations/007_multi_usuario_por_piso.sql`
+- Create: `api/migrations/008_multi_usuario_por_piso.sql`
 
 - [ ] **Step 1: Crear archivo de migración**
 
