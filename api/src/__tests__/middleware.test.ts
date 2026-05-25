@@ -2,7 +2,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { Request, Response, NextFunction } from 'express';
 import { authMiddleware } from '../middleware/auth';
 import { adminMiddleware } from '../middleware/admin';
-import { rateLimit, rateLimitOnlyOnFailure } from '../middleware/rateLimit';
+import { rateLimit, rateLimitOnlyOnFailure, rateLimitOnError } from '../middleware/rateLimit';
 import { signToken } from '../lib/jwt';
 
 process.env.JWT_SECRET = 'test-secret-key';
@@ -223,6 +223,96 @@ describe('rateLimitOnlyOnFailure', () => {
     await new Promise(r => setTimeout(r, 110));
 
     // should allow again
+    const req = mockReq({ ip });
+    const res = mockRes();
+    const n = mockNext();
+    limiter(req, res, n);
+    expect(n).toHaveBeenCalled();
+  });
+});
+
+describe('rateLimitOnError', () => {
+  it('does not count successful responses (200)', () => {
+    const limiter = rateLimitOnError(2, 60000);
+    const ip = '10.6.6.6';
+
+    for (let i = 0; i < 5; i++) {
+      const req = mockReq({ ip });
+      const res = mockRes();
+      res.statusCode = 200;
+      res.json = vi.fn().mockReturnValue(res);
+      const n = mockNext();
+      limiter(req, res, n);
+      expect(n).toHaveBeenCalled();
+      res.json({ ok: true });
+    }
+  });
+
+  it('counts 400 responses as errors', () => {
+    const limiter = rateLimitOnError(2, 60000);
+    const ip = '10.7.7.7';
+
+    for (let i = 0; i < 2; i++) {
+      const req = mockReq({ ip });
+      const res = mockRes();
+      res.status(400);
+      const n = mockNext();
+      limiter(req, res, n);
+      res.json({ error: 'fail' });
+      expect(n).toHaveBeenCalled();
+    }
+
+    const req3 = mockReq({ ip });
+    const res3 = mockRes();
+    const n3 = mockNext();
+    limiter(req3, res3, n3);
+    expect(res3.status).toHaveBeenCalledWith(429);
+    expect(n3).not.toHaveBeenCalled();
+  });
+
+  it('counts 500 responses as errors', () => {
+    const limiter = rateLimitOnError(2, 60000);
+    const ip = '10.8.8.8';
+
+    for (let i = 0; i < 2; i++) {
+      const req = mockReq({ ip });
+      const res = mockRes();
+      res.status(500);
+      const n = mockNext();
+      limiter(req, res, n);
+      res.json({ error: 'internal' });
+      expect(n).toHaveBeenCalled();
+    }
+
+    const req3 = mockReq({ ip });
+    const res3 = mockRes();
+    const n3 = mockNext();
+    limiter(req3, res3, n3);
+    expect(res3.status).toHaveBeenCalledWith(429);
+    expect(n3).not.toHaveBeenCalled();
+  });
+
+  it('resets window after expiry', async () => {
+    const limiter = rateLimitOnError(2, 100);
+    const ip = '10.9.9.9';
+
+    for (let i = 0; i < 2; i++) {
+      const req = mockReq({ ip });
+      const res = mockRes();
+      res.status(400);
+      const n = mockNext();
+      limiter(req, res, n);
+      res.json({ error: 'fail' });
+    }
+
+    const blocked = mockReq({ ip });
+    const blockedRes = mockRes();
+    const blockedN = mockNext();
+    limiter(blocked, blockedRes, blockedN);
+    expect(blockedRes.status).toHaveBeenCalledWith(429);
+
+    await new Promise(r => setTimeout(r, 110));
+
     const req = mockReq({ ip });
     const res = mockRes();
     const n = mockNext();

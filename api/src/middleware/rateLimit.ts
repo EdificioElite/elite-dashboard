@@ -64,3 +64,39 @@ export function rateLimitOnlyOnFailure(maxAttempts: number, windowMs: number) {
     next();
   };
 }
+
+const errorAttempts = new Map<string, { count: number; resetAt: number }>();
+
+export function rateLimitOnError(maxAttempts: number, windowMs: number) {
+  return (req: Request, res: Response, next: NextFunction) => {
+    if (process.env.DISABLE_RATE_LIMIT === 'true') {
+      next();
+      return;
+    }
+    const ip = req.ip || req.socket.remoteAddress || 'unknown';
+    const now = Date.now();
+    const record = errorAttempts.get(ip);
+
+    if (record && now <= record.resetAt && record.count >= maxAttempts) {
+      const minutos = Math.ceil(windowMs / 60000);
+      res.status(429).json({ error: `Demasiados errores. Intenta de nuevo en ${minutos} ${minutos === 1 ? 'minuto' : 'minutos'}.` });
+      return;
+    }
+
+    const originalJson = res.json.bind(res);
+    res.json = function (body: unknown) {
+      if (res.statusCode >= 400) {
+        const now = Date.now();
+        const record = errorAttempts.get(ip);
+        if (!record || now > record.resetAt) {
+          errorAttempts.set(ip, { count: 1, resetAt: now + windowMs });
+        } else {
+          record.count++;
+        }
+      }
+      return originalJson(body);
+    };
+
+    next();
+  };
+}

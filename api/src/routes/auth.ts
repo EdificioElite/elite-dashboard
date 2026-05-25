@@ -3,7 +3,7 @@ import bcrypt from 'bcrypt';
 import { query } from '../db';
 import { signToken } from '../lib/jwt';
 import { authMiddleware } from '../middleware/auth';
-import { rateLimit, rateLimitOnlyOnFailure } from '../middleware/rateLimit';
+import { rateLimit, rateLimitOnlyOnFailure, rateLimitOnError } from '../middleware/rateLimit';
 import { logger } from '../lib/logger';
 import { createEmailToken, verifyEmailToken, markTokenUsed, hashToken } from '../lib/tokens';
 import { sendResetEmail } from '../lib/email';
@@ -141,7 +141,7 @@ function validatePassword(password: string): string | null {
   return null;
 }
 
-router.get('/auth/verify-token', async (req: Request, res: Response) => {
+router.get('/auth/verify-token', rateLimitOnError(20, 60 * 1000), async (req: Request, res: Response) => {
   try {
     const { token } = req.query;
     if (!token || typeof token !== 'string') {
@@ -172,7 +172,7 @@ router.get('/auth/verify-token', async (req: Request, res: Response) => {
   }
 });
 
-router.post('/auth/register', async (req: Request, res: Response) => {
+router.post('/auth/register', rateLimitOnError(20, 60 * 1000), async (req: Request, res: Response) => {
   try {
     const { token, password } = req.body;
     if (!token || !password) {

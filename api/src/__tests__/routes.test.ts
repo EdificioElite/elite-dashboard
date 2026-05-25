@@ -19,6 +19,7 @@ vi.mock('../db', () => ({
 vi.mock('../middleware/rateLimit', () => ({
   rateLimit: () => (_req: Request, _res: Response, next: NextFunction) => next(),
   rateLimitOnlyOnFailure: () => (_req: Request, _res: Response, next: NextFunction) => next(),
+  rateLimitOnError: () => (_req: Request, _res: Response, next: NextFunction) => next(),
 }));
 
 vi.mock('../lib/tokens', () => ({
