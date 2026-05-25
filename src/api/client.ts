@@ -79,3 +79,10 @@ export async function resetPassword(token: string, password: string) {
     body: JSON.stringify({ token, password }),
   });
 }
+
+export async function inviteUser(email: string, vecinoPiso?: string) {
+  return apiFetch<{ message: string }>('/admin/usuarios', {
+    method: 'POST',
+    body: JSON.stringify({ email, vecino_piso: vecinoPiso || undefined }),
+  });
+}

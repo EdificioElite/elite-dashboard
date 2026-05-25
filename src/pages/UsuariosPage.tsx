@@ -5,6 +5,7 @@ import Icon from '../components/Icon';
 import EditUserModal from '../components/EditUserModal';
 import ChangePasswordModal from '../components/ChangePasswordModal';
 import DeleteUserModal from '../components/DeleteUserModal';
+import InviteUserModal from '../components/InviteUserModal';
 
 interface Usuario {
   id: number;
@@ -22,12 +23,7 @@ export default function UsuariosPage() {
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
 
-  const [showForm, setShowForm] = useState(false);
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [vecinoPiso, setVecinoPiso] = useState('');
-  const [formError, setFormError] = useState('');
-  const [formSuccess, setFormSuccess] = useState('');
+  const [showInviteModal, setShowInviteModal] = useState(false);
 
   const [editingUser, setEditingUser] = useState<Usuario | null>(null);
   const [changingPassword, setChangingPassword] = useState<Usuario | null>(null);
@@ -38,23 +34,6 @@ export default function UsuariosPage() {
   };
 
   useEffect(() => { fetchUsuarios(); }, []);
-
-  const handleCreate = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setFormError('');
-    setFormSuccess('');
-    try {
-      const body: Record<string, string> = { email, password };
-      if (vecinoPiso) body.vecino_piso = vecinoPiso;
-      await apiFetch('/admin/usuarios', { method: 'POST', body: JSON.stringify(body) });
-      setFormSuccess('Usuario creado');
-      setEmail(''); setPassword(''); setVecinoPiso('');
-      setShowForm(false);
-      fetchUsuarios();
-    } catch (err: any) {
-      setFormError(err.message || 'Error al crear usuario');
-    }
-  };
 
   const filtered = usuarios.filter(u =>
     u.email.toLowerCase().includes(search.toLowerCase()) ||
@@ -107,9 +86,9 @@ export default function UsuariosPage() {
             <h1 className="font-display text-[40px] font-medium text-cocoa mt-1" style={{ letterSpacing: '-0.02em' }}>Usuarios</h1>
             <p className="text-sm text-cocoa/60 mt-1.5 max-w-lg">Gestiona los accesos al dashboard.</p>
           </div>
-          <button onClick={() => setShowForm(!showForm)} className={`btn ${showForm ? 'btn-ghost' : 'btn-primary'}`}>
-            <Icon name={showForm ? 'x' : 'plus'} size={14} />
-            {showForm ? 'Cancelar' : 'Crear acceso'}
+          <button onClick={() => setShowInviteModal(true)} className="btn btn-primary">
+            <Icon name="plus" size={14} />
+            Crear acceso
           </button>
         </div>
 
@@ -128,39 +107,6 @@ export default function UsuariosPage() {
             </div>
           ))}
         </div>
-
-        {showForm && (
-          <div className="glass p-[26px]">
-            <div className="flex items-center gap-3 mb-5">
-              <div className="w-7 h-7 rounded-lg flex items-center justify-center shrink-0" style={{ background: 'var(--accent)' }}>
-                <Icon name="plus" size={14} className="text-cream" />
-              </div>
-              <span className="eyebrow">Nuevo acceso</span>
-            </div>
-            {formError && <div className="mb-4 px-4 py-3 rounded-xl text-sm flex items-center gap-2" style={{ background: 'rgba(163,64,42,.08)', color: '#a3402a' }}><Icon name="alertTriangle" size={14} />{formError}</div>}
-            {formSuccess && <div className="mb-4 px-4 py-3 rounded-xl text-sm flex items-center gap-2" style={{ background: 'rgba(91,122,74,.1)', color: '#5b7a4a' }}><Icon name="check" size={14} />{formSuccess}</div>}
-            <form onSubmit={handleCreate} className="grid grid-cols-1 md:grid-cols-3 gap-4 items-end">
-              <div>
-                <label className="block text-xs font-semibold uppercase tracking-wider text-cocoa/40 mb-1.5">Piso</label>
-                <select value={vecinoPiso} onChange={e => setVecinoPiso(e.target.value)} className="input-card">
-                  <option value="">Sin piso (usuario global)...</option>
-                  {usuarios.map(u => u.vecino_piso && <option key={u.vecino_piso} value={u.vecino_piso}>{u.vecino_piso}</option>)}
-                </select>
-              </div>
-              <div>
-                <label className="block text-xs font-semibold uppercase tracking-wider text-cocoa/40 mb-1.5">Email</label>
-                <input type="email" value={email} onChange={e => setEmail(e.target.value)} required className="input-card" placeholder="vecino@email.com" />
-              </div>
-              <div>
-                <label className="block text-xs font-semibold uppercase tracking-wider text-cocoa/40 mb-1.5">Contrasena</label>
-                <input type="password" value={password} onChange={e => setPassword(e.target.value)} required minLength={6} className="input-card" placeholder="••••••••" />
-              </div>
-              <div className="md:col-span-3 flex justify-end">
-                <button type="submit" className="btn btn-primary"><Icon name="check" size={14} />Guardar</button>
-              </div>
-            </form>
-          </div>
-        )}
 
         <div className="glass p-[26px]">
           <div className="flex items-center gap-3 mb-5">
@@ -263,6 +209,13 @@ export default function UsuariosPage() {
 
       {deletingUser && (
         <DeleteUserModal userId={deletingUser.id} userName={deletingUser.email} onClose={() => setDeletingUser(null)} onDeleted={() => { setDeletingUser(null); fetchUsuarios(); }} />
+      )}
+
+      {showInviteModal && (
+        <InviteUserModal
+          onClose={() => setShowInviteModal(false)}
+          onSaved={() => fetchUsuarios()}
+        />
       )}
     </div>
   );
