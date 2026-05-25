@@ -173,10 +173,10 @@ router.delete('/admin/vecinos/:piso', authMiddleware, adminMiddleware, async (re
 
 router.post('/admin/usuarios', authMiddleware, adminMiddleware, async (req: Request, res: Response) => {
   try {
-    const { email, password, vecino_piso } = req.body;
+    const { email, vecino_piso } = req.body;
 
-    if (!email || !password) {
-      res.status(400).json({ error: 'email y password son requeridos' });
+    if (!email) {
+      res.status(400).json({ error: 'email es requerido' });
       return;
     }
 
@@ -188,22 +188,11 @@ router.post('/admin/usuarios', authMiddleware, adminMiddleware, async (req: Requ
       }
     }
 
-    const password_hash = await bcrypt.hash(password, 12);
-
-    const result = await query(
-      `INSERT INTO usuarios (vecino_piso, email, password_hash)
-       VALUES ($1, $2, $3)
-       RETURNING id, vecino_piso, email, is_admin, created_at`,
-      [vecino_piso || null, email, password_hash]
-    );
-
-    res.status(201).json(result.rows[0]);
-  } catch (err: any) {
-    if (err.code === '23505') {
-      res.status(409).json({ error: 'El email o el vecino ya tiene un usuario asignado' });
-      return;
-    }
-    logger.error(err, 'Admin create user error');
+    const token = await createEmailToken(email, 'invite', vecino_piso || undefined);
+    await sendInviteEmail(email, vecino_piso || null, token);
+    res.json({ message: 'Invitacion enviada correctamente' });
+  } catch (err) {
+    logger.error(err, 'Admin invite user error');
     res.status(500).json({ error: 'Error interno del servidor' });
   }
 });
@@ -342,11 +331,6 @@ router.post('/admin/invitar', authMiddleware, adminMiddleware, rateLimit(100, 60
     const vecino = vecinoResult.rows[0];
     if (!vecino.email) {
       res.status(400).json({ error: 'El vecino no tiene email registrado' });
-      return;
-    }
-    const existingUser = await query('SELECT id FROM usuarios WHERE vecino_piso = $1', [piso]);
-    if (existingUser.rows.length > 0) {
-      res.status(409).json({ error: 'Este piso ya tiene un usuario registrado' });
       return;
     }
     const token = await createEmailToken(vecino.email, 'invite', vecino.piso);
