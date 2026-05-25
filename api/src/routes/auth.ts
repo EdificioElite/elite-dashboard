@@ -3,7 +3,7 @@ import bcrypt from 'bcrypt';
 import { query } from '../db';
 import { signToken } from '../lib/jwt';
 import { authMiddleware } from '../middleware/auth';
-import { rateLimit, rateLimitOnlyOnFailure } from '../middleware/rateLimit';
+import { rateLimit, rateLimitOnlyOnFailure, rateLimitOnError } from '../middleware/rateLimit';
 import { logger } from '../lib/logger';
 import { createEmailToken, verifyEmailToken, markTokenUsed, hashToken } from '../lib/tokens';
 import { sendResetEmail } from '../lib/email';
@@ -141,7 +141,7 @@ function validatePassword(password: string): string | null {
   return null;
 }
 
-router.get('/auth/verify-token', rateLimit(60, 60 * 1000), async (req: Request, res: Response) => {
+router.get('/auth/verify-token', rateLimitOnError(20, 60 * 1000), async (req: Request, res: Response) => {
   try {
     const { token } = req.query;
     if (!token || typeof token !== 'string') {
@@ -172,7 +172,7 @@ router.get('/auth/verify-token', rateLimit(60, 60 * 1000), async (req: Request, 
   }
 });
 
-router.post('/auth/register', rateLimit(10, 15 * 60 * 1000), async (req: Request, res: Response) => {
+router.post('/auth/register', rateLimitOnError(20, 60 * 1000), async (req: Request, res: Response) => {
   try {
     const { token, password } = req.body;
     if (!token || !password) {
@@ -187,11 +187,6 @@ router.post('/auth/register', rateLimit(10, 15 * 60 * 1000), async (req: Request
     const tokenData = await verifyEmailToken(token, 'invite');
     if (!tokenData) {
       res.status(400).json({ error: 'Token invalido, expirado o ya usado' });
-      return;
-    }
-    const existing = await query('SELECT id FROM usuarios WHERE vecino_piso = $1', [tokenData.piso]);
-    if (existing.rows.length > 0) {
-      res.status(409).json({ error: 'Ya existe un usuario para este piso' });
       return;
     }
     const password_hash = await bcrypt.hash(password, 12);

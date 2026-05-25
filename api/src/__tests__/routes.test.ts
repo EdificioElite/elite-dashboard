@@ -19,6 +19,7 @@ vi.mock('../db', () => ({
 vi.mock('../middleware/rateLimit', () => ({
   rateLimit: () => (_req: Request, _res: Response, next: NextFunction) => next(),
   rateLimitOnlyOnFailure: () => (_req: Request, _res: Response, next: NextFunction) => next(),
+  rateLimitOnError: () => (_req: Request, _res: Response, next: NextFunction) => next(),
 }));
 
 vi.mock('../lib/tokens', () => ({
@@ -373,19 +374,19 @@ describe('Auth routes', () => {
       expect(res.status).toBe(400);
     });
 
-    it('returns 409 when user already exists for piso', async () => {
+    it('allows multiple users for the same piso', async () => {
       mockVerifyEmailToken.mockResolvedValueOnce({ id: 1, email: 'a@a.com', piso: '2A' });
-      mockQuery.mockResolvedValueOnce({ rows: [{ id: 5 }] });
+      mockQuery.mockResolvedValueOnce({ rows: [{ id: 10, vecino_piso: '2A', email: 'a@a.com', is_admin: false }] });
       const app = createApp();
       const res = await request(app).post('/api/auth/register').send({ token: 'valid', password: 'Pass1234' });
-      expect(res.status).toBe(409);
+      expect(res.status).toBe(200);
+      expect(res.body.token).toBeDefined();
+      expect(mockMarkTokenUsed).toHaveBeenCalledWith(1);
     });
 
     it('registers user and returns token', async () => {
       mockVerifyEmailToken.mockResolvedValueOnce({ id: 1, email: 'a@a.com', piso: '2A' });
-      mockQuery
-        .mockResolvedValueOnce({ rows: [] })
-        .mockResolvedValueOnce({ rows: [{ id: 10, vecino_piso: '2A', email: 'a@a.com', is_admin: false }] });
+      mockQuery.mockResolvedValueOnce({ rows: [{ id: 10, vecino_piso: '2A', email: 'a@a.com', is_admin: false }] });
       const app = createApp();
       const res = await request(app).post('/api/auth/register').send({ token: 'valid', password: 'Pass1234' });
       expect(res.status).toBe(200);
@@ -670,7 +671,7 @@ describe('Facturas routes', () => {
 
 describe('Admin routes', () => {
   beforeEach(() => {
-    vi.clearAllMocks();
+    vi.resetAllMocks();
   });
 
   describe('GET /api/admin/vecinos', () => {
@@ -704,30 +705,26 @@ describe('Admin routes', () => {
   });
 
   describe('POST /api/admin/usuarios', () => {
-    it('returns 400 when fields missing', async () => {
+    it('returns 400 when email is missing', async () => {
       const app = createApp();
       const token = userToken(true);
       const res = await request(app)
         .post('/api/admin/usuarios')
         .set('Authorization', `Bearer ${token}`)
-        .send({ email: 'a@a.com' });
+        .send({});
       expect(res.status).toBe(400);
     });
 
-    it('creates user for admin', async () => {
-      mockQuery
-        .mockResolvedValueOnce({ rows: [{ piso: '2A' }] })
-        .mockResolvedValueOnce({
-          rows: [{ id: 2, vecino_piso: '2A', email: 'new@test.com', is_admin: false, created_at: '2026-01-01' }],
-        });
+    it('sends invite email for admin', async () => {
+      mockQuery.mockResolvedValueOnce({ rows: [{ piso: '2A' }] });
       const app = createApp();
       const token = userToken(true);
       const res = await request(app)
         .post('/api/admin/usuarios')
         .set('Authorization', `Bearer ${token}`)
-        .send({ email: 'new@test.com', password: '123456', vecino_piso: '2A' });
-      expect(res.status).toBe(201);
-      expect(res.body.email).toBe('new@test.com');
+        .send({ email: 'new@test.com', vecino_piso: '2A' });
+      expect(res.status).toBe(200);
+      expect(res.body.message).toBe('Invitacion enviada correctamente');
     });
 
     it('returns 400 when vecino does not exist', async () => {
@@ -737,21 +734,19 @@ describe('Admin routes', () => {
       const res = await request(app)
         .post('/api/admin/usuarios')
         .set('Authorization', `Bearer ${token}`)
-        .send({ email: 'new@test.com', password: '123456', vecino_piso: 'Z9' });
+        .send({ email: 'new@test.com', vecino_piso: 'Z9' });
       expect(res.status).toBe(400);
       expect(res.body.error).toBe('El piso indicado no existe en el edificio');
     });
 
-    it('creates user without vecino_piso (global user)', async () => {
-      mockQuery.mockResolvedValueOnce({ rows: [{ id: 10, vecino_piso: null, email: 'gestor@elite.com', is_admin: true, created_at: new Date().toISOString() }] });
+    it('sends invite email without vecino_piso (global user)', async () => {
       const app = createApp();
       const res = await request(app)
         .post('/api/admin/usuarios')
         .set('Authorization', `Bearer ${userToken(true)}`)
-        .send({ email: 'gestor@elite.com', password: 'password123' });
-      expect(res.status).toBe(201);
-      expect(res.body.vecino_piso).toBeNull();
-      expect(res.body.email).toBe('gestor@elite.com');
+        .send({ email: 'gestor@elite.com' });
+      expect(res.status).toBe(200);
+      expect(res.body.message).toBe('Invitacion enviada correctamente');
     });
   });
 
@@ -973,22 +968,19 @@ describe('Admin routes', () => {
       expect(res.status).toBe(400);
     });
 
-    it('returns 409 when user already exists', async () => {
-      mockQuery
-        .mockResolvedValueOnce({ rows: [{ piso: '2A', email: 'a@a.com' }] })
-        .mockResolvedValueOnce({ rows: [{ id: 5 }] });
+    it('allows inviting when user already exists', async () => {
+      mockQuery.mockResolvedValueOnce({ rows: [{ piso: '2A', email: 'a@a.com' }] });
       const app = createApp();
       const res = await request(app)
         .post('/api/admin/invitar')
         .set('Authorization', `Bearer ${userToken(true)}`)
         .send({ piso: '2A' });
-      expect(res.status).toBe(409);
+      expect(res.status).toBe(200);
+      expect(res.body.message).toContain('Invitacion enviada');
     });
 
     it('sends invite for valid vecino', async () => {
-      mockQuery
-        .mockResolvedValueOnce({ rows: [{ piso: '2A', email: 'a@a.com' }] })
-        .mockResolvedValueOnce({ rows: [] });
+      mockQuery.mockResolvedValueOnce({ rows: [{ piso: '2A', email: 'a@a.com' }] });
       const app = createApp();
       const res = await request(app)
         .post('/api/admin/invitar')

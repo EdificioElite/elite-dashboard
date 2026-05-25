@@ -60,7 +60,7 @@ function wrapHtml(title: string, body: string): string {
 
 const replyTo = config.adminEmail || undefined;
 
-export async function sendInviteEmail(to: string, piso: string, token: string) {
+export async function sendInviteEmail(to: string, piso: string | null, token: string) {
   const url = `${config.frontendUrl}/registro?token=${token}`;
   if (config.mockEmail) {
     sentEmails.push({ to, subject: 'Invitación', text: '', html: '', url, token, sentAt: new Date() });
@@ -71,8 +71,8 @@ export async function sendInviteEmail(to: string, piso: string, token: string) {
     to,
     replyTo,
     subject: 'Invitación para registrarte en la página web del Edificio Elite',
-    text: `Hola vecino del piso ${piso},\n\nHas sido invitado a registrarte en la página web del Edificio Elite (${frontendLink}). En ella podrás consultar tus consumos históricos y en tiempo real de aerotermia, tener a mano información relevante de la comunidad (horarios de piscina, contactos, etc.) y acceder a todas las actas de las juntas.\n\nHaz clic en el siguiente enlace para completar tu registro:\n\n${url}\n\nEste enlace expirará en 30 días.\n\n${emailSignature}`,
-    html: wrapHtml('', `<p>Hola vecino del piso <strong>${piso}</strong>,</p>
+    text: `${piso ? `Hola vecino del piso ${piso},\n\n` : 'Hola,\n\n'}Has sido invitado a registrarte en la página web del Edificio Elite (${frontendLink}). En ella podrás consultar tus consumos históricos y en tiempo real de aerotermia, tener a mano información relevante de la comunidad (horarios de piscina, contactos, etc.) y acceder a todas las actas de las juntas.\n\nHaz clic en el siguiente enlace para completar tu registro:\n\n${url}\n\nEste enlace expirará en 30 días.\n\n${emailSignature}`,
+    html: wrapHtml('', `${piso ? `<p>Hola vecino del piso <strong>${piso}</strong>,</p>` : '<p>Hola,</p>'}
 <p>Has sido invitado a registrarte en la página web del <a href="${frontendLink}">Edificio Elite</a>. En ella podrás consultar tus consumos históricos y en tiempo real de aerotermia, tener a mano información relevante de la comunidad (horarios de piscina, contactos, etc.) y acceder a todas las actas de las juntas.</p>
 <p>Haz clic en el siguiente enlace para completar tu registro:</p>
 <p><a href="${url}">${url}</a></p>
