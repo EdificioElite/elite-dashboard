@@ -138,7 +138,7 @@ export default function FacturasChart({ data, headerRight }: { data: Factura[]; 
           <CartesianGrid strokeDasharray="2 4" stroke="rgba(58,47,36,.06)" vertical={false} />
           <XAxis dataKey="periodoLabel" fontSize={10} tick={{ fill: 'rgba(58,47,36,.44)' }} axisLine={false} tickLine={false} interval={0} angle={-45} textAnchor="end" height={40} />
           <YAxis fontSize={10} tick={{ fill: 'rgba(58,47,36,.44)', fontFamily: "'JetBrains Mono', monospace" }} axisLine={false} tickLine={false} width={55} tickFormatter={(v: number) => `${v.toFixed(0)} €`} />
-          <Tooltip content={<FacturasTooltip />} cursor={{ fill: 'rgba(58,47,36,.04)' }} />
+          <Tooltip content={<FacturasTooltip />} wrapperStyle={{ zIndex: 9999, pointerEvents: 'none' }} cursor={{ fill: 'rgba(58,47,36,.04)' }} />
           <Bar dataKey="importe_fijo" stackId="a" fill="#A6754B" radius={[0, 0, 0, 0]} />
           <Bar dataKey="importe_calor" stackId="a" fill="#B53228" radius={[0, 0, 0, 0]} />
           <Bar dataKey="importe_frio" stackId="a" fill="#4A7A8C" radius={[0, 0, 0, 0]} />

@@ -82,7 +82,7 @@ export default function PieChartCard({ data }: { data: PieSlice[] }) {
               style={{ fontFamily: "'Fraunces', serif", fontSize: '24px', fontWeight: 500, fill: '#1E140A' }}
             />
           </Pie>
-          <Tooltip content={<ChartTooltip />} />
+          <Tooltip content={<ChartTooltip unit="kWh" />} wrapperStyle={{ zIndex: 9999, pointerEvents: 'none' }} />
           <Legend content={legendContent} />
         </PieChart>
       </ResponsiveContainer>

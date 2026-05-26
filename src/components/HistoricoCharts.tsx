@@ -7,7 +7,7 @@ import SegmentedControl from './SegmentedControl';
 import ChartTooltip from './ChartTooltip';
 import Icon from './Icon';
 
-function formatTooltipDate(_label: string, payload: { name: string; value: number; color: string; payload?: Record<string, unknown> }[]): string {
+function formatTooltipDate(_label: string, payload: { name: string; value: number | null | undefined; color: string; payload?: Record<string, unknown> }[]): string {
   const entry = payload[0]?.payload as { timestamp?: string } | undefined;
   return (entry?.timestamp)
     ? new Date(entry.timestamp).toLocaleString('es-ES', { day: 'numeric', month: 'long', hour: '2-digit', minute: '2-digit' })
@@ -89,7 +89,7 @@ interface ChartLineProps {
   decimals?: number;
 }
 
-function ChartLine({ data, color, dashed }: ChartLineProps) {
+function ChartLine({ data, color, dashed, unit }: ChartLineProps) {
   const domain = useMemo(() => computeDomain(data.map((d) => d.value)), [data]);
 
   return (
@@ -104,7 +104,7 @@ function ChartLine({ data, color, dashed }: ChartLineProps) {
           domain={domain}
           width={40}
         />
-        <Tooltip content={<ChartTooltip labelFormatter={formatTooltipDate} />} />
+        <Tooltip content={<ChartTooltip labelFormatter={formatTooltipDate} unit={unit} />} wrapperStyle={{ zIndex: 9999, pointerEvents: 'none' }} />
         <defs>
           <linearGradient id="areaGradient" x1="0" y1="0" x2="0" y2="1">
             <stop offset="0%" stopColor={color} stopOpacity={0.12} />
@@ -150,7 +150,7 @@ function TempChart({ data }: { data: { label: string; timestamp: string; impulsi
           width={40}
           tickFormatter={(v: number) => `${v.toFixed(0)}°`}
         />
-        <Tooltip content={<ChartTooltip labelFormatter={formatTooltipDate} />} />
+        <Tooltip content={<ChartTooltip labelFormatter={formatTooltipDate} unit="°C" />} wrapperStyle={{ zIndex: 9999, pointerEvents: 'none' }} />
         <Line
           type="monotone"
           dataKey="impulsion"
