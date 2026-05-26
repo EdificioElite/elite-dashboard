@@ -10,9 +10,15 @@ interface ChartTooltipProps {
   payload?: RechartsPayload;
   label?: string;
   labelFormatter?: (label: string, payload: RechartsPayload) => string;
+  unit?: string;
 }
 
-export default function ChartTooltip({ active, payload, label, labelFormatter }: ChartTooltipProps) {
+function fmtVal(value: number): string {
+  if (Number.isInteger(value)) return value.toLocaleString('es-ES');
+  return value.toLocaleString('es-ES', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+}
+
+export default function ChartTooltip({ active, payload, label, labelFormatter, unit }: ChartTooltipProps) {
   if (!active || !payload?.length) return null;
 
   return (
@@ -26,6 +32,8 @@ export default function ChartTooltip({ active, payload, label, labelFormatter }:
         fontSize: '12px',
         fontFamily: "'Manrope', sans-serif",
         color: '#1E140A',
+        zIndex: 9999,
+        position: 'relative',
       }}
     >
       {label && (
@@ -37,7 +45,9 @@ export default function ChartTooltip({ active, payload, label, labelFormatter }:
         <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '2px 0' }}>
           <span style={{ width: 8, height: 8, borderRadius: '50%', background: entry.color, flexShrink: 0 }} />
           <span style={{ opacity: 0.7 }}>{entry.name}:</span>
-          <span style={{ fontWeight: 600, fontFamily: "'JetBrains Mono', monospace", fontSize: '11px' }}>{entry.value}</span>
+          <span style={{ fontWeight: 600, fontFamily: "'JetBrains Mono', monospace", fontSize: '11px' }}>
+            {fmtVal(entry.value)}{unit ? ` ${unit}` : ''}
+          </span>
         </div>
       ))}
     </div>

@@ -69,7 +69,7 @@ export default function CopChart({ data }: { data: CopDatum[] }) {
             domain={[0, Math.max(maxCop * 1.15, 2)]}
             width={35}
           />
-          <Tooltip content={<ChartTooltip labelFormatter={(l) => labelMes(l)} />} />
+          <Tooltip content={<ChartTooltip labelFormatter={(l) => labelMes(l)} />} wrapperStyle={{ zIndex: 9999, pointerEvents: 'none' }} />
           <ReferenceLine y={1} stroke="#1E140A" strokeDasharray="4 4" strokeOpacity={0.2} />
           <Line
             type="monotone"
