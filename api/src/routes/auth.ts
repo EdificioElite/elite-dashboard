@@ -256,7 +256,12 @@ router.post('/auth/reset-password', rateLimit(10, 15 * 60 * 1000), async (req: R
 });
 
 router.get('/health', (_req: Request, res: Response) => {
-  res.json({ status: 'ok' });
+  try {
+    res.json({ status: 'ok' });
+  } catch (err) {
+    logger.error(err, 'Health check error');
+    res.status(500).json({ error: 'Error interno del servidor' });
+  }
 });
 
 export default router;
