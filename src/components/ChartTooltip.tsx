@@ -1,6 +1,6 @@
 type RechartsPayload = Array<{
   name: string;
-  value: number;
+  value: number | null | undefined;
   color: string;
   payload?: Record<string, unknown>;
 }>;
@@ -13,7 +13,8 @@ interface ChartTooltipProps {
   unit?: string;
 }
 
-function fmtVal(value: number): string {
+function fmtVal(value: number | null | undefined): string {
+  if (value == null || isNaN(value)) return '—';
   if (Number.isInteger(value)) return value.toLocaleString('es-ES');
   return value.toLocaleString('es-ES', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 }

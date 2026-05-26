@@ -7,7 +7,7 @@ import SegmentedControl from './SegmentedControl';
 import ChartTooltip from './ChartTooltip';
 import Icon from './Icon';
 
-function formatTooltipDate(_label: string, payload: { name: string; value: number; color: string; payload?: Record<string, unknown> }[]): string {
+function formatTooltipDate(_label: string, payload: { name: string; value: number | null | undefined; color: string; payload?: Record<string, unknown> }[]): string {
   const entry = payload[0]?.payload as { timestamp?: string } | undefined;
   return (entry?.timestamp)
     ? new Date(entry.timestamp).toLocaleString('es-ES', { day: 'numeric', month: 'long', hour: '2-digit', minute: '2-digit' })
