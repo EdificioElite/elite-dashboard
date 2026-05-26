@@ -88,12 +88,14 @@ router.get('/consumo-actual', authMiddleware, async (req: Request, res: Response
           ct.energy_wh_inst_value_0_0_0,
           ct.energy_manufacturer_specific_02_wh_inst_value_0_0_0,
           ct.volume_m3_inst_value_0_1_0,
+          ct.volume_m3_inst_value_0_2_0,
           ct.flow_temp_c_inst_value_0_0_0 AS temp_impulsion,
           ct.return_temp_c_inst_value_0_0_0 AS temp_retorno,
           ct.power_w_inst_value_0_0_0 AS power_w,
           LAG(ct.energy_wh_inst_value_0_0_0) OVER (ORDER BY ct.created) AS prev_wh_calor,
           LAG(ct.energy_manufacturer_specific_02_wh_inst_value_0_0_0) OVER (ORDER BY ct.created) AS prev_wh_frio,
-          LAG(ct.volume_m3_inst_value_0_1_0) OVER (ORDER BY ct.created) AS prev_m3_acs
+          LAG(ct.volume_m3_inst_value_0_1_0) OVER (ORDER BY ct.created) AS prev_m3_acs,
+          LAG(ct.volume_m3_inst_value_0_2_0) OVER (ORDER BY ct.created) AS prev_m3_afs
         FROM contadores ct
         JOIN vecinos v ON ct.device_identification = v.device_identification
           AND ct.serial_number::text = v.serial_number
@@ -104,7 +106,8 @@ router.get('/consumo-actual', authMiddleware, async (req: Request, res: Response
         SELECT
           ct.energy_wh_inst_value_0_0_0 AS calor_mes,
           ct.energy_manufacturer_specific_02_wh_inst_value_0_0_0 AS frio_mes,
-          ct.volume_m3_inst_value_0_1_0 AS m3_acs_mes
+          ct.volume_m3_inst_value_0_1_0 AS m3_acs_mes,
+          ct.volume_m3_inst_value_0_2_0 AS m3_afs_mes
         FROM contadores ct
         JOIN vecinos v ON ct.device_identification = v.device_identification
           AND ct.serial_number::text = v.serial_number
@@ -119,17 +122,21 @@ router.get('/consumo-actual', authMiddleware, async (req: Request, res: Response
         ROUND((energy_manufacturer_specific_02_wh_inst_value_0_0_0 - prev_wh_frio) / 1000.0, 3) AS kwh_frio,
         ROUND((volume_m3_inst_value_0_1_0 - prev_m3_acs)::numeric, 3) AS m3_acs,
         ROUND(((volume_m3_inst_value_0_1_0 - prev_m3_acs) * 46.5)::numeric, 3) AS kwh_acs,
+        ROUND((volume_m3_inst_value_0_2_0 - prev_m3_afs)::numeric, 3) AS m3_afs,
         ROUND(energy_wh_inst_value_0_0_0 / 1000.0, 3) AS kwh_calor_abs,
         ROUND(energy_manufacturer_specific_02_wh_inst_value_0_0_0 / 1000.0, 3) AS kwh_frio_abs,
         ROUND(volume_m3_inst_value_0_1_0::numeric, 3) AS m3_acs_abs,
+        ROUND(volume_m3_inst_value_0_2_0::numeric, 3) AS m3_afs_abs,
         (SELECT ROUND((energy_wh_inst_value_0_0_0 - calor_mes) / 1000.0, 3) FROM mes_inicio) AS kwh_calor_mes_inicio,
         (SELECT ROUND((energy_manufacturer_specific_02_wh_inst_value_0_0_0 - frio_mes) / 1000.0, 3) FROM mes_inicio) AS kwh_frio_mes_inicio,
         (SELECT ROUND((volume_m3_inst_value_0_1_0 - m3_acs_mes)::numeric, 3) FROM mes_inicio) AS m3_acs_mes_inicio,
+        (SELECT ROUND((volume_m3_inst_value_0_2_0 - m3_afs_mes)::numeric, 3) FROM mes_inicio) AS m3_afs_mes_inicio,
         temp_impulsion,
         temp_retorno,
         power_w
       FROM latest
       WHERE prev_wh_calor IS NOT NULL
+      ORDER BY timestamp DESC
       LIMIT 1`,
       [vecinoPiso]
     );
@@ -150,6 +157,9 @@ router.get('/consumo-actual', authMiddleware, async (req: Request, res: Response
     } else {
       row.modo = 'desconocido';
     }
+
+    row.modo_calefaccion_activado = row.modo === 'calefaccion';
+    row.modo_refrigeracion_activado = row.modo === 'refrigeracion';
 
     res.json(row);
 
