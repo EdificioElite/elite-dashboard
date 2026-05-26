@@ -537,9 +537,9 @@ describe('Consumos routes', () => {
   });
 
   describe('GET /api/consumo-actual', () => {
-    it('returns the latest reading', async () => {
+    it('returns the latest reading with AFS and modo booleans', async () => {
       mockQuery.mockResolvedValueOnce({
-        rows: [{ timestamp: '2026-01-01T12:00:00Z', kwh_calor: 2.0, kwh_frio: 0.5, m3_acs: 0.03, kwh_acs: 1.395, temp_impulsion: 43.0, temp_retorno: 33.0 }],
+        rows: [{ timestamp: '2026-01-01T12:00:00Z', kwh_calor: 2.0, kwh_frio: 0.5, m3_acs: 0.03, kwh_acs: 1.395, m3_afs: 0.02, m3_afs_abs: 10.5, m3_afs_mes_inicio: 0.5, temp_impulsion: 43.0, temp_retorno: 33.0 }],
       });
       const app = createApp();
       const token = userToken();
@@ -548,6 +548,11 @@ describe('Consumos routes', () => {
         .set('Authorization', `Bearer ${token}`);
       expect(res.status).toBe(200);
       expect(res.body.kwh_calor).toBe(2.0);
+      expect(res.body.m3_afs).toBe(0.02);
+      expect(res.body.m3_afs_abs).toBe(10.5);
+      expect(res.body.m3_afs_mes_inicio).toBe(0.5);
+      expect(res.body.modo_calefaccion_activado).toBe(true);
+      expect(res.body.modo_refrigeracion_activado).toBe(false);
     });
 
     it('returns null when no data', async () => {
@@ -572,6 +577,8 @@ describe('Consumos routes', () => {
         .set('Authorization', `Bearer ${token}`);
       expect(res.status).toBe(200);
       expect(res.body.modo).toBe('calefaccion');
+      expect(res.body.modo_calefaccion_activado).toBe(true);
+      expect(res.body.modo_refrigeracion_activado).toBe(false);
     });
 
     it('returns modo refrigeracion when temp_impulsion < 21', async () => {
@@ -585,6 +592,8 @@ describe('Consumos routes', () => {
         .set('Authorization', `Bearer ${token}`);
       expect(res.status).toBe(200);
       expect(res.body.modo).toBe('refrigeracion');
+      expect(res.body.modo_calefaccion_activado).toBe(false);
+      expect(res.body.modo_refrigeracion_activado).toBe(true);
     });
 
     it('returns modo desconocido when temp_impulsion between 21 and 29', async () => {
@@ -598,6 +607,8 @@ describe('Consumos routes', () => {
         .set('Authorization', `Bearer ${token}`);
       expect(res.status).toBe(200);
       expect(res.body.modo).toBe('desconocido');
+      expect(res.body.modo_calefaccion_activado).toBe(false);
+      expect(res.body.modo_refrigeracion_activado).toBe(false);
     });
 
     it('returns modo desconocido at boundary 29', async () => {
@@ -611,6 +622,8 @@ describe('Consumos routes', () => {
         .set('Authorization', `Bearer ${token}`);
       expect(res.status).toBe(200);
       expect(res.body.modo).toBe('desconocido');
+      expect(res.body.modo_calefaccion_activado).toBe(false);
+      expect(res.body.modo_refrigeracion_activado).toBe(false);
     });
 
     it('returns modo desconocido at boundary 21', async () => {
@@ -624,6 +637,8 @@ describe('Consumos routes', () => {
         .set('Authorization', `Bearer ${token}`);
       expect(res.status).toBe(200);
       expect(res.body.modo).toBe('desconocido');
+      expect(res.body.modo_calefaccion_activado).toBe(false);
+      expect(res.body.modo_refrigeracion_activado).toBe(false);
     });
 
     it('returns modo desconocido when temp_impulsion is null', async () => {
@@ -637,6 +652,8 @@ describe('Consumos routes', () => {
         .set('Authorization', `Bearer ${token}`);
       expect(res.status).toBe(200);
       expect(res.body.modo).toBe('desconocido');
+      expect(res.body.modo_calefaccion_activado).toBe(false);
+      expect(res.body.modo_refrigeracion_activado).toBe(false);
     });
   });
 });

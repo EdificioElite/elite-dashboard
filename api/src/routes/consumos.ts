@@ -136,6 +136,7 @@ router.get('/consumo-actual', authMiddleware, async (req: Request, res: Response
         power_w
       FROM latest
       WHERE prev_wh_calor IS NOT NULL
+      ORDER BY timestamp DESC
       LIMIT 1`,
       [vecinoPiso]
     );
