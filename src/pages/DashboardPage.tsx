@@ -176,7 +176,7 @@ export default function DashboardPage() {
             <div>
               <p className="text-cocoa/70 text-sm leading-relaxed mb-4">
                 Lleva los datos de tu aerotermia a Home Assistant para automatizar tu casa. La integración{' '}
-                <strong>Elite Climate</strong> expone los consumos de calefacción, refrigeración, ACS, temperaturas
+                <strong>Edificio Elite</strong> expone los consumos de calefacción, refrigeración, ACS, temperaturas
                 y potencia en tiempo real como entidades en Home Assistant.
               </p>
 
