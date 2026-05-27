@@ -80,7 +80,7 @@ test.describe('Admin Aerotermia Dashboard', () => {
   test('navigates to aerotermia from sidebar', async ({ page }) => {
     await page.goto('/admin/vecinos');
     await page.waitForURL('/admin/vecinos');
-    await expect(page.getByText('Vecinos')).toBeVisible({ timeout: 10000 });
+    await expect(page.getByText('Vecinos').first()).toBeVisible({ timeout: 10000 });
     await page.getByRole('button', { name: 'Aerotermia', exact: true }).last().click();
     await expect(page).toHaveURL('/admin/aerotermia');
   });
