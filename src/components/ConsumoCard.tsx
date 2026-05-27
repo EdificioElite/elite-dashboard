@@ -3,10 +3,7 @@ import Sparkline from './Sparkline';
 
 interface ConsumoActual {
   timestamp: string;
-  kwh_calor: number;
-  kwh_frio: number;
   m3_acs: number;
-  kwh_acs: number;
   kwh_calor_abs: number;
   kwh_frio_abs: number;
   m3_acs_abs: number;
@@ -118,7 +115,7 @@ export default function ConsumoCard({ data }: { data: ConsumoActual | null }) {
           </div>
           {isLive && (
             <div className="font-mono text-[11px] text-cocoa/40 font-num mt-0.5">
-              {`${Number(data.power_w).toFixed(0)} W`}
+              {`${Math.abs(Number(data.power_w)).toFixed(0)} W`}
             </div>
           )}
           <div className="text-[11px] text-cocoa/40 mt-1">

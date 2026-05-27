@@ -492,8 +492,8 @@ describe('Consumos routes', () => {
     it('returns consumos for authenticated user', async () => {
       mockQuery.mockResolvedValueOnce({
         rows: [
-          { timestamp: '2026-01-01T00:00:00Z', kwh_calor: 1.5, kwh_frio: 0.3, m3_acs: 0.02, kwh_acs: 0.93, temp_impulsion: 42.0, temp_retorno: 32.0 },
-          { timestamp: '2026-01-01T12:00:00Z', kwh_calor: 1.6, kwh_frio: 0.2, m3_acs: 0.01, kwh_acs: 0.465, temp_impulsion: 41.0, temp_retorno: 31.0 },
+          { timestamp: '2026-01-01T00:00:00Z', m3_acs: 0.02, temp_impulsion: 42.0, temp_retorno: 32.0, power_w: 100, kwh_calor_abs: 150, kwh_frio_abs: 30, m3_acs_abs: 12.5 },
+          { timestamp: '2026-01-01T12:00:00Z', m3_acs: 0.01, temp_impulsion: 41.0, temp_retorno: 31.0, power_w: 120, kwh_calor_abs: 160, kwh_frio_abs: 20, m3_acs_abs: 12.6 },
         ],
       });
       const app = createApp();
@@ -505,7 +505,7 @@ describe('Consumos routes', () => {
       expect(res.body).toHaveLength(2);
     });
 
-    it('uses sampling to limit results to 500 points', async () => {
+    it('uses time bucketing to limit results to ~500 points', async () => {
       mockQuery.mockResolvedValueOnce({ rows: [] });
       const app = createApp();
       const token = userToken();
@@ -514,12 +514,11 @@ describe('Consumos routes', () => {
         .set('Authorization', `Bearer ${token}`);
       expect(res.status).toBe(200);
       const sqlArg = mockQuery.mock.calls[0][0] as string;
-      expect(sqlArg).toContain('counted AS');
-      expect(sqlArg).toContain('sampled AS');
-      expect(sqlArg).toContain('with_deltas AS');
-      expect(sqlArg).toContain('rn = 1');
-      expect(sqlArg).toContain('rn = total');
-      expect(sqlArg).toContain('CEIL');
+      expect(sqlArg).toContain('GROUP BY timestamp');
+      expect(sqlArg).toContain('EXTRACT(EPOCH FROM ct.created)');
+      expect(sqlArg).toContain('bucketed AS');
+      expect(sqlArg).toContain('GREATEST(ct.power_w_inst_value_0_0_0, 0)');
+      expect(sqlArg).toContain('LAG(max_m3_acs)');
     });
 
     it('filters by date range', async () => {

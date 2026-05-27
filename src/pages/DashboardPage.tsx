@@ -13,10 +13,7 @@ import { toDatetimeLocal, fromDatetimeLocal, applyPreset, Preset } from '../lib/
 
 interface Consumo {
   timestamp: string;
-  kwh_calor: number;
-  kwh_frio: number;
   m3_acs: number;
-  kwh_acs: number;
   kwh_calor_abs: number;
   kwh_frio_abs: number;
   m3_acs_abs: number;
