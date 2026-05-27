@@ -12,7 +12,7 @@ vi.mock('../store/auth', () => ({
 vi.mock('../api/client', () => ({
   apiFetch: vi.fn().mockResolvedValue({
     timestamp: '2026-05-13T12:00:00Z',
-    kwh_calor: 12, kwh_frio: 8, m3_acs: 0.5, kwh_acs: 3,
+    m3_acs: 0.5,
     kwh_calor_abs: 123456, kwh_frio_abs: 61728, m3_acs_abs: 12.3,
     kwh_calor_mes_inicio: 9, kwh_frio_mes_inicio: 2, m3_acs_mes_inicio: 0.1,
     temp_impulsion: 42, temp_retorno: 32, power_w: 150,

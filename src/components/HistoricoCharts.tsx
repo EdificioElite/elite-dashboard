@@ -16,10 +16,7 @@ function formatTooltipDate(_label: string, payload: { name: string; value: numbe
 
 interface Consumo {
   timestamp: string;
-  kwh_calor: number;
-  kwh_frio: number;
   m3_acs: number;
-  kwh_acs: number;
   temp_impulsion: number | null;
   temp_retorno: number | null;
   power_w: number | null;

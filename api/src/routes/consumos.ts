@@ -15,54 +15,41 @@ router.get('/consumos', authMiddleware, async (req: Request, res: Response) => {
     const isAdmin = req.user!.isAdmin;
     const vecinoPiso = (isAdmin && pisoQuery) ? pisoQuery : req.user!.vecinoPiso;
 
-    const MAX_POINTS = 500;
-
     let whereSql = `WHERE v.piso = $1`;
     const params: unknown[] = [vecinoPiso];
-    if (desde) { params.push(desde); whereSql += ` AND ct.created >= $${params.length}`; }
-    if (hasta) { params.push(hasta); whereSql += ` AND ct.created <= $${params.length}`; }
+
+    const ahora = new Date();
+    const desdeDate = desde ? new Date(desde as string) : new Date(ahora.getTime() - 7 * 24 * 60 * 60 * 1000);
+    const hastaDate = hasta ? new Date(hasta as string) : ahora;
+    const spanMs = hastaDate.getTime() - desdeDate.getTime();
+    const targetBuckets = 500;
+    const idealBucketSec = spanMs / 1000 / targetBuckets;
+    const niceIntervals = [300, 600, 900, 1800, 3600, 7200, 14400, 21600, 43200, 86400, 604800];
+    const bucketSec = niceIntervals.find((i) => i >= idealBucketSec) ?? niceIntervals[niceIntervals.length - 1];
+
+    params.push(desdeDate.toISOString());
+    whereSql += ` AND ct.created >= $${params.length}`;
+    params.push(hastaDate.toISOString());
+    whereSql += ` AND ct.created <= $${params.length}`;
+
+    params.push(bucketSec);
+    const bucketExpr = `to_timestamp(FLOOR(EXTRACT(EPOCH FROM ct.created) / $${params.length}) * $${params.length})`;
 
     const sql = `
-      WITH counted AS (
-        SELECT
-          ct.created,
-          ct.energy_wh_inst_value_0_0_0,
-          ct.energy_manufacturer_specific_02_wh_inst_value_0_0_0,
-          ct.volume_m3_inst_value_0_1_0,
-          ct.flow_temp_c_inst_value_0_0_0,
-          ct.return_temp_c_inst_value_0_0_0,
-          ct.power_w_inst_value_0_0_0,
-          ROW_NUMBER() OVER (ORDER BY ct.created) AS rn,
-          COUNT(*) OVER () AS total
-        FROM contadores ct
-        JOIN vecinos v ON ct.device_identification = v.device_identification
-          AND ct.serial_number::text = v.serial_number
-        ${whereSql}
-      ),
-      sampled AS (
-        SELECT * FROM counted
-        WHERE total <= ${MAX_POINTS}
-           OR rn = 1
-           OR rn = total
-           OR rn % GREATEST(1, CEIL(total / ${MAX_POINTS}.0)::int) = 1
-      ),
-      with_deltas AS (
-        SELECT
-          created AS timestamp,
-          ROUND((energy_wh_inst_value_0_0_0 - LAG(energy_wh_inst_value_0_0_0) OVER w) / 1000.0, 3) AS kwh_calor,
-          ROUND((energy_manufacturer_specific_02_wh_inst_value_0_0_0 - LAG(energy_manufacturer_specific_02_wh_inst_value_0_0_0) OVER w) / 1000.0, 3) AS kwh_frio,
-          ROUND((volume_m3_inst_value_0_1_0 - LAG(volume_m3_inst_value_0_1_0) OVER w)::numeric, 3) AS m3_acs,
-          ROUND(((volume_m3_inst_value_0_1_0 - LAG(volume_m3_inst_value_0_1_0) OVER w) * 46.5)::numeric, 3) AS kwh_acs,
-          flow_temp_c_inst_value_0_0_0 AS temp_impulsion,
-          return_temp_c_inst_value_0_0_0 AS temp_retorno,
-          power_w_inst_value_0_0_0 AS power_w,
-          ROUND(energy_wh_inst_value_0_0_0 / 1000.0, 0) AS kwh_calor_abs,
-          ROUND(energy_manufacturer_specific_02_wh_inst_value_0_0_0 / 1000.0, 0) AS kwh_frio_abs,
-          ROUND(volume_m3_inst_value_0_1_0::numeric, 3) AS m3_acs_abs
-        FROM sampled
-        WINDOW w AS (ORDER BY created)
-      )
-      SELECT * FROM with_deltas WHERE kwh_calor IS NOT NULL
+      SELECT
+        ${bucketExpr} AS timestamp,
+        ROUND(AVG(ct.power_w_inst_value_0_0_0)::numeric, 1) AS power_w,
+        ROUND(MAX(ct.energy_wh_inst_value_0_0_0) / 1000.0, 0) AS kwh_calor_abs,
+        ROUND(MAX(ct.energy_manufacturer_specific_02_wh_inst_value_0_0_0) / 1000.0, 0) AS kwh_frio_abs,
+        ROUND(MAX(ct.volume_m3_inst_value_0_1_0)::numeric, 3) AS m3_acs_abs,
+        ROUND((MAX(ct.volume_m3_inst_value_0_1_0) - MIN(ct.volume_m3_inst_value_0_1_0))::numeric, 3) AS m3_acs,
+        ROUND(AVG(ct.flow_temp_c_inst_value_0_0_0)::numeric, 1) AS temp_impulsion,
+        ROUND(AVG(ct.return_temp_c_inst_value_0_0_0)::numeric, 1) AS temp_retorno
+      FROM contadores ct
+      JOIN vecinos v ON ct.device_identification = v.device_identification
+        AND ct.serial_number::text = v.serial_number
+      ${whereSql}
+      GROUP BY timestamp
       ORDER BY timestamp ASC
     `;
 

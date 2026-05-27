@@ -13,7 +13,7 @@ describe('ConsumoCard', () => {
       <ConsumoCard
         data={{
           timestamp: '2026-01-01T12:00:00Z',
-          kwh_calor: 12.34, kwh_frio: 3.21, m3_acs: 0.12, kwh_acs: 5.67,
+          m3_acs: 0.12,
           kwh_calor_abs: 123456, kwh_frio_abs: 61728, m3_acs_abs: 12.345,
           kwh_calor_mes_inicio: 9.13, kwh_frio_mes_inicio: 2.76, m3_acs_mes_inicio: 0.117,
           temp_impulsion: 42, temp_retorno: 32, power_w: 150, modo: 'calefaccion',
@@ -42,7 +42,7 @@ describe('ConsumoCard', () => {
     render(
       <ConsumoCard
         data={{
-          timestamp: '2026-05-09T10:30:00Z', kwh_calor: 5, kwh_frio: 0, m3_acs: 0.01, kwh_acs: 2,
+          timestamp: '2026-05-09T10:30:00Z', m3_acs: 0.01,
           kwh_calor_abs: 5, kwh_frio_abs: 0, m3_acs_abs: 0.01,
           kwh_calor_mes_inicio: null, kwh_frio_mes_inicio: null, m3_acs_mes_inicio: null,
           temp_impulsion: null, temp_retorno: null, power_w: null,
@@ -56,8 +56,7 @@ describe('ConsumoCard', () => {
     const { rerender, unmount } = render(
       <ConsumoCard
         data={{
-          timestamp: '2026-05-09T10:30:00Z', kwh_calor: 1, kwh_frio: 0, m3_acs: 0.01, kwh_acs: 2,
-          kwh_calor_abs: 1, kwh_frio_abs: 0, m3_acs_abs: 0.01,
+          timestamp: '2026-05-09T10:30:00Z', m3_acs: 0.01, kwh_calor_abs: 1, kwh_frio_abs: 0, m3_acs_abs: 0.01,
           kwh_calor_mes_inicio: null, kwh_frio_mes_inicio: null, m3_acs_mes_inicio: null,
           temp_impulsion: null, temp_retorno: null, power_w: null,
         }}
@@ -68,8 +67,7 @@ describe('ConsumoCard', () => {
     rerender(
       <ConsumoCard
         data={{
-          timestamp: '2026-05-09T10:30:00Z', kwh_calor: 1, kwh_frio: 0, m3_acs: 0.01, kwh_acs: 2,
-          kwh_calor_abs: 1, kwh_frio_abs: 0, m3_acs_abs: 0.01,
+          timestamp: '2026-05-09T10:30:00Z', m3_acs: 0.01, kwh_calor_abs: 1, kwh_frio_abs: 0, m3_acs_abs: 0.01,
           kwh_calor_mes_inicio: null, kwh_frio_mes_inicio: null, m3_acs_mes_inicio: null,
           temp_impulsion: null, temp_retorno: null, power_w: 30,
         }}
@@ -81,8 +79,7 @@ describe('ConsumoCard', () => {
     render(
       <ConsumoCard
         data={{
-          timestamp: '2026-05-09T10:30:00Z', kwh_calor: 1, kwh_frio: 0, m3_acs: 0.01, kwh_acs: 2,
-          kwh_calor_abs: 1, kwh_frio_abs: 0, m3_acs_abs: 0.01,
+          timestamp: '2026-05-09T10:30:00Z', m3_acs: 0.01, kwh_calor_abs: 1, kwh_frio_abs: 0, m3_acs_abs: 0.01,
           kwh_calor_mes_inicio: null, kwh_frio_mes_inicio: null, m3_acs_mes_inicio: null,
           temp_impulsion: null, temp_retorno: null, power_w: -30,
         }}
@@ -95,8 +92,7 @@ describe('ConsumoCard', () => {
     render(
       <ConsumoCard
         data={{
-          timestamp: '2026-05-09T10:30:00Z', kwh_calor: 1, kwh_frio: 0, m3_acs: 0.01, kwh_acs: 2,
-          kwh_calor_abs: 1, kwh_frio_abs: 0, m3_acs_abs: 0.01,
+          timestamp: '2026-05-09T10:30:00Z', m3_acs: 0.01, kwh_calor_abs: 1, kwh_frio_abs: 0, m3_acs_abs: 0.01,
           kwh_calor_mes_inicio: null, kwh_frio_mes_inicio: null, m3_acs_mes_inicio: null,
           temp_impulsion: null, temp_retorno: null, power_w: -2000,
         }}
@@ -111,7 +107,7 @@ describe('ConsumoCard', () => {
       <ConsumoCard
         data={{
           timestamp: '2026-01-01T12:00:00Z',
-          kwh_calor: 1, kwh_frio: 5, m3_acs: 0.01, kwh_acs: 2,
+          m3_acs: 0.01,
           kwh_calor_abs: 1, kwh_frio_abs: 5, m3_acs_abs: 0.01,
           kwh_calor_mes_inicio: null, kwh_frio_mes_inicio: null, m3_acs_mes_inicio: null,
           temp_impulsion: 7, temp_retorno: 12, power_w: 2000,
@@ -128,8 +124,7 @@ describe('ConsumoCard', () => {
       <ConsumoCard
         data={{
           timestamp: '2026-01-01T12:00:00Z',
-          kwh_calor: 1, kwh_frio: 0, m3_acs: 0.01, kwh_acs: 2,
-          kwh_calor_abs: 1, kwh_frio_abs: 0, m3_acs_abs: 0.01,
+          m3_acs: 0.01, kwh_calor_abs: 1, kwh_frio_abs: 0, m3_acs_abs: 0.01,
           kwh_calor_mes_inicio: null, kwh_frio_mes_inicio: null, m3_acs_mes_inicio: null,
           temp_impulsion: 25, temp_retorno: 20, power_w: 100,
           modo: 'desconocido',
@@ -145,8 +140,7 @@ describe('ConsumoCard', () => {
       <ConsumoCard
         data={{
           timestamp: '2026-01-01T12:00:00Z',
-          kwh_calor: 1, kwh_frio: 0, m3_acs: 0.01, kwh_acs: 2,
-          kwh_calor_abs: 1, kwh_frio_abs: 0, m3_acs_abs: 0.01,
+          m3_acs: 0.01, kwh_calor_abs: 1, kwh_frio_abs: 0, m3_acs_abs: 0.01,
           kwh_calor_mes_inicio: null, kwh_frio_mes_inicio: null, m3_acs_mes_inicio: null,
           temp_impulsion: null, temp_retorno: null, power_w: null,
         }}
