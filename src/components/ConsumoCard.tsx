@@ -118,7 +118,7 @@ export default function ConsumoCard({ data }: { data: ConsumoActual | null }) {
           </div>
           {isLive && (
             <div className="font-mono text-[11px] text-cocoa/40 font-num mt-0.5">
-              {`${Number(data.power_w).toFixed(0)} W`}
+              {`${Math.abs(Number(data.power_w)).toFixed(0)} W`}
             </div>
           )}
           <div className="text-[11px] text-cocoa/40 mt-1">

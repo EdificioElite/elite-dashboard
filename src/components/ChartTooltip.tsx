@@ -10,7 +10,7 @@ interface ChartTooltipProps {
   payload?: RechartsPayload;
   label?: string;
   labelFormatter?: (label: string, payload: RechartsPayload) => string;
-  unit?: string;
+  unit?: string | Record<string, string>;
 }
 
 function fmtVal(value: number | null | undefined): string {
@@ -42,15 +42,18 @@ export default function ChartTooltip({ active, payload, label, labelFormatter, u
           {labelFormatter ? labelFormatter(label, payload) : label}
         </div>
       )}
-      {payload.map((entry, i) => (
+      {payload.map((entry, i) => {
+        const entryUnit = typeof unit === 'string' ? unit : (unit?.[entry.name] ?? '');
+        return (
         <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '2px 0' }}>
           <span style={{ width: 8, height: 8, borderRadius: '50%', background: entry.color, flexShrink: 0 }} />
           <span style={{ opacity: 0.7 }}>{entry.name}:</span>
           <span style={{ fontWeight: 600, fontFamily: "'JetBrains Mono', monospace", fontSize: '11px' }}>
-            {fmtVal(entry.value)}{unit ? ` ${unit}` : ''}
+            {fmtVal(entry.value)}{entryUnit ? ` ${entryUnit}` : ''}
           </span>
         </div>
-      ))}
+        );
+      })}
     </div>
   );
 }

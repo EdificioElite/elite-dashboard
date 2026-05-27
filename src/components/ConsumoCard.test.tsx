@@ -103,7 +103,7 @@ describe('ConsumoCard', () => {
       />
     );
     expect(screen.getByText('Encendido')).toBeInTheDocument();
-    expect(screen.getByText('-2000 W')).toBeInTheDocument();
+    expect(screen.getByText('2000 W')).toBeInTheDocument();
   });
 
   it('displays Refrigeracion mode in azul', () => {

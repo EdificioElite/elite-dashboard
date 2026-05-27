@@ -23,6 +23,8 @@ interface Consumo {
   temp_impulsion: number | null;
   temp_retorno: number | null;
   power_w: number | null;
+  kwh_calor_abs: number;
+  kwh_frio_abs: number;
 }
 
 type Preset = '24h' | '7d' | '30d' | '1a' | null;
@@ -127,6 +129,93 @@ function ChartLine({ data, color, dashed, unit }: ChartLineProps) {
   );
 }
 
+interface PowerKwhChartProps {
+  data: { label: string; timestamp: string; power: number; counter: number }[];
+  powerColor: string;
+  counterColor: string;
+  powerName: string;
+  counterName: string;
+}
+
+function PowerKwhChart({ data, powerColor, counterColor, powerName, counterName }: PowerKwhChartProps) {
+  const powerDomain = useMemo(() => {
+    const vals = data.map((d) => d.power).filter((v) => v != null && !isNaN(v));
+    if (vals.length === 0) return [0, 1] as [number, number];
+    const min = Math.min(...vals);
+    const max = Math.max(...vals);
+    const range = max - min;
+    const pad = Math.max(range * 0.15, 0.01);
+    return [Math.max(0, min - pad), max + pad] as [number, number];
+  }, [data]);
+
+  const counterDomain = useMemo(() => {
+    const vals = data.map((d) => d.counter).filter((v) => v != null && !isNaN(v));
+    if (vals.length === 0) return [0, 1] as [number, number];
+    const min = Math.min(...vals);
+    const max = Math.max(...vals);
+    const range = max - min || 1;
+    const pad = Math.max(range * 0.15, 0.01);
+    return [Math.max(0, min - pad), max + pad] as [number, number];
+  }, [data]);
+
+  return (
+    <ResponsiveContainer width="100%" height={140}>
+      <LineChart data={data} margin={{ top: 4, right: 0, left: 0, bottom: 0 }}>
+        <CartesianGrid strokeDasharray="2 4" stroke="rgba(30,20,10,0.12)" vertical={false} />
+        <XAxis dataKey="label" fontSize={10} tick={{ fill: 'rgba(58,47,36,.35)' }} axisLine={false} tickLine={false} interval="preserveStartEnd" />
+        <YAxis
+          yAxisId="left"
+          fontSize={10}
+          tick={{ fill: 'rgba(58,47,36,.35)', fontFamily: "'JetBrains Mono', monospace" }}
+          axisLine={false} tickLine={false}
+          domain={powerDomain}
+          width={45}
+          tickFormatter={(v: number) => (v >= 1000 ? `${(v / 1000).toFixed(0)}k` : `${v.toFixed(0)}`)}
+        />
+        <YAxis
+          yAxisId="right"
+          orientation="right"
+          fontSize={10}
+          tick={{ fill: 'rgba(58,47,36,.35)', fontFamily: "'JetBrains Mono', monospace" }}
+          axisLine={false} tickLine={false}
+          domain={counterDomain}
+          width={45}
+          tickFormatter={(v: number) => `${v.toFixed(0)}`}
+        />
+        <Tooltip content={<ChartTooltip labelFormatter={formatTooltipDate} unit={{ [powerName]: 'W', [counterName]: 'kWh' }} />} wrapperStyle={{ zIndex: 9999, pointerEvents: 'none' }} />
+        <defs>
+          <linearGradient id="dualAreaGradient" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stopColor={powerColor} stopOpacity={0.12} />
+            <stop offset="100%" stopColor={powerColor} stopOpacity={0} />
+          </linearGradient>
+        </defs>
+        <Area type="monotone" dataKey="power" stroke="none" fill="url(#dualAreaGradient)" yAxisId="left" />
+        <Line
+          yAxisId="left"
+          type="monotone"
+          dataKey="power"
+          name={powerName}
+          stroke={powerColor}
+          strokeWidth={3}
+          dot={false}
+          activeDot={{ r: 4, fill: '#fff8ee', stroke: powerColor, strokeWidth: 1.5 }}
+        />
+        <Line
+          yAxisId="right"
+          type="monotone"
+          dataKey="counter"
+          name={counterName}
+          stroke={counterColor}
+          strokeWidth={2}
+          strokeDasharray="4 3"
+          dot={false}
+          activeDot={{ r: 4, fill: '#fff8ee', stroke: counterColor, strokeWidth: 1.5 }}
+        />
+      </LineChart>
+    </ResponsiveContainer>
+  );
+}
+
 function TempChart({ data }: { data: { label: string; timestamp: string; impulsion: number | null; retorno: number | null }[] }) {
   const domain = useMemo(() => {
     const all = data.flatMap((d) => [d.impulsion, d.retorno].filter((v): v is number => v != null && !isNaN(v)));
@@ -215,12 +304,20 @@ export default function HistoricoCharts({ endpoint, title, desde: extDesde, hast
     [data, spanMs]
   );
 
-  const calorData = useMemo(
-    () => data.map((d, i) => ({ ...formatted[i], value: d.power_w != null && d.power_w > 0 ? d.power_w : 0 })),
+  const calorKwhData = useMemo(
+    () => data.map((d, i) => ({
+      ...formatted[i],
+      power: d.power_w != null && d.power_w > 0 ? d.power_w : 0,
+      counter: d.kwh_calor_abs ?? 0,
+    })),
     [data, formatted]
   );
-  const frioData = useMemo(
-    () => data.map((d, i) => ({ ...formatted[i], value: d.power_w != null && d.power_w < 0 ? Math.abs(d.power_w) : 0 })),
+  const frioKwhData = useMemo(
+    () => data.map((d, i) => ({
+      ...formatted[i],
+      power: d.power_w != null && d.power_w < 0 ? Math.abs(d.power_w) : 0,
+      counter: d.kwh_frio_abs ?? 0,
+    })),
     [data, formatted]
   );
   const acsData = useMemo(
@@ -266,17 +363,35 @@ export default function HistoricoCharts({ endpoint, title, desde: extDesde, hast
             <div className="flex items-center gap-2 mb-1.5">
               <span className="w-2 h-2 rounded-full shrink-0" style={{ background: 'var(--calor)' }} />
               <span className="text-[11px] font-medium text-cocoa/40 uppercase tracking-wider">Calefacción</span>
-              <span className="text-[10px] text-cocoa/30 font-mono">W</span>
+              <span className="text-[10px] text-cocoa/30 font-mono">W / kWh</span>
             </div>
-            <ChartLine data={calorData} color="#B53228" unit="W" />
+            <div className="flex items-center gap-4 mb-1.5">
+              <span className="flex items-center gap-1.5 text-[10px] text-cocoa/40">
+                <span className="w-2 h-2 rounded-full shrink-0" style={{ background: '#B53228' }} /> Potencia (W)
+              </span>
+              <span className="flex items-center gap-1.5 text-[10px] text-cocoa/40">
+                <span className="w-0 h-0" style={{ borderLeft: '3px solid transparent', borderRight: '3px solid transparent', borderBottom: `3px solid #D4897A` }} />
+                <span className="[text-decoration-style:dotted] [text-decoration-line:underline] [text-decoration-color:#D4897A]" style={{ textDecoration: 'underline dotted #D4897A' }}>Contador (kWh)</span>
+              </span>
+            </div>
+            <PowerKwhChart data={calorKwhData} powerColor="#B53228" counterColor="#D4897A" powerName="Potencia" counterName="Contador" />
           </div>
           <div id="frio" className="scroll-mt-20">
             <div className="flex items-center gap-2 mb-1.5">
               <span className="w-2 h-2 rounded-full shrink-0" style={{ background: 'var(--frio)' }} />
               <span className="text-[11px] font-medium text-cocoa/40 uppercase tracking-wider">Refrigeración</span>
-              <span className="text-[10px] text-cocoa/30 font-mono">W</span>
+              <span className="text-[10px] text-cocoa/30 font-mono">W / kWh</span>
             </div>
-            <ChartLine data={frioData} color="#4A7A8C" unit="W" />
+            <div className="flex items-center gap-4 mb-1.5">
+              <span className="flex items-center gap-1.5 text-[10px] text-cocoa/40">
+                <span className="w-2 h-2 rounded-full shrink-0" style={{ background: '#4A7A8C' }} /> Potencia (W)
+              </span>
+              <span className="flex items-center gap-1.5 text-[10px] text-cocoa/40">
+                <span className="w-0 h-0" style={{ borderLeft: '3px solid transparent', borderRight: '3px solid transparent', borderBottom: `3px solid #7BAAB8` }} />
+                <span className="[text-decoration-style:dotted] [text-decoration-line:underline] [text-decoration-color:#7BAAB8]" style={{ textDecoration: 'underline dotted #7BAAB8' }}>Contador (kWh)</span>
+              </span>
+            </div>
+            <PowerKwhChart data={frioKwhData} powerColor="#4A7A8C" counterColor="#7BAAB8" powerName="Potencia" counterName="Contador" />
           </div>
           <div id="acs" className="scroll-mt-20">
             <div className="flex items-center gap-2 mb-1.5">

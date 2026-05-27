@@ -55,7 +55,9 @@ router.get('/consumos', authMiddleware, async (req: Request, res: Response) => {
           ROUND(((volume_m3_inst_value_0_1_0 - LAG(volume_m3_inst_value_0_1_0) OVER w) * 46.5)::numeric, 3) AS kwh_acs,
           flow_temp_c_inst_value_0_0_0 AS temp_impulsion,
           return_temp_c_inst_value_0_0_0 AS temp_retorno,
-          power_w_inst_value_0_0_0 AS power_w
+          power_w_inst_value_0_0_0 AS power_w,
+          ROUND(energy_wh_inst_value_0_0_0 / 1000.0, 3) AS kwh_calor_abs,
+          ROUND(energy_manufacturer_specific_02_wh_inst_value_0_0_0 / 1000.0, 3) AS kwh_frio_abs
         FROM sampled
         WINDOW w AS (ORDER BY created)
       )
