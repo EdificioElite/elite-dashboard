@@ -22,6 +22,7 @@ interface Consumo {
   kwh_acs: number;
   temp_impulsion: number | null;
   temp_retorno: number | null;
+  power_w: number | null;
 }
 
 type Preset = '24h' | '7d' | '30d' | '1a' | null;
@@ -215,11 +216,11 @@ export default function HistoricoCharts({ endpoint, title, desde: extDesde, hast
   );
 
   const calorData = useMemo(
-    () => data.map((d, i) => ({ ...formatted[i], value: d.kwh_calor })),
+    () => data.map((d, i) => ({ ...formatted[i], value: d.power_w != null && d.power_w > 0 ? d.power_w : 0 })),
     [data, formatted]
   );
   const frioData = useMemo(
-    () => data.map((d, i) => ({ ...formatted[i], value: d.kwh_frio })),
+    () => data.map((d, i) => ({ ...formatted[i], value: d.power_w != null && d.power_w < 0 ? Math.abs(d.power_w) : 0 })),
     [data, formatted]
   );
   const acsData = useMemo(
@@ -265,17 +266,17 @@ export default function HistoricoCharts({ endpoint, title, desde: extDesde, hast
             <div className="flex items-center gap-2 mb-1.5">
               <span className="w-2 h-2 rounded-full shrink-0" style={{ background: 'var(--calor)' }} />
               <span className="text-[11px] font-medium text-cocoa/40 uppercase tracking-wider">Calefacción</span>
-              <span className="text-[10px] text-cocoa/30 font-mono">kWh</span>
+              <span className="text-[10px] text-cocoa/30 font-mono">W</span>
             </div>
-            <ChartLine data={calorData} color="#B53228" unit="kWh" />
+            <ChartLine data={calorData} color="#B53228" unit="W" />
           </div>
           <div id="frio" className="scroll-mt-20">
             <div className="flex items-center gap-2 mb-1.5">
               <span className="w-2 h-2 rounded-full shrink-0" style={{ background: 'var(--frio)' }} />
               <span className="text-[11px] font-medium text-cocoa/40 uppercase tracking-wider">Refrigeración</span>
-              <span className="text-[10px] text-cocoa/30 font-mono">kWh</span>
+              <span className="text-[10px] text-cocoa/30 font-mono">W</span>
             </div>
-            <ChartLine data={frioData} color="#4A7A8C" unit="kWh" />
+            <ChartLine data={frioData} color="#4A7A8C" unit="W" />
           </div>
           <div id="acs" className="scroll-mt-20">
             <div className="flex items-center gap-2 mb-1.5">

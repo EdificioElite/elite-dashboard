@@ -28,7 +28,7 @@ function deltaStr(desdeInicio: number | null, decimals: number): string {
 }
 
 export default function ConsumoCard({ data }: { data: ConsumoActual | null }) {
-  const isLive = data?.power_w != null && Number(data.power_w) > 0;
+  const isLive = data?.power_w != null && Math.abs(Number(data.power_w)) > 50;
 
   if (!data) {
     return (

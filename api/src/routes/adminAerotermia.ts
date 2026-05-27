@@ -25,8 +25,9 @@ router.get('/admin/aerotermia/consumos', authMiddleware, adminMiddleware, async 
           ct.energy_wh_inst_value_0_0_0,
           ct.energy_manufacturer_specific_02_wh_inst_value_0_0_0,
           ct.volume_m3_inst_value_0_1_0,
-          ct.flow_temp_c_inst_value_0_0_0,
-          ct.return_temp_c_inst_value_0_0_0
+           ct.flow_temp_c_inst_value_0_0_0,
+          ct.return_temp_c_inst_value_0_0_0,
+          ct.power_w_inst_value_0_0_0 AS power_w
         FROM contadores ct
         JOIN vecinos v ON ct.device_identification = v.device_identification
           AND ct.serial_number::text = v.serial_number
@@ -58,7 +59,8 @@ router.get('/admin/aerotermia/consumos', authMiddleware, adminMiddleware, async 
         SELECT
           date_trunc('hour', timestamp) AS hour,
           ROUND(AVG(flow_temp_c_inst_value_0_0_0)::numeric, 1) AS temp_impulsion,
-          ROUND(AVG(return_temp_c_inst_value_0_0_0)::numeric, 1) AS temp_retorno
+          ROUND(AVG(return_temp_c_inst_value_0_0_0)::numeric, 1) AS temp_retorno,
+          ROUND(AVG(power_w)::numeric, 1) AS power_w
         FROM all_readings
         GROUP BY date_trunc('hour', timestamp)
       ),
@@ -66,7 +68,7 @@ router.get('/admin/aerotermia/consumos', authMiddleware, adminMiddleware, async 
         SELECT *, ROW_NUMBER() OVER (ORDER BY hour) AS rn, COUNT(*) OVER () AS total
         FROM valid_deltas
       )
-      SELECT d.hour AS timestamp, d.kwh_calor, d.kwh_frio, d.m3_acs, d.kwh_acs, t.temp_impulsion, t.temp_retorno
+      SELECT d.hour AS timestamp, d.kwh_calor, d.kwh_frio, d.m3_acs, d.kwh_acs, t.temp_impulsion, t.temp_retorno, t.power_w
       FROM counted d
       LEFT JOIN temp_avgs t ON d.hour = t.hour
       WHERE d.total <= ${MAX_POINTS}
