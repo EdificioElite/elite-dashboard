@@ -516,8 +516,9 @@ describe('Consumos routes', () => {
       const sqlArg = mockQuery.mock.calls[0][0] as string;
       expect(sqlArg).toContain('GROUP BY timestamp');
       expect(sqlArg).toContain('EXTRACT(EPOCH FROM ct.created)');
-      expect(sqlArg).toContain('AVG(ct.power_w_inst_value_0_0_0)');
-      expect(sqlArg).toContain('MAX(ct.energy_wh_inst_value_0_0_0)');
+      expect(sqlArg).toContain('bucketed AS');
+      expect(sqlArg).toContain('GREATEST(ct.power_w_inst_value_0_0_0, 0)');
+      expect(sqlArg).toContain('LAG(max_m3_acs)');
     });
 
     it('filters by date range', async () => {

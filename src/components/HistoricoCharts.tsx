@@ -20,6 +20,8 @@ interface Consumo {
   temp_impulsion: number | null;
   temp_retorno: number | null;
   power_w: number | null;
+  power_w_calor: number | null;
+  power_w_frio: number | null;
   kwh_calor_abs: number;
   kwh_frio_abs: number;
   m3_acs_abs: number;
@@ -107,6 +109,8 @@ function DualAxisChart({ data, leftColor, rightColor, leftName, rightName, leftU
 
   const defaultLeftTick = (v: number) => (v >= 1000 ? `${(v / 1000).toFixed(0)}k` : `${v.toFixed(0)}`);
 
+  const gradientId = useMemo(() => `dualAreaGradient-${leftColor.replace('#', '')}`, [leftColor]);
+
   return (
     <ResponsiveContainer width="100%" height={140}>
       <LineChart data={data} margin={{ top: 4, right: 0, left: 0, bottom: 0 }}>
@@ -133,12 +137,12 @@ function DualAxisChart({ data, leftColor, rightColor, leftName, rightName, leftU
         />
         <Tooltip content={<ChartTooltip labelFormatter={formatTooltipDate} unit={{ [leftName]: leftUnit, [rightName]: rightUnit }} />} wrapperStyle={{ zIndex: 9999, pointerEvents: 'none' }} />
         <defs>
-          <linearGradient id="dualAreaGradient" x1="0" y1="0" x2="0" y2="1">
+          <linearGradient id={gradientId} x1="0" y1="0" x2="0" y2="1">
             <stop offset="0%" stopColor={leftColor} stopOpacity={0.12} />
             <stop offset="100%" stopColor={leftColor} stopOpacity={0} />
           </linearGradient>
         </defs>
-        <Area type="monotone" dataKey="left" stroke="none" fill="url(#dualAreaGradient)" yAxisId="left" />
+        <Area type="monotone" dataKey="left" stroke="none" fill={`url(#${gradientId})`} yAxisId="left" />
         <Line
           yAxisId="left"
           type="monotone"
@@ -256,7 +260,7 @@ export default function HistoricoCharts({ endpoint, title, desde: extDesde, hast
   const calorKwhData = useMemo(
     () => data.map((d, i) => ({
       ...formatted[i],
-      left: d.power_w != null && d.power_w > 0 ? d.power_w : 0,
+      left: d.power_w_calor ?? 0,
       right: d.kwh_calor_abs ?? 0,
     })),
     [data, formatted]
@@ -264,7 +268,7 @@ export default function HistoricoCharts({ endpoint, title, desde: extDesde, hast
   const frioKwhData = useMemo(
     () => data.map((d, i) => ({
       ...formatted[i],
-      left: d.power_w != null && d.power_w < 0 ? Math.abs(d.power_w) : 0,
+      left: d.power_w_frio ?? 0,
       right: d.kwh_frio_abs ?? 0,
     })),
     [data, formatted]

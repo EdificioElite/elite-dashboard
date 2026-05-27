@@ -25,7 +25,7 @@ router.get('/consumos', authMiddleware, async (req: Request, res: Response) => {
     const targetBuckets = 500;
     const idealBucketSec = spanMs / 1000 / targetBuckets;
     const niceIntervals = [300, 600, 900, 1800, 3600, 7200, 14400, 21600, 43200, 86400, 604800];
-    const bucketSec = niceIntervals.find((i) => i >= idealBucketSec) ?? niceIntervals[niceIntervals.length - 1];
+    const bucketSec = niceIntervals.find((i) => i >= idealBucketSec) ?? Math.max(604800, Math.ceil(idealBucketSec));
 
     params.push(desdeDate.toISOString());
     whereSql += ` AND ct.created >= $${params.length}`;
@@ -36,20 +36,35 @@ router.get('/consumos', authMiddleware, async (req: Request, res: Response) => {
     const bucketExpr = `to_timestamp(FLOOR(EXTRACT(EPOCH FROM ct.created) / $${params.length}) * $${params.length})`;
 
     const sql = `
+      WITH bucketed AS (
+        SELECT
+          ${bucketExpr} AS timestamp,
+          AVG(ct.power_w_inst_value_0_0_0) AS power_w_avg,
+          AVG(GREATEST(ct.power_w_inst_value_0_0_0, 0)) AS power_w_calor_avg,
+          AVG(ABS(LEAST(ct.power_w_inst_value_0_0_0, 0))) AS power_w_frio_avg,
+          MAX(ct.energy_wh_inst_value_0_0_0) AS max_wh_calor,
+          MAX(ct.energy_manufacturer_specific_02_wh_inst_value_0_0_0) AS max_wh_frio,
+          MAX(ct.volume_m3_inst_value_0_1_0) AS max_m3_acs,
+          AVG(ct.flow_temp_c_inst_value_0_0_0) AS temp_impulsion_avg,
+          AVG(ct.return_temp_c_inst_value_0_0_0) AS temp_retorno_avg
+        FROM contadores ct
+        JOIN vecinos v ON ct.device_identification = v.device_identification
+          AND ct.serial_number::text = v.serial_number
+        ${whereSql}
+        GROUP BY timestamp
+      )
       SELECT
-        ${bucketExpr} AS timestamp,
-        ROUND(AVG(ct.power_w_inst_value_0_0_0)::numeric, 1) AS power_w,
-        ROUND(MAX(ct.energy_wh_inst_value_0_0_0) / 1000.0, 0) AS kwh_calor_abs,
-        ROUND(MAX(ct.energy_manufacturer_specific_02_wh_inst_value_0_0_0) / 1000.0, 0) AS kwh_frio_abs,
-        ROUND(MAX(ct.volume_m3_inst_value_0_1_0)::numeric, 3) AS m3_acs_abs,
-        ROUND((MAX(ct.volume_m3_inst_value_0_1_0) - MIN(ct.volume_m3_inst_value_0_1_0))::numeric, 3) AS m3_acs,
-        ROUND(AVG(ct.flow_temp_c_inst_value_0_0_0)::numeric, 1) AS temp_impulsion,
-        ROUND(AVG(ct.return_temp_c_inst_value_0_0_0)::numeric, 1) AS temp_retorno
-      FROM contadores ct
-      JOIN vecinos v ON ct.device_identification = v.device_identification
-        AND ct.serial_number::text = v.serial_number
-      ${whereSql}
-      GROUP BY timestamp
+        timestamp,
+        ROUND(power_w_avg::numeric, 1) AS power_w,
+        ROUND(power_w_calor_avg::numeric, 1) AS power_w_calor,
+        ROUND(power_w_frio_avg::numeric, 1) AS power_w_frio,
+        ROUND(max_wh_calor / 1000.0, 0) AS kwh_calor_abs,
+        ROUND(max_wh_frio / 1000.0, 0) AS kwh_frio_abs,
+        ROUND(max_m3_acs::numeric, 3) AS m3_acs_abs,
+        ROUND((max_m3_acs - LAG(max_m3_acs) OVER (ORDER BY timestamp))::numeric, 3) AS m3_acs,
+        ROUND(temp_impulsion_avg::numeric, 1) AS temp_impulsion,
+        ROUND(temp_retorno_avg::numeric, 1) AS temp_retorno
+      FROM bucketed
       ORDER BY timestamp ASC
     `;
 
