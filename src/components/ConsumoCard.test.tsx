@@ -52,8 +52,8 @@ describe('ConsumoCard', () => {
     expect(screen.queryByText(/desde inicio de mes/)).not.toBeInTheDocument();
   });
 
-  it('shows apagado when power is null or zero', () => {
-    render(
+  it('shows apagado when power is null or within threshold', () => {
+    const { rerender, unmount } = render(
       <ConsumoCard
         data={{
           timestamp: '2026-05-09T10:30:00Z', kwh_calor: 1, kwh_frio: 0, m3_acs: 0.01, kwh_acs: 2,
@@ -64,6 +64,46 @@ describe('ConsumoCard', () => {
       />
     );
     expect(screen.getByText('Apagado')).toBeInTheDocument();
+
+    rerender(
+      <ConsumoCard
+        data={{
+          timestamp: '2026-05-09T10:30:00Z', kwh_calor: 1, kwh_frio: 0, m3_acs: 0.01, kwh_acs: 2,
+          kwh_calor_abs: 1, kwh_frio_abs: 0, m3_acs_abs: 0.01,
+          kwh_calor_mes_inicio: null, kwh_frio_mes_inicio: null, m3_acs_mes_inicio: null,
+          temp_impulsion: null, temp_retorno: null, power_w: 30,
+        }}
+      />
+    );
+    expect(screen.getByText('Apagado')).toBeInTheDocument();
+
+    unmount();
+    render(
+      <ConsumoCard
+        data={{
+          timestamp: '2026-05-09T10:30:00Z', kwh_calor: 1, kwh_frio: 0, m3_acs: 0.01, kwh_acs: 2,
+          kwh_calor_abs: 1, kwh_frio_abs: 0, m3_acs_abs: 0.01,
+          kwh_calor_mes_inicio: null, kwh_frio_mes_inicio: null, m3_acs_mes_inicio: null,
+          temp_impulsion: null, temp_retorno: null, power_w: -30,
+        }}
+      />
+    );
+    expect(screen.getByText('Apagado')).toBeInTheDocument();
+  });
+
+  it('shows encendido with negative power (enfriando)', () => {
+    render(
+      <ConsumoCard
+        data={{
+          timestamp: '2026-05-09T10:30:00Z', kwh_calor: 1, kwh_frio: 0, m3_acs: 0.01, kwh_acs: 2,
+          kwh_calor_abs: 1, kwh_frio_abs: 0, m3_acs_abs: 0.01,
+          kwh_calor_mes_inicio: null, kwh_frio_mes_inicio: null, m3_acs_mes_inicio: null,
+          temp_impulsion: null, temp_retorno: null, power_w: -2000,
+        }}
+      />
+    );
+    expect(screen.getByText('Encendido')).toBeInTheDocument();
+    expect(screen.getByText('-2000 W')).toBeInTheDocument();
   });
 
   it('displays Refrigeracion mode in azul', () => {
