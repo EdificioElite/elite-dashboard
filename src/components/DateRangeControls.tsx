@@ -12,10 +12,10 @@ interface DateRangeControlsProps {
 
 const PRESET_OPTIONS: { key: Preset; label: string }[] = [
   { key: '24h', label: '24h' },
-  { key: '7d', label: '7d' },
-  { key: '30d', label: '30d' },
-  { key: '3m', label: '3m' },
-  { key: '1a', label: '1a' },
+  { key: '7d', label: '7 dias' },
+  { key: '30d', label: '30 dias' },
+  { key: '3m', label: '3 meses' },
+  { key: '1a', label: '1 año' },
 ];
 
 function formatRangeLabel(desdeInput: string, hastaInput: string): string {
@@ -56,10 +56,12 @@ export default function DateRangeControls({
   }, [open]);
 
   const handleCustomClick = () => {
-    if (!open) {
-      setLocalDesde(desdeInput);
-      setLocalHasta(hastaInput);
+    if (open) {
+      setOpen(false);
+      return;
     }
+    setLocalDesde(desdeInput);
+    setLocalHasta(hastaInput);
     setOpen(true);
   };
 
@@ -74,7 +76,7 @@ export default function DateRangeControls({
   };
 
   return (
-    <div className="glass p-[14px] flex items-center gap-3">
+    <div className="glass p-[14px] flex items-center gap-3 flex-wrap">
       <span className="eyebrow shrink-0">Periodo</span>
       <SegmentedControl
         options={PRESET_OPTIONS}
@@ -86,7 +88,7 @@ export default function DateRangeControls({
         <button
           type="button"
           onClick={handleCustomClick}
-          className={`flex items-center gap-1.5 text-sm px-2 py-1 rounded-md transition-colors hover:bg-cream/50 ${preset === null ? 'text-accent' : 'text-cocoa/60'}`}
+          className={`flex items-center gap-2 text-xs font-medium py-1.5 px-3.5 rounded-[10px] border transition-colors ${open || preset === null ? 'border-accent bg-accent/6 text-accent' : 'border-cocoa/6 bg-cream/50 text-cocoa/40 hover:text-cocoa/70'}`}
         >
           <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
             <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />

@@ -6,7 +6,7 @@ describe('DateRangeControls', () => {
   const defaultProps = {
     preset: '7d' as const,
     desdeInput: '2026-04-28T00:00',
-    hastaInput: '2026-05-28T00:00',
+    hastaInput: '2026-05-28T23:59',
     onPresetChange: vi.fn(),
     onCustomApply: vi.fn(),
   };
@@ -20,16 +20,16 @@ describe('DateRangeControls', () => {
     const tabs = screen.getAllByRole('tab');
     expect(tabs).toHaveLength(5);
     expect(tabs[0]).toHaveTextContent('24h');
-    expect(tabs[1]).toHaveTextContent('7d');
-    expect(tabs[2]).toHaveTextContent('30d');
-    expect(tabs[3]).toHaveTextContent('3m');
-    expect(tabs[4]).toHaveTextContent('1a');
+    expect(tabs[1]).toHaveTextContent('7 dias');
+    expect(tabs[2]).toHaveTextContent('30 dias');
+    expect(tabs[3]).toHaveTextContent('3 meses');
+    expect(tabs[4]).toHaveTextContent('1 año');
   });
 
   it('marks the correct preset as selected', () => {
     render(<DateRangeControls {...defaultProps} preset="30d" />);
     const selected = screen.getByRole('tab', { selected: true });
-    expect(selected).toHaveTextContent('30d');
+    expect(selected).toHaveTextContent('30 dias');
   });
 
   it('shows range label in custom button', () => {
@@ -44,7 +44,7 @@ describe('DateRangeControls', () => {
     expect(screen.getByLabelText('Hasta')).toBeInTheDocument();
     expect(screen.getByText('Aplicar')).toBeInTheDocument();
     expect(screen.getByLabelText('Desde')).toHaveValue('2026-04-28T00:00');
-    expect(screen.getByLabelText('Hasta')).toHaveValue('2026-05-28T00:00');
+    expect(screen.getByLabelText('Hasta')).toHaveValue('2026-05-28T23:59');
   });
 
   it('closes popover and calls onCustomApply when Aplicar is clicked', () => {
@@ -52,14 +52,14 @@ describe('DateRangeControls', () => {
     render(<DateRangeControls {...defaultProps} onCustomApply={onCustomApply} />);
     fireEvent.click(screen.getByRole('button'));
     fireEvent.click(screen.getByText('Aplicar'));
-    expect(onCustomApply).toHaveBeenCalledWith('2026-04-28T00:00', '2026-05-28T00:00');
+    expect(onCustomApply).toHaveBeenCalledWith('2026-04-28T00:00', '2026-05-28T23:59');
     expect(screen.queryByText('Aplicar')).not.toBeInTheDocument();
   });
 
   it('calls onPresetChange when a preset is clicked', () => {
     const onPresetChange = vi.fn();
     render(<DateRangeControls {...defaultProps} onPresetChange={onPresetChange} />);
-    fireEvent.click(screen.getByRole('tab', { name: '30d' }));
+    fireEvent.click(screen.getByRole('tab', { name: '30 dias' }));
     expect(onPresetChange).toHaveBeenCalledWith('30d');
   });
 
