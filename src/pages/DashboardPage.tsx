@@ -9,6 +9,7 @@ import HistoricoCharts from '../components/HistoricoCharts';
 import FacturasChart from '../components/FacturasChart';
 import FacturasTable from '../components/FacturasTable';
 import Icon from '../components/Icon';
+import DateRangeControls from '../components/DateRangeControls';
 import { toDatetimeLocal, fromDatetimeLocal, applyPreset, Preset } from '../lib/dates';
 
 interface Consumo {
@@ -50,20 +51,24 @@ export default function DashboardPage() {
   const pisoParam = searchParams.get('piso');
   const viewingAs = user?.is_admin && pisoParam ? pisoParam : null;
 
-  const [preset, setPreset] = useState<Preset | null>('1a');
-  const [desdeInput, setDesdeInput] = useState(() => toDatetimeLocal(applyPreset('1a').desde));
-  const [hastaInput, setHastaInput] = useState(() => toDatetimeLocal(applyPreset('1a').hasta));
+  const [preset, setPreset] = useState<Preset | null>('30d');
+  const [desdeInput, setDesdeInput] = useState(() => toDatetimeLocal(applyPreset('30d').desde));
+  const [hastaInput, setHastaInput] = useState(() => toDatetimeLocal(applyPreset('30d').hasta));
 
   const { saludo } = greeting();
   const nombre = viewingAs ? `Piso ${viewingAs}` : (user?.vecino_piso || user?.email?.split('@')[0] || 'vecino');
 
-  const setRange = (p: string) => {
-    setPreset(p as Preset);
-    if (p) {
-      const { desde, hasta } = applyPreset(p as Preset);
-      setDesdeInput(toDatetimeLocal(desde));
-      setHastaInput(toDatetimeLocal(hasta));
-    }
+  const handlePresetChange = (p: Preset) => {
+    setPreset(p);
+    const { desde, hasta } = applyPreset(p);
+    setDesdeInput(toDatetimeLocal(desde));
+    setHastaInput(toDatetimeLocal(hasta));
+  };
+
+  const handleCustomApply = (d: string, h: string) => {
+    setDesdeInput(d);
+    setHastaInput(h);
+    setPreset(null);
   };
 
   const desde = desdeInput ? fromDatetimeLocal(desdeInput) : '';
@@ -124,27 +129,13 @@ export default function DashboardPage() {
           </h1>
         </div>
 
-        <div className="flex flex-col sm:flex-row sm:items-center gap-3 glass p-[26px]">
-          <span className="eyebrow shrink-0">Periodo</span>
-          <div className="flex items-center gap-2 flex-wrap" role="group" aria-label="Presets de periodo">
-            {[{ key: '24h', label: '24h' }, { key: '7d', label: '7 dias' }, { key: '30d', label: '30 dias' }, { key: '3m', label: '3 meses' }, { key: '1a', label: '1 año' }].map((p) => (
-              <button
-                key={p.key}
-                aria-pressed={preset === p.key}
-                onClick={() => setRange(p.key)}
-                className={`text-[11px] font-medium uppercase tracking-[0.05em] px-2.5 py-1.5 rounded-md transition-colors ${preset === p.key ? 'text-cocoa bg-accent/12' : 'text-cocoa/40 hover:text-cocoa'}`}
-              >{p.label}</button>
-            ))}
-          </div>
-          <div className="flex items-center gap-2">
-            <label className="text-[11px] font-medium uppercase tracking-wider text-cocoa/40 shrink-0">Desde:</label>
-            <input type="datetime-local" value={desdeInput} onChange={(e) => { setDesdeInput(e.target.value); setPreset(null); }} className="input-card text-xs py-1.5 px-3" />
-          </div>
-          <div className="flex items-center gap-2">
-            <label className="text-[11px] font-medium uppercase tracking-wider text-cocoa/40 shrink-0">Hasta:</label>
-            <input type="datetime-local" value={hastaInput} onChange={(e) => { setHastaInput(e.target.value); setPreset(null); }} className="input-card text-xs py-1.5 px-3" />
-          </div>
-        </div>
+        <DateRangeControls
+          preset={preset}
+          desdeInput={desdeInput}
+          hastaInput={hastaInput}
+          onPresetChange={handlePresetChange}
+          onCustomApply={handleCustomApply}
+        />
 
         <div className="stagger flex flex-col gap-[22px]">
           <ConsumoCard data={consumoActual} />
