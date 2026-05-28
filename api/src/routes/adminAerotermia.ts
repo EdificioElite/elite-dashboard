@@ -60,15 +60,24 @@ router.get('/admin/aerotermia/consumos', authMiddleware, adminMiddleware, async 
           date_trunc('hour', timestamp) AS hour,
           ROUND(AVG(flow_temp_c_inst_value_0_0_0)::numeric, 1) AS temp_impulsion,
           ROUND(AVG(return_temp_c_inst_value_0_0_0)::numeric, 1) AS temp_retorno,
-          ROUND(AVG(power_w)::numeric, 1) AS power_w
+          ROUND(AVG(power_w)::numeric, 1) AS power_w,
+          ROUND(AVG(GREATEST(power_w, 0))::numeric, 1) AS power_w_calor,
+          ROUND(AVG(ABS(LEAST(power_w, 0)))::numeric, 1) AS power_w_frio
         FROM all_readings
         GROUP BY date_trunc('hour', timestamp)
       ),
       counted AS (
-        SELECT *, ROW_NUMBER() OVER (ORDER BY hour) AS rn, COUNT(*) OVER () AS total
+        SELECT *, ROW_NUMBER() OVER (ORDER BY hour) AS rn, COUNT(*) OVER () AS total,
+          SUM(kwh_calor) OVER (ORDER BY hour) AS kwh_calor_abs,
+          SUM(kwh_frio) OVER (ORDER BY hour) AS kwh_frio_abs,
+          SUM(m3_acs) OVER (ORDER BY hour) AS m3_acs_abs
         FROM valid_deltas
       )
-      SELECT d.hour AS timestamp, d.kwh_calor, d.kwh_frio, d.m3_acs, d.kwh_acs, t.temp_impulsion, t.temp_retorno, t.power_w
+      SELECT d.hour AS timestamp, d.kwh_calor, d.kwh_frio, d.m3_acs, d.kwh_acs,
+        t.temp_impulsion, t.temp_retorno, t.power_w, t.power_w_calor, t.power_w_frio,
+        ROUND(d.kwh_calor_abs::numeric, 1) AS kwh_calor_abs,
+        ROUND(d.kwh_frio_abs::numeric, 1) AS kwh_frio_abs,
+        ROUND(d.m3_acs_abs::numeric, 3) AS m3_acs_abs
       FROM counted d
       LEFT JOIN temp_avgs t ON d.hour = t.hour
       WHERE d.total <= ${MAX_POINTS}
