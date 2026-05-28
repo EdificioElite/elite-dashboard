@@ -75,7 +75,7 @@ export default function DateRangeControls({
 
   return (
     <div className="glass p-[14px] flex items-center gap-3">
-      <span className="eyebrow shrink-0">PERIODO</span>
+      <span className="eyebrow shrink-0">Periodo</span>
       <SegmentedControl
         options={PRESET_OPTIONS}
         value={preset ?? ('' as Preset)}
