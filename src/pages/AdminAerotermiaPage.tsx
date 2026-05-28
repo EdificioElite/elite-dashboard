@@ -10,6 +10,7 @@ import FacturaElectricaTable from '../components/FacturaElectricaTable';
 import HeatmapChart from '../components/HeatmapChart';
 import CopChart from '../components/CopChart';
 import { toDatetimeLocal, fromDatetimeLocal, applyPreset, Preset } from '../lib/dates';
+import DateRangeControls from '../components/DateRangeControls';
 
 interface ConsumoAgregado {
   timestamp: string;
@@ -52,9 +53,9 @@ export default function AdminAerotermiaPage() {
   const [facturas, setFacturas] = useState<FacturaGlobal[]>([]);
   const [copData, setCopData] = useState<CopDatum[]>([]);
   const [loading, setLoading] = useState(true);
-  const [preset, setPreset] = useState<Preset | null>('7d');
-  const [desdeInput, setDesdeInput] = useState('');
-  const [hastaInput, setHastaInput] = useState('');
+  const [preset, setPreset] = useState<Preset | null>('3m');
+  const [desdeInput, setDesdeInput] = useState(() => toDatetimeLocal(applyPreset('3m').desde));
+  const [hastaInput, setHastaInput] = useState(() => toDatetimeLocal(applyPreset('3m').hasta));
   const [pisoFacturas, setPisoFacturas] = useState<string>('');
 
   const [sections, setSections] = useState<Record<string, boolean>>({
@@ -69,17 +70,6 @@ export default function AdminAerotermiaPage() {
   const toggleSection = (key: string) => {
     setSections((prev) => ({ ...prev, [key]: !prev[key] }));
   };
-
-  const setRange = (p: string) => {
-    setPreset(p as Preset);
-    if (p) {
-      const { desde, hasta } = applyPreset(p as Preset);
-      setDesdeInput(toDatetimeLocal(desde));
-      setHastaInput(toDatetimeLocal(hasta));
-    }
-  };
-
-  useEffect(() => { setRange('3m'); }, []);
 
   const desde = desdeInput ? fromDatetimeLocal(desdeInput) : '';
   const hasta = hastaInput ? fromDatetimeLocal(hastaInput) : '';
@@ -267,39 +257,22 @@ export default function AdminAerotermiaPage() {
 
         <section aria-label="Panel de aerotermia">
 
-        <div className="flex flex-col sm:flex-row sm:items-center gap-3 glass p-[26px]">
-          <span className="eyebrow shrink-0">Periodo</span>
-          <div className="flex items-center gap-2">
-            <button
-              onClick={() => setRange('24h')}
-              className={`text-[11px] font-medium uppercase tracking-[0.05em] px-2.5 py-1.5 rounded-md transition-colors ${preset === '24h' ? 'text-cocoa bg-accent/12' : 'text-cocoa/40 hover:text-cocoa'}`}
-            >24h</button>
-            <button
-              onClick={() => setRange('7d')}
-              className={`text-[11px] font-medium uppercase tracking-[0.05em] px-2.5 py-1.5 rounded-md transition-colors ${preset === '7d' ? 'text-cocoa bg-accent/12' : 'text-cocoa/40 hover:text-cocoa'}`}
-            >7 dias</button>
-            <button
-              onClick={() => setRange('30d')}
-              className={`text-[11px] font-medium uppercase tracking-[0.05em] px-2.5 py-1.5 rounded-md transition-colors ${preset === '30d' ? 'text-cocoa bg-accent/12' : 'text-cocoa/40 hover:text-cocoa'}`}
-            >30 dias</button>
-            <button
-              onClick={() => setRange('3m')}
-              className={`text-[11px] font-medium uppercase tracking-[0.05em] px-2.5 py-1.5 rounded-md transition-colors ${preset === '3m' ? 'text-cocoa bg-accent/12' : 'text-cocoa/40 hover:text-cocoa'}`}
-            >3 meses</button>
-            <button
-              onClick={() => setRange('1a')}
-              className={`text-[11px] font-medium uppercase tracking-[0.05em] px-2.5 py-1.5 rounded-md transition-colors ${preset === '1a' ? 'text-cocoa bg-accent/12' : 'text-cocoa/40 hover:text-cocoa'}`}
-            >1 año</button>
-          </div>
-          <div className="flex items-center gap-2">
-            <label className="text-[11px] font-medium uppercase tracking-wider text-cocoa/40 shrink-0">Desde:</label>
-            <input type="datetime-local" value={desdeInput} onChange={(e) => { setDesdeInput(e.target.value); setPreset(null); }} className="input-card text-xs py-1.5 px-3" />
-          </div>
-          <div className="flex items-center gap-2">
-            <label className="text-[11px] font-medium uppercase tracking-wider text-cocoa/40 shrink-0">Hasta:</label>
-            <input type="datetime-local" value={hastaInput} onChange={(e) => { setHastaInput(e.target.value); setPreset(null); }} className="input-card text-xs py-1.5 px-3" />
-          </div>
-        </div>
+        <DateRangeControls
+          preset={preset}
+          desdeInput={desdeInput}
+          hastaInput={hastaInput}
+          onPresetChange={(p) => {
+            setPreset(p);
+            const { desde, hasta } = applyPreset(p as Preset);
+            setDesdeInput(toDatetimeLocal(desde));
+            setHastaInput(toDatetimeLocal(hasta));
+          }}
+          onCustomApply={(d, h) => {
+            setDesdeInput(d);
+            setHastaInput(h);
+            setPreset(null);
+          }}
+        />
 
         <div className="stagger flex flex-col gap-[22px]">
           <div className="glass p-[26px]">
