@@ -63,8 +63,8 @@ Al hacer click en el boton "Personalizado":
 - Aparece un popover posicionado debajo del boton (alineado a la derecha)
 - Estilo glass: `background: rgba(255,251,245,.97)`, `backdrop-filter: blur(16px)`, `border-radius: 16px`, `box-shadow: 0 8px 32px rgba(30,20,10,.12)`
 - Contenido:
-  - Label + input `type="date"` para "Desde"
-  - Label + input `type="date"` para "Hasta"
+  - Label + input `type="datetime-local"` para "Desde"
+  - Label + input `type="datetime-local"` para "Hasta"
   - Boton "Aplicar" (usa clase `btn btn-primary` existente)
 - Cierra al hacer click fuera (onClickOutside) o al pulsar "Aplicar"
 - Al pulsar "Aplicar": ejecuta `onApply` y cierra el popover

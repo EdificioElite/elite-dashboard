@@ -22,13 +22,13 @@ test.describe('Admin Aerotermia Dashboard', () => {
     await expect(page.getByText('Total facturado')).toBeVisible();
   });
 
-  test('shows date range presets and inputs', async ({ page }) => {
-    await expect(page.getByText('24h').first()).toBeVisible({ timeout: 10000 });
-    await expect(page.getByText('7 dias').first()).toBeVisible();
-    await expect(page.getByText('30 dias').first()).toBeVisible();
-    await expect(page.getByText('1 año').first()).toBeVisible();
-    await expect(page.getByText('Desde:').first()).toBeVisible();
-    await expect(page.getByText('Hasta:').first()).toBeVisible();
+  test('shows date range presets and custom button', async ({ page }) => {
+    await expect(page.getByRole('tab', { name: '24h' })).toBeVisible({ timeout: 10000 });
+    await expect(page.getByRole('tab', { name: '7 dias' })).toBeVisible();
+    await expect(page.getByRole('tab', { name: '30 dias' })).toBeVisible();
+    await expect(page.getByRole('tab', { name: '3 meses' })).toBeVisible();
+    await expect(page.getByRole('tab', { name: '1 año' })).toBeVisible();
+    await expect(page.getByText('Periodo')).toBeVisible();
   });
 
   test('shows all dashboard sections', async ({ page }) => {
@@ -44,18 +44,18 @@ test.describe('Admin Aerotermia Dashboard', () => {
   });
 
   test('preset 24h changes selection', async ({ page }) => {
-    await page.getByText('24h').first().click();
-    await expect(page.getByText('24h').first()).toHaveClass(/text-cocoa bg-accent\/12/);
+    await page.getByRole('tab', { name: '24h' }).click();
+    await expect(page.getByRole('tab', { name: '24h' })).toHaveAttribute('aria-selected', 'true');
   });
 
   test('preset 30d changes selection', async ({ page }) => {
-    await page.getByText('30 dias').first().click();
-    await expect(page.getByText('30 dias').first()).toHaveClass(/text-cocoa bg-accent\/12/);
+    await page.getByRole('tab', { name: '30 dias' }).click();
+    await expect(page.getByRole('tab', { name: '30 dias' })).toHaveAttribute('aria-selected', 'true');
   });
 
   test('preset 1a changes selection', async ({ page }) => {
-    await page.getByText('1 año').first().click();
-    await expect(page.getByText('1 año').first()).toHaveClass(/text-cocoa bg-accent\/12/);
+    await page.getByRole('tab', { name: '1 año' }).click();
+    await expect(page.getByRole('tab', { name: '1 año' })).toHaveAttribute('aria-selected', 'true');
   });
 
   test('factura selector has options', async ({ page }) => {

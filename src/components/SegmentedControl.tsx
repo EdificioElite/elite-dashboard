@@ -7,7 +7,7 @@ interface Option<T> {
 
 interface SegmentedControlProps<T> {
   options: Option<T>[];
-  value: T;
+  value: T | null;
   onChange: (key: T) => void;
 }
 
@@ -20,7 +20,10 @@ export default function SegmentedControl<T extends string>({ options, value, onC
     if (!track) return;
     const activeIdx = options.findIndex((o) => o.key === value);
     const buttons = track.querySelectorAll<HTMLElement>('.segmented-option');
-    if (buttons.length === 0 || activeIdx < 0) return;
+    if (buttons.length === 0 || activeIdx < 0) {
+      setPillStyle({ width: 0, left: 0 });
+      return;
+    }
 
     let left = 0;
     for (let i = 0; i < activeIdx; i++) {
