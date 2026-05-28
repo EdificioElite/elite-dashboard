@@ -104,7 +104,7 @@ export default function FacturasChart({ data, headerRight }: { data: Factura[]; 
     .map((f) => ({ ...f, periodoLabel: fmtPeriodo(f.periodo) }));
 
   return (
-    <div className="glass p-[26px]">
+    <div className="glass p-[26px] relative z-10">
       <div className="flex items-center justify-between mb-4 flex-wrap gap-3">
         <div className="flex items-center gap-3">
           <div className="w-7 h-7 rounded-lg flex items-center justify-center shrink-0" style={{ background: 'var(--accent)' }}>
