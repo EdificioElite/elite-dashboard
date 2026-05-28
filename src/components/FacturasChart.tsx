@@ -104,7 +104,7 @@ export default function FacturasChart({ data, headerRight }: { data: Factura[]; 
     .map((f) => ({ ...f, periodoLabel: fmtPeriodo(f.periodo) }));
 
   return (
-    <div className="glass p-[26px] relative z-10">
+    <div className="glass p-[26px] relative z-10" style={{ overflow: 'visible' }}>
       <div className="flex items-center justify-between mb-4 flex-wrap gap-3">
         <div className="flex items-center gap-3">
           <div className="w-7 h-7 rounded-lg flex items-center justify-center shrink-0" style={{ background: 'var(--accent)' }}>
@@ -133,7 +133,8 @@ export default function FacturasChart({ data, headerRight }: { data: Factura[]; 
         </span>
       </div>
 
-      <ResponsiveContainer width="100%" height={200}>
+      <div style={{ overflow: 'visible' }}>
+        <ResponsiveContainer width="100%" height={250}>
         <BarChart data={chartData} margin={{ top: 4, right: 8, left: 8, bottom: 4 }}>
           <CartesianGrid strokeDasharray="2 4" stroke="rgba(58,47,36,.06)" vertical={false} />
           <XAxis dataKey="periodoLabel" fontSize={10} tick={{ fill: 'rgba(58,47,36,.44)' }} axisLine={false} tickLine={false} interval={0} angle={-45} textAnchor="end" height={40} />
@@ -146,6 +147,7 @@ export default function FacturasChart({ data, headerRight }: { data: Factura[]; 
           <Bar dataKey="importe_acs" stackId="a" fill="#2D8A4A" radius={[4, 4, 0, 0]} />
         </BarChart>
       </ResponsiveContainer>
+      </div>
     </div>
   );
 }
