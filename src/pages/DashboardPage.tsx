@@ -129,16 +129,15 @@ export default function DashboardPage() {
           </h1>
         </div>
 
-        <DateRangeControls
-          preset={preset}
-          desdeInput={desdeInput}
-          hastaInput={hastaInput}
-          onPresetChange={handlePresetChange}
-          onCustomApply={handleCustomApply}
-        />
-
         <div className="stagger flex flex-col gap-[22px]">
           <ConsumoCard data={consumoActual} />
+          <DateRangeControls
+            preset={preset}
+            desdeInput={desdeInput}
+            hastaInput={hastaInput}
+            onPresetChange={handlePresetChange}
+            onCustomApply={handleCustomApply}
+          />
           <HistoricoCharts
             endpoint={viewingAs ? `/admin/vecinos/${viewingAs}` : undefined}
             title={viewingAs ? `Histórico — Piso ${viewingAs}` : undefined}

@@ -101,7 +101,7 @@ export default function DateRangeControls({
           <span>{formatRangeLabel(desdeInput, hastaInput)}</span>
         </button>
         {open && (
-          <div className="absolute right-0 top-full mt-2 glass rounded-md p-4 min-w-[280px] z-50" style={{ boxShadow: '0 4px 24px rgba(30,20,10,0.12), 0 1px 0 rgba(255,255,255,0.4) inset' }}>
+          <div className="absolute right-0 top-full mt-2 glass rounded-md p-4 min-w-[280px]" style={{ boxShadow: '0 4px 24px rgba(30,20,10,0.12), 0 1px 0 rgba(255,255,255,0.4) inset', zIndex: 9999 }}>
             <div className="space-y-3">
               <label htmlFor={desdeId} className="flex items-center gap-3">
                 <span className="text-xs font-medium text-cocoa/60 w-12 shrink-0">Desde</span>
