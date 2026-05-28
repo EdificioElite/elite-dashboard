@@ -1,4 +1,5 @@
-import { useState, useRef, useEffect, useId } from 'react';
+import { useState, useRef, useEffect, useId, useCallback } from 'react';
+import { createPortal } from 'react-dom';
 import type { Preset } from '../lib/dates';
 import SegmentedControl from './SegmentedControl';
 
@@ -42,16 +43,45 @@ export default function DateRangeControls({
   const [open, setOpen] = useState(false);
   const [localDesde, setLocalDesde] = useState('');
   const [localHasta, setLocalHasta] = useState('');
+  const [popoverStyle, setPopoverStyle] = useState<{ top: number; right: number }>({ top: 0, right: 0 });
   const containerRef = useRef<HTMLDivElement>(null);
+  const buttonRef = useRef<HTMLButtonElement>(null);
+  const popoverRef = useRef<HTMLDivElement>(null);
   const desdeId = useId();
   const hastaId = useId();
+
+  const updatePopoverPosition = useCallback(() => {
+    if (!buttonRef.current) return;
+    const rect = buttonRef.current.getBoundingClientRect();
+    setPopoverStyle({
+      top: rect.bottom + 8,
+      right: window.innerWidth - rect.right,
+    });
+  }, []);
+
+  useEffect(() => {
+    if (open) updatePopoverPosition();
+  }, [open, updatePopoverPosition]);
+
+  useEffect(() => {
+    if (!open) return;
+    const handleScroll = () => updatePopoverPosition();
+    const handleResize = () => updatePopoverPosition();
+    window.addEventListener('scroll', handleScroll, true);
+    window.addEventListener('resize', handleResize);
+    return () => {
+      window.removeEventListener('scroll', handleScroll, true);
+      window.removeEventListener('resize', handleResize);
+    };
+  }, [open, updatePopoverPosition]);
 
   useEffect(() => {
     if (!open) return;
     const handleClickOutside = (e: MouseEvent) => {
-      if (containerRef.current && !containerRef.current.contains(e.target as Node)) {
-        setOpen(false);
-      }
+      const target = e.target as Node;
+      if (containerRef.current?.contains(target)) return;
+      if (popoverRef.current?.contains(target)) return;
+      setOpen(false);
     };
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
@@ -86,8 +116,9 @@ export default function DateRangeControls({
         onChange={handlePresetChange}
       />
       <div className="w-px h-5 bg-cocoa/6 shrink-0" />
-      <div ref={containerRef} className="relative">
+      <div ref={containerRef}>
         <button
+          ref={buttonRef}
           type="button"
           onClick={handleCustomClick}
           className={`flex items-center gap-2 text-xs font-medium py-1.5 px-3.5 rounded-[10px] border transition-colors ${open || preset === null ? 'border-accent bg-accent/6 text-accent' : 'border-cocoa/6 bg-cream/50 text-cocoa/40 hover:text-cocoa/70'}`}
@@ -100,8 +131,8 @@ export default function DateRangeControls({
           </svg>
           <span>{formatRangeLabel(desdeInput, hastaInput)}</span>
         </button>
-        {open && (
-          <div className="absolute right-0 top-full mt-2 glass rounded-md p-4 min-w-[280px]" style={{ boxShadow: '0 4px 24px rgba(30,20,10,0.12), 0 1px 0 rgba(255,255,255,0.4) inset', zIndex: 9999 }}>
+        {open && createPortal(
+          <div ref={popoverRef} className="glass rounded-md p-4 min-w-[280px]" style={{ position: 'fixed', top: popoverStyle.top, right: popoverStyle.right, boxShadow: '0 4px 24px rgba(30,20,10,0.12), 0 1px 0 rgba(255,255,255,0.4) inset', zIndex: 9999 }}>
             <div className="space-y-3">
               <label htmlFor={desdeId} className="flex items-center gap-3">
                 <span className="text-xs font-medium text-cocoa/60 w-12 shrink-0">Desde</span>
@@ -129,7 +160,8 @@ export default function DateRangeControls({
                 </button>
               </div>
             </div>
-          </div>
+          </div>,
+          document.body
         )}
       </div>
     </div>
