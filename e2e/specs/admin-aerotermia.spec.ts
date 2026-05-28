@@ -28,7 +28,7 @@ test.describe('Admin Aerotermia Dashboard', () => {
     await expect(page.getByRole('tab', { name: '30 dias' })).toBeVisible();
     await expect(page.getByRole('tab', { name: '3 meses' })).toBeVisible();
     await expect(page.getByRole('tab', { name: '1 año' })).toBeVisible();
-    await expect(page.getByText('Periodo')).toBeVisible();
+    await expect(page.locator('.eyebrow', { hasText: 'Periodo' })).toBeVisible();
   });
 
   test('shows all dashboard sections', async ({ page }) => {
