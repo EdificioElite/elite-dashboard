@@ -72,8 +72,8 @@ describe('Admin Aerotermia routes', () => {
     it('returns aggregated consumption data', async () => {
       mockQuery.mockResolvedValueOnce({
         rows: [
-          { timestamp: '2026-01-01T01:00:00.000Z', kwh_calor: 10.5, kwh_frio: 2.3, m3_acs: 0.15, kwh_acs: 6.975 },
-          { timestamp: '2026-01-01T02:00:00.000Z', kwh_calor: 8.2, kwh_frio: 1.5, m3_acs: 0.12, kwh_acs: 5.58 },
+          { timestamp: '2026-01-01T01:00:00.000Z', kwh_calor: 10.5, kwh_frio: 2.3, m3_acs: 0.15, kwh_acs: 6.975, power_w_calor: 800, power_w_frio: 0, kwh_calor_abs: 1250.5, kwh_frio_abs: 320.1, m3_acs_abs: 18.55 },
+          { timestamp: '2026-01-01T02:00:00.000Z', kwh_calor: 8.2, kwh_frio: 1.5, m3_acs: 0.12, kwh_acs: 5.58, power_w_calor: 600, power_w_frio: 150, kwh_calor_abs: 1258.7, kwh_frio_abs: 321.6, m3_acs_abs: 18.67 },
         ],
       });
       const app = createApp();
@@ -84,6 +84,9 @@ describe('Admin Aerotermia routes', () => {
       expect(res.body).toHaveLength(2);
       expect(res.body[0].kwh_calor).toBe(10.5);
       expect(res.body[0].kwh_acs).toBe(6.975);
+      expect(res.body[0].power_w_calor).toBe(800);
+      expect(res.body[0].kwh_calor_abs).toBe(1250.5);
+      expect(res.body[0].m3_acs_abs).toBe(18.55);
     });
   });
 
