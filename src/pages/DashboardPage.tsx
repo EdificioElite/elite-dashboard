@@ -154,7 +154,7 @@ export default function DashboardPage() {
             desde={desde}
             hasta={hasta}
           />
-          <div id="facturas" className="scroll-mt-20">
+          <div id="facturas" className="scroll-mt-20 relative z-10">
             <FacturasChart data={filteredFacturas} />
           </div>
           <FacturasTable data={filteredFacturas} />
