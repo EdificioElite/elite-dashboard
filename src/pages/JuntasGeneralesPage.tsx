@@ -1,42 +1,41 @@
+import { useState, useEffect, useCallback } from 'react';
+import { useAuthStore } from '../store/auth';
+import { fetchJuntas, downloadJuntaPDF } from '../api/client';
+import CreateJuntaModal from '../components/CreateJuntaModal';
+import EditJuntaModal from '../components/EditJuntaModal';
+import DeleteJuntaModal from '../components/DeleteJuntaModal';
 import Icon from '../components/Icon';
 
-interface JuntaVecinal {
-  tipo: 'Ordinaria' | 'Extraordinaria';
+interface Junta {
+  id: number;
+  tipo: string;
   fecha: string;
+  file_name: string | null;
+  created_at: string;
+  updated_at: string;
 }
 
-interface JuntaVocal {
-  tipo: 'Ordinaria';
-  fecha: string;
+const TIPO_LABELS: Record<string, string> = {
+  vecinal_ordinaria: 'Vecinal Ordinaria',
+  vecinal_extraordinaria: 'Vecinal Extraordinaria',
+  vocal_ordinaria: 'Directiva Ordinaria',
+  vocal_extraordinaria: 'Directiva Extraordinaria',
+};
+
+function tipoLabel(tipo: string): string {
+  return TIPO_LABELS[tipo] || tipo;
 }
 
-const VECINALES: JuntaVecinal[] = [
-  { tipo: 'Ordinaria', fecha: '2022-09-01' },
-  { tipo: 'Extraordinaria', fecha: '2022-10-13' },
-  { tipo: 'Extraordinaria', fecha: '2023-03-08' },
-  { tipo: 'Extraordinaria', fecha: '2023-04-11' },
-  { tipo: 'Ordinaria', fecha: '2023-10-04' },
-  { tipo: 'Extraordinaria', fecha: '2023-12-04' },
-  { tipo: 'Extraordinaria', fecha: '2024-05-16' },
-  { tipo: 'Extraordinaria', fecha: '2024-06-08' },
-  { tipo: 'Ordinaria', fecha: '2024-10-03' },
-  { tipo: 'Extraordinaria', fecha: '2024-10-14' },
-  { tipo: 'Extraordinaria', fecha: '2024-12-16' },
-  { tipo: 'Extraordinaria', fecha: '2025-05-22' },
-  { tipo: 'Extraordinaria', fecha: '2025-05-29' },
-  { tipo: 'Extraordinaria', fecha: '2025-07-07' },
-  { tipo: 'Ordinaria', fecha: '2025-09-25' },
-  { tipo: 'Extraordinaria', fecha: '2026-02-12' },
-];
+function tipoBadgeClass(tipo: string): string {
+  if (tipo.includes('extraordinaria')) {
+    return 'text-accent bg-accent/10';
+  }
+  return 'text-sage bg-sage/8';
+}
 
-const VOCALES: JuntaVocal[] = [
-  { tipo: 'Ordinaria', fecha: '2025-06-12' },
-  { tipo: 'Ordinaria', fecha: '2025-08-04' },
-  { tipo: 'Ordinaria', fecha: '2025-09-10' },
-  { tipo: 'Ordinaria', fecha: '2025-10-08' },
-  { tipo: 'Ordinaria', fecha: '2025-11-17' },
-  { tipo: 'Ordinaria', fecha: '2026-03-25' },
-];
+function isVocal(tipo: string): boolean {
+  return tipo.startsWith('vocal');
+}
 
 function fmtFecha(iso: string): string {
   const d = new Date(iso + 'T00:00:00');
@@ -44,16 +43,99 @@ function fmtFecha(iso: string): string {
 }
 
 export default function JuntasGeneralesPage() {
+  const user = useAuthStore((s) => s.user);
+  const isAdmin = user?.is_admin ?? false;
+
+  const [juntas, setJuntas] = useState<Junta[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+  const [downloading, setDownloading] = useState<number | null>(null);
+  const [showCreate, setShowCreate] = useState(false);
+  const [editingJunta, setEditingJunta] = useState<Junta | null>(null);
+  const [deletingJunta, setDeletingJunta] = useState<Junta | null>(null);
+
+  const loadJuntas = useCallback(async () => {
+    try {
+      setError('');
+      const data = await fetchJuntas();
+      setJuntas(data);
+    } catch (err: any) {
+      setError(err.message || 'Error al cargar juntas');
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    loadJuntas();
+  }, [loadJuntas]);
+
+  const handleDownload = async (junta: Junta) => {
+    setDownloading(junta.id);
+    try {
+      await downloadJuntaPDF(junta.id);
+    } catch (err: any) {
+      setError(err.message || 'Error al descargar');
+    } finally {
+      setDownloading(null);
+    }
+  };
+
+  const handleCreated = () => {
+    setShowCreate(false);
+    loadJuntas();
+  };
+
+  const handleEdited = () => {
+    setEditingJunta(null);
+    loadJuntas();
+  };
+
+  const handleDeleted = () => {
+    setDeletingJunta(null);
+    loadJuntas();
+  };
+
+  const vecinales = juntas.filter((j) => !isVocal(j.tipo));
+  const vocales = juntas.filter((j) => isVocal(j.tipo));
+
+  if (loading) {
+    return (
+      <div className="page-in">
+        <div className="max-w-[1180px] mx-auto px-6 py-20 text-center">
+          <p className="text-cocoa/40">Cargando juntas...</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="page-in">
       <main className="max-w-[1180px] mx-auto px-6 flex flex-col gap-[22px] pb-10">
         <div className="pt-2">
-          <p className="eyebrow">Comunidad</p>
-          <h1 className="font-display text-[40px] font-medium text-cocoa mt-1" style={{ letterSpacing: '-0.02em' }}>
-            Juntas
-          </h1>
-          <p className="text-sm text-cocoa/50 mt-1">Edificio Elite — C.P. Pio Rio Hortega 46</p>
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="eyebrow">Comunidad</p>
+              <h1 className="font-display text-[40px] font-medium text-cocoa mt-1" style={{ letterSpacing: '-0.02em' }}>
+                Juntas
+              </h1>
+              <p className="text-sm text-cocoa/50 mt-1">Edificio Elite — C.P. Pio Rio Hortega 46</p>
+            </div>
+            {isAdmin && (
+              <button onClick={() => setShowCreate(true)} className="btn btn-primary">
+                <Icon name="plus" size={14} />
+                Crear junta
+              </button>
+            )}
+          </div>
         </div>
+
+        {error && (
+          <div className="px-4 py-3 rounded-xl text-sm flex items-center gap-2" style={{ background: 'rgba(163,64,42,.08)', color: '#a3402a' }}>
+            <Icon name="alertTriangle" size={14} />
+            {error}
+          </div>
+        )}
 
         <div className="glass p-[26px]">
           <div className="flex items-center gap-3 mb-5">
@@ -63,38 +145,65 @@ export default function JuntasGeneralesPage() {
             <span className="eyebrow">Vecinales — Juntas Generales</span>
           </div>
 
-          <div className="overflow-x-auto -mx-2">
-            <table className="table-glass">
-              <thead>
-                <tr>
-                  <th>Tipo</th>
-                  <th>Fecha</th>
-                  <th className="text-right">Acta</th>
-                </tr>
-              </thead>
-              <tbody>
-                {VECINALES.map((j, i) => (
-                  <tr key={i} className="row-stagger" style={{ animationDelay: `${i * 30}ms` }}>
-                    <td>
-                      <span className={`text-[11px] font-medium uppercase tracking-wider px-2 py-0.5 rounded-md ${j.tipo === 'Ordinaria' ? 'text-sage bg-sage/8' : 'text-accent bg-accent/10'}`}>
-                        {j.tipo}
-                      </span>
-                    </td>
-                    <td className="text-sm text-cocoa/70">{fmtFecha(j.fecha)}</td>
-                    <td className="text-right">
-                      <button
-                        disabled
-                        className="btn btn-ghost text-xs opacity-40 cursor-default"
-                      >
-                        <Icon name="download" size={12} />
-                        Proximamente
-                      </button>
-                    </td>
+          {vecinales.length === 0 ? (
+            <p className="text-sm text-cocoa/40 py-4">No hay juntas vecinales registradas.</p>
+          ) : (
+            <div className="overflow-x-auto -mx-2">
+              <table className="table-glass">
+                <thead>
+                  <tr>
+                    <th>Tipo</th>
+                    <th>Fecha</th>
+                    <th className="text-right">Acta</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+                </thead>
+                <tbody>
+                  {vecinales.map((j, i) => (
+                    <tr key={j.id} className="row-stagger" style={{ animationDelay: `${i * 30}ms` }}>
+                      <td>
+                        <span className={`text-[11px] font-medium uppercase tracking-wider px-2 py-0.5 rounded-md inline-flex items-center gap-2 ${tipoBadgeClass(j.tipo)}`}>
+                          {tipoLabel(j.tipo).replace('Vecinal ', '').replace('Directiva ', '')}
+                          {isAdmin && (
+                            <span className="inline-flex items-center gap-0.5">
+                              <button
+                                onClick={() => setEditingJunta(j)}
+                                className="hover:opacity-70 p-0.5"
+                                title="Editar junta"
+                              >
+                                <Icon name="edit" size={12} />
+                              </button>
+                              <button
+                                onClick={() => setDeletingJunta(j)}
+                                className="hover:opacity-70 p-0.5"
+                                title="Eliminar junta"
+                              >
+                                <Icon name="trash" size={12} />
+                              </button>
+                            </span>
+                          )}
+                        </span>
+                      </td>
+                      <td className="text-sm text-cocoa/70">{fmtFecha(j.fecha)}</td>
+                      <td className="text-right">
+                        {j.file_name ? (
+                          <button
+                            onClick={() => handleDownload(j)}
+                            disabled={downloading === j.id}
+                            className="btn btn-ghost text-xs"
+                          >
+                            <Icon name="download" size={12} />
+                            {downloading === j.id ? 'Descargando...' : 'Descargar'}
+                          </button>
+                        ) : (
+                          <span className="text-xs text-cocoa/30">—</span>
+                        )}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
         </div>
 
         <div className="glass p-[26px]">
@@ -105,40 +214,90 @@ export default function JuntasGeneralesPage() {
             <span className="eyebrow">Vocales — Juntas de Junta Directiva</span>
           </div>
 
-          <div className="overflow-x-auto -mx-2">
-            <table className="table-glass">
-              <thead>
-                <tr>
-                  <th>Tipo</th>
-                  <th>Fecha</th>
-                  <th className="text-right">Acta</th>
-                </tr>
-              </thead>
-              <tbody>
-                {VOCALES.map((j, i) => (
-                  <tr key={i} className="row-stagger" style={{ animationDelay: `${i * 30}ms` }}>
-                    <td>
-                      <span className="text-[11px] font-medium uppercase tracking-wider px-2 py-0.5 rounded-md text-sage bg-sage/8">
-                        {j.tipo}
-                      </span>
-                    </td>
-                    <td className="text-sm text-cocoa/70">{fmtFecha(j.fecha)}</td>
-                    <td className="text-right">
-                      <button
-                        disabled
-                        className="btn btn-ghost text-xs opacity-40 cursor-default"
-                      >
-                        <Icon name="download" size={12} />
-                        Proximamente
-                      </button>
-                    </td>
+          {vocales.length === 0 ? (
+            <p className="text-sm text-cocoa/40 py-4">No hay juntas de directiva registradas.</p>
+          ) : (
+            <div className="overflow-x-auto -mx-2">
+              <table className="table-glass">
+                <thead>
+                  <tr>
+                    <th>Tipo</th>
+                    <th>Fecha</th>
+                    <th className="text-right">Acta</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+                </thead>
+                <tbody>
+                  {vocales.map((j, i) => (
+                    <tr key={j.id} className="row-stagger" style={{ animationDelay: `${i * 30}ms` }}>
+                      <td>
+                        <span className={`text-[11px] font-medium uppercase tracking-wider px-2 py-0.5 rounded-md inline-flex items-center gap-2 ${tipoBadgeClass(j.tipo)}`}>
+                          {tipoLabel(j.tipo).replace('Vecinal ', '').replace('Directiva ', '')}
+                          {isAdmin && (
+                            <span className="inline-flex items-center gap-0.5">
+                              <button
+                                onClick={() => setEditingJunta(j)}
+                                className="hover:opacity-70 p-0.5"
+                                title="Editar junta"
+                              >
+                                <Icon name="edit" size={12} />
+                              </button>
+                              <button
+                                onClick={() => setDeletingJunta(j)}
+                                className="hover:opacity-70 p-0.5"
+                                title="Eliminar junta"
+                              >
+                                <Icon name="trash" size={12} />
+                              </button>
+                            </span>
+                          )}
+                        </span>
+                      </td>
+                      <td className="text-sm text-cocoa/70">{fmtFecha(j.fecha)}</td>
+                      <td className="text-right">
+                        {j.file_name ? (
+                          <button
+                            onClick={() => handleDownload(j)}
+                            disabled={downloading === j.id}
+                            className="btn btn-ghost text-xs"
+                          >
+                            <Icon name="download" size={12} />
+                            {downloading === j.id ? 'Descargando...' : 'Descargar'}
+                          </button>
+                        ) : (
+                          <span className="text-xs text-cocoa/30">—</span>
+                        )}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
         </div>
       </main>
+
+      {showCreate && (
+        <CreateJuntaModal
+          onClose={() => setShowCreate(false)}
+          onCreated={handleCreated}
+        />
+      )}
+
+      {editingJunta && (
+        <EditJuntaModal
+          junta={editingJunta}
+          onClose={() => setEditingJunta(null)}
+          onUpdated={handleEdited}
+        />
+      )}
+
+      {deletingJunta && (
+        <DeleteJuntaModal
+          junta={deletingJunta}
+          onClose={() => setDeletingJunta(null)}
+          onDeleted={handleDeleted}
+        />
+      )}
     </div>
   );
 }
