@@ -21,10 +21,7 @@ import { fetchJuntas } from '../api/client';
 const mockUseAuthStore = useAuthStore as unknown as ReturnType<typeof vi.fn>;
 const mockFetchJuntas = fetchJuntas as ReturnType<typeof vi.fn>;
 
-let currentUser: { vecino_piso: string; email: string; is_admin: boolean } | null = null;
-
 function setUser(user: { vecino_piso: string; email: string; is_admin: boolean } | null) {
-  currentUser = user;
   mockUseAuthStore.mockImplementation((selector?: any) => {
     const state = { user };
     return selector ? selector(state) : state;
