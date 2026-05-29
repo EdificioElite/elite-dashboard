@@ -20,4 +20,7 @@ export const config = {
   adminEmail: process.env.ADMIN_EMAIL || '',
   frontendUrl: process.env.FRONTEND_URL || 'http://localhost:5173',
   mockEmail: process.env.MOCK_EMAIL === 'true',
+  googleServiceAccountEmail: process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL || '',
+  googleServiceAccountPrivateKey: process.env.GOOGLE_SERVICE_ACCOUNT_PRIVATE_KEY || '',
+  googleDriveFolderId: process.env.GOOGLE_DRIVE_FOLDER_ID || '',
 };
