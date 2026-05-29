@@ -6,8 +6,50 @@ import { adminMiddleware } from '../middleware/admin';
 import { logger } from '../lib/logger';
 import { uploadPDF, getPDFStream, deleteFile, renameFile } from '../lib/googleDrive';
 
+const PDF_MAGIC = [0x25, 0x50, 0x44, 0x46]; // %PDF
+
 const router = Router();
-const upload = multer({ storage: multer.memoryStorage() });
+const upload = multer({
+  storage: multer.memoryStorage(),
+  limits: { fileSize: 10 * 1024 * 1024 }, // 10 MB
+  fileFilter: (_req, file, cb) => {
+    if (file.mimetype !== 'application/pdf') {
+      cb(new Error('Solo se permiten archivos PDF'));
+      return;
+    }
+    cb(null, true);
+  },
+});
+
+function handleUpload(
+  req: Request,
+  res: Response,
+  next: () => void
+): void {
+  upload.single('archivo')(req, res, (err: any) => {
+    if (err) {
+      if (err.code === 'LIMIT_FILE_SIZE') {
+        res.status(413).json({ error: 'El archivo excede el tamano maximo de 10 MB' });
+        return;
+      }
+      if (err.message === 'Solo se permiten archivos PDF') {
+        res.status(400).json({ error: err.message });
+        return;
+      }
+      res.status(400).json({ error: err.message || 'Error al procesar el archivo' });
+      return;
+    }
+    if (req.file) {
+      const header = req.file.buffer.subarray(0, 4);
+      const isValid = PDF_MAGIC.every((b, i) => header[i] === b);
+      if (!isValid) {
+        res.status(400).json({ error: 'El archivo no es un PDF valido' });
+        return;
+      }
+    }
+    next();
+  });
+}
 
 const TIPOS_VALIDOS = ['vecinal_ordinaria', 'vecinal_extraordinaria', 'vocal_ordinaria', 'vocal_extraordinaria'];
 
@@ -82,99 +124,106 @@ router.get('/juntas/:id', authMiddleware, async (req: Request, res: Response) =>
   }
 });
 
-router.post('/admin/juntas', authMiddleware, adminMiddleware, upload.single('archivo'), async (req: Request, res: Response) => {
-  try {
-    const { tipo, fecha } = req.body;
+router.post('/admin/juntas', authMiddleware, adminMiddleware, (req, res) => {
+  handleUpload(req, res, async () => {
+    try {
+      const { tipo, fecha } = req.body;
 
-    if (!tipo || !fecha) {
-      res.status(400).json({ error: 'tipo y fecha son requeridos' });
-      return;
+      if (!tipo || !fecha) {
+        res.status(400).json({ error: 'tipo y fecha son requeridos' });
+        return;
+      }
+      if (!TIPOS_VALIDOS.includes(tipo)) {
+        res.status(400).json({ error: `tipo invalido. Valores permitidos: ${TIPOS_VALIDOS.join(', ')}` });
+        return;
+      }
+      if (isNaN(Date.parse(fecha))) {
+        res.status(400).json({ error: 'fecha invalida' });
+        return;
+      }
+
+      let driveFileId: string | null = null;
+      let fileName: string | null = null;
+
+      if (req.file) {
+        const constructedName = buildFileName(tipo, fecha);
+        driveFileId = await uploadPDF(req.file.buffer, constructedName);
+        fileName = constructedName;
+      }
+
+      const result = await query(
+        `INSERT INTO juntas (tipo, fecha, drive_file_id, file_name)
+         VALUES ($1, $2, $3, $4)
+         RETURNING id, tipo, fecha, file_name, created_at, updated_at`,
+        [tipo, fecha, driveFileId, fileName]
+      );
+
+      res.status(201).json(result.rows[0]);
+    } catch (err) {
+      logger.error(err, 'Create junta error');
+      res.status(500).json({ error: 'Error interno del servidor' });
     }
-    if (!TIPOS_VALIDOS.includes(tipo)) {
-      res.status(400).json({ error: `tipo invalido. Valores permitidos: ${TIPOS_VALIDOS.join(', ')}` });
-      return;
-    }
-    if (isNaN(Date.parse(fecha))) {
-      res.status(400).json({ error: 'fecha invalida' });
-      return;
-    }
-
-    let driveFileId: string | null = null;
-    let fileName: string | null = null;
-
-    if (req.file) {
-      const constructedName = buildFileName(tipo, fecha);
-      driveFileId = await uploadPDF(req.file.buffer, constructedName);
-      fileName = req.file.originalname;
-    }
-
-    const result = await query(
-      `INSERT INTO juntas (tipo, fecha, drive_file_id, file_name)
-       VALUES ($1, $2, $3, $4)
-       RETURNING id, tipo, fecha, file_name, created_at, updated_at`,
-      [tipo, fecha, driveFileId, fileName]
-    );
-
-    res.status(201).json(result.rows[0]);
-  } catch (err) {
-    logger.error(err, 'Create junta error');
-    res.status(500).json({ error: 'Error interno del servidor' });
-  }
+  });
 });
 
-router.put('/admin/juntas/:id', authMiddleware, adminMiddleware, upload.single('archivo'), async (req: Request, res: Response) => {
-  try {
-    const { id } = req.params;
-    const existing = await query('SELECT * FROM juntas WHERE id = $1', [id]);
-    if (existing.rows.length === 0) {
-      res.status(404).json({ error: 'Junta no encontrada' });
-      return;
-    }
-    const current = existing.rows[0];
-
-    const tipo = req.body.tipo || current.tipo;
-    const fecha = req.body.fecha || current.fecha;
-
-    if (req.body.tipo && !TIPOS_VALIDOS.includes(req.body.tipo)) {
-      res.status(400).json({ error: `tipo invalido. Valores permitidos: ${TIPOS_VALIDOS.join(', ')}` });
-      return;
-    }
-    if (req.body.fecha && isNaN(Date.parse(req.body.fecha))) {
-      res.status(400).json({ error: 'fecha invalida' });
-      return;
-    }
-
-    let driveFileId = current.drive_file_id;
-    let fileNameResult = current.file_name;
-    const tipoCambiado = req.body.tipo && req.body.tipo !== current.tipo;
-    const fechaCambiada = req.body.fecha && req.body.fecha !== current.fecha;
-    const nombreDebeCambiar = tipoCambiado || fechaCambiada;
-
-    if (req.file) {
-      if (current.drive_file_id) {
-        await deleteFile(current.drive_file_id);
+router.put('/admin/juntas/:id', authMiddleware, adminMiddleware, (req, res) => {
+  handleUpload(req, res, async () => {
+    try {
+      const { id } = req.params;
+      const existing = await query('SELECT * FROM juntas WHERE id = $1', [id]);
+      if (existing.rows.length === 0) {
+        res.status(404).json({ error: 'Junta no encontrada' });
+        return;
       }
-      const constructedName = buildFileName(tipo, fecha);
-      driveFileId = await uploadPDF(req.file.buffer, constructedName);
-      fileNameResult = req.file.originalname;
-    } else if (nombreDebeCambiar && current.drive_file_id) {
-      const newName = buildFileName(tipo, fecha);
-      await renameFile(current.drive_file_id, newName);
-      fileNameResult = newName;
+      const current = existing.rows[0];
+
+      const tipo = req.body.tipo || current.tipo;
+      const fecha = req.body.fecha || current.fecha;
+
+      if (req.body.tipo && !TIPOS_VALIDOS.includes(req.body.tipo)) {
+        res.status(400).json({ error: `tipo invalido. Valores permitidos: ${TIPOS_VALIDOS.join(', ')}` });
+        return;
+      }
+      if (req.body.fecha && isNaN(Date.parse(req.body.fecha))) {
+        res.status(400).json({ error: 'fecha invalida' });
+        return;
+      }
+
+      let driveFileId = current.drive_file_id;
+      let fileNameResult = current.file_name;
+      const tipoCambiado = req.body.tipo && req.body.tipo !== current.tipo;
+      const fechaCambiada = req.body.fecha && req.body.fecha !== current.fecha;
+      const nombreDebeCambiar = tipoCambiado || fechaCambiada;
+      let oldDriveFileId: string | null = null;
+
+      if (req.file) {
+        const constructedName = buildFileName(tipo, fecha);
+        driveFileId = await uploadPDF(req.file.buffer, constructedName);
+        fileNameResult = constructedName;
+        oldDriveFileId = current.drive_file_id;
+      } else if (nombreDebeCambiar && current.drive_file_id) {
+        const newName = buildFileName(tipo, fecha);
+        await renameFile(current.drive_file_id, newName);
+        fileNameResult = newName;
+      }
+
+      const result = await query(
+        `UPDATE juntas SET tipo = $1, fecha = $2, drive_file_id = $3, file_name = $4, updated_at = NOW()
+         WHERE id = $5
+         RETURNING id, tipo, fecha, file_name, created_at, updated_at`,
+        [tipo, fecha, driveFileId, fileNameResult, id]
+      );
+
+      if (oldDriveFileId) {
+        await deleteFile(oldDriveFileId);
+      }
+
+      res.json(result.rows[0]);
+    } catch (err) {
+      logger.error(err, 'Update junta error');
+      res.status(500).json({ error: 'Error interno del servidor' });
     }
-
-    const result = await query(
-      `UPDATE juntas SET tipo = $1, fecha = $2, drive_file_id = $3, file_name = $4, updated_at = NOW()
-       WHERE id = $5
-       RETURNING id, tipo, fecha, file_name, created_at, updated_at`,
-      [tipo, fecha, driveFileId, fileNameResult, id]
-    );
-
-    res.json(result.rows[0]);
-  } catch (err) {
-    logger.error(err, 'Update junta error');
-    res.status(500).json({ error: 'Error interno del servidor' });
-  }
+  });
 });
 
 router.delete('/admin/juntas/:id', authMiddleware, adminMiddleware, async (req: Request, res: Response) => {

@@ -209,7 +209,7 @@ describe('Juntas routes', () => {
         .set('Authorization', `Bearer ${adminToken()}`)
         .field('tipo', 'vecinal_ordinaria')
         .field('fecha', '2026-05-29')
-        .attach('archivo', Buffer.from('fake-pdf'), 'acta.pdf');
+        .attach('archivo', Buffer.from('%PDF-fake-content'), 'acta.pdf');
       expect(res.status).toBe(201);
       expect(mockUploadPDF).toHaveBeenCalled();
     });
@@ -248,7 +248,7 @@ describe('Juntas routes', () => {
       await request(app)
         .put('/api/admin/juntas/1')
         .set('Authorization', `Bearer ${adminToken()}`)
-        .attach('archivo', Buffer.from('new-pdf'), 'nueva-acta.pdf');
+        .attach('archivo', Buffer.from('%PDF-new-content'), 'nueva-acta.pdf');
       expect(mockDeleteFile).toHaveBeenCalledWith('drive-file-123');
       expect(mockUploadPDF).toHaveBeenCalled();
     });
