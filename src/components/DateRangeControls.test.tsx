@@ -89,4 +89,30 @@ describe('DateRangeControls', () => {
     );
     expect(screen.getByText('Personalizado')).toBeInTheDocument();
   });
+
+  it('centers popover relative to button on wide screens', () => {
+    render(<DateRangeControls {...defaultProps} />);
+    const btn = screen.getByRole('button');
+    Object.defineProperty(btn, 'getBoundingClientRect', {
+      value: () => ({ left: 400, right: 500, bottom: 44, width: 100, height: 36, top: 0, x: 400, y: 0 }),
+    });
+    Object.defineProperty(window, 'innerWidth', { value: 1024, writable: true });
+    fireEvent.click(btn);
+    const popover = document.body.querySelector('[style*="position: fixed"]') as HTMLElement;
+    const left = parseFloat(popover.style.left);
+    expect(left).toBeGreaterThanOrEqual(16);
+    expect(left).toBeLessThanOrEqual(1024 - 310 - 16);
+  });
+
+  it('clamps popover to left margin on narrow screens', () => {
+    render(<DateRangeControls {...defaultProps} />);
+    const btn = screen.getByRole('button');
+    Object.defineProperty(btn, 'getBoundingClientRect', {
+      value: () => ({ left: 0, right: 100, bottom: 44, width: 100, height: 36, top: 0, x: 0, y: 0 }),
+    });
+    Object.defineProperty(window, 'innerWidth', { value: 320, writable: true });
+    fireEvent.click(btn);
+    const popover = document.body.querySelector('[style*="position: fixed"]') as HTMLElement;
+    expect(parseFloat(popover.style.left)).toBe(16);
+  });
 });

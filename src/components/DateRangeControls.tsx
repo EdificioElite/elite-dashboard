@@ -136,7 +136,7 @@ export default function DateRangeControls({
           <span>{formatRangeLabel(desdeInput, hastaInput)}</span>
         </button>
         {open && createPortal(
-          <div ref={popoverRef} className="glass rounded-md p-4 min-w-[280px]" style={{ position: 'fixed', top: popoverStyle.top, left: popoverStyle.left, boxShadow: '0 4px 24px rgba(30,20,10,0.12), 0 1px 0 rgba(255,255,255,0.4) inset', zIndex: 9999 }}>
+          <div ref={popoverRef} className="glass rounded-md p-4 min-w-[280px]" style={{ position: 'fixed', top: popoverStyle.top, left: popoverStyle.left, maxWidth: 'calc(100vw - 32px)', boxSizing: 'border-box', boxShadow: '0 4px 24px rgba(30,20,10,0.12), 0 1px 0 rgba(255,255,255,0.4) inset', zIndex: 9999 }}>
             <div className="space-y-3">
               <label htmlFor={desdeId} className="flex items-center gap-3">
                 <span className="text-xs font-medium text-cocoa/60 w-12 shrink-0">Desde</span>
