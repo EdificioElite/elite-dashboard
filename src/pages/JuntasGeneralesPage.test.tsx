@@ -1,55 +1,120 @@
-import { describe, it, expect, vi } from 'vitest';
-import { render, screen } from '@testing-library/react';
+import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { render, screen, waitFor } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import JuntasGeneralesPage from './JuntasGeneralesPage';
 
 vi.mock('../store/auth', () => ({
-  useAuthStore: vi.fn(() => ({
-    user: { vecino_piso: '1A', email: 'vecino@test.com', is_admin: false },
-  })),
+  useAuthStore: vi.fn(),
 }));
 
+vi.mock('../api/client', () => ({
+  fetchJuntas: vi.fn(),
+  downloadJuntaPDF: vi.fn(),
+  createJunta: vi.fn(),
+  updateJunta: vi.fn(),
+  deleteJunta: vi.fn(),
+}));
+
+import { useAuthStore } from '../store/auth';
+import { fetchJuntas } from '../api/client';
+
+const mockUseAuthStore = useAuthStore as unknown as ReturnType<typeof vi.fn>;
+const mockFetchJuntas = fetchJuntas as ReturnType<typeof vi.fn>;
+
+let currentUser: { vecino_piso: string; email: string; is_admin: boolean } | null = null;
+
+function setUser(user: { vecino_piso: string; email: string; is_admin: boolean } | null) {
+  currentUser = user;
+  mockUseAuthStore.mockImplementation((selector?: any) => {
+    const state = { user };
+    return selector ? selector(state) : state;
+  });
+}
+
+function mockJuntas(data: any[]) {
+  mockFetchJuntas.mockResolvedValue(data);
+}
+
 describe('JuntasGeneralesPage', () => {
-  it('renders both tables', () => {
-    render(
-      <MemoryRouter>
-        <JuntasGeneralesPage />
-      </MemoryRouter>
-    );
-    expect(screen.getByText('Vecinales — Juntas Generales')).toBeInTheDocument();
-    expect(screen.getByText('Vocales — Juntas de Junta Directiva')).toBeInTheDocument();
+  beforeEach(() => {
+    vi.clearAllMocks();
+    setUser({ vecino_piso: '1A', email: 'vecino@test.com', is_admin: false });
   });
 
-  it('renders Ordinaria and Extraordinaria badges in vecinales', () => {
-    render(
-      <MemoryRouter>
-        <JuntasGeneralesPage />
-      </MemoryRouter>
-    );
-    const ordinarias = screen.getAllByText('Ordinaria');
-    const extraordinarias = screen.getAllByText('Extraordinaria');
-    expect(ordinarias.length).toBe(10);
-    expect(extraordinarias.length).toBe(12);
-  });
-
-  it('renders correct dates', () => {
-    render(
-      <MemoryRouter>
-        <JuntasGeneralesPage />
-      </MemoryRouter>
-    );
-    expect(screen.getByText('1 de septiembre de 2022')).toBeInTheDocument();
-    expect(screen.getByText('12 de febrero de 2026')).toBeInTheDocument();
-    expect(screen.getByText('25 de marzo de 2026')).toBeInTheDocument();
-  });
-
-  it('renders title and subtitle', () => {
-    render(
-      <MemoryRouter>
-        <JuntasGeneralesPage />
-      </MemoryRouter>
-    );
-    expect(screen.getByText('Juntas')).toBeInTheDocument();
+  it('renders title and subtitle', async () => {
+    mockJuntas([]);
+    render(<MemoryRouter><JuntasGeneralesPage /></MemoryRouter>);
+    await waitFor(() => {
+      expect(screen.getByText('Juntas')).toBeInTheDocument();
+    });
     expect(screen.getByText('Edificio Elite — C.P. Pio Rio Hortega 46')).toBeInTheDocument();
+  });
+
+  it('renders both sections', async () => {
+    mockJuntas([]);
+    render(<MemoryRouter><JuntasGeneralesPage /></MemoryRouter>);
+    await waitFor(() => {
+      expect(screen.getByText('Vecinales — Juntas Generales')).toBeInTheDocument();
+      expect(screen.getByText('Vocales — Juntas de Junta Directiva')).toBeInTheDocument();
+    });
+  });
+
+  it('shows empty state when no juntas', async () => {
+    mockJuntas([]);
+    render(<MemoryRouter><JuntasGeneralesPage /></MemoryRouter>);
+    await waitFor(() => {
+      expect(screen.getByText('No hay juntas vecinales registradas.')).toBeInTheDocument();
+      expect(screen.getByText('No hay juntas de directiva registradas.')).toBeInTheDocument();
+    });
+  });
+
+  it('renders juntas from API', async () => {
+    mockJuntas([
+      { id: 1, tipo: 'vecinal_ordinaria', fecha: '2026-05-29', file_name: 'JVO-2026-05-29.pdf', created_at: '', updated_at: '' },
+      { id: 2, tipo: 'vocal_ordinaria', fecha: '2026-03-25', file_name: 'JDO-2026-03-25.pdf', created_at: '', updated_at: '' },
+    ]);
+    render(<MemoryRouter><JuntasGeneralesPage /></MemoryRouter>);
+    await waitFor(() => {
+      expect(screen.getByText('29 de mayo de 2026')).toBeInTheDocument();
+      expect(screen.getByText('25 de marzo de 2026')).toBeInTheDocument();
+    });
+  });
+
+  it('shows descargar button when file exists', async () => {
+    mockJuntas([
+      { id: 1, tipo: 'vecinal_ordinaria', fecha: '2026-05-29', file_name: 'JVO-2026-05-29.pdf', created_at: '', updated_at: '' },
+    ]);
+    render(<MemoryRouter><JuntasGeneralesPage /></MemoryRouter>);
+    await waitFor(() => {
+      expect(screen.getByText('Descargar')).toBeInTheDocument();
+    });
+  });
+
+  it('shows dash when no file', async () => {
+    mockJuntas([
+      { id: 1, tipo: 'vecinal_ordinaria', fecha: '2026-05-29', file_name: null, created_at: '', updated_at: '' },
+    ]);
+    render(<MemoryRouter><JuntasGeneralesPage /></MemoryRouter>);
+    await waitFor(() => {
+      expect(screen.getByText('—')).toBeInTheDocument();
+    });
+  });
+
+  it('shows crear junta button for admin', async () => {
+    setUser({ vecino_piso: '1A', email: 'admin@test.com', is_admin: true });
+    mockJuntas([]);
+    render(<MemoryRouter><JuntasGeneralesPage /></MemoryRouter>);
+    await waitFor(() => {
+      expect(screen.getByText('Crear junta')).toBeInTheDocument();
+    });
+  });
+
+  it('hides crear junta button for vecino', async () => {
+    setUser({ vecino_piso: '1A', email: 'vecino@test.com', is_admin: false });
+    mockJuntas([]);
+    render(<MemoryRouter><JuntasGeneralesPage /></MemoryRouter>);
+    await waitFor(() => {
+      expect(screen.queryByText('Crear junta')).not.toBeInTheDocument();
+    });
   });
 });
