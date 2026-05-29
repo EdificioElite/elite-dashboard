@@ -86,3 +86,86 @@ export async function inviteUser(email: string, vecinoPiso?: string) {
     body: JSON.stringify({ email, vecino_piso: vecinoPiso || undefined }),
   });
 }
+
+// --- Juntas ---
+
+interface Junta {
+  id: number;
+  tipo: string;
+  fecha: string;
+  file_name: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export async function fetchJuntas(tipo?: string): Promise<Junta[]> {
+  const params = tipo ? `?tipo=${encodeURIComponent(tipo)}` : '';
+  return apiFetch<Junta[]>(`/juntas${params}`);
+}
+
+export async function downloadJuntaPDF(id: number): Promise<void> {
+  const token = getToken();
+  const response = await fetch(`${API_URL}/juntas/${id}`, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  if (!response.ok) {
+    const body = await response.json().catch(() => ({}));
+    throw new Error(body.error || `HTTP ${response.status}`);
+  }
+  const blob = await response.blob();
+  const disposition = response.headers.get('content-disposition') || '';
+  const match = disposition.match(/filename="(.+)"/);
+  const filename = match ? match[1] : `junta-${id}.pdf`;
+
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  URL.revokeObjectURL(url);
+}
+
+async function apiForm<T>(endpoint: string, method: string, formData: FormData): Promise<T> {
+  const token = getToken();
+  const headers: Record<string, string> = {};
+  if (token) {
+    headers['Authorization'] = `Bearer ${token}`;
+  }
+  const response = await fetch(`${API_URL}${endpoint}`, {
+    method,
+    headers,
+    body: formData,
+  });
+  if (!response.ok) {
+    const body = await response.json().catch(() => ({}));
+    throw new Error(body.error || `HTTP ${response.status}`);
+  }
+  return response.json();
+}
+
+export async function createJunta(data: { tipo: string; fecha: string; archivo?: File | null }): Promise<Junta> {
+  const formData = new FormData();
+  formData.append('tipo', data.tipo);
+  formData.append('fecha', data.fecha);
+  if (data.archivo) {
+    formData.append('archivo', data.archivo);
+  }
+  return apiForm<Junta>('/admin/juntas', 'POST', formData);
+}
+
+export async function updateJunta(
+  id: number,
+  data: { tipo?: string; fecha?: string; archivo?: File | null }
+): Promise<Junta> {
+  const formData = new FormData();
+  if (data.tipo) formData.append('tipo', data.tipo);
+  if (data.fecha) formData.append('fecha', data.fecha);
+  if (data.archivo) formData.append('archivo', data.archivo);
+  return apiForm<Junta>(`/admin/juntas/${id}`, 'PUT', formData);
+}
+
+export async function deleteJunta(id: number): Promise<{ message: string }> {
+  return apiFetch<{ message: string }>(`/admin/juntas/${id}`, { method: 'DELETE' });
+}
