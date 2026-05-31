@@ -57,7 +57,7 @@ export default function DeleteJuntaModal({ junta, onClose, onDeleted }: Props) {
 
   return createPortal(
     <div className="modal-backdrop" onClick={onClose}>
-      <div className="modal-panel w-[420px] max-w-[90vw] p-6" onClick={(e) => e.stopPropagation()} role="dialog" aria-modal="true">
+      <div className="modal-panel w-[380px] max-w-[90vw] p-6" onClick={(e) => e.stopPropagation()} role="dialog" aria-modal="true">
         <div className="flex items-center justify-between mb-5">
           <div className="flex items-center gap-3">
             <div className="w-7 h-7 rounded-lg flex items-center justify-center shrink-0" style={{ background: 'var(--rise)' }}>
@@ -99,7 +99,7 @@ export default function DeleteJuntaModal({ junta, onClose, onDeleted }: Props) {
           </p>
         </div>
 
-        <div className="flex justify-start gap-3">
+        <div className="flex justify-center gap-3">
           <button onClick={handleDelete} disabled={deleting} className="btn" style={{ background: '#a3402a', color: '#f5ece0', border: 0 }}>
             <Icon name="trash" size={14} />
             {deleting ? 'Eliminando...' : 'Eliminar junta'}
