@@ -40,15 +40,21 @@ describe('googleDrive', () => {
   describe('uploadPDF', () => {
     it('uploads a buffer and returns fileId', async () => {
       mockDrive.files.create.mockResolvedValueOnce({ data: { id: 'file-123' } });
+      mockDrive.files.update.mockResolvedValueOnce({});
       const buffer = Buffer.from('test-pdf-content');
       const fileId = await uploadPDF(buffer, 'JVO-2026-05-29.pdf');
       expect(fileId).toBe('file-123');
       expect(mockDrive.files.create).toHaveBeenCalledWith(
         expect.objectContaining({
-          requestBody: { name: 'JVO-2026-05-29.pdf', parents: ['test-folder-id'] },
+          requestBody: { name: 'JVO-2026-05-29.pdf' },
           media: expect.objectContaining({ mimeType: 'application/pdf' }),
         })
       );
+      expect(mockDrive.files.update).toHaveBeenCalledWith({
+        fileId: 'file-123',
+        addParents: 'test-folder-id',
+        supportsAllDrives: true,
+      });
     });
 
     it('throws when no fileId returned', async () => {
