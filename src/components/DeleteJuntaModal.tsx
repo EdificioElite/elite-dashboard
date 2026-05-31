@@ -99,11 +99,13 @@ export default function DeleteJuntaModal({ junta, onClose, onDeleted }: Props) {
           </p>
         </div>
 
-        <div className="flex justify-end gap-3">
-          <button onClick={onClose} disabled={deleting} className="btn btn-ghost">Cancelar</button>
-          <button onClick={handleDelete} disabled={deleting} className="btn" style={{ background: 'var(--rise)', color: '#f5ece0' }}>
+        <div className="flex justify-start gap-3">
+          <button onClick={handleDelete} disabled={deleting} className="btn" style={{ background: '#a3402a', color: '#f5ece0', border: 0 }}>
             <Icon name="trash" size={14} />
             {deleting ? 'Eliminando...' : 'Eliminar junta'}
+          </button>
+          <button onClick={onClose} disabled={deleting} className="btn" style={{ background: 'rgba(58,47,36,.08)', color: '#3a2f24' }}>
+            Cancelar
           </button>
         </div>
       </div>
