@@ -5,8 +5,8 @@ interface CopDatum {
   id: string;
   startdate: string;
   enddate: string;
-  kwh_eléctricos: number | null;
-  kwh_térmicos: number | null;
+  kwh_electricos: number | null;
+  kwh_termicos: number | null;
   cop: number | null;
 }
 
