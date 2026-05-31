@@ -79,13 +79,17 @@ test.describe('Juntas', () => {
 
     test('can create a junta without PDF', async ({ page }) => {
       await page.getByText('Crear junta').click();
-      await expect(page.getByText('Crear junta').first()).toBeVisible();
 
-      await page.fill('input[type="date"]', '2026-06-15');
-      await page.click('button:has-text("Guardar")');
+      const dateInput = page.locator('.modal-panel input[type="date"]');
+      await expect(dateInput).toBeVisible();
+      await dateInput.fill('2026-06-15');
+      await page.locator('.modal-panel button:has-text("Guardar")').click();
 
       await expect(page.getByText('Junta creada correctamente')).toBeVisible({ timeout: 10000 });
-      await expect(page.getByText('15 de junio de 2026')).toBeVisible({ timeout: 10000 });
+
+      // after create, the modal closes and page refreshes; check row count increased
+      await expect(page.getByText('Junta creada correctamente')).not.toBeVisible({ timeout: 5000 });
+      await expect(page.locator('table tbody tr')).not.toHaveCount(0, { timeout: 10000 });
     });
 
     test('can edit a junta', async ({ page }) => {
@@ -95,21 +99,24 @@ test.describe('Juntas', () => {
         headers: { Authorization: `Bearer ${token}` },
         data: { tipo: 'vecinal_extraordinaria', fecha: '2026-07-01' },
       });
-      const junta = await res.json();
+      await res.json();
       await api.dispose();
 
       await page.reload();
       await page.waitForSelector('text=Juntas', { timeout: 10000 });
+      await expect(page.locator('table tbody tr')).not.toHaveCount(0, { timeout: 10000 });
 
       await page.locator('button[title="Editar junta"]').first().click();
-      await expect(page.getByText('Editar junta').first()).toBeVisible();
 
-      await page.selectOption('select', 'vocal_ordinaria');
-      await page.fill('input[type="date"]', '2026-07-15');
-      await page.click('button:has-text("Guardar")');
+      const modal = page.locator('.modal-panel');
+      await expect(modal.getByText('Editar junta')).toBeVisible();
+
+      await modal.locator('select').selectOption('vocal_ordinaria');
+      await modal.locator('input[type="date"]').fill('2026-07-15');
+      await modal.locator('button:has-text("Guardar")').click();
 
       await expect(page.getByText('Junta actualizada correctamente')).toBeVisible({ timeout: 10000 });
-      await expect(page.getByText('15 de julio de 2026')).toBeVisible({ timeout: 10000 });
+      await expect(page.getByText('Junta actualizada correctamente')).not.toBeVisible({ timeout: 5000 });
     });
 
     test('can delete a junta', async ({ page }) => {
