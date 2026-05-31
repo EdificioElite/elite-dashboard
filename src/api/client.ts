@@ -114,8 +114,8 @@ export async function downloadJuntaPDF(id: number): Promise<void> {
   }
   const blob = await response.blob();
   const disposition = response.headers.get('content-disposition') || '';
-  const match = disposition.match(/filename="(.+)"/);
-  const filename = match ? match[1] : `junta-${id}.pdf`;
+  const match = disposition.match(/filename[^;=\n]*=((['"]).*?\2|[^;\n]*)/);
+  const filename = match ? match[1].replace(/['"]/g, '') : `junta-${id}.pdf`;
 
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');

@@ -18,15 +18,49 @@ function getDrive() {
   return google.drive({ version: 'v3', auth: getAuth() });
 }
 
+let juntasFolderId: string | null = null;
+
+export async function ensureJuntasFolder(): Promise<string> {
+  if (juntasFolderId) return juntasFolderId;
+
+  const drive = getDrive();
+
+  // search for existing "Juntas" folder inside the configured parent
+  const existing = await drive.files.list({
+    q: `name='Juntas' and '${config.googleDriveFolderId}' in parents and mimeType='application/vnd.google-apps.folder' and trashed=false`,
+    fields: 'files(id)',
+  });
+
+  if (existing.data.files && existing.data.files.length > 0) {
+    juntasFolderId = existing.data.files[0].id!;
+    logger.info({ juntasFolderId }, 'Juntas folder found');
+    return juntasFolderId;
+  }
+
+  // create it
+  const created = await drive.files.create({
+    requestBody: {
+      name: 'Juntas',
+      parents: [config.googleDriveFolderId],
+      mimeType: 'application/vnd.google-apps.folder',
+    },
+  });
+
+  juntasFolderId = created.data.id!;
+  logger.info({ juntasFolderId }, 'Juntas folder created');
+  return juntasFolderId;
+}
+
 export async function uploadPDF(
   buffer: Buffer,
   fileName: string
 ): Promise<string> {
   const drive = getDrive();
+  const folderId = await ensureJuntasFolder();
   const response = await drive.files.create({
     requestBody: {
       name: fileName,
-      parents: [config.googleDriveFolderId],
+      parents: [folderId],
     },
     media: {
       mimeType: 'application/pdf',
