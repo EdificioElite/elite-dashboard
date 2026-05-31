@@ -3,15 +3,15 @@ import { Readable } from 'stream';
 import { config } from '../config';
 import { logger } from './logger';
 
-const SCOPES = ['https://www.googleapis.com/auth/drive'];
-
 function getAuth() {
-  const privateKey = config.googleServiceAccountPrivateKey.replace(/\\n/g, '\n');
-  return new google.auth.JWT({
-    email: config.googleServiceAccountEmail,
-    key: privateKey,
-    scopes: SCOPES,
+  const oauth2Client = new google.auth.OAuth2(
+    config.googleClientId,
+    config.googleClientSecret,
+  );
+  oauth2Client.setCredentials({
+    refresh_token: config.googleRefreshToken,
   });
+  return oauth2Client;
 }
 
 function getDrive() {
@@ -23,30 +23,20 @@ export async function uploadPDF(
   fileName: string
 ): Promise<string> {
   const drive = getDrive();
-
-  // Step 1: create file in root (bypasses SA storage quota)
-  const createResponse = await drive.files.create({
+  const response = await drive.files.create({
+    requestBody: {
+      name: fileName,
+      parents: [config.googleDriveFolderId],
+    },
     media: {
       mimeType: 'application/pdf',
       body: Readable.from(buffer),
     },
-    requestBody: {
-      name: fileName,
-    },
   });
-
-  const fileId = createResponse.data.id;
+  const fileId = response.data.id;
   if (!fileId) {
     throw new Error('Google Drive no devolvio ID de archivo');
   }
-
-  // Step 2: move to target folder
-  await drive.files.update({
-    fileId,
-    addParents: config.googleDriveFolderId,
-    supportsAllDrives: true,
-  });
-
   logger.info({ fileId, fileName }, 'PDF uploaded to Google Drive');
   return fileId;
 }

@@ -8,11 +8,15 @@ const mockFiles = {
   update: vi.fn(),
 };
 
+const mockOAuth2 = {
+  setCredentials: vi.fn(),
+};
+
 vi.mock('googleapis', () => {
   return {
     google: {
       auth: {
-        JWT: vi.fn().mockImplementation(function () {}),
+        OAuth2: vi.fn(function () { return mockOAuth2; }),
       },
       drive: vi.fn(() => ({ files: mockFiles })),
     },
@@ -21,8 +25,9 @@ vi.mock('googleapis', () => {
 
 vi.mock('../config', () => ({
   config: {
-    googleServiceAccountEmail: 'test@test.iam.gserviceaccount.com',
-    googleServiceAccountPrivateKey: 'test-key',
+    googleClientId: 'test-client-id',
+    googleClientSecret: 'test-client-secret',
+    googleRefreshToken: 'test-refresh-token',
     googleDriveFolderId: 'test-folder-id',
   },
 }));
@@ -40,21 +45,15 @@ describe('googleDrive', () => {
   describe('uploadPDF', () => {
     it('uploads a buffer and returns fileId', async () => {
       mockDrive.files.create.mockResolvedValueOnce({ data: { id: 'file-123' } });
-      mockDrive.files.update.mockResolvedValueOnce({});
       const buffer = Buffer.from('test-pdf-content');
       const fileId = await uploadPDF(buffer, 'JVO-2026-05-29.pdf');
       expect(fileId).toBe('file-123');
       expect(mockDrive.files.create).toHaveBeenCalledWith(
         expect.objectContaining({
-          requestBody: { name: 'JVO-2026-05-29.pdf' },
+          requestBody: { name: 'JVO-2026-05-29.pdf', parents: ['test-folder-id'] },
           media: expect.objectContaining({ mimeType: 'application/pdf' }),
         })
       );
-      expect(mockDrive.files.update).toHaveBeenCalledWith({
-        fileId: 'file-123',
-        addParents: 'test-folder-id',
-        supportsAllDrives: true,
-      });
     });
 
     it('throws when no fileId returned', async () => {
