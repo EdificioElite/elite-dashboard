@@ -73,3 +73,45 @@ jobs:
       - name: Tear down
         if: always()
         run: docker compose -f docker-compose.e2e.yml down -v
+
+  vercel-alias:
+    needs: [backend, frontend, e2e]
+    if: github.event_name == 'pull_request' && success()
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set alias dev.edificioelite.com
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+          VERCEL_PROJECT_ID: prj_MOCD6Rb9AuQbNK0mztToUSxwXoXM
+          VERCEL_TEAM_ID: team_h5qRNEwh6gA07FQonf43IV4s
+        run: |
+          # Wait for Vercel preview deployment to be ready
+          echo "Waiting for Vercel preview deployment..."
+          for i in $(seq 1 30); do
+            DEPLOYMENT_URL=$(curl -sf \
+              -H "Authorization: Bearer $VERCEL_TOKEN" \
+              "https://api.vercel.com/v9/deployments?projectId=$VERCEL_PROJECT_ID&meta-githubCommitSha=$GITHUB_SHA&limit=1&target=preview&teamId=$VERCEL_TEAM_ID" | \
+              jq -r '.deployments[0].url')
+            if [ -n "$DEPLOYMENT_URL" ] && [ "$DEPLOYMENT_URL" != "null" ]; then
+              STATE=$(curl -sf \
+                -H "Authorization: Bearer $VERCEL_TOKEN" \
+                "https://api.vercel.com/v12/deployments/$DEPLOYMENT_URL?teamId=$VERCEL_TEAM_ID" | \
+                jq -r '.state')
+              if [ "$STATE" = "READY" ]; then
+                echo "Deployment ready: $DEPLOYMENT_URL"
+                break
+              fi
+            fi
+            echo "  attempt $i/30..."
+            sleep 10
+          done
+          if [ -z "$DEPLOYMENT_URL" ] || [ "$DEPLOYMENT_URL" = "null" ]; then
+            echo "No preview deployment found"
+            exit 1
+          fi
+          echo "Aliasing $DEPLOYMENT_URL -> dev.edificioelite.com"
+          npx vercel alias set "$DEPLOYMENT_URL" dev.edificioelite.com \
+            --token "$VERCEL_TOKEN" \
+            --scope cp-edificio-elite-s-projects
