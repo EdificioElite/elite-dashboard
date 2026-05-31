@@ -27,7 +27,8 @@ function tipoLabel(tipo: string): string {
 }
 
 function fmtFecha(iso: string): string {
-  const d = new Date(iso + 'T00:00:00');
+  const [year, month, day] = iso.split('-').map(Number);
+  const d = new Date(year, month - 1, day);
   return d.toLocaleDateString('es-ES', { day: 'numeric', month: 'long', year: 'numeric' });
 }
 
@@ -80,16 +81,21 @@ export default function DeleteJuntaModal({ junta, onClose, onDeleted }: Props) {
         <p className="text-sm text-cocoa/70 mb-2">
           ¿Estás seguro de que quieres eliminar esta junta?
         </p>
-        <p className="text-sm text-cocoa/50 mb-4">
-          {tipoLabel(junta.tipo)} — {fmtFecha(junta.fecha)}
-          {junta.file_name && <span className="block text-xs mt-0.5">Incluye archivo adjunto</span>}
-        </p>
+        <div className="mb-5 px-4 py-3 rounded-xl text-sm" style={{ background: 'rgba(163,64,42,.06)' }}>
+          <p className="text-cocoa/70">
+            <span className="font-medium text-cocoa">{tipoLabel(junta.tipo)}</span>
+          </p>
+          <p className="text-cocoa/50 text-xs mt-0.5">
+            {fmtFecha(junta.fecha)}
+            {junta.file_name && ' — incluye archivo adjunto'}
+          </p>
+        </div>
 
         <div className="flex justify-end gap-3">
           <button onClick={onClose} disabled={deleting} className="btn btn-ghost">Cancelar</button>
           <button onClick={handleDelete} disabled={deleting} className="btn text-cream" style={{ background: 'var(--rise)' }}>
             <Icon name="trash" size={14} />
-            {deleting ? 'Eliminando...' : 'Eliminar'}
+            {deleting ? 'Eliminando...' : 'Eliminar junta'}
           </button>
         </div>
       </div>
