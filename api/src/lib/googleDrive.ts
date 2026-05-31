@@ -32,6 +32,7 @@ export async function uploadPDF(
       mimeType: 'application/pdf',
       body: Readable.from(buffer),
     },
+    supportsAllDrives: true,
   });
   const fileId = response.data.id;
   if (!fileId) {

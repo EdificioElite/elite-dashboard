@@ -159,8 +159,13 @@ router.post('/admin/juntas', authMiddleware, adminMiddleware, (req, res) => {
       );
 
       res.status(201).json(result.rows[0]);
-    } catch (err) {
+    } catch (err: any) {
       logger.error(err, 'Create junta error');
+      const message = err?.message || '';
+      if (message.includes('storageQuotaExceeded') || message.includes('Service Accounts do not have storage quota')) {
+        res.status(500).json({ error: 'Error de Google Drive: la carpeta debe estar compartida con la Service Account como Editor' });
+        return;
+      }
       res.status(500).json({ error: 'Error interno del servidor' });
     }
   });
