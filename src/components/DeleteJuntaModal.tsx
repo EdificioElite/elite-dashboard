@@ -27,10 +27,8 @@ function tipoLabel(tipo: string): string {
 }
 
 function fmtFecha(iso: string): string {
-  const dateStr = iso.substring(0, 10);
-  const [year, month, day] = dateStr.split('-').map(Number);
-  const d = new Date(year, month - 1, day);
-  return d.toLocaleDateString('es-ES', { day: 'numeric', month: 'long', year: 'numeric' });
+  const d = new Date(iso);
+  return d.toLocaleDateString('es-ES', { day: 'numeric', month: 'long', year: 'numeric', timeZone: 'Europe/Madrid' });
 }
 
 export default function DeleteJuntaModal({ junta, onClose, onDeleted }: Props) {
