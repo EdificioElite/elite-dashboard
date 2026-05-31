@@ -26,13 +26,6 @@ function tipoLabel(tipo: string): string {
   return TIPO_LABELS[tipo] || tipo;
 }
 
-function tipoBadgeClass(tipo: string): string {
-  if (tipo.includes('extraordinaria')) {
-    return 'text-accent bg-accent/10';
-  }
-  return 'text-sage bg-sage/8';
-}
-
 function isVocal(tipo: string): boolean {
   return tipo.startsWith('vocal');
 }
@@ -155,34 +148,13 @@ export default function JuntasGeneralesPage() {
                     <th>Tipo</th>
                     <th>Fecha</th>
                     <th className="text-right">Acta</th>
+                    {isAdmin && <th className="text-center">Acciones</th>}
                   </tr>
                 </thead>
                 <tbody>
                   {vecinales.map((j, i) => (
                     <tr key={j.id} className="row-stagger" style={{ animationDelay: `${i * 30}ms` }}>
-                      <td>
-                        <span className={`text-[11px] font-medium uppercase tracking-wider px-2 py-0.5 rounded-md inline-flex items-center gap-2 ${tipoBadgeClass(j.tipo)}`}>
-                          {tipoLabel(j.tipo).replace('Vecinal ', '').replace('Directiva ', '')}
-                          {isAdmin && (
-                            <span className="inline-flex items-center gap-0.5">
-                              <button
-                                onClick={() => setEditingJunta(j)}
-                                className="hover:opacity-70 p-0.5"
-                                title="Editar junta"
-                              >
-                                <Icon name="edit" size={12} />
-                              </button>
-                              <button
-                                onClick={() => setDeletingJunta(j)}
-                                className="hover:opacity-70 p-0.5"
-                                title="Eliminar junta"
-                              >
-                                <Icon name="trash" size={12} />
-                              </button>
-                            </span>
-                          )}
-                        </span>
-                      </td>
+                      <td className="font-medium text-cocoa">{tipoLabel(j.tipo)}</td>
                       <td className="text-sm text-cocoa/70">{fmtFecha(j.fecha)}</td>
                       <td className="text-right">
                         {j.file_name ? (
@@ -198,6 +170,26 @@ export default function JuntasGeneralesPage() {
                           <span className="text-xs text-cocoa/30">—</span>
                         )}
                       </td>
+                      {isAdmin && (
+                        <td>
+                          <div className="flex items-center justify-center gap-1">
+                            <button
+                              onClick={() => setEditingJunta(j)}
+                              className="btn btn-ghost p-2 text-cocoa/40 hover:text-accent-2"
+                              title="Editar junta"
+                            >
+                              <Icon name="edit" size={15} />
+                            </button>
+                            <button
+                              onClick={() => setDeletingJunta(j)}
+                              className="btn btn-ghost p-2 text-cocoa/40 hover:text-red-600"
+                              title="Eliminar junta"
+                            >
+                              <Icon name="trash" size={15} />
+                            </button>
+                          </div>
+                        </td>
+                      )}
                     </tr>
                   ))}
                 </tbody>
@@ -224,34 +216,13 @@ export default function JuntasGeneralesPage() {
                     <th>Tipo</th>
                     <th>Fecha</th>
                     <th className="text-right">Acta</th>
+                    {isAdmin && <th className="text-center">Acciones</th>}
                   </tr>
                 </thead>
                 <tbody>
                   {vocales.map((j, i) => (
                     <tr key={j.id} className="row-stagger" style={{ animationDelay: `${i * 30}ms` }}>
-                      <td>
-                        <span className={`text-[11px] font-medium uppercase tracking-wider px-2 py-0.5 rounded-md inline-flex items-center gap-2 ${tipoBadgeClass(j.tipo)}`}>
-                          {tipoLabel(j.tipo).replace('Vecinal ', '').replace('Directiva ', '')}
-                          {isAdmin && (
-                            <span className="inline-flex items-center gap-0.5">
-                              <button
-                                onClick={() => setEditingJunta(j)}
-                                className="hover:opacity-70 p-0.5"
-                                title="Editar junta"
-                              >
-                                <Icon name="edit" size={12} />
-                              </button>
-                              <button
-                                onClick={() => setDeletingJunta(j)}
-                                className="hover:opacity-70 p-0.5"
-                                title="Eliminar junta"
-                              >
-                                <Icon name="trash" size={12} />
-                              </button>
-                            </span>
-                          )}
-                        </span>
-                      </td>
+                      <td className="font-medium text-cocoa">{tipoLabel(j.tipo)}</td>
                       <td className="text-sm text-cocoa/70">{fmtFecha(j.fecha)}</td>
                       <td className="text-right">
                         {j.file_name ? (
@@ -267,6 +238,26 @@ export default function JuntasGeneralesPage() {
                           <span className="text-xs text-cocoa/30">—</span>
                         )}
                       </td>
+                      {isAdmin && (
+                        <td>
+                          <div className="flex items-center justify-center gap-1">
+                            <button
+                              onClick={() => setEditingJunta(j)}
+                              className="btn btn-ghost p-2 text-cocoa/40 hover:text-accent-2"
+                              title="Editar junta"
+                            >
+                              <Icon name="edit" size={15} />
+                            </button>
+                            <button
+                              onClick={() => setDeletingJunta(j)}
+                              className="btn btn-ghost p-2 text-cocoa/40 hover:text-red-600"
+                              title="Eliminar junta"
+                            >
+                              <Icon name="trash" size={15} />
+                            </button>
+                          </div>
+                        </td>
+                      )}
                     </tr>
                   ))}
                 </tbody>

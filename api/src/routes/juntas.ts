@@ -78,7 +78,7 @@ function tipoDisplay(tipo: string): string {
 router.get('/juntas', authMiddleware, async (req: Request, res: Response) => {
   try {
     const { tipo } = req.query;
-    let sql = 'SELECT id, tipo, fecha, file_name, created_at, updated_at FROM juntas';
+    let sql = 'SELECT id, tipo, fecha::text AS fecha, file_name, created_at, updated_at FROM juntas';
     const params: unknown[] = [];
     if (tipo && typeof tipo === 'string') {
       params.push(tipo);
@@ -97,7 +97,7 @@ router.get('/juntas/:id', authMiddleware, async (req: Request, res: Response) =>
   try {
     const { id } = req.params;
     const result = await query(
-      'SELECT drive_file_id, tipo, fecha, file_name FROM juntas WHERE id = $1',
+      'SELECT drive_file_id, tipo, fecha::text AS fecha, file_name FROM juntas WHERE id = $1',
       [id]
     );
     if (result.rows.length === 0) {
@@ -154,8 +154,8 @@ router.post('/admin/juntas', authMiddleware, adminMiddleware, (req, res) => {
       const result = await query(
         `INSERT INTO juntas (tipo, fecha, drive_file_id, file_name)
          VALUES ($1, $2, $3, $4)
-         RETURNING id, tipo, fecha, file_name, created_at, updated_at`,
-        [tipo, fecha, driveFileId, fileName]
+         RETURNING id, tipo, fecha::text AS fecha, file_name, created_at, updated_at`,
+         [tipo, fecha, driveFileId, fileName]
       );
 
       res.status(201).json(result.rows[0]);
@@ -215,8 +215,8 @@ router.put('/admin/juntas/:id', authMiddleware, adminMiddleware, (req, res) => {
       const result = await query(
         `UPDATE juntas SET tipo = $1, fecha = $2, drive_file_id = $3, file_name = $4, updated_at = NOW()
          WHERE id = $5
-         RETURNING id, tipo, fecha, file_name, created_at, updated_at`,
-        [tipo, fecha, driveFileId, fileNameResult, id]
+         RETURNING id, tipo, fecha::text AS fecha, file_name, created_at, updated_at`,
+         [tipo, fecha, driveFileId, fileNameResult, id]
       );
 
       if (oldDriveFileId) {
