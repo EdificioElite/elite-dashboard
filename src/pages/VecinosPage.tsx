@@ -46,7 +46,7 @@ export default function VecinosPage() {
       await apiFetch('/admin/invitar', { method: 'POST', body: JSON.stringify({ piso }) });
       setInviteMessage('Invitacion enviada correctamente');
     } catch (err: any) {
-      setInviteMessage(err.message || 'Error al enviar invitacion');
+      setInviteMessage(err.message || 'Error al enviar invitación');
       setInviteError(true);
     }
   };
@@ -106,7 +106,7 @@ export default function VecinosPage() {
       <main className="max-w-[1180px] mx-auto px-6 flex flex-col gap-[22px] pb-10">
         <div className="pt-2 flex items-start justify-between flex-wrap gap-4">
           <div>
-            <p className="eyebrow">Panel de administracion</p>
+            <p className="eyebrow">Panel de administración</p>
             <h1 className="font-display text-[40px] font-medium text-cocoa mt-1" style={{ letterSpacing: '-0.02em' }}>Vecinos</h1>
             <p className="text-sm text-cocoa/60 mt-1.5 max-w-lg">Gestiona los vecinos del edificio.</p>
           </div>
@@ -170,7 +170,7 @@ export default function VecinosPage() {
                         </button>
                         {v.vecino_email ? (
                           !v.user_id ? (
-                            <button onClick={() => handleInvite(v.piso)} className="btn btn-ghost p-2 text-accent hover:text-accent/80" title="Enviar invitacion">
+                            <button onClick={() => handleInvite(v.piso)} className="btn btn-ghost p-2 text-accent hover:text-accent/80" title="Enviar invitación">
                               <Icon name="mail" size={15} />
                             </button>
                           ) : (

@@ -29,7 +29,7 @@ function handleUpload(
   upload.single('archivo')(req, res, (err: any) => {
     if (err) {
       if (err.code === 'LIMIT_FILE_SIZE') {
-        res.status(413).json({ error: 'El archivo excede el tamano maximo de 10 MB' });
+        res.status(413).json({ error: 'El archivo excede el tamaño máximo de 10 MB' });
         return;
       }
       if (err.message === 'Solo se permiten archivos PDF') {
@@ -43,7 +43,7 @@ function handleUpload(
       const header = req.file.buffer.subarray(0, 4);
       const isValid = PDF_MAGIC.every((b, i) => header[i] === b);
       if (!isValid) {
-        res.status(400).json({ error: 'El archivo no es un PDF valido' });
+        res.status(400).json({ error: 'El archivo no es un PDF válido' });
         return;
       }
     }
@@ -134,11 +134,11 @@ router.post('/admin/juntas', authMiddleware, adminMiddleware, (req, res) => {
         return;
       }
       if (!TIPOS_VALIDOS.includes(tipo)) {
-        res.status(400).json({ error: `tipo invalido. Valores permitidos: ${TIPOS_VALIDOS.join(', ')}` });
+        res.status(400).json({ error: `tipo inválido. Valores permitidos: ${TIPOS_VALIDOS.join(', ')}` });
         return;
       }
       if (isNaN(Date.parse(fecha))) {
-        res.status(400).json({ error: 'fecha invalida' });
+        res.status(400).json({ error: 'fecha inválida' });
         return;
       }
 
@@ -181,11 +181,11 @@ router.put('/admin/juntas/:id', authMiddleware, adminMiddleware, (req, res) => {
       const fecha = req.body.fecha || current.fecha;
 
       if (req.body.tipo && !TIPOS_VALIDOS.includes(req.body.tipo)) {
-        res.status(400).json({ error: `tipo invalido. Valores permitidos: ${TIPOS_VALIDOS.join(', ')}` });
+        res.status(400).json({ error: `tipo inválido. Valores permitidos: ${TIPOS_VALIDOS.join(', ')}` });
         return;
       }
       if (req.body.fecha && isNaN(Date.parse(req.body.fecha))) {
-        res.status(400).json({ error: 'fecha invalida' });
+        res.status(400).json({ error: 'fecha inválida' });
         return;
       }
 

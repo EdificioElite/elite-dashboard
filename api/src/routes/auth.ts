@@ -25,7 +25,7 @@ router.post('/auth/login', rateLimitOnlyOnFailure(5, 60 * 1000), async (req: Req
     );
 
     if (result.rows.length === 0) {
-      res.status(401).json({ error: 'Credenciales invalidas' });
+      res.status(401).json({ error: 'Credenciales inválidas' });
       return;
     }
 
@@ -33,7 +33,7 @@ router.post('/auth/login', rateLimitOnlyOnFailure(5, 60 * 1000), async (req: Req
     const valid = await bcrypt.compare(password, user.password_hash);
 
     if (!valid) {
-      res.status(401).json({ error: 'Credenciales invalidas' });
+      res.status(401).json({ error: 'Credenciales inválidas' });
       return;
     }
 
@@ -90,11 +90,11 @@ router.put('/auth/password', authMiddleware, rateLimit(10, 60 * 1000), async (re
     const { currentPassword, newPassword } = req.body;
 
     if (!currentPassword) {
-      res.status(400).json({ error: 'La contrasena actual es requerida' });
+      res.status(400).json({ error: 'La contraseña actual es requerida' });
       return;
     }
     if (!newPassword) {
-      res.status(400).json({ error: 'La nueva contrasena es requerida' });
+      res.status(400).json({ error: 'La nueva contraseña es requerida' });
       return;
     }
 
@@ -116,7 +116,7 @@ router.put('/auth/password', authMiddleware, rateLimit(10, 60 * 1000), async (re
 
     const valid = await bcrypt.compare(currentPassword, result.rows[0].password_hash);
     if (!valid) {
-      res.status(401).json({ error: 'La contrasena actual es incorrecta' });
+      res.status(401).json({ error: 'La contraseña actual es incorrecta' });
       return;
     }
 
@@ -134,10 +134,10 @@ router.put('/auth/password', authMiddleware, rateLimit(10, 60 * 1000), async (re
 });
 
 function validatePassword(password: string): string | null {
-  if (password.length < 8) return 'La contrasena debe tener al menos 8 caracteres';
-  if (!/[A-Z]/.test(password)) return 'La contrasena debe contener al menos una mayuscula';
-  if (!/[a-z]/.test(password)) return 'La contrasena debe contener al menos una minuscula';
-  if (!/[0-9]/.test(password)) return 'La contrasena debe contener al menos un numero';
+  if (password.length < 8) return 'La contraseña debe tener al menos 8 caracteres';
+  if (!/[A-Z]/.test(password)) return 'La contraseña debe contener al menos una mayúscula';
+  if (!/[a-z]/.test(password)) return 'La contraseña debe contener al menos una minúscula';
+  if (!/[0-9]/.test(password)) return 'La contraseña debe contener al menos un número';
   return null;
 }
 
@@ -153,7 +153,7 @@ router.get('/auth/verify-token', rateLimitOnError(20, 60 * 1000), async (req: Re
       [hashToken(token)]
     );
     if (result.rows.length === 0) {
-      res.status(400).json({ error: 'Token invalido' });
+      res.status(400).json({ error: 'Token inválido' });
       return;
     }
     const row = result.rows[0];
@@ -176,7 +176,7 @@ router.post('/auth/register', rateLimitOnError(20, 60 * 1000), async (req: Reque
   try {
     const { token, password } = req.body;
     if (!token || !password) {
-      res.status(400).json({ error: 'Token y contrasena son requeridos' });
+      res.status(400).json({ error: 'Token y contraseña son requeridos' });
       return;
     }
     const pwdError = validatePassword(password);
@@ -186,7 +186,7 @@ router.post('/auth/register', rateLimitOnError(20, 60 * 1000), async (req: Reque
     }
     const tokenData = await verifyEmailToken(token, 'invite');
     if (!tokenData) {
-      res.status(400).json({ error: 'Token invalido, expirado o ya usado' });
+      res.status(400).json({ error: 'Token inválido, expirado o ya usado' });
       return;
     }
     const password_hash = await bcrypt.hash(password, 12);
@@ -221,7 +221,7 @@ router.post('/auth/forgot-password', rateLimit(6, 15 * 60 * 1000), async (req: R
       const token = await createEmailToken(email, 'reset');
       await sendResetEmail(email, token);
     }
-    res.json({ message: 'Si el email existe en nuestro sistema, recibiras un enlace para restablecer tu contrasena' });
+    res.json({ message: 'Si el email existe en nuestro sistema, recibirás un enlace para restablecer tu contraseña' });
   } catch (err) {
     logger.error(err, 'Forgot password error');
     res.status(500).json({ error: 'Error interno del servidor' });
@@ -232,7 +232,7 @@ router.post('/auth/reset-password', rateLimit(10, 15 * 60 * 1000), async (req: R
   try {
     const { token, password } = req.body;
     if (!token || !password) {
-      res.status(400).json({ error: 'Token y contrasena son requeridos' });
+      res.status(400).json({ error: 'Token y contraseña son requeridos' });
       return;
     }
     const pwdError = validatePassword(password);
@@ -242,7 +242,7 @@ router.post('/auth/reset-password', rateLimit(10, 15 * 60 * 1000), async (req: R
     }
     const tokenData = await verifyEmailToken(token, 'reset');
     if (!tokenData) {
-      res.status(400).json({ error: 'Token invalido, expirado o ya usado' });
+      res.status(400).json({ error: 'Token inválido, expirado o ya usado' });
       return;
     }
     const password_hash = await bcrypt.hash(password, 12);

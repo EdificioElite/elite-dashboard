@@ -195,7 +195,7 @@ router.post('/admin/usuarios', authMiddleware, adminMiddleware, async (req: Requ
 
     const token = await createEmailToken(email, 'invite', vecino_piso || undefined);
     await sendInviteEmail(email, vecino_piso || null, token);
-    res.json({ message: 'Invitacion enviada correctamente' });
+    res.json({ message: 'Invitación enviada correctamente' });
   } catch (err) {
     logger.error(err, 'Admin invite user error');
     res.status(500).json({ error: 'Error interno del servidor' });
@@ -258,7 +258,7 @@ router.put('/admin/usuarios/:id', authMiddleware, adminMiddleware, async (req: R
   } catch (err: any) {
     if (err.code === '23505') {
       const field = err.constraint?.includes('email') ? 'email' : 'vecino_piso';
-      res.status(409).json({ error: `El ${field} ya esta en uso` });
+      res.status(409).json({ error: `El ${field} ya está en uso` });
       return;
     }
     logger.error(err, 'Admin update user error');
@@ -272,7 +272,7 @@ router.put('/admin/usuarios/:id/password', authMiddleware, adminMiddleware, asyn
     const { password } = req.body;
 
     if (!password || password.length < 6) {
-      res.status(400).json({ error: 'La contrasena debe tener al menos 6 caracteres' });
+      res.status(400).json({ error: 'La contraseña debe tener al menos 6 caracteres' });
       return;
     }
 
@@ -340,7 +340,7 @@ router.post('/admin/invitar', authMiddleware, adminMiddleware, rateLimit(100, 60
     }
     const token = await createEmailToken(vecino.email, 'invite', vecino.piso);
     await sendInviteEmail(vecino.email, vecino.piso, token);
-    res.json({ message: 'Invitacion enviada correctamente' });
+    res.json({ message: 'Invitación enviada correctamente' });
   } catch (err) {
     logger.error(err, 'Admin invite error');
     res.status(500).json({ error: 'Error interno del servidor' });

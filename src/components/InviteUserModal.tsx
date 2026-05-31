@@ -58,7 +58,7 @@ export default function InviteUserModal({ onClose, onSaved }: Props) {
       await inviteUser(email, vecinoPiso || undefined);
       setSuccess(true);
     } catch (err: any) {
-      setError(err.message || 'Error al enviar invitacion');
+      setError(err.message || 'Error al enviar invitación');
     } finally {
       setSaving(false);
     }
@@ -110,7 +110,7 @@ export default function InviteUserModal({ onClose, onSaved }: Props) {
               <button type="button" onClick={onClose} className="btn btn-ghost">Cancelar</button>
               <button type="submit" disabled={saving} className="btn btn-primary">
                 <Icon name="mail" size={14} />
-                {saving ? 'Enviando...' : 'Enviar invitacion'}
+                {saving ? 'Enviando...' : 'Enviar invitación'}
               </button>
             </div>
           </form>

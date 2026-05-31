@@ -28,13 +28,13 @@ export default function SelfPasswordModal({ onClose }: Props) {
   const handleBackdropClick = () => onClose();
 
   const validate = (): string | null => {
-    if (!current) return 'La contrasena actual es requerida';
-    if (!password) return 'La nueva contrasena es requerida';
-    if (password.length < 8) return 'La contrasena debe tener al menos 8 caracteres';
-    if (!/[A-Z]/.test(password)) return 'La contrasena debe contener al menos una mayuscula';
-    if (!/[a-z]/.test(password)) return 'La contrasena debe contener al menos una minuscula';
-    if (!/[0-9]/.test(password)) return 'La contrasena debe contener al menos un numero';
-    if (password !== confirm) return 'Las contrasenas no coinciden';
+    if (!current) return 'La contraseña actual es requerida';
+    if (!password) return 'La nueva contraseña es requerida';
+    if (password.length < 8) return 'La contraseña debe tener al menos 8 caracteres';
+    if (!/[A-Z]/.test(password)) return 'La contraseña debe contener al menos una mayúscula';
+    if (!/[a-z]/.test(password)) return 'La contraseña debe contener al menos una minúscula';
+    if (!/[0-9]/.test(password)) return 'La contraseña debe contener al menos un número';
+    if (password !== confirm) return 'Las contraseñas no coinciden';
     return null;
   };
 
@@ -54,7 +54,7 @@ export default function SelfPasswordModal({ onClose }: Props) {
       setSuccess(true);
       setTimeout(() => { if (mountedRef.current) onClose(); }, 1500);
     } catch (err: any) {
-      setError(err.message || 'Error al cambiar contrasena');
+      setError(err.message || 'Error al cambiar contraseña');
     } finally {
       setSaving(false);
     }
@@ -71,7 +71,7 @@ export default function SelfPasswordModal({ onClose }: Props) {
             >
               <Icon name="key" size={14} className="text-cream" />
             </div>
-            <span className="eyebrow">Cambiar contrasena</span>
+            <span className="eyebrow">Cambiar contraseña</span>
           </div>
           <button
             onClick={onClose}
@@ -116,12 +116,12 @@ export default function SelfPasswordModal({ onClose }: Props) {
                 required
                 aria-describedby={error ? 'password-error' : undefined}
                 className="input-card"
-                placeholder="Tu contrasena actual"
+                placeholder="Tu contraseña actual"
               />
             </div>
             <div>
               <label htmlFor="new-password" className="block text-xs font-semibold uppercase tracking-wider text-cocoa/40 mb-1.5">
-                Nueva contrasena
+                Nueva contraseña
               </label>
               <input
                 id="new-password"
@@ -132,12 +132,12 @@ export default function SelfPasswordModal({ onClose }: Props) {
                 minLength={8}
                 aria-describedby={error ? 'password-error' : undefined}
                 className="input-card"
-                placeholder="Minimo 8 caracteres, mayuscula, minuscula y numero"
+                placeholder="Mínimo 8 caracteres, mayúscula, minúscula y número"
               />
             </div>
             <div>
               <label htmlFor="confirm-password" className="block text-xs font-semibold uppercase tracking-wider text-cocoa/40 mb-1.5">
-                Confirmar contrasena
+                Confirmar contraseña
               </label>
               <input
                 id="confirm-password"
@@ -148,7 +148,7 @@ export default function SelfPasswordModal({ onClose }: Props) {
                 minLength={8}
                 aria-describedby={error ? 'password-error' : undefined}
                 className="input-card"
-                placeholder="Repetir nueva contrasena"
+                placeholder="Repetir nueva contraseña"
               />
             </div>
             <div className="flex justify-end gap-3 mt-2">

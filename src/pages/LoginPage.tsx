@@ -19,7 +19,7 @@ export default function LoginPage() {
       const user = useAuthStore.getState().user;
       navigate(user?.is_admin ? '/admin' : '/dashboard');
     } catch (err: any) {
-      setError(err.message || 'Error al iniciar sesion');
+      setError(err.message || 'Error al iniciar sesión');
     } finally {
       setLoading(false);
     }
@@ -85,7 +85,7 @@ export default function LoginPage() {
 
           <div>
             <label htmlFor="password" className="block text-xs font-semibold uppercase tracking-wider text-cocoa/40 mb-1.5 ml-1">
-              Contrasena
+              Contraseña
             </label>
             <input
               id="password"

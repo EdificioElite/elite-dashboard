@@ -51,9 +51,9 @@ export default function DeleteUserModal({ userId, userName, onClose, onDeleted }
           </button>
         </div>
 
-        <p className="text-sm text-cocoa/70 mb-1">Estas seguro de que queres eliminar el acceso de:</p>
+        <p className="text-sm text-cocoa/70 mb-1">¿Estás seguro de que quieres eliminar el acceso de:</p>
         <p className="text-sm font-semibold text-cocoa mb-4">{userName}</p>
-        <p className="text-xs text-cocoa/40 mb-4">Esta accion no se puede deshacer. El vecino perdera el acceso al dashboard.</p>
+        <p className="text-xs text-cocoa/40 mb-4">Esta acción no se puede deshacer. El vecino perderá el acceso al dashboard.</p>
 
         {error && (
           <div className="mb-4 px-4 py-3 rounded-xl text-sm flex items-center gap-2" style={{ background: 'rgba(163,64,42,.08)', color: '#a3402a' }}>

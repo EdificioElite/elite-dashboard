@@ -82,7 +82,7 @@ export default function UsuariosPage() {
       <main className="max-w-[1180px] mx-auto px-6 flex flex-col gap-[22px] pb-10">
         <div className="pt-2 flex items-start justify-between flex-wrap gap-4">
           <div>
-            <p className="eyebrow">Panel de administracion</p>
+            <p className="eyebrow">Panel de administración</p>
             <h1 className="font-display text-[40px] font-medium text-cocoa mt-1" style={{ letterSpacing: '-0.02em' }}>Usuarios</h1>
             <p className="text-sm text-cocoa/60 mt-1.5 max-w-lg">Gestiona los accesos al dashboard.</p>
           </div>
@@ -129,7 +129,7 @@ export default function UsuariosPage() {
                   <th scope="col">Piso</th>
                   <th scope="col">Rol</th>
                   <th scope="col" className="text-center">Estado</th>
-                  <th scope="col" className="text-center">Ult. conexion</th>
+                  <th scope="col" className="text-center">Ult. conexión</th>
                   <th scope="col" className="text-center min-w-[130px]">Acciones</th>
                 </tr>
               </thead>
@@ -178,7 +178,7 @@ export default function UsuariosPage() {
                     <td>
                       <div className="flex items-center justify-center gap-1">
                         <button onClick={() => setEditingUser(u)} className="btn btn-ghost p-2 text-cocoa/40 hover:text-cocoa" title="Editar usuario"><Icon name="edit" size={15} /></button>
-                        <button onClick={() => setChangingPassword(u)} className="btn btn-ghost p-2 text-cocoa/40 hover:text-cocoa" title="Cambiar contrasena"><Icon name="key" size={15} /></button>
+                        <button onClick={() => setChangingPassword(u)} className="btn btn-ghost p-2 text-cocoa/40 hover:text-cocoa" title="Cambiar contraseña"><Icon name="key" size={15} /></button>
                         {u.id !== user?.id && (
                           <button onClick={() => setDeletingUser(u)} className="btn btn-ghost p-2 text-cocoa/40 hover:text-red-600" title="Eliminar usuario"><Icon name="trash" size={15} /></button>
                         )}

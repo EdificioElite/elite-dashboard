@@ -78,7 +78,7 @@ export default function DeleteJuntaModal({ junta, onClose, onDeleted }: Props) {
         )}
 
         <p className="text-sm text-cocoa/70 mb-2">
-          Estas seguro de que quieres eliminar esta junta?
+          ¿Estás seguro de que quieres eliminar esta junta?
         </p>
         <p className="text-sm text-cocoa/50 mb-4">
           {tipoLabel(junta.tipo)} — {fmtFecha(junta.fecha)}

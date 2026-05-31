@@ -119,7 +119,7 @@ export default function JuntasGeneralesPage() {
               <h1 className="font-display text-[40px] font-medium text-cocoa mt-1" style={{ letterSpacing: '-0.02em' }}>
                 Juntas
               </h1>
-              <p className="text-sm text-cocoa/50 mt-1">Edificio Elite — C.P. Pio Rio Hortega 46</p>
+              <p className="text-sm text-cocoa/50 mt-1">Edificio Elite — C.P. Pío Río Hortega 46</p>
             </div>
             {isAdmin && (
               <button onClick={() => setShowCreate(true)} className="btn btn-primary">

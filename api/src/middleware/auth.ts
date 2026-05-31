@@ -23,6 +23,6 @@ export function authMiddleware(req: Request, res: Response, next: NextFunction) 
     req.user = verifyToken(token);
     next();
   } catch {
-    res.status(401).json({ error: 'Token invalido o expirado' });
+    res.status(401).json({ error: 'Token inválido o expirado' });
   }
 }
