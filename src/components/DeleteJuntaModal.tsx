@@ -78,9 +78,18 @@ export default function DeleteJuntaModal({ junta, onClose, onDeleted }: Props) {
           </div>
         )}
 
-        <p className="text-sm text-cocoa/70 mb-2">
-          ¿Estás seguro de que quieres eliminar esta junta?
-        </p>
+        <div className="text-center mb-5">
+          <div className="mx-auto w-12 h-12 rounded-full flex items-center justify-center mb-3" style={{ background: 'rgba(163,64,42,.1)' }}>
+            <Icon name="alertTriangle" size={22} className="text-[var(--rise)]" />
+          </div>
+          <p className="text-sm font-medium text-cocoa">
+            ¿Eliminar esta junta?
+          </p>
+          <p className="text-sm text-cocoa/50 mt-1">
+            Esta accion no se puede deshacer.
+          </p>
+        </div>
+
         <div className="mb-5 px-4 py-3 rounded-xl text-sm" style={{ background: 'rgba(163,64,42,.06)' }}>
           <p className="text-cocoa/70">
             <span className="font-medium text-cocoa">{tipoLabel(junta.tipo)}</span>
@@ -93,7 +102,7 @@ export default function DeleteJuntaModal({ junta, onClose, onDeleted }: Props) {
 
         <div className="flex justify-end gap-3">
           <button onClick={onClose} disabled={deleting} className="btn btn-ghost">Cancelar</button>
-          <button onClick={handleDelete} disabled={deleting} className="btn text-cream" style={{ background: 'var(--rise)' }}>
+          <button onClick={handleDelete} disabled={deleting} className="btn text-cream flex items-center gap-2" style={{ background: 'var(--rise)' }}>
             <Icon name="trash" size={14} />
             {deleting ? 'Eliminando...' : 'Eliminar junta'}
           </button>
