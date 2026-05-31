@@ -113,6 +113,7 @@ router.get('/juntas/:id', authMiddleware, async (req: Request, res: Response) =>
     const fileName = junta.file_name || buildFileName(junta.tipo, junta.fecha);
     res.setHeader('Content-Type', 'application/pdf');
     res.setHeader('Content-Disposition', `attachment; filename="${fileName}"`);
+    res.setHeader('Access-Control-Expose-Headers', 'Content-Disposition');
 
     const stream = await getPDFStream(junta.drive_file_id);
     stream.pipe(res);
