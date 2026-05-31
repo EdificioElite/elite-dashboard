@@ -288,7 +288,7 @@ router.put('/admin/usuarios/:id/password', authMiddleware, adminMiddleware, asyn
       return;
     }
 
-    res.json({ message: 'Contrasena actualizada' });
+    res.json({ message: 'Contraseña actualizada' });
   } catch (err) {
     logger.error(err, 'Admin change password error');
     res.status(500).json({ error: 'Error interno del servidor' });

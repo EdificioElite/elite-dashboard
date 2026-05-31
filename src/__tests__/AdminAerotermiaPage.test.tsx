@@ -43,7 +43,7 @@ describe('AdminAerotermiaPage', () => {
     mockApiFetch.mockResolvedValue([]);
     renderPage();
     await waitFor(() => {
-      expect(screen.getByText('Panel de administracion')).toBeInTheDocument();
+      expect(screen.getByText('Panel de administración')).toBeInTheDocument();
     });
   });
 
@@ -63,7 +63,7 @@ describe('AdminAerotermiaPage', () => {
       expect(screen.getByText('Consumo por vecino')).toBeInTheDocument();
       expect(screen.getByText('Histórico — Global')).toBeInTheDocument();
       expect(screen.getAllByText('No hay facturas disponibles').length).toBeGreaterThan(0);
-      expect(screen.getByText('No hay facturas electricas disponibles')).toBeInTheDocument();
+      expect(screen.getByText('No hay facturas eléctricas disponibles')).toBeInTheDocument();
     });
   });
 

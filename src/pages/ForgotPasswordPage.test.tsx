@@ -28,7 +28,7 @@ describe('ForgotPasswordPage', () => {
     await userEvent.type(screen.getByLabelText('Email'), 'a@a.com');
     await userEvent.click(screen.getByRole('button', { name: 'Enviar enlace' }));
     await waitFor(() => {
-      expect(screen.getByText(/recibiras un enlace/i)).toBeInTheDocument();
+      expect(screen.getByText(/recibirás un enlace/i)).toBeInTheDocument();
     });
   });
 

@@ -25,7 +25,7 @@ describe('ResetPasswordPage', () => {
       </MemoryRouter>
     );
     await waitFor(() => {
-      expect(screen.getByText(/invalido/i)).toBeInTheDocument();
+      expect(screen.getByText(/inválido/i)).toBeInTheDocument();
     });
   });
 
@@ -49,7 +49,7 @@ describe('ResetPasswordPage', () => {
       </MemoryRouter>
     );
     await waitFor(() => {
-      expect(screen.getByLabelText('Nueva contrasena')).toBeInTheDocument();
+      expect(screen.getByLabelText('Nueva contraseña')).toBeInTheDocument();
     });
   });
 
@@ -61,11 +61,11 @@ describe('ResetPasswordPage', () => {
       </MemoryRouter>
     );
     await waitFor(() => {
-      expect(screen.getByLabelText('Nueva contrasena')).toBeInTheDocument();
+      expect(screen.getByLabelText('Nueva contraseña')).toBeInTheDocument();
     });
-    await userEvent.type(screen.getByLabelText('Nueva contrasena'), 'password123');
-    await userEvent.type(screen.getByLabelText('Confirmar contrasena'), 'different123');
-    await userEvent.click(screen.getByRole('button', { name: 'Guardar contrasena' }));
+    await userEvent.type(screen.getByLabelText('Nueva contraseña'), 'password123');
+    await userEvent.type(screen.getByLabelText('Confirmar contraseña'), 'different123');
+    await userEvent.click(screen.getByRole('button', { name: 'Guardar contraseña' }));
     await waitFor(() => {
       expect(screen.getByText(/no coinciden/i)).toBeInTheDocument();
     });
@@ -80,11 +80,11 @@ describe('ResetPasswordPage', () => {
       </MemoryRouter>
     );
     await waitFor(() => {
-      expect(screen.getByLabelText('Nueva contrasena')).toBeInTheDocument();
+      expect(screen.getByLabelText('Nueva contraseña')).toBeInTheDocument();
     });
-    await userEvent.type(screen.getByLabelText('Nueva contrasena'), 'password123');
-    await userEvent.type(screen.getByLabelText('Confirmar contrasena'), 'password123');
-    await userEvent.click(screen.getByRole('button', { name: 'Guardar contrasena' }));
+    await userEvent.type(screen.getByLabelText('Nueva contraseña'), 'password123');
+    await userEvent.type(screen.getByLabelText('Confirmar contraseña'), 'password123');
+    await userEvent.click(screen.getByRole('button', { name: 'Guardar contraseña' }));
     await waitFor(() => {
       expect(mockResetPassword).toHaveBeenCalledWith('valid', 'password123');
       expect(screen.getByText(/actualizada correctamente/i)).toBeInTheDocument();
@@ -100,11 +100,11 @@ describe('ResetPasswordPage', () => {
       </MemoryRouter>
     );
     await waitFor(() => {
-      expect(screen.getByLabelText('Nueva contrasena')).toBeInTheDocument();
+      expect(screen.getByLabelText('Nueva contraseña')).toBeInTheDocument();
     });
-    await userEvent.type(screen.getByLabelText('Nueva contrasena'), 'password123');
-    await userEvent.type(screen.getByLabelText('Confirmar contrasena'), 'password123');
-    await userEvent.click(screen.getByRole('button', { name: 'Guardar contrasena' }));
+    await userEvent.type(screen.getByLabelText('Nueva contraseña'), 'password123');
+    await userEvent.type(screen.getByLabelText('Confirmar contraseña'), 'password123');
+    await userEvent.click(screen.getByRole('button', { name: 'Guardar contraseña' }));
     await waitFor(() => {
       expect(screen.getByText('API error')).toBeInTheDocument();
     });
@@ -118,7 +118,7 @@ describe('ResetPasswordPage', () => {
       </MemoryRouter>
     );
     await waitFor(() => {
-      expect(screen.getByText(/invalido/i)).toBeInTheDocument();
+      expect(screen.getByText(/inválido/i)).toBeInTheDocument();
     });
   });
 });

@@ -17,17 +17,17 @@ describe('SelfPasswordModal', () => {
 
   it('renders three password fields', () => {
     render(<SelfPasswordModal onClose={onClose} />);
-    expect(screen.getByLabelText('Contrasena actual')).toBeInTheDocument();
-    expect(screen.getByLabelText('Nueva contrasena')).toBeInTheDocument();
-    expect(screen.getByLabelText('Confirmar contrasena')).toBeInTheDocument();
+    expect(screen.getByLabelText('Contraseña actual')).toBeInTheDocument();
+    expect(screen.getByLabelText('Nueva contraseña')).toBeInTheDocument();
+    expect(screen.getByLabelText('Confirmar contraseña')).toBeInTheDocument();
   });
 
   it('shows error when new password is too short', async () => {
     const user = userEvent.setup();
     render(<SelfPasswordModal onClose={onClose} />);
-    await user.type(screen.getByLabelText('Contrasena actual'), 'oldpass');
-    await user.type(screen.getByLabelText('Nueva contrasena'), 'Ab1');
-    await user.type(screen.getByLabelText('Confirmar contrasena'), 'Ab1');
+    await user.type(screen.getByLabelText('Contraseña actual'), 'oldpass');
+    await user.type(screen.getByLabelText('Nueva contraseña'), 'Ab1');
+    await user.type(screen.getByLabelText('Confirmar contraseña'), 'Ab1');
     await user.click(screen.getByRole('button', { name: /cambiar/i }));
     expect(screen.getByText(/8 caracteres/)).toBeInTheDocument();
   });
@@ -35,8 +35,8 @@ describe('SelfPasswordModal', () => {
   it('shows error when current password is empty', async () => {
     const user = userEvent.setup();
     render(<SelfPasswordModal onClose={onClose} />);
-    await user.type(screen.getByLabelText('Nueva contrasena'), 'NewPass1');
-    await user.type(screen.getByLabelText('Confirmar contrasena'), 'NewPass1');
+    await user.type(screen.getByLabelText('Nueva contraseña'), 'NewPass1');
+    await user.type(screen.getByLabelText('Confirmar contraseña'), 'NewPass1');
     await user.click(screen.getByRole('button', { name: /cambiar/i }));
     expect(screen.getByText(/actual es requerida/)).toBeInTheDocument();
   });
@@ -44,30 +44,30 @@ describe('SelfPasswordModal', () => {
   it('shows error when new password lacks uppercase', async () => {
     const user = userEvent.setup();
     render(<SelfPasswordModal onClose={onClose} />);
-    await user.type(screen.getByLabelText('Contrasena actual'), 'oldpass');
-    await user.type(screen.getByLabelText('Nueva contrasena'), 'lowercase1');
-    await user.type(screen.getByLabelText('Confirmar contrasena'), 'lowercase1');
+    await user.type(screen.getByLabelText('Contraseña actual'), 'oldpass');
+    await user.type(screen.getByLabelText('Nueva contraseña'), 'lowercase1');
+    await user.type(screen.getByLabelText('Confirmar contraseña'), 'lowercase1');
     await user.click(screen.getByRole('button', { name: /cambiar/i }));
-    expect(screen.getByText(/mayuscula/)).toBeInTheDocument();
+    expect(screen.getByText(/mayúscula/)).toBeInTheDocument();
   });
 
   it('shows error when passwords do not match', async () => {
     const user = userEvent.setup();
     render(<SelfPasswordModal onClose={onClose} />);
-    await user.type(screen.getByLabelText('Contrasena actual'), 'oldpass');
-    await user.type(screen.getByLabelText('Nueva contrasena'), 'NewPass1');
-    await user.type(screen.getByLabelText('Confirmar contrasena'), 'NewPass2');
+    await user.type(screen.getByLabelText('Contraseña actual'), 'oldpass');
+    await user.type(screen.getByLabelText('Nueva contraseña'), 'NewPass1');
+    await user.type(screen.getByLabelText('Confirmar contraseña'), 'NewPass2');
     await user.click(screen.getByRole('button', { name: /cambiar/i }));
     expect(screen.getByText(/no coinciden/)).toBeInTheDocument();
   });
 
   it('calls changeOwnPassword and shows success', async () => {
     const user = userEvent.setup();
-    vi.mocked(client.changeOwnPassword).mockResolvedValueOnce({ message: 'Contrasena actualizada' });
+    vi.mocked(client.changeOwnPassword).mockResolvedValueOnce({ message: 'Contraseña actualizada' });
     render(<SelfPasswordModal onClose={onClose} />);
-    await user.type(screen.getByLabelText('Contrasena actual'), 'oldpass');
-    await user.type(screen.getByLabelText('Nueva contrasena'), 'NewPass1');
-    await user.type(screen.getByLabelText('Confirmar contrasena'), 'NewPass1');
+    await user.type(screen.getByLabelText('Contraseña actual'), 'oldpass');
+    await user.type(screen.getByLabelText('Nueva contraseña'), 'NewPass1');
+    await user.type(screen.getByLabelText('Confirmar contraseña'), 'NewPass1');
     await user.click(screen.getByRole('button', { name: /cambiar/i }));
     expect(client.changeOwnPassword).toHaveBeenCalledWith('oldpass', 'NewPass1');
     await waitFor(() => {
@@ -77,11 +77,11 @@ describe('SelfPasswordModal', () => {
 
   it('shows error from API', async () => {
     const user = userEvent.setup();
-    vi.mocked(client.changeOwnPassword).mockRejectedValueOnce(new Error('La contrasena actual es incorrecta'));
+    vi.mocked(client.changeOwnPassword).mockRejectedValueOnce(new Error('La contraseña actual es incorrecta'));
     render(<SelfPasswordModal onClose={onClose} />);
-    await user.type(screen.getByLabelText('Contrasena actual'), 'wrong');
-    await user.type(screen.getByLabelText('Nueva contrasena'), 'NewPass1');
-    await user.type(screen.getByLabelText('Confirmar contrasena'), 'NewPass1');
+    await user.type(screen.getByLabelText('Contraseña actual'), 'wrong');
+    await user.type(screen.getByLabelText('Nueva contraseña'), 'NewPass1');
+    await user.type(screen.getByLabelText('Confirmar contraseña'), 'NewPass1');
     await user.click(screen.getByRole('button', { name: /cambiar/i }));
     await waitFor(() => {
       expect(screen.getByText(/incorrecta/)).toBeInTheDocument();

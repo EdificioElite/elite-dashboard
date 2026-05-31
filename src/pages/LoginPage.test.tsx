@@ -33,6 +33,6 @@ describe('LoginPage', () => {
     );
     expect(screen.getByText('Bienvenido')).toBeInTheDocument();
     expect(screen.getByLabelText('Email')).toBeInTheDocument();
-    expect(screen.getByLabelText('Contrasena')).toBeInTheDocument();
+    expect(screen.getByLabelText('Contraseña')).toBeInTheDocument();
   });
 });

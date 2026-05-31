@@ -110,7 +110,7 @@ export default function LoginPage() {
 
         <div className="mt-5 text-center">
           <Link to="/recuperar-contrasena" className="text-sm text-accent hover:underline">
-            ¿Olvidaste tu contrasena?
+            ¿Olvidaste tu contraseña?
           </Link>
         </div>
 

@@ -89,7 +89,7 @@ export default function InviteUserModal({ onClose, onSaved }: Props) {
         {success && (
           <div className="mb-4 px-4 py-3 rounded-xl text-sm flex items-center gap-2" style={{ background: 'rgba(91,122,74,.1)', color: '#5b7a4a' }}>
             <Icon name="check" size={14} />
-            Invitacion enviada correctamente
+            Invitación enviada correctamente
           </div>
         )}
 

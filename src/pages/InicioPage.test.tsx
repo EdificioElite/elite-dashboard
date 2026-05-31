@@ -40,8 +40,8 @@ describe('InicioPage', () => {
         <InicioPage />
       </MemoryRouter>
     );
-    expect(await screen.findByText('Proxima Junta de Vecinos')).toBeInTheDocument();
-    expect(screen.getByText('Proximamente. Fecha y hora por determinar.')).toBeInTheDocument();
+    expect(await screen.findByText('Próxima Junta de Vecinos')).toBeInTheDocument();
+    expect(screen.getByText('Próximamente. Fecha y hora por determinar.')).toBeInTheDocument();
   });
 
   it('renders WiFi card', async () => {

@@ -23,7 +23,7 @@ describe('ConsumoCard', () => {
     expect(screen.getByText('123.456')).toBeInTheDocument();
     expect(screen.getByText('61.728')).toBeInTheDocument();
     expect(screen.getByText('12,35')).toBeInTheDocument();
-    expect(screen.getByText('Calefacción')).toBeInTheDocument();
+    expect(screen.getAllByText('Calefacción').length).toBeGreaterThanOrEqual(1);
     expect(screen.getByText('Refrigeración')).toBeInTheDocument();
     expect(screen.getByText('ACS')).toBeInTheDocument();
     expect(screen.getByText('Estado')).toBeInTheDocument();
@@ -34,8 +34,9 @@ describe('ConsumoCard', () => {
     expect(screen.getByText('42.0°C')).toBeInTheDocument();
     expect(screen.getByText('32.0°C')).toBeInTheDocument();
     expect(screen.getByText('Contadores de Aerotermia en vivo')).toBeInTheDocument();
-    expect(screen.getByText('Calefaccion')).toBeInTheDocument();
-    expect(screen.getByText('Calefaccion')).toHaveStyle({ color: '#a3402a' });
+    const calefaccionEls = screen.getAllByText('Calefacción');
+    expect(calefaccionEls.length).toBe(2);
+    expect(calefaccionEls[1]).toHaveStyle({ color: '#a3402a' });
   });
 
   it('hides delta when mes_inicio is null', () => {
@@ -102,7 +103,7 @@ describe('ConsumoCard', () => {
     expect(screen.getByText('2000 W')).toBeInTheDocument();
   });
 
-  it('displays Refrigeracion mode in azul', () => {
+  it('displays Refrigeración mode in azul', () => {
     render(
       <ConsumoCard
         data={{
@@ -115,8 +116,9 @@ describe('ConsumoCard', () => {
         }}
       />
     );
-    expect(screen.getByText('Refrigeracion')).toBeInTheDocument();
-    expect(screen.getByText('Refrigeracion')).toHaveStyle({ color: '#3b82f6' });
+    const refrigeracionEls = screen.getAllByText('Refrigeración');
+    expect(refrigeracionEls.length).toBe(2);
+    expect(refrigeracionEls[1]).toHaveStyle({ color: '#3b82f6' });
   });
 
   it('displays Desconocido mode in gris', () => {
@@ -146,8 +148,8 @@ describe('ConsumoCard', () => {
         }}
       />
     );
-    expect(screen.queryByText('Calefaccion')).not.toBeInTheDocument();
-    expect(screen.queryByText('Refrigeracion')).not.toBeInTheDocument();
+    expect(screen.getAllByText('Calefacción')).toHaveLength(1);
+    expect(screen.getAllByText('Refrigeración')).toHaveLength(1);
     expect(screen.queryByText('Desconocido')).not.toBeInTheDocument();
     expect(screen.getByText('Apagado')).toBeInTheDocument();
   });

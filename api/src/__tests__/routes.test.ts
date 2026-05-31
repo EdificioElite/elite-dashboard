@@ -207,7 +207,7 @@ describe('Auth routes', () => {
         .set('Authorization', `Bearer ${token}`)
         .send({ currentPassword: 'old', newPassword: 'abcdefg1' });
       expect(res.status).toBe(400);
-      expect(res.body.error).toContain('mayuscula');
+      expect(res.body.error).toContain('mayúscula');
     });
 
     it('returns 400 when newPassword lacks lowercase', async () => {
@@ -218,7 +218,7 @@ describe('Auth routes', () => {
         .set('Authorization', `Bearer ${token}`)
         .send({ currentPassword: 'old', newPassword: 'ABCDEFG1' });
       expect(res.status).toBe(400);
-      expect(res.body.error).toContain('minuscula');
+      expect(res.body.error).toContain('minúscula');
     });
 
     it('returns 400 when newPassword lacks digit', async () => {
@@ -229,7 +229,7 @@ describe('Auth routes', () => {
         .set('Authorization', `Bearer ${token}`)
         .send({ currentPassword: 'old', newPassword: 'Abcdefgh' });
       expect(res.status).toBe(400);
-      expect(res.body.error).toContain('numero');
+      expect(res.body.error).toContain('número');
     });
 
     it('returns 401 when currentPassword is wrong', async () => {
@@ -261,7 +261,7 @@ describe('Auth routes', () => {
         .set('Authorization', `Bearer ${token}`)
         .send({ currentPassword: 'correct', newPassword: 'NewPass1' });
       expect(res.status).toBe(200);
-      expect(res.body.message).toBe('Contrasena actualizada');
+      expect(res.body.message).toBe('Contraseña actualizada');
       // Verify the UPDATE query was called
       const calls = mockQuery.mock.calls;
       const updateCall = calls.find((c: any) => typeof c[0] === 'string' && c[0].includes('UPDATE usuarios SET password_hash'));
@@ -350,21 +350,21 @@ describe('Auth routes', () => {
       const app = createApp();
       const res = await request(app).post('/api/auth/register').send({ token: 'abc', password: 'abcdefg1' });
       expect(res.status).toBe(400);
-      expect(res.body.error).toContain('mayuscula');
+      expect(res.body.error).toContain('mayúscula');
     });
 
     it('returns 400 when password lacks lowercase', async () => {
       const app = createApp();
       const res = await request(app).post('/api/auth/register').send({ token: 'abc', password: 'ABCDEFG1' });
       expect(res.status).toBe(400);
-      expect(res.body.error).toContain('minuscula');
+      expect(res.body.error).toContain('minúscula');
     });
 
     it('returns 400 when password lacks digit', async () => {
       const app = createApp();
       const res = await request(app).post('/api/auth/register').send({ token: 'abc', password: 'Abcdefgh' });
       expect(res.status).toBe(400);
-      expect(res.body.error).toContain('numero');
+      expect(res.body.error).toContain('número');
     });
 
     it('returns 400 when token is invalid', async () => {
@@ -441,21 +441,21 @@ describe('Auth routes', () => {
       const app = createApp();
       const res = await request(app).post('/api/auth/reset-password').send({ token: 'abc', password: 'abcdefg1' });
       expect(res.status).toBe(400);
-      expect(res.body.error).toContain('mayuscula');
+      expect(res.body.error).toContain('mayúscula');
     });
 
     it('returns 400 when password lacks lowercase', async () => {
       const app = createApp();
       const res = await request(app).post('/api/auth/reset-password').send({ token: 'abc', password: 'ABCDEFG1' });
       expect(res.status).toBe(400);
-      expect(res.body.error).toContain('minuscula');
+      expect(res.body.error).toContain('minúscula');
     });
 
     it('returns 400 when password lacks digit', async () => {
       const app = createApp();
       const res = await request(app).post('/api/auth/reset-password').send({ token: 'abc', password: 'Abcdefgh' });
       expect(res.status).toBe(400);
-      expect(res.body.error).toContain('numero');
+      expect(res.body.error).toContain('número');
     });
 
     it('returns 400 when token is invalid', async () => {
@@ -740,7 +740,7 @@ describe('Admin routes', () => {
         .set('Authorization', `Bearer ${token}`)
         .send({ email: 'new@test.com', vecino_piso: '2A' });
       expect(res.status).toBe(200);
-      expect(res.body.message).toBe('Invitacion enviada correctamente');
+      expect(res.body.message).toBe('Invitación enviada correctamente');
     });
 
     it('returns 400 when vecino does not exist', async () => {
@@ -762,7 +762,7 @@ describe('Admin routes', () => {
         .set('Authorization', `Bearer ${userToken(true)}`)
         .send({ email: 'gestor@elite.com' });
       expect(res.status).toBe(200);
-      expect(res.body.message).toBe('Invitacion enviada correctamente');
+      expect(res.body.message).toBe('Invitación enviada correctamente');
     });
   });
 
@@ -992,7 +992,7 @@ describe('Admin routes', () => {
         .set('Authorization', `Bearer ${userToken(true)}`)
         .send({ piso: '2A' });
       expect(res.status).toBe(200);
-      expect(res.body.message).toContain('Invitacion enviada');
+      expect(res.body.message).toContain('Invitación enviada');
     });
 
     it('sends invite for valid vecino', async () => {
@@ -1003,7 +1003,7 @@ describe('Admin routes', () => {
         .set('Authorization', `Bearer ${userToken(true)}`)
         .send({ piso: '2A' });
       expect(res.status).toBe(200);
-      expect(res.body.message).toContain('Invitacion enviada');
+      expect(res.body.message).toContain('Invitación enviada');
     });
   });
 

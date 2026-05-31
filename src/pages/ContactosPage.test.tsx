@@ -44,7 +44,7 @@ describe('ContactosPage', () => {
         <ContactosPage />
       </MemoryRouter>
     );
-    expect(screen.getByText('Limpieza y Paqueteria')).toBeInTheDocument();
+    expect(screen.getByText('Limpieza y Paquetería')).toBeInTheDocument();
     expect(screen.getByText('Cristina')).toBeInTheDocument();
     expect(screen.getByText('info@cnlimpiezas.com')).toBeInTheDocument();
     expect(screen.getByText('634 466 849')).toBeInTheDocument();

@@ -88,7 +88,7 @@ export default function SelfPasswordModal({ onClose }: Props) {
             style={{ background: 'rgba(52,199,89,0.1)', color: '#34c759' }}
           >
             <Icon name="check" size={14} />
-            Contrasena actualizada correctamente
+            Contraseña actualizada correctamente
           </div>
         ) : (
           <form onSubmit={handleSubmit} noValidate className="flex flex-col gap-4">
@@ -106,7 +106,7 @@ export default function SelfPasswordModal({ onClose }: Props) {
 
             <div>
               <label htmlFor="current-password" className="block text-xs font-semibold uppercase tracking-wider text-cocoa/40 mb-1.5">
-                Contrasena actual
+                Contraseña actual
               </label>
               <input
                 id="current-password"

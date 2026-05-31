@@ -44,7 +44,7 @@ describe('JuntasGeneralesPage', () => {
     await waitFor(() => {
       expect(screen.getByText('Juntas')).toBeInTheDocument();
     });
-    expect(screen.getByText('Edificio Elite — C.P. Pio Rio Hortega 46')).toBeInTheDocument();
+    expect(screen.getByText('Edificio Elite — C.P. Pío Río Hortega 46')).toBeInTheDocument();
   });
 
   it('renders both sections', async () => {

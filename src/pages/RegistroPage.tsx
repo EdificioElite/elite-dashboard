@@ -106,7 +106,7 @@ export default function RegistroPage() {
             <input id="password" type="password" value={password} onChange={(e) => setPassword(e.target.value)} required minLength={8} className="input-card" placeholder="••••••••" autoComplete="new-password" autoFocus />
           </div>
           <div>
-            <label htmlFor="confirm" className="block text-xs font-semibold uppercase tracking-wider text-cocoa/40 mb-1.5 ml-1">Confirmar contrasena</label>
+            <label htmlFor="confirm" className="block text-xs font-semibold uppercase tracking-wider text-cocoa/40 mb-1.5 ml-1">Confirmar contraseña</label>
             <input id="confirm" type="password" value={confirm} onChange={(e) => setConfirm(e.target.value)} required minLength={8} className="input-card" placeholder="••••••••" autoComplete="new-password" />
           </div>
           <button type="submit" disabled={loading} className="btn btn-primary w-full min-h-[44px] uppercase tracking-[0.04em] mt-2">

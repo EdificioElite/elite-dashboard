@@ -126,7 +126,7 @@ router.put('/auth/password', authMiddleware, rateLimit(10, 60 * 1000), async (re
       [password_hash, req.user!.userId]
     );
 
-    res.json({ message: 'Contrasena actualizada' });
+    res.json({ message: 'Contraseña actualizada' });
   } catch (err) {
     logger.error(err, 'Change password error');
     res.status(500).json({ error: 'Error interno del servidor' });
@@ -248,7 +248,7 @@ router.post('/auth/reset-password', rateLimit(10, 15 * 60 * 1000), async (req: R
     const password_hash = await bcrypt.hash(password, 12);
     await query('UPDATE usuarios SET password_hash = $1 WHERE email = $2', [password_hash, tokenData.email]);
     await markTokenUsed(tokenData.id);
-    res.json({ message: 'Contrasena actualizada correctamente' });
+    res.json({ message: 'Contraseña actualizada correctamente' });
   } catch (err) {
     logger.error(err, 'Reset password error');
     res.status(500).json({ error: 'Error interno del servidor' });
