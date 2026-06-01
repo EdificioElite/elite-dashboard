@@ -48,7 +48,7 @@ const WIFI_CONTENT = {
   icon: 'wifi' as const,
   color: '#4a8c9c',
   ssid: 'Edificio Elite',
-  password: '5dUmpRu9',
+  password: '5dumpRu9XEqnba',
 };
 
 function InfoCard({ title, icon, color, children }: { title: string; icon: string; color: string; children: React.ReactNode }) {
