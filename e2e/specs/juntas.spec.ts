@@ -133,11 +133,10 @@ test.describe('Juntas', () => {
       await page.waitForSelector('text=Juntas', { timeout: 10000 });
 
       await page.locator('button[title="Eliminar junta"]').first().click();
-      await expect(page.getByText('Eliminar junta')).toBeVisible();
-      await expect(page.getByText('Estas seguro de que quieres eliminar esta junta?')).toBeVisible();
+      await expect(page.getByText('¿Eliminar esta junta?')).toBeVisible();
 
-      await page.click('button:has-text("Eliminar")');
-      await expect(page.getByText('1 de agosto de 2026')).not.toBeVisible({ timeout: 10000 });
+      await page.click('button:has-text("Eliminar junta")');
+      await expect(page.locator('table tbody tr')).toHaveCount(0, { timeout: 10000 });
     });
 
     test('delete modal can be cancelled', async ({ page }) => {
