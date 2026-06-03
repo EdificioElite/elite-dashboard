@@ -68,10 +68,10 @@ test.describe('Admin', () => {
   test('changes user password', async ({ page }) => {
     await page.goto('/admin/usuarios');
     const row = page.locator('tr', { hasText: 'vecino2@elite.com' });
-    await row.locator('[title="Cambiar contrasena"]').click();
+    await row.locator('[title="Cambiar contraseña"]').click();
 
     const modal = page.locator('.modal-backdrop').last();
-    await expect(modal.locator('.eyebrow')).toContainText('Cambiar contrasena');
+    await expect(modal.locator('.eyebrow')).toContainText('Cambiar contraseña');
 
     await modal.locator('input[type="password"]').first().fill('newpass123');
     await modal.locator('input[type="password"]').last().fill('newpass123');
@@ -85,10 +85,10 @@ test.describe('Admin', () => {
   test('shows error on admin password change with too short password', async ({ page }) => {
     await page.goto('/admin/usuarios');
     const row = page.locator('tr', { hasText: 'vecino2@elite.com' });
-    await row.locator('[title="Cambiar contrasena"]').click();
+    await row.locator('[title="Cambiar contraseña"]').click();
 
     const modal = page.locator('.modal-backdrop').last();
-    await expect(modal.locator('.eyebrow')).toContainText('Cambiar contrasena');
+    await expect(modal.locator('.eyebrow')).toContainText('Cambiar contraseña');
 
     await modal.locator('input[type="password"]').first().fill('12345');
     await modal.locator('input[type="password"]').last().fill('12345');
@@ -100,10 +100,10 @@ test.describe('Admin', () => {
   test('shows error on admin password change with mismatched passwords', async ({ page }) => {
     await page.goto('/admin/usuarios');
     const row = page.locator('tr', { hasText: 'vecino2@elite.com' });
-    await row.locator('[title="Cambiar contrasena"]').click();
+    await row.locator('[title="Cambiar contraseña"]').click();
 
     const modal = page.locator('.modal-backdrop').last();
-    await expect(modal.locator('.eyebrow')).toContainText('Cambiar contrasena');
+    await expect(modal.locator('.eyebrow')).toContainText('Cambiar contraseña');
 
     await modal.locator('input[type="password"]').first().fill('newpass123');
     await modal.locator('input[type="password"]').last().fill('different');

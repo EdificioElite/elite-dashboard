@@ -19,7 +19,7 @@ test.describe('Login', () => {
     await page.fill('input[type="email"]', 'wrong@elite.com');
     await page.fill('input[type="password"]', 'wrong');
     await page.click('button[type="submit"]');
-    await expect(page.getByText('Credenciales invalidas')).toBeVisible();
+    await expect(page.getByText('Credenciales inválidas')).toBeVisible();
   });
 
   test('empty fields shows error', async ({ page }) => {

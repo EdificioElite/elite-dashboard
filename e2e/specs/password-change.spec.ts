@@ -45,14 +45,14 @@ test.describe('Password Change (self-service)', () => {
     await page.waitForSelector('text=Cargando tus datos', { state: 'hidden', timeout: 10000 }).catch(() => {});
 
     await page.locator('.rounded-full').click();
-    await page.getByText('Cambiar contrasena').click();
+    await page.getByText('Cambiar contraseña').click();
 
     const modal = page.locator('[role="dialog"]').last();
-    await expect(modal.getByText('Cambiar contrasena')).toBeVisible();
+    await expect(modal.getByText('Cambiar contraseña')).toBeVisible();
 
-    await modal.getByLabel('Contrasena actual').fill(OLD_PASSWORD);
-    await modal.getByLabel('Nueva contrasena').fill(NEW_PASSWORD);
-    await modal.getByLabel('Confirmar contrasena').fill(NEW_PASSWORD);
+    await modal.getByLabel('Contraseña actual').fill(OLD_PASSWORD);
+    await modal.getByLabel('Nueva contraseña').fill(NEW_PASSWORD);
+    await modal.getByLabel('Confirmar contraseña').fill(NEW_PASSWORD);
 
     await modal.getByRole('button', { name: /Cambiar/i }).click();
 
@@ -63,12 +63,12 @@ test.describe('Password Change (self-service)', () => {
     await loginAs(page, TEST_EMAIL, OLD_PASSWORD);
 
     await page.locator('.rounded-full').click();
-    await page.getByText('Cambiar contrasena').click();
+    await page.getByText('Cambiar contraseña').click();
 
     const modal = page.locator('[role="dialog"]').last();
-    await modal.getByLabel('Contrasena actual').fill('wrongpassword');
-    await modal.getByLabel('Nueva contrasena').fill(NEW_PASSWORD);
-    await modal.getByLabel('Confirmar contrasena').fill(NEW_PASSWORD);
+    await modal.getByLabel('Contraseña actual').fill('wrongpassword');
+    await modal.getByLabel('Nueva contraseña').fill(NEW_PASSWORD);
+    await modal.getByLabel('Confirmar contraseña').fill(NEW_PASSWORD);
 
     await modal.getByRole('button', { name: /Cambiar/i }).click();
 
@@ -79,12 +79,12 @@ test.describe('Password Change (self-service)', () => {
     await loginAs(page, TEST_EMAIL, OLD_PASSWORD);
 
     await page.locator('.rounded-full').click();
-    await page.getByText('Cambiar contrasena').click();
+    await page.getByText('Cambiar contraseña').click();
 
     const modal = page.locator('[role="dialog"]').last();
-    await modal.getByLabel('Contrasena actual').fill(OLD_PASSWORD);
-    await modal.getByLabel('Nueva contrasena').fill('Ab1');
-    await modal.getByLabel('Confirmar contrasena').fill('Ab1');
+    await modal.getByLabel('Contraseña actual').fill(OLD_PASSWORD);
+    await modal.getByLabel('Nueva contraseña').fill('Ab1');
+    await modal.getByLabel('Confirmar contraseña').fill('Ab1');
 
     await modal.getByRole('button', { name: /Cambiar/i }).click();
 
@@ -95,12 +95,12 @@ test.describe('Password Change (self-service)', () => {
     await loginAs(page, TEST_EMAIL, OLD_PASSWORD);
 
     await page.locator('.rounded-full').click();
-    await page.getByText('Cambiar contrasena').click();
+    await page.getByText('Cambiar contraseña').click();
 
     const modal = page.locator('[role="dialog"]').last();
-    await modal.getByLabel('Contrasena actual').fill(OLD_PASSWORD);
-    await modal.getByLabel('Nueva contrasena').fill(NEW_PASSWORD);
-    await modal.getByLabel('Confirmar contrasena').fill('Different1');
+    await modal.getByLabel('Contraseña actual').fill(OLD_PASSWORD);
+    await modal.getByLabel('Nueva contraseña').fill(NEW_PASSWORD);
+    await modal.getByLabel('Confirmar contraseña').fill('Different1');
 
     await modal.getByRole('button', { name: /Cambiar/i }).click();
 
