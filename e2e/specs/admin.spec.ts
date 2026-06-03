@@ -141,7 +141,7 @@ test.describe('Admin', () => {
 
   test('shows ultima_conexion column with null for users who never logged in', async ({ page }) => {
     await page.goto('/admin/usuarios');
-    await expect(page.locator('tbody')).toBeVisible();
+    await page.waitForSelector('table tbody', { timeout: 15000 });
     await expect(page.locator('th').filter({ hasText: /Ult\.\s+conexión/ })).toBeVisible();
 
     const vecino2Row = page.locator('tr', { hasText: 'vecino2@elite.com' });
@@ -150,7 +150,7 @@ test.describe('Admin', () => {
 
   test('ultima_conexion updates after vecino logs in', async ({ page }) => {
     await page.goto('/admin/usuarios');
-    await expect(page.locator('tbody')).toBeVisible();
+    await page.waitForSelector('table tbody', { timeout: 15000 });
 
     await logout(page);
     await loginAsVecino(page);

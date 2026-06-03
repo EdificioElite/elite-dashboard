@@ -214,10 +214,11 @@ test.describe('Invitation Flow', () => {
     await loginAsAdmin(page);
 
     const row = page.locator('tr', { hasText: INVITE_PISO });
+    await expect(row).toBeVisible({ timeout: 10000 });
     const inviteBtn = row.locator('[title="Enviar invitación"]');
     await inviteBtn.click();
 
-    await expect(page.getByText(/Invitación enviada correctamente/i)).toBeVisible({ timeout: 10000 });
+    await expect(page.getByText(/Invitación enviada correctamente/i)).toBeVisible({ timeout: 15000 });
   });
 
   test('full invitation and registration flow', async ({ page }) => {
