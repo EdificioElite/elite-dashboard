@@ -717,6 +717,12 @@ describe('Admin routes', () => {
         .set('Authorization', `Bearer ${token}`);
       expect(res.status).toBe(200);
       expect(res.body).toHaveLength(1);
+      expect(mockQuery).toHaveBeenCalledWith(
+        expect.stringContaining('DISTINCT ON (v.piso)'),
+      );
+      expect(mockQuery).toHaveBeenCalledWith(
+        expect.stringContaining('ORDER BY v.piso, u.id'),
+      );
     });
   });
 

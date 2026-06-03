@@ -104,7 +104,21 @@ jobs:
             echo "No Vercel preview URL found in PR comments"
             exit 1
           fi
-          echo "Aliasing $PREVIEW_URL -> dev.edificioelite.com"
-          vercel alias set "$PREVIEW_URL" dev.edificioelite.com \
-            --token "$VERCEL_TOKEN" \
-            --scope cp-edificio-elite-s-projects
+
+          echo "Aliasing $PREVIEW_URL -> dev.edificioelite.com (retrying until deployment is ready)..."
+          SUCCESS=false
+          for i in $(seq 1 30); do
+            if vercel alias set "$PREVIEW_URL" dev.edificioelite.com \
+              --token "$VERCEL_TOKEN" \
+              --scope cp-edificio-elite-s-projects; then
+              echo "Alias created successfully"
+              SUCCESS=true
+              break
+            fi
+            echo "  attempt $i/30..."
+            sleep 10
+          done
+          if [ "$SUCCESS" = false ]; then
+            echo "Failed to create alias after 30 attempts"
+            exit 1
+          fi
