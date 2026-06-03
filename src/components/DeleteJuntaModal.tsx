@@ -65,7 +65,7 @@ export default function DeleteJuntaModal({ junta, onClose, onDeleted }: Props) {
             </div>
             <span className="eyebrow">Eliminar junta</span>
           </div>
-          <button onClick={onClose} className="btn btn-ghost p-2 text-cocoa/40 hover:text-cocoa">
+          <button onClick={onClose} className="btn btn-ghost p-2 text-cocoa/40 hover:text-cocoa" aria-label="Cerrar">
             <Icon name="x" size={16} />
           </button>
         </div>
@@ -85,7 +85,7 @@ export default function DeleteJuntaModal({ junta, onClose, onDeleted }: Props) {
             ¿Eliminar esta junta?
           </p>
           <p className="text-sm text-cocoa/50 mt-1">
-            Esta accion no se puede deshacer.
+            Esta acción no se puede deshacer.
           </p>
         </div>
 

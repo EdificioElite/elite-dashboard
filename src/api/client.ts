@@ -105,9 +105,11 @@ export async function fetchJuntas(tipo?: string): Promise<Junta[]> {
 
 export async function downloadJuntaPDF(id: number): Promise<void> {
   const token = getToken();
-  const response = await fetch(`${API_URL}/juntas/${id}`, {
-    headers: { Authorization: `Bearer ${token}` },
-  });
+  const headers: Record<string, string> = {};
+  if (token) {
+    headers['Authorization'] = `Bearer ${token}`;
+  }
+  const response = await fetch(`${API_URL}/juntas/${id}`, { headers });
   if (!response.ok) {
     const body = await response.json().catch(() => ({}));
     throw new Error(body.error || `HTTP ${response.status}`);
