@@ -105,25 +105,20 @@ jobs:
             exit 1
           fi
 
-          echo "Waiting for deployment to be ready..."
+          echo "Aliasing $PREVIEW_URL -> dev.edificioelite.com (retrying until deployment is ready)..."
+          SUCCESS=false
           for i in $(seq 1 30); do
-            STATE=$(curl -sf "https://api.vercel.com/v13/deployments/get?url=$PREVIEW_URL" \
-              -H "Authorization: Bearer $VERCEL_TOKEN" | \
-              jq -r '.state // empty')
-            if [ "$STATE" = "READY" ]; then
-              echo "Deployment is READY"
+            if vercel alias set "$PREVIEW_URL" dev.edificioelite.com \
+              --token "$VERCEL_TOKEN" \
+              --scope cp-edificio-elite-s-projects; then
+              echo "Alias created successfully"
+              SUCCESS=true
               break
             fi
-            echo "  attempt $i/30 (state: ${STATE:-unknown})..."
+            echo "  attempt $i/30..."
             sleep 10
           done
-
-          if [ "$STATE" != "READY" ]; then
-            echo "Deployment did not become ready after waiting"
+          if [ "$SUCCESS" = false ]; then
+            echo "Failed to create alias after 30 attempts"
             exit 1
           fi
-
-          echo "Aliasing $PREVIEW_URL -> dev.edificioelite.com"
-          vercel alias set "$PREVIEW_URL" dev.edificioelite.com \
-            --token "$VERCEL_TOKEN" \
-            --scope cp-edificio-elite-s-projects
