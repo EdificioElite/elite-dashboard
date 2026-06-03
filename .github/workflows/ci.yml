@@ -104,6 +104,25 @@ jobs:
             echo "No Vercel preview URL found in PR comments"
             exit 1
           fi
+
+          echo "Waiting for deployment to be ready..."
+          for i in $(seq 1 30); do
+            STATE=$(curl -sf "https://api.vercel.com/v13/deployments/get?url=$PREVIEW_URL" \
+              -H "Authorization: Bearer $VERCEL_TOKEN" | \
+              jq -r '.state // empty')
+            if [ "$STATE" = "READY" ]; then
+              echo "Deployment is READY"
+              break
+            fi
+            echo "  attempt $i/30 (state: ${STATE:-unknown})..."
+            sleep 10
+          done
+
+          if [ "$STATE" != "READY" ]; then
+            echo "Deployment did not become ready after waiting"
+            exit 1
+          fi
+
           echo "Aliasing $PREVIEW_URL -> dev.edificioelite.com"
           vercel alias set "$PREVIEW_URL" dev.edificioelite.com \
             --token "$VERCEL_TOKEN" \
