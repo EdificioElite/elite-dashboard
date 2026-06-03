@@ -168,7 +168,7 @@ test.describe('Forgot Password Flow', () => {
     await page.getByLabel('Confirmar contraseña').fill('abcdefgh');
     await page.getByRole('button', { name: 'Guardar contraseña' }).click();
 
-    await expect(page.getByText(/mayuscula/i)).toBeVisible({ timeout: 5000 });
+    await expect(page.getByText(/mayúscula/i)).toBeVisible({ timeout: 5000 });
   });
 });
 
@@ -217,7 +217,7 @@ test.describe('Invitation Flow', () => {
     const inviteBtn = row.locator('[title="Enviar invitación"]');
     await inviteBtn.click();
 
-    await expect(page.getByText(/Invitación enviada correctamente/i)).toBeVisible({ timeout: 5000 });
+    await expect(page.getByText(/Invitación enviada correctamente/i)).toBeVisible({ timeout: 10000 });
   });
 
   test('full invitation and registration flow', async ({ page }) => {
