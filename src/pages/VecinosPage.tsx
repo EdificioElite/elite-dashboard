@@ -44,7 +44,7 @@ export default function VecinosPage() {
     setInviteError(false);
     try {
       await apiFetch('/admin/invitar', { method: 'POST', body: JSON.stringify({ piso }) });
-      setInviteMessage('Invitacion enviada correctamente');
+      setInviteMessage('Invitación enviada correctamente');
     } catch (err: any) {
       setInviteMessage(err.message || 'Error al enviar invitación');
       setInviteError(true);
