@@ -142,7 +142,7 @@ test.describe('Admin', () => {
   test('shows ultima_conexion column with null for users who never logged in', async ({ page }) => {
     await page.goto('/admin/usuarios');
     await expect(page.locator('tbody')).toBeVisible();
-    await expect(page.locator('th').filter({ hasText: /Últ\.\s+conexión/ })).toBeVisible();
+    await expect(page.locator('th').filter({ hasText: /Ult\.\s+conexión/ })).toBeVisible();
 
     const vecino2Row = page.locator('tr', { hasText: 'vecino2@elite.com' });
     await expect(vecino2Row).toContainText('—');
