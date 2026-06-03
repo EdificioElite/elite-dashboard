@@ -73,3 +73,38 @@ jobs:
       - name: Tear down
         if: always()
         run: docker compose -f docker-compose.e2e.yml down -v
+
+  vercel-alias:
+    if: github.event_name == 'pull_request' && success()
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Alias preview to dev.edificioelite.com
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          npm install -g vercel
+
+          echo "Waiting for Vercel preview deployment..."
+          for i in $(seq 1 12); do
+            PREVIEW_URL=$(gh pr view ${{ github.event.pull_request.number }} \
+              --json comments --jq '.comments[] | select(.author.login=="vercel") | .body' | \
+              grep -oP 'https://[a-zA-Z0-9.-]+\.vercel\.app' | head -1)
+            if [ -n "$PREVIEW_URL" ]; then
+              echo "Found: $PREVIEW_URL"
+              break
+            fi
+            echo "  attempt $i/12..."
+            sleep 10
+          done
+
+          if [ -z "$PREVIEW_URL" ]; then
+            echo "No Vercel preview URL found in PR comments"
+            exit 1
+          fi
+          echo "Aliasing $PREVIEW_URL -> dev.edificioelite.com"
+          vercel alias set "$PREVIEW_URL" dev.edificioelite.com \
+            --token "$VERCEL_TOKEN" \
+            --scope cp-edificio-elite-s-projects

@@ -60,7 +60,7 @@ test.describe('Forgot Password Flow', () => {
 
   test('login page has forgot password link', async ({ page }) => {
     await page.goto('/login');
-    const link = page.getByRole('link', { name: /Olvidaste tu contrasena/i });
+    const link = page.getByRole('link', { name: /Olvidaste tu contraseña/i });
     await expect(link).toBeVisible();
     await expect(link).toHaveAttribute('href', '/recuperar-contrasena');
   });
@@ -73,7 +73,7 @@ test.describe('Forgot Password Flow', () => {
     await page.getByLabel('Email').fill(TEST_EMAIL);
     await page.getByRole('button', { name: 'Enviar enlace' }).click();
 
-    await expect(page.getByText(/recibiras un enlace/i)).toBeVisible({ timeout: 5000 });
+    await expect(page.getByText(/recibirás un enlace/i)).toBeVisible({ timeout: 5000 });
     await expect(page.getByRole('link', { name: 'Volver al login' })).toBeVisible();
   });
 
@@ -82,12 +82,12 @@ test.describe('Forgot Password Flow', () => {
     await page.getByLabel('Email').fill('nonexistent@example.com');
     await page.getByRole('button', { name: 'Enviar enlace' }).click();
 
-    await expect(page.getByText(/recibiras un enlace/i)).toBeVisible({ timeout: 5000 });
+    await expect(page.getByText(/recibirás un enlace/i)).toBeVisible({ timeout: 5000 });
   });
 
   test('reset password page shows error for invalid token', async ({ page }) => {
     await page.goto('/resetear-contrasena?token=invalid-token-12345');
-    await expect(page.getByText(/invalido|expirado/i)).toBeVisible({ timeout: 5000 });
+    await expect(page.getByText(/inválido|expirado/i)).toBeVisible({ timeout: 5000 });
     await expect(page.getByRole('link', { name: 'Volver al login' })).toBeVisible();
   });
 
@@ -104,14 +104,14 @@ test.describe('Forgot Password Flow', () => {
 
     // Step 3: Navigate to reset password page with token
     await page.goto(`/resetear-contrasena?token=${token}`);
-    await expect(page.getByLabel('Nueva contrasena')).toBeVisible({ timeout: 5000 });
-    await expect(page.getByLabel('Confirmar contrasena')).toBeVisible();
+    await expect(page.getByLabel('Nueva contraseña')).toBeVisible({ timeout: 5000 });
+    await expect(page.getByLabel('Confirmar contraseña')).toBeVisible();
 
     // Step 4: Set new password
     const newPassword = 'NewPass1';
-    await page.getByLabel('Nueva contrasena').fill(newPassword);
-    await page.getByLabel('Confirmar contrasena').fill(newPassword);
-    await page.getByRole('button', { name: 'Guardar contrasena' }).click();
+    await page.getByLabel('Nueva contraseña').fill(newPassword);
+    await page.getByLabel('Confirmar contraseña').fill(newPassword);
+    await page.getByRole('button', { name: 'Guardar contraseña' }).click();
 
     // Step 5: Verify success
     await expect(page.getByText(/actualizada correctamente/i)).toBeVisible({ timeout: 5000 });
@@ -147,11 +147,11 @@ test.describe('Forgot Password Flow', () => {
     expect(token).not.toBeNull();
 
     await page.goto(`/resetear-contrasena?token=${token}`);
-    await expect(page.getByLabel('Nueva contrasena')).toBeVisible({ timeout: 5000 });
+    await expect(page.getByLabel('Nueva contraseña')).toBeVisible({ timeout: 5000 });
 
-    await page.getByLabel('Nueva contrasena').fill('NewPass1');
-    await page.getByLabel('Confirmar contrasena').fill('Different1');
-    await page.getByRole('button', { name: 'Guardar contrasena' }).click();
+    await page.getByLabel('Nueva contraseña').fill('NewPass1');
+    await page.getByLabel('Confirmar contraseña').fill('Different1');
+    await page.getByRole('button', { name: 'Guardar contraseña' }).click();
 
     await expect(page.getByText(/no coinciden/i)).toBeVisible({ timeout: 5000 });
   });
@@ -162,13 +162,13 @@ test.describe('Forgot Password Flow', () => {
     expect(token).not.toBeNull();
 
     await page.goto(`/resetear-contrasena?token=${token}`);
-    await expect(page.getByLabel('Nueva contrasena')).toBeVisible({ timeout: 5000 });
+    await expect(page.getByLabel('Nueva contraseña')).toBeVisible({ timeout: 5000 });
 
-    await page.getByLabel('Nueva contrasena').fill('abcdefgh');
-    await page.getByLabel('Confirmar contrasena').fill('abcdefgh');
-    await page.getByRole('button', { name: 'Guardar contrasena' }).click();
+    await page.getByLabel('Nueva contraseña').fill('abcdefgh');
+    await page.getByLabel('Confirmar contraseña').fill('abcdefgh');
+    await page.getByRole('button', { name: 'Guardar contraseña' }).click();
 
-    await expect(page.getByText(/mayuscula/i)).toBeVisible({ timeout: 5000 });
+    await expect(page.getByText(/mayúscula/i)).toBeVisible({ timeout: 5000 });
   });
 });
 
@@ -197,7 +197,7 @@ test.describe('Invitation Flow', () => {
 
   test('registration page shows error for invalid token', async ({ page }) => {
     await page.goto('/registro?token=invalid-token-12345');
-    await expect(page.getByText(/invalido|expirado/i)).toBeVisible({ timeout: 5000 });
+    await expect(page.getByText(/inválido|expirado/i)).toBeVisible({ timeout: 5000 });
   });
 
   test('admin page shows invite button for vecino without user', async ({ page }) => {
@@ -206,7 +206,7 @@ test.describe('Invitation Flow', () => {
     const row = page.locator('tr', { hasText: INVITE_PISO });
     await expect(row).toBeVisible();
 
-    const inviteBtn = row.locator('[title="Enviar invitacion"]');
+    const inviteBtn = row.locator('[title="Enviar invitación"]');
     await expect(inviteBtn).toBeVisible();
   });
 
@@ -214,10 +214,11 @@ test.describe('Invitation Flow', () => {
     await loginAsAdmin(page);
 
     const row = page.locator('tr', { hasText: INVITE_PISO });
-    const inviteBtn = row.locator('[title="Enviar invitacion"]');
+    await expect(row).toBeVisible({ timeout: 10000 });
+    const inviteBtn = row.locator('[title="Enviar invitación"]');
     await inviteBtn.click();
 
-    await expect(page.getByText(/Invitacion enviada correctamente/i)).toBeVisible({ timeout: 5000 });
+    await expect(page.getByText(/Invitación enviada correctamente/i)).toBeVisible({ timeout: 15000 });
   });
 
   test('full invitation and registration flow', async ({ page }) => {
@@ -245,7 +246,7 @@ test.describe('Invitation Flow', () => {
 
     // Step 5: Register with password
     await page.locator('#password').fill('RegPass1');
-    await page.getByLabel('Confirmar contrasena').fill('RegPass1');
+    await page.getByLabel('Confirmar contraseña').fill('RegPass1');
     await page.getByRole('button', { name: 'Registrarse' }).click();
 
     // Step 6: Verify redirect to inicio
@@ -281,7 +282,7 @@ test.describe('Invitation Flow', () => {
     await expect(page.locator('#password')).toBeVisible({ timeout: 5000 });
 
     await page.locator('#password').fill('RegPass1');
-    await page.getByLabel('Confirmar contrasena').fill('Different1');
+    await page.getByLabel('Confirmar contraseña').fill('Different1');
     await page.getByRole('button', { name: 'Registrarse' }).click();
 
     await expect(page.getByText(/no coinciden/i)).toBeVisible({ timeout: 5000 });
@@ -294,7 +295,7 @@ test.describe('Invitation Flow', () => {
     const row = page.locator('tr', { hasText: '1A' });
     await expect(row).toBeVisible();
 
-    const inviteBtn = row.locator('[title="Enviar invitacion"]');
+    const inviteBtn = row.locator('[title="Enviar invitación"]');
     await expect(inviteBtn).not.toBeVisible();
   });
 });

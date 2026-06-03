@@ -16,15 +16,15 @@ export default function ResetPasswordPage() {
 
   useEffect(() => {
     if (!token) {
-      setTokenError('Enlace invalido');
+      setTokenError('Enlace inválido');
       setVerifying(false);
       return;
     }
     verifyToken(token)
       .then((data) => {
-        if (data.type !== 'reset') setTokenError('Enlace invalido');
+        if (data.type !== 'reset') setTokenError('Enlace inválido');
       })
-      .catch(() => setTokenError('Enlace invalido o expirado'))
+      .catch(() => setTokenError('Enlace inválido o expirado'))
       .finally(() => setVerifying(false));
   }, [token]);
 
@@ -32,7 +32,7 @@ export default function ResetPasswordPage() {
     e.preventDefault();
     setError('');
     if (password !== confirm) {
-      setError('Las contrasenas no coinciden');
+      setError('Las contraseñas no coinciden');
       return;
     }
     setLoading(true);
@@ -40,7 +40,7 @@ export default function ResetPasswordPage() {
       await resetPassword(token, password);
       setSuccess(true);
     } catch (err: any) {
-      setError(err.message || 'Error al restablecer la contrasena');
+      setError(err.message || 'Error al restablecer la contraseña');
     } finally {
       setLoading(false);
     }
@@ -77,26 +77,26 @@ export default function ResetPasswordPage() {
       <div className="relative z-10 glass p-8 w-full max-w-[400px]">
         <img src="/images/elite/Logotipo PNG.png" alt="Edificio Elite" className="h-12 w-auto mx-auto mb-6" />
         <h1 className="font-display text-[26px] font-medium text-center text-cocoa mb-7" style={{ letterSpacing: '-0.02em' }}>
-          Nueva contrasena
+          Nueva contraseña
         </h1>
         {success ? (
           <div className="text-sm text-cocoa/70 text-center">
-            <p className="mb-4">Tu contrasena ha sido actualizada correctamente.</p>
+            <p className="mb-4">Tu contraseña ha sido actualizada correctamente.</p>
             <Link to="/login" className="text-accent hover:underline text-sm">Ir al login</Link>
           </div>
         ) : (
           <form onSubmit={handleSubmit} className="space-y-4">
             {error && <div className="flex items-center gap-2 p-3 rounded-lg bg-rise/5 border border-rise/20 text-rise text-sm mb-4" role="alert"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="7" stroke="currentColor" strokeWidth="1.5"/><path d="M8 4.5V8.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/><circle cx="8" cy="11.5" r="0.75" fill="currentColor"/></svg>{error}</div>}
             <div>
-              <label htmlFor="password" className="block text-xs font-semibold uppercase tracking-wider text-cocoa/40 mb-1.5 ml-1">Nueva contrasena</label>
+              <label htmlFor="password" className="block text-xs font-semibold uppercase tracking-wider text-cocoa/40 mb-1.5 ml-1">Nueva contraseña</label>
               <input id="password" type="password" value={password} onChange={(e) => setPassword(e.target.value)} required minLength={8} className="input-card" placeholder="••••••••" autoComplete="new-password" autoFocus />
             </div>
             <div>
-              <label htmlFor="confirm" className="block text-xs font-semibold uppercase tracking-wider text-cocoa/40 mb-1.5 ml-1">Confirmar contrasena</label>
+              <label htmlFor="confirm" className="block text-xs font-semibold uppercase tracking-wider text-cocoa/40 mb-1.5 ml-1">Confirmar contraseña</label>
               <input id="confirm" type="password" value={confirm} onChange={(e) => setConfirm(e.target.value)} required minLength={8} className="input-card" placeholder="••••••••" autoComplete="new-password" />
             </div>
             <button type="submit" disabled={loading} className="btn btn-primary w-full min-h-[44px] uppercase tracking-[0.04em] mt-2">
-              {loading ? 'Guardando...' : 'Guardar contrasena'}
+              {loading ? 'Guardando...' : 'Guardar contraseña'}
             </button>
           </form>
         )}

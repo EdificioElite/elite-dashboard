@@ -33,7 +33,7 @@ export default function CopChart({ data }: { data: CopDatum[] }) {
           <span className="eyebrow">COP</span>
           <span className="text-[11px] text-cocoa/40 font-num">(coeficiente de rendimiento)</span>
         </div>
-        <p className="text-sm text-cocoa/44 py-8">Sin datos de COP. Se mostrara cuando facturaelectrica tenga kWh electricos.</p>
+        <p className="text-sm text-cocoa/44 py-8">Sin datos de COP. Se mostrará cuando facturaelectrica tenga kWh eléctricos.</p>
       </div>
     );
   }
@@ -83,7 +83,7 @@ export default function CopChart({ data }: { data: CopDatum[] }) {
       </ResponsiveContainer>
 
       <p className="text-[10px] text-cocoa/30 mt-3">
-        COP = kWh termicos totales / kWh electricos. La linea punteada marca COP = 1 (umbral de eficiencia).
+        COP = kWh térmicos totales / kWh eléctricos. La línea punteada marca COP = 1 (umbral de eficiencia).
       </p>
     </div>
   );

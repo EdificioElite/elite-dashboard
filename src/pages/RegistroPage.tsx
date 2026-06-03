@@ -19,20 +19,20 @@ export default function RegistroPage() {
 
   useEffect(() => {
     if (!token) {
-      setError('Enlace de registro invalido');
+      setError('Enlace de registro inválido');
       setVerifying(false);
       return;
     }
     verifyToken(token)
       .then((data) => {
         if (data.type !== 'invite') {
-          setError('Enlace de registro invalido');
+          setError('Enlace de registro inválido');
         } else {
           setEmail(data.email);
           setPiso(data.piso || '');
         }
       })
-      .catch(() => setError('Enlace de registro invalido o expirado'))
+      .catch(() => setError('Enlace de registro inválido o expirado'))
       .finally(() => setVerifying(false));
   }, [token]);
 
@@ -40,7 +40,7 @@ export default function RegistroPage() {
     e.preventDefault();
     setError('');
     if (password !== confirm) {
-      setError('Las contrasenas no coinciden');
+      setError('Las contraseñas no coinciden');
       return;
     }
     setLoading(true);
@@ -102,11 +102,11 @@ export default function RegistroPage() {
             <input id="piso" type="text" value={piso} readOnly className="input-card bg-cocoa/5" />
           </div>
           <div>
-            <label htmlFor="password" className="block text-xs font-semibold uppercase tracking-wider text-cocoa/40 mb-1.5 ml-1">Contrasena</label>
+            <label htmlFor="password" className="block text-xs font-semibold uppercase tracking-wider text-cocoa/40 mb-1.5 ml-1">Contraseña</label>
             <input id="password" type="password" value={password} onChange={(e) => setPassword(e.target.value)} required minLength={8} className="input-card" placeholder="••••••••" autoComplete="new-password" autoFocus />
           </div>
           <div>
-            <label htmlFor="confirm" className="block text-xs font-semibold uppercase tracking-wider text-cocoa/40 mb-1.5 ml-1">Confirmar contrasena</label>
+            <label htmlFor="confirm" className="block text-xs font-semibold uppercase tracking-wider text-cocoa/40 mb-1.5 ml-1">Confirmar contraseña</label>
             <input id="confirm" type="password" value={confirm} onChange={(e) => setConfirm(e.target.value)} required minLength={8} className="input-card" placeholder="••••••••" autoComplete="new-password" />
           </div>
           <button type="submit" disabled={loading} className="btn btn-primary w-full min-h-[44px] uppercase tracking-[0.04em] mt-2">

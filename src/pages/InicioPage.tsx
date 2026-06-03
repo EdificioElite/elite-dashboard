@@ -37,10 +37,10 @@ const POOL_CONTENT = {
 };
 
 const MEETING_CONTENT = {
-  title: 'Proxima Junta de Vecinos',
+  title: 'Próxima Junta de Vecinos',
   icon: 'calendar' as const,
   color: '#b88a5e',
-  text: 'Proximamente. Fecha y hora por determinar.',
+  text: 'Próximamente. Fecha y hora por determinar.',
 };
 
 const WIFI_CONTENT = {
@@ -48,7 +48,7 @@ const WIFI_CONTENT = {
   icon: 'wifi' as const,
   color: '#4a8c9c',
   ssid: 'Edificio Elite',
-  password: '5dUmpRu9',
+  password: '5dumpRu9XEqnba',
 };
 
 function InfoCard({ title, icon, color, children }: { title: string; icon: string; color: string; children: React.ReactNode }) {
@@ -159,7 +159,7 @@ export default function InicioPage() {
               />
             </div>
             <p className="text-cocoa/30 text-[10px] mt-3 leading-relaxed">
-              Para conectar dispositivos de uso constante (cargadores de coche electrico, etc.) contacta con la Junta Directiva en{' '}
+              Para conectar dispositivos de uso constante (cargadores de coche eléctrico, etc.) contacta con la Junta Directiva en{' '}
               <a href="mailto:cpedificioelite@gmail.com" className="text-accent hover:text-accent-dark underline">cpedificioelite@gmail.com</a>.
             </p>
           </InfoCard>

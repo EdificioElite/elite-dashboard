@@ -40,7 +40,7 @@ describe('RegistroPage', () => {
       </MemoryRouter>
     );
     await waitFor(() => {
-      expect(screen.getByText(/invalido/i)).toBeInTheDocument();
+      expect(screen.getByText(/inválido/i)).toBeInTheDocument();
     });
   });
 
@@ -64,7 +64,7 @@ describe('RegistroPage', () => {
       </MemoryRouter>
     );
     await waitFor(() => {
-      expect(screen.getByText(/invalido/i)).toBeInTheDocument();
+      expect(screen.getByText(/inválido/i)).toBeInTheDocument();
     });
   });
 
@@ -93,8 +93,8 @@ describe('RegistroPage', () => {
     });
 
     const user = userEvent.setup();
-    await user.type(screen.getByLabelText('Contrasena', { exact: true }), 'password123');
-    await user.type(screen.getByLabelText('Confirmar contrasena'), 'different123');
+    await user.type(screen.getByLabelText('Contraseña', { exact: true }), 'password123');
+    await user.type(screen.getByLabelText('Confirmar contraseña'), 'different123');
     await user.click(screen.getByRole('button', { name: /Registrarse/i }));
 
     await waitFor(() => {
@@ -114,8 +114,8 @@ describe('RegistroPage', () => {
     });
 
     const user = userEvent.setup();
-    await user.type(screen.getByLabelText('Contrasena', { exact: true }), 'password123');
-    await user.type(screen.getByLabelText('Confirmar contrasena'), 'password123');
+    await user.type(screen.getByLabelText('Contraseña', { exact: true }), 'password123');
+    await user.type(screen.getByLabelText('Confirmar contraseña'), 'password123');
     await user.click(screen.getByRole('button', { name: /Registrarse/i }));
 
     await waitFor(() => {
@@ -136,8 +136,8 @@ describe('RegistroPage', () => {
     });
 
     const user = userEvent.setup();
-    await user.type(screen.getByLabelText('Contrasena', { exact: true }), 'password123');
-    await user.type(screen.getByLabelText('Confirmar contrasena'), 'password123');
+    await user.type(screen.getByLabelText('Contraseña', { exact: true }), 'password123');
+    await user.type(screen.getByLabelText('Confirmar contraseña'), 'password123');
     await user.click(screen.getByRole('button', { name: /Registrarse/i }));
 
     await waitFor(() => {

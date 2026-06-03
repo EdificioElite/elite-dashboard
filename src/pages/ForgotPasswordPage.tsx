@@ -29,11 +29,11 @@ export default function ForgotPasswordPage() {
       <div className="relative z-10 glass p-8 w-full max-w-[400px]">
         <img src="/images/elite/Logotipo PNG.png" alt="Edificio Elite" className="h-12 w-auto mx-auto mb-6" />
         <h1 className="font-display text-[26px] font-medium text-center text-cocoa mb-7" style={{ letterSpacing: '-0.02em' }}>
-          Recuperar contrasena
+          Recuperar contraseña
         </h1>
         {sent ? (
           <div className="text-sm text-cocoa/70 text-center">
-            <p className="mb-4">Si el email existe en nuestro sistema, recibiras un enlace para restablecer tu contrasena.</p>
+            <p className="mb-4">Si el email existe en nuestro sistema, recibirás un enlace para restablecer tu contraseña.</p>
             <Link to="/login" className="text-accent hover:underline text-sm">Volver al login</Link>
           </div>
         ) : (

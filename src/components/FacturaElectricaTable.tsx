@@ -28,9 +28,9 @@ export default function FacturaElectricaTable({ data }: { data: CopDatum[] }) {
               <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" />
             </svg>
           </div>
-          <span className="eyebrow">Facturas electricas</span>
+          <span className="eyebrow">Facturas eléctricas</span>
         </div>
-        <p className="text-sm text-cocoa/44 py-8">No hay facturas electricas disponibles</p>
+        <p className="text-sm text-cocoa/44 py-8">No hay facturas eléctricas disponibles</p>
       </div>
     );
   }
@@ -43,7 +43,7 @@ export default function FacturaElectricaTable({ data }: { data: CopDatum[] }) {
             <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" />
           </svg>
         </div>
-        <span className="eyebrow">Facturas electricas</span>
+        <span className="eyebrow">Facturas eléctricas</span>
         <span className="text-[11px] text-cocoa/40 font-num">edificio</span>
       </div>
 

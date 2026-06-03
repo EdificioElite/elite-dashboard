@@ -17,9 +17,9 @@ const CONTACTS: ContactEntry[] = [
     details: [
       { label: 'Email', value: 'juanjomontalvo@martinylorente.es', href: 'mailto:juanjomontalvo@martinylorente.es', icon: 'mail' },
       { label: 'Web', value: 'www.martinylorente.es', href: 'https://www.martinylorente.es', icon: 'eye' },
-      { label: 'Telefono', value: '91 796 00 43', href: 'tel:+34917960043', icon: 'phone' },
-      { label: 'Telefono', value: '91 505 53 10', href: 'tel:+34915055310', icon: 'phone' },
-      { label: 'Telefono', value: '91 060 79 46', href: 'tel:+34910607946', icon: 'phone' },
+      { label: 'Teléfono', value: '91 796 00 43', href: 'tel:+34917960043', icon: 'phone' },
+      { label: 'Teléfono', value: '91 505 53 10', href: 'tel:+34915055310', icon: 'phone' },
+      { label: 'Teléfono', value: '91 060 79 46', href: 'tel:+34910607946', icon: 'phone' },
     ],
   },
   {
@@ -38,18 +38,18 @@ const CONTACTS: ContactEntry[] = [
     color: '#4a7a8c',
     details: [
       { label: 'Urgencias 24h', value: '+34 602 22 52 97', href: 'tel:+34602225297', icon: 'zap' },
-      { label: 'Atencion al cliente', value: '+34 917 99 26 88', href: 'tel:+34917992688', icon: 'phone' },
+      { label: 'Atención al cliente', value: '+34 917 99 26 88', href: 'tel:+34917992688', icon: 'phone' },
       { label: 'Email', value: 'clientes@ness.es', href: 'mailto:clientes@ness.es', icon: 'mail' },
     ],
   },
   {
-    title: 'Limpieza y Paqueteria',
+    title: 'Limpieza y Paquetería',
     subtitle: 'Cristina',
     icon: 'home',
     color: '#6f8a5c',
     details: [
       { label: 'Email', value: 'info@cnlimpiezas.com', href: 'mailto:info@cnlimpiezas.com', icon: 'mail' },
-      { label: 'Telefono', value: '634 466 849', href: 'tel:+34634466849', icon: 'phone' },
+      { label: 'Teléfono', value: '634 466 849', href: 'tel:+34634466849', icon: 'phone' },
     ],
   },
 ];

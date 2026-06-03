@@ -95,8 +95,8 @@ export default function ConsumoCard({ data }: { data: ConsumoActual | null }) {
                 : data.modo === 'refrigeracion' ? '#3b82f6'
                 : '#9ca3af',
             }}>
-              {data.modo === 'calefaccion' ? 'Calefaccion'
-                : data.modo === 'refrigeracion' ? 'Refrigeracion'
+              {data.modo === 'calefaccion' ? 'Calefacción'
+                : data.modo === 'refrigeracion' ? 'Refrigeración'
                 : 'Desconocido'}
             </div>
           )}
@@ -119,7 +119,7 @@ export default function ConsumoCard({ data }: { data: ConsumoActual | null }) {
             </div>
           )}
           <div className="text-[11px] text-cocoa/40 mt-1">
-            Impulsion: <span className="text-rise font-medium">{data.temp_impulsion != null ? `${Number(data.temp_impulsion).toFixed(1)}°C` : '—'}</span>
+            Impulsión: <span className="text-rise font-medium">{data.temp_impulsion != null ? `${Number(data.temp_impulsion).toFixed(1)}°C` : '—'}</span>
           </div>
           <div className="text-[11px] text-cocoa/40">
             Retorno: <span className="text-sage font-medium">{data.temp_retorno != null ? `${Number(data.temp_retorno).toFixed(1)}°C` : '—'}</span>

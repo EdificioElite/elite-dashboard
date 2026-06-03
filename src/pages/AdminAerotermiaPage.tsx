@@ -243,7 +243,7 @@ export default function AdminAerotermiaPage() {
             <span className="text-cocoa/30">→</span>
             <span className="text-cocoa/60">Aerotermia</span>
           </div>
-          <p className="eyebrow">Panel de administracion</p>
+          <p className="eyebrow">Panel de administración</p>
           <h1
             className="font-display text-[40px] font-medium text-cocoa mt-1"
             style={{ letterSpacing: '-0.02em' }}

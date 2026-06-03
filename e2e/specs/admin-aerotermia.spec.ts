@@ -12,7 +12,7 @@ test.describe('Admin Aerotermia Dashboard', () => {
   });
 
   test('shows eyebrow text', async ({ page }) => {
-    await expect(page.getByText('Panel de administracion')).toBeVisible({ timeout: 10000 });
+    await expect(page.getByText('Panel de administración')).toBeVisible({ timeout: 10000 });
   });
 
   test('shows stat cards with values', async ({ page }) => {

@@ -9,6 +9,7 @@ import consumosRoutes from './routes/consumos';
 import facturasRoutes from './routes/facturas';
 import adminRoutes from './routes/admin';
 import adminAerotermiaRoutes from './routes/adminAerotermia';
+import juntasRoutes from './routes/juntas';
 import testRoutes from './routes/test';
 
 const app = express();
@@ -38,6 +39,8 @@ app.use(promBundle({
     [/^\/api\/admin\/aerotermia\/consumos$/, '/api/admin/aerotermia/consumos'],
     [/^\/api\/admin\/aerotermia\/facturas$/, '/api/admin/aerotermia/facturas'],
     [/^\/api\/admin\/aerotermia\/cop$/, '/api/admin/aerotermia/cop'],
+    [/^\/api\/juntas\/\d+$/, '/api/juntas/:id'],
+    [/^\/api\/admin\/juntas\/\d+$/, '/api/admin/juntas/:id'],
   ],
   autoregister: false,
 }));
@@ -47,6 +50,7 @@ app.use('/api', consumosRoutes);
 app.use('/api', facturasRoutes);
 app.use('/api', adminRoutes);
 app.use('/api', adminAerotermiaRoutes);
+app.use('/api', juntasRoutes);
 if (config.mockEmail) {
   app.use('/api', testRoutes);
 }

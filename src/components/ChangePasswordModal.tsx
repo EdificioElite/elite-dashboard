@@ -31,11 +31,11 @@ export default function ChangePasswordModal({ userId, userName, onClose, onSaved
     setError('');
 
     if (password.length < 6) {
-      setError('La contrasena debe tener al menos 6 caracteres');
+      setError('La contraseña debe tener al menos 6 caracteres');
       return;
     }
     if (password !== confirm) {
-      setError('Las contrasenas no coinciden');
+      setError('Las contraseñas no coinciden');
       return;
     }
 
@@ -44,7 +44,7 @@ export default function ChangePasswordModal({ userId, userName, onClose, onSaved
       await changePassword(userId, password);
       onSaved();
     } catch (err: any) {
-      setError(err.message || 'Error al cambiar contrasena');
+      setError(err.message || 'Error al cambiar contraseña');
     } finally {
       setSaving(false);
     }
@@ -58,7 +58,7 @@ export default function ChangePasswordModal({ userId, userName, onClose, onSaved
             <div className="w-7 h-7 rounded-lg flex items-center justify-center shrink-0" style={{ background: 'var(--accent-2)' }}>
               <Icon name="key" size={14} className="text-cream" />
             </div>
-            <span className="eyebrow">Cambiar contrasena</span>
+            <span className="eyebrow">Cambiar contraseña</span>
           </div>
           <button onClick={onClose} className="btn btn-ghost p-2 text-cocoa/40 hover:text-cocoa" aria-label="Cerrar">
             <Icon name="x" size={16} />
@@ -76,7 +76,7 @@ export default function ChangePasswordModal({ userId, userName, onClose, onSaved
 
         <form onSubmit={handleSubmit} className="flex flex-col gap-4">
           <div>
-            <label className="block text-xs font-semibold uppercase tracking-wider text-cocoa/40 mb-1.5">Nueva contrasena</label>
+            <label className="block text-xs font-semibold uppercase tracking-wider text-cocoa/40 mb-1.5">Nueva contraseña</label>
             <input
               type="password"
               value={password}
@@ -84,11 +84,11 @@ export default function ChangePasswordModal({ userId, userName, onClose, onSaved
               required
               minLength={6}
               className="input-card"
-              placeholder="Minimo 6 caracteres"
+              placeholder="Mínimo 6 caracteres"
             />
           </div>
           <div>
-            <label className="block text-xs font-semibold uppercase tracking-wider text-cocoa/40 mb-1.5">Confirmar contrasena</label>
+            <label className="block text-xs font-semibold uppercase tracking-wider text-cocoa/40 mb-1.5">Confirmar contraseña</label>
             <input
               type="password"
               value={confirm}
@@ -96,7 +96,7 @@ export default function ChangePasswordModal({ userId, userName, onClose, onSaved
               required
               minLength={6}
               className="input-card"
-              placeholder="Repetir contrasena"
+              placeholder="Repetir contraseña"
             />
           </div>
           <div className="flex justify-end gap-3 mt-2">

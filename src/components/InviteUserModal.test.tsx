@@ -35,13 +35,13 @@ describe('InviteUserModal', () => {
 
   it('calls inviteUser and shows success', async () => {
     const user = userEvent.setup();
-    vi.mocked(client.inviteUser).mockResolvedValueOnce({ message: 'Invitacion enviada correctamente' });
+    vi.mocked(client.inviteUser).mockResolvedValueOnce({ message: 'Invitación enviada correctamente' });
     render(<InviteUserModal onClose={onClose} onSaved={onSaved} />);
     await user.type(screen.getByPlaceholderText('vecino@email.com'), 'test@test.com');
     await user.click(screen.getByRole('button', { name: /enviar/i }));
     expect(client.inviteUser).toHaveBeenCalledWith('test@test.com', undefined);
     await waitFor(() => {
-      expect(screen.getByText('Invitacion enviada correctamente')).toBeInTheDocument();
+      expect(screen.getByText('Invitación enviada correctamente')).toBeInTheDocument();
     });
   });
 
