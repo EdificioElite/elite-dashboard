@@ -39,8 +39,30 @@ interface CopDatum {
 }
 
 function formatPeriodo(periodo: string): string {
+  if (!periodo) return '—';
   const d = new Date(periodo);
   return d.toLocaleDateString('es-ES', { month: 'short', year: '2-digit' });
+}
+
+function SectionHeader({ id, label, icon, expanded, onToggle }: {
+  id: string;
+  label: string;
+  icon: string;
+  expanded: boolean;
+  onToggle: (key: string) => void;
+}) {
+  return (
+    <button
+      onClick={() => onToggle(id)}
+      className="flex items-center gap-3 w-full text-left py-3"
+    >
+      <div className="w-7 h-7 rounded-lg flex items-center justify-center shrink-0" style={{ background: 'var(--accent-2)' }}>
+        <Icon name={icon} size={14} className="text-cream" />
+      </div>
+      <span className="eyebrow flex-1">{label}</span>
+      <Icon name={expanded ? 'chevronUp' : 'chevronDown'} size={16} className="text-cocoa/30" />
+    </button>
+  );
 }
 
 export default function AdminAerotermiaPage() {
@@ -139,19 +161,6 @@ export default function AdminAerotermiaPage() {
     });
   }, [copData, desde, hasta]);
 
-  const SectionHeader = ({ id, label, icon }: { id: string; label: string; icon: string }) => (
-    <button
-      onClick={() => toggleSection(id)}
-      className="flex items-center gap-3 w-full text-left py-3"
-    >
-      <div className="w-7 h-7 rounded-lg flex items-center justify-center shrink-0" style={{ background: 'var(--accent-2)' }}>
-        <Icon name={icon} size={14} className="text-cream" />
-      </div>
-      <span className="eyebrow flex-1">{label}</span>
-      <Icon name={sections[id] ? 'chevronUp' : 'chevronDown'} size={16} className="text-cocoa/30" />
-    </button>
-  );
-
   if (loading) {
     return (
       <div>
@@ -207,7 +216,7 @@ export default function AdminAerotermiaPage() {
             {pisosFiltrados.length === 0 ? (
               <p className="text-sm text-cocoa/40">Sin resultados</p>
             ) : (
-              <div className="grid grid-cols-4 gap-2">
+              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2">
                 {pisosFiltrados.map((p) => (
                   <Link
                     key={p}
@@ -242,7 +251,7 @@ export default function AdminAerotermiaPage() {
           <div className="stagger flex flex-col gap-[22px]">
             {/* 4. Histórico global */}
             <div className="glass p-[26px]">
-              <SectionHeader id="historico" label="Histórico global" icon="activity" />
+              <SectionHeader id="historico" label="Histórico global" icon="activity" expanded={sections.historico} onToggle={toggleSection} />
               {sections.historico && (
                 <div className="mt-3">
                   <HistoricoCharts endpoint="/admin/aerotermia/consumos" title="Histórico — Global" desde={desde} hasta={hasta} />
@@ -252,7 +261,7 @@ export default function AdminAerotermiaPage() {
 
             {/* 5. Facturas — Tabla pivote */}
             <div className="glass p-[26px]">
-              <SectionHeader id="facturas" label="Facturas" icon="dollar" />
+              <SectionHeader id="facturas" label="Facturas" icon="dollar" expanded={sections.facturas} onToggle={toggleSection} />
               {sections.facturas && (
                 <div className="mt-3 overflow-x-auto">
                   {periodosUnicos.length === 0 ? (
@@ -261,7 +270,7 @@ export default function AdminAerotermiaPage() {
                     <table className="w-full text-xs border-collapse">
                       <thead>
                         <tr>
-                          <th className="text-left py-2 px-3 font-medium uppercase tracking-wider text-cocoa/40 sticky left-0 bg-[rgba(255,251,245,0.95)] z-10" style={{ minWidth: '60px' }}>Piso</th>
+                          <th className="text-left py-2 px-3 font-medium uppercase tracking-wider text-cocoa/40 sticky left-0 z-10" style={{ minWidth: '60px', background: 'rgba(255,251,245,0.95)' }}>Piso</th>
                           {periodosUnicos.map((p) => (
                             <th key={p} className="text-right py-2 px-3 font-medium uppercase tracking-wider text-cocoa/40" style={{ minWidth: '70px' }}>
                               {formatPeriodo(p)}
@@ -272,11 +281,11 @@ export default function AdminAerotermiaPage() {
                       <tbody>
                         {pisosUnicos.map((piso) => (
                           <tr key={piso} className="border-t border-cocoa/5">
-                            <td className="py-2 px-3 font-semibold text-cocoa sticky left-0 bg-[rgba(255,251,245,0.95)]">{piso}</td>
+                            <td className="py-2 px-3 font-semibold text-cocoa sticky left-0" style={{ background: 'rgba(255,251,245,0.95)' }}>{piso}</td>
                             {periodosUnicos.map((periodo) => {
                               const importe = facturasPivote.get(piso)?.[periodo];
                               return (
-                                <td key={periodo} className="py-2 px-3 text-right font-mono tabular-nums text-cocoa/70">
+                                <td key={periodo} className="py-2 px-3 text-right font-mono font-num text-cocoa/70">
                                   {importe != null ? `${importe.toLocaleString('es-ES', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} €` : '—'}
                                 </td>
                               );
@@ -292,7 +301,7 @@ export default function AdminAerotermiaPage() {
 
             {/* 6. COP y factura electrica */}
             <div className="glass p-[26px]">
-              <SectionHeader id="cop" label="COP y factura electrica" icon="zap" />
+              <SectionHeader id="cop" label="COP y factura electrica" icon="zap" expanded={sections.cop} onToggle={toggleSection} />
               {sections.cop && (
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-[16px] mt-3">
                   <CopChart data={filteredCopData} />
@@ -303,7 +312,7 @@ export default function AdminAerotermiaPage() {
 
             {/* 7. Heatmap */}
             <div className="glass p-[26px]">
-              <SectionHeader id="heatmap" label="Heatmap de consumo" icon="flame" />
+              <SectionHeader id="heatmap" label="Heatmap de consumo" icon="flame" expanded={sections.heatmap} onToggle={toggleSection} />
               {sections.heatmap && (
                 <div className="mt-3">
                   <HeatmapChart data={heatmapData} />
