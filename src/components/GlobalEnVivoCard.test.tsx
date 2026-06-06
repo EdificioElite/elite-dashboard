@@ -38,7 +38,6 @@ describe('GlobalEnVivoCard', () => {
       temp_retorno_max: 38.6,
       temp_retorno_min: 28.3,
       modo: 'calefaccion',
-      power_w_total: 2850,
     });
     render(<GlobalEnVivoCard />);
     await waitFor(() => {
@@ -58,7 +57,7 @@ describe('GlobalEnVivoCard', () => {
       kwh_calor_mes_inicio: 0, kwh_frio_mes_inicio: 0, m3_acs_mes_inicio: 0,
       temp_impulsion_avg: 15.0, temp_impulsion_max: 18, temp_impulsion_min: 12,
       temp_retorno_avg: 10, temp_retorno_max: 12, temp_retorno_min: 8,
-      modo: 'refrigeracion', power_w_total: 500,
+      modo: 'refrigeracion',
     });
     render(<GlobalEnVivoCard />);
     await waitFor(() => {

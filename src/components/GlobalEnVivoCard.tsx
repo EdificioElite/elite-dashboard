@@ -10,24 +10,16 @@ interface GlobalEnVivo {
   kwh_calor_mes_inicio: number;
   kwh_frio_mes_inicio: number;
   m3_acs_mes_inicio: number;
-  temp_impulsion_avg: number;
-  temp_impulsion_max: number;
-  temp_impulsion_min: number;
-  temp_retorno_avg: number;
-  temp_retorno_max: number;
-  temp_retorno_min: number;
+  temp_impulsion_avg: number | null;
+  temp_impulsion_max: number | null;
+  temp_impulsion_min: number | null;
+  temp_retorno_avg: number | null;
+  temp_retorno_max: number | null;
+  temp_retorno_min: number | null;
   modo: 'calefaccion' | 'refrigeracion' | 'desconocido';
-  power_w_total: number;
 }
 
-function fmtNum(value: number, decimals: number): string {
-  return value.toLocaleString('es-ES', {
-    minimumFractionDigits: decimals,
-    maximumFractionDigits: decimals,
-  });
-}
-
-function modoBadge(modo: string) {
+function modoBadge(modo: GlobalEnVivo['modo']) {
   switch (modo) {
     case 'calefaccion':
       return <span className="inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[11px] font-semibold" style={{ background: '#fef2f2', color: '#B53228' }}><span className="w-2 h-2 rounded-full shrink-0" style={{ background: '#B53228' }} />Calefacción</span>;
@@ -59,7 +51,7 @@ export default function GlobalEnVivoCard() {
 
   if (!data) {
     return (
-      <div className="glass p-[26px]" aria-label="Aerotermia global en vivo">
+      <div className="glass glass-hover p-[26px]" aria-label="Aerotermia global en vivo">
         <div className="flex items-center gap-3">
           <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ background: 'var(--accent)' }}>
             <Icon name="zap" size={15} className="text-cream" />
@@ -75,7 +67,7 @@ export default function GlobalEnVivoCard() {
   }
 
   return (
-    <div className="glass p-[26px]" aria-label="Aerotermia global en vivo">
+    <div className="glass glass-hover p-[26px]" aria-label="Aerotermia global en vivo">
       <div className="flex items-center justify-between mb-4 flex-wrap gap-2">
         <div className="flex items-center gap-3">
           <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ background: 'var(--accent)' }}>
@@ -87,7 +79,7 @@ export default function GlobalEnVivoCard() {
           </div>
         </div>
         <span className="text-[11px] text-cocoa/30 font-mono">
-          {new Date(data.timestamp).toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit', second: '2-digit' })}
+          {new Date(data.timestamp).toLocaleString('es-ES', { timeZone: 'Europe/Madrid', hour: '2-digit', minute: '2-digit', second: '2-digit' })}
         </span>
       </div>
 
@@ -95,13 +87,13 @@ export default function GlobalEnVivoCard() {
         {/* Calefacción */}
         <div className="text-center">
           <p className="text-[10px] uppercase tracking-wider text-cocoa/40 font-medium mb-1">Calefacción</p>
-          <p className="text-[22px] font-bold font-num leading-none" style={{ color: 'var(--calor)' }}>
-            {fmtNum(data.kwh_calor_abs, 1)}
+          <p className="font-display text-[28px] font-medium leading-none" style={{ letterSpacing: '-0.02em', color: 'var(--calor)' }}>
+            {data.kwh_calor_abs.toLocaleString('es-ES', { maximumFractionDigits: 1, minimumFractionDigits: 1 })}
           </p>
-          <p className="text-[10px] text-cocoa/40 mt-0.5">kWh</p>
+          <p className="text-[11px] text-cocoa/40 font-mono font-num mt-0.5">kWh</p>
           {data.kwh_calor_mes_inicio > 0 && (
             <p className="text-[10px] mt-1" style={{ color: 'var(--sage)' }}>
-              +{fmtNum(data.kwh_calor_mes_inicio, 1)} desde inicio mes
+              +{data.kwh_calor_mes_inicio.toLocaleString('es-ES', { maximumFractionDigits: 1, minimumFractionDigits: 1 })} desde inicio mes
             </p>
           )}
         </div>
@@ -109,13 +101,13 @@ export default function GlobalEnVivoCard() {
         {/* Refrigeración */}
         <div className="text-center">
           <p className="text-[10px] uppercase tracking-wider text-cocoa/40 font-medium mb-1">Refrigeración</p>
-          <p className="text-[22px] font-bold font-num leading-none" style={{ color: 'var(--frio)' }}>
-            {fmtNum(data.kwh_frio_abs, 1)}
+          <p className="font-display text-[28px] font-medium leading-none" style={{ letterSpacing: '-0.02em', color: 'var(--frio)' }}>
+            {data.kwh_frio_abs.toLocaleString('es-ES', { maximumFractionDigits: 1, minimumFractionDigits: 1 })}
           </p>
-          <p className="text-[10px] text-cocoa/40 mt-0.5">kWh</p>
+          <p className="text-[11px] text-cocoa/40 font-mono font-num mt-0.5">kWh</p>
           {data.kwh_frio_mes_inicio > 0 && (
             <p className="text-[10px] mt-1" style={{ color: 'var(--sage)' }}>
-              +{fmtNum(data.kwh_frio_mes_inicio, 1)} desde inicio mes
+              +{data.kwh_frio_mes_inicio.toLocaleString('es-ES', { maximumFractionDigits: 1, minimumFractionDigits: 1 })} desde inicio mes
             </p>
           )}
         </div>
@@ -123,13 +115,13 @@ export default function GlobalEnVivoCard() {
         {/* ACS */}
         <div className="text-center">
           <p className="text-[10px] uppercase tracking-wider text-cocoa/40 font-medium mb-1">ACS</p>
-          <p className="text-[22px] font-bold font-num leading-none" style={{ color: 'var(--sage)' }}>
-            {fmtNum(data.m3_acs_abs, 1)}
+          <p className="font-display text-[28px] font-medium leading-none" style={{ letterSpacing: '-0.02em', color: 'var(--sage)' }}>
+            {data.m3_acs_abs.toLocaleString('es-ES', { maximumFractionDigits: 1, minimumFractionDigits: 1 })}
           </p>
-          <p className="text-[10px] text-cocoa/40 mt-0.5">m³</p>
+          <p className="text-[11px] text-cocoa/40 font-mono font-num mt-0.5">m³</p>
           {data.m3_acs_mes_inicio > 0 && (
             <p className="text-[10px] mt-1" style={{ color: 'var(--sage)' }}>
-              +{fmtNum(data.m3_acs_mes_inicio, 1)} desde inicio mes
+              +{data.m3_acs_mes_inicio.toLocaleString('es-ES', { maximumFractionDigits: 1, minimumFractionDigits: 1 })} desde inicio mes
             </p>
           )}
         </div>
