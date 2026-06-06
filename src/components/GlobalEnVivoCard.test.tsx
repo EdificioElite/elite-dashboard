@@ -68,18 +68,18 @@ describe('GlobalEnVivoCard', () => {
 
   it('hace polling cada 30s', async () => {
     let capturedCallback: (() => void) | null = null;
-    const origSetInterval = global.setInterval.bind(global);
+    const origSetInterval = window.setInterval.bind(window);
 
-    const setIntervalSpy = vi.spyOn(global, 'setInterval').mockImplementation(
-      (fn: (...args: unknown[]) => void, ms?: number, ...args: unknown[]) => {
+    const setIntervalSpy = (vi.spyOn(window, 'setInterval') as any).mockImplementation(
+      (fn: TimerHandler, ms?: number, ...args: unknown[]) => {
         if (ms === 30000) {
           capturedCallback = fn as () => void;
-          return 1 as unknown as ReturnType<typeof setInterval>;
+          return 1;
         }
-        return origSetInterval(fn as TimerHandler, ms, ...args);
+        return origSetInterval(fn, ms, ...args);
       }
     );
-    const clearIntervalSpy = vi.spyOn(global, 'clearInterval');
+    const clearIntervalSpy = vi.spyOn(window, 'clearInterval');
 
     mockApiFetch.mockResolvedValue(null);
     const { unmount } = render(<GlobalEnVivoCard />);
