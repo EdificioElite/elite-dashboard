@@ -1,81 +1,47 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, vi } from 'vitest';
 import { render, screen, waitFor } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
 import { MemoryRouter } from 'react-router-dom';
 import AdminAerotermiaPage from '../pages/AdminAerotermiaPage';
 
 vi.mock('../api/client', () => ({
-  apiFetch: vi.fn(),
+  apiFetch: vi.fn((url: string) => {
+    if (url === '/admin/aerotermia/facturas') return Promise.resolve([]);
+    if (url === '/admin/aerotermia/cop') return Promise.resolve([]);
+    if (url.includes('/admin/aerotermia/consumos')) return Promise.resolve([]);
+    if (url === '/admin/aerotermia/en-vivo') return Promise.resolve(null);
+    return Promise.resolve([]);
+  }),
 }));
-
-vi.mock('../store/auth', () => ({
-  useAuthStore: vi.fn(() => ({
-    user: { id: 1, email: 'admin@test.com', vecino_piso: null, is_admin: true },
-    loading: false,
-  })),
-}));
-
-import { apiFetch } from '../api/client';
-const mockApiFetch = apiFetch as ReturnType<typeof vi.fn>;
-
-function renderPage() {
-  return render(
-    <MemoryRouter>
-      <AdminAerotermiaPage />
-    </MemoryRouter>
-  );
-}
 
 describe('AdminAerotermiaPage', () => {
-  beforeEach(() => {
-    vi.resetAllMocks();
-  });
-
-  it('renders header title', async () => {
-    mockApiFetch.mockResolvedValue([]);
-    renderPage();
+  it('renderiza la card Global en Vivo', async () => {
+    render(<MemoryRouter><AdminAerotermiaPage /></MemoryRouter>);
     await waitFor(() => {
-      expect(screen.getByText('Aerotermia Admin')).toBeInTheDocument();
+      expect(screen.getByText('Aerotermia Global en Vivo')).toBeInTheDocument();
     });
   });
 
-  it('renders eyebrow', async () => {
-    mockApiFetch.mockResolvedValue([]);
-    renderPage();
+  it('renderiza el buscador de vecinos', async () => {
+    render(<MemoryRouter><AdminAerotermiaPage /></MemoryRouter>);
     await waitFor(() => {
-      expect(screen.getByText('Panel de administración')).toBeInTheDocument();
+      expect(screen.getByPlaceholderText('Buscar piso...')).toBeInTheDocument();
     });
   });
 
-  it('fetches facturas on mount', async () => {
-    mockApiFetch.mockResolvedValue([]);
-    renderPage();
+  it('renderiza las secciones principales', async () => {
+    render(<MemoryRouter><AdminAerotermiaPage /></MemoryRouter>);
     await waitFor(() => {
-      expect(mockApiFetch).toHaveBeenCalledWith('/admin/aerotermia/facturas');
+      expect(screen.getByText('Histórico global')).toBeInTheDocument();
+      expect(screen.getByText('Facturas')).toBeInTheDocument();
     });
   });
 
-  it('shows sections when data is loaded', async () => {
-    mockApiFetch.mockResolvedValue([]);
-    renderPage();
+  it('no renderiza los KPI antiguos', async () => {
+    render(<MemoryRouter><AdminAerotermiaPage /></MemoryRouter>);
     await waitFor(() => {
-      expect(screen.getByText('Distribución por vecino')).toBeInTheDocument();
-      expect(screen.getByText('Consumo por vecino')).toBeInTheDocument();
-      expect(screen.getByText('Histórico — Global')).toBeInTheDocument();
-      expect(screen.getAllByText('No hay facturas disponibles').length).toBeGreaterThan(0);
-      expect(screen.getByText('No hay facturas eléctricas disponibles')).toBeInTheDocument();
-    });
-  });
-
-  it('shows heatmap section when toggled open', async () => {
-    mockApiFetch.mockResolvedValue([]);
-    renderPage();
-    await waitFor(() => {
-      expect(screen.getByText('Heatmap de consumo')).toBeInTheDocument();
-    });
-    await userEvent.click(screen.getByText('Heatmap de consumo'));
-    await waitFor(() => {
-      expect(screen.getByText('Heatmap mensual')).toBeInTheDocument();
+      expect(screen.queryByText('Total kWh calor')).not.toBeInTheDocument();
+      expect(screen.queryByText('Total facturado')).not.toBeInTheDocument();
+      expect(screen.queryByText('Distribución por piso')).not.toBeInTheDocument();
     });
   });
 });
