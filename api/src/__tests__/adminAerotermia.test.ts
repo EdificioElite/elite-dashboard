@@ -126,6 +126,58 @@ describe('Admin Aerotermia routes', () => {
     });
   });
 
+  describe('GET /api/admin/aerotermia/en-vivo', () => {
+    it('devuelve null cuando no hay contadores', async () => {
+      mockQuery.mockResolvedValueOnce({ rows: [] });
+      const app = createApp();
+      const res = await request(app)
+        .get('/api/admin/aerotermia/en-vivo')
+        .set('Authorization', `Bearer ${adminToken()}`);
+      expect(res.status).toBe(200);
+      expect(res.body).toBeNull();
+    });
+
+    it('devuelve datos agregados cuando hay contadores', async () => {
+      mockQuery.mockResolvedValueOnce({
+        rows: [{
+          timestamp: '2026-06-06T12:00:00Z',
+          kwh_calor_abs: 180,
+          kwh_frio_abs: 90,
+          m3_acs_abs: 18.7,
+          kwh_calor_mes_inicio: 50,
+          kwh_frio_mes_inicio: 20,
+          m3_acs_mes_inicio: 5.2,
+          temp_impulsion_avg: 40,
+          temp_impulsion_max: 42,
+          temp_impulsion_min: 38,
+          temp_retorno_avg: 30,
+          temp_retorno_max: 32,
+          temp_retorno_min: 28,
+          power_w_total: 300,
+        }],
+      });
+      const app = createApp();
+      const res = await request(app)
+        .get('/api/admin/aerotermia/en-vivo')
+        .set('Authorization', `Bearer ${adminToken()}`);
+      expect(res.status).toBe(200);
+      expect(res.body).not.toBeNull();
+      expect(res.body.kwh_calor_abs).toBe(180);
+      expect(res.body.kwh_frio_abs).toBe(90);
+      expect(res.body.m3_acs_abs).toBe(18.7);
+      expect(res.body.modo).toBe('calefaccion');
+      expect(res.body.temp_impulsion_avg).toBe(40);
+    });
+
+    it('requiere autenticacion admin', async () => {
+      const app = createApp();
+      const res = await request(app)
+        .get('/api/admin/aerotermia/en-vivo')
+        .set('Authorization', `Bearer ${userToken()}`);
+      expect(res.status).toBe(403);
+    });
+  });
+
   describe('GET /api/admin/aerotermia/facturas/:id_factura', () => {
     it('rejects non-admin users with 403', async () => {
       const app = createApp();
