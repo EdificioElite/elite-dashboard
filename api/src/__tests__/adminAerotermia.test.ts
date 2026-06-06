@@ -127,7 +127,7 @@ describe('Admin Aerotermia routes', () => {
   });
 
   describe('GET /api/admin/aerotermia/en-vivo', () => {
-    it('devuelve null cuando no hay contadores', async () => {
+    it('returns null when no contadores exist', async () => {
       mockQuery.mockResolvedValueOnce({ rows: [] });
       const app = createApp();
       const res = await request(app)
@@ -137,7 +137,34 @@ describe('Admin Aerotermia routes', () => {
       expect(res.body).toBeNull();
     });
 
-    it('devuelve datos agregados cuando hay contadores', async () => {
+    it('returns null when kwh_calor_abs is null', async () => {
+      mockQuery.mockResolvedValueOnce({
+        rows: [{
+          timestamp: '2026-06-06T12:00:00Z',
+          kwh_calor_abs: null,
+          kwh_frio_abs: 90,
+          m3_acs_abs: 18.7,
+          kwh_calor_mes_inicio: 50,
+          kwh_frio_mes_inicio: 20,
+          m3_acs_mes_inicio: 5.2,
+          temp_impulsion_avg: 40,
+          temp_impulsion_max: 42,
+          temp_impulsion_min: 38,
+          temp_retorno_avg: 30,
+          temp_retorno_max: 32,
+          temp_retorno_min: 28,
+          power_w_total: 300,
+        }],
+      });
+      const app = createApp();
+      const res = await request(app)
+        .get('/api/admin/aerotermia/en-vivo')
+        .set('Authorization', `Bearer ${adminToken()}`);
+      expect(res.status).toBe(200);
+      expect(res.body).toBeNull();
+    });
+
+    it('returns aggregated data with calefaccion mode', async () => {
       mockQuery.mockResolvedValueOnce({
         rows: [{
           timestamp: '2026-06-06T12:00:00Z',
@@ -169,7 +196,63 @@ describe('Admin Aerotermia routes', () => {
       expect(res.body.temp_impulsion_avg).toBe(40);
     });
 
-    it('requiere autenticacion admin', async () => {
+    it('returns aggregated data with refrigeracion mode', async () => {
+      mockQuery.mockResolvedValueOnce({
+        rows: [{
+          timestamp: '2026-06-06T12:00:00Z',
+          kwh_calor_abs: 50,
+          kwh_frio_abs: 120,
+          m3_acs_abs: 12.3,
+          kwh_calor_mes_inicio: 10,
+          kwh_frio_mes_inicio: 30,
+          m3_acs_mes_inicio: 3.1,
+          temp_impulsion_avg: 15,
+          temp_impulsion_max: 16,
+          temp_impulsion_min: 14,
+          temp_retorno_avg: 20,
+          temp_retorno_max: 22,
+          temp_retorno_min: 18,
+          power_w_total: -500,
+        }],
+      });
+      const app = createApp();
+      const res = await request(app)
+        .get('/api/admin/aerotermia/en-vivo')
+        .set('Authorization', `Bearer ${adminToken()}`);
+      expect(res.status).toBe(200);
+      expect(res.body.modo).toBe('refrigeracion');
+      expect(res.body.temp_impulsion_avg).toBe(15);
+    });
+
+    it('returns aggregated data with desconocido mode', async () => {
+      mockQuery.mockResolvedValueOnce({
+        rows: [{
+          timestamp: '2026-06-06T12:00:00Z',
+          kwh_calor_abs: 50,
+          kwh_frio_abs: 40,
+          m3_acs_abs: 10.5,
+          kwh_calor_mes_inicio: 15,
+          kwh_frio_mes_inicio: 10,
+          m3_acs_mes_inicio: 2.8,
+          temp_impulsion_avg: 25,
+          temp_impulsion_max: 26,
+          temp_impulsion_min: 24,
+          temp_retorno_avg: 23,
+          temp_retorno_max: 24,
+          temp_retorno_min: 22,
+          power_w_total: 100,
+        }],
+      });
+      const app = createApp();
+      const res = await request(app)
+        .get('/api/admin/aerotermia/en-vivo')
+        .set('Authorization', `Bearer ${adminToken()}`);
+      expect(res.status).toBe(200);
+      expect(res.body.modo).toBe('desconocido');
+      expect(res.body.temp_impulsion_avg).toBe(25);
+    });
+
+    it('rejects non-admin users with 403', async () => {
       const app = createApp();
       const res = await request(app)
         .get('/api/admin/aerotermia/en-vivo')
