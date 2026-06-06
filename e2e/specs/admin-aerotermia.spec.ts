@@ -17,11 +17,11 @@ test.describe('Admin Aerotermia Dashboard', () => {
 
   test('shows global live card with data', async ({ page }) => {
     await expect(page.getByText('Aerotermia Global en Vivo')).toBeVisible({ timeout: 15000 });
-    await expect(page.getByText('Calefacción')).toBeVisible();
-    await expect(page.getByText('Refrigeración')).toBeVisible();
-    await expect(page.getByText('ACS')).toBeVisible();
-    await expect(page.getByText('Climatización')).toBeVisible();
-    await expect(page.getByText('Temperaturas')).toBeVisible();
+    await expect(page.getByText('Calefacción').first()).toBeVisible();
+    await expect(page.getByText('Refrigeración').first()).toBeVisible();
+    await expect(page.getByText('ACS').first()).toBeVisible();
+    await expect(page.getByText('Climatización').first()).toBeVisible();
+    await expect(page.getByText('Temperaturas').first()).toBeVisible();
   });
 
   test('shows date range presets and custom button', async ({ page }) => {
