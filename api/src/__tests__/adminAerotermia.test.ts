@@ -30,11 +30,11 @@ function createApp() {
 }
 
 function adminToken() {
-  return signToken({ userId: 1, vecinoPiso: '1A', email: 'admin@test.com', isAdmin: true });
+  return signToken({ userId: 1, vecinoPiso: '1A', email: 'admin@test.com', role: 'admin' });
 }
 
 function userToken() {
-  return signToken({ userId: 2, vecinoPiso: '2A', email: 'user@test.com', isAdmin: false });
+  return signToken({ userId: 2, vecinoPiso: '2A', email: 'user@test.com', role: 'usuario' });
 }
 
 describe('Admin Aerotermia routes', () => {
