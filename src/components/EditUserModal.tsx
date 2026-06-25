@@ -1,13 +1,14 @@
 import { useState, useEffect, FormEvent } from 'react';
 import Icon from './Icon';
 import { updateUser } from '../api/client';
+import type { Role } from '../lib/roles';
 
 interface Vecino {
   piso: string;
   nombre: string;
   user_id: number | null;
   email: string | null;
-  is_admin: boolean;
+  role: Role;
 }
 
 interface Props {
@@ -21,7 +22,7 @@ interface Props {
 export default function EditUserModal({ vecino, vecinos, currentUserId, onClose, onSaved }: Props) {
   const [email, setEmail] = useState(vecino.email || '');
   const [piso, setPiso] = useState(vecino.piso);
-  const [isAdmin, setIsAdmin] = useState(vecino.is_admin);
+  const [role, setRole] = useState<Role>(vecino.role);
   const [error, setError] = useState('');
   const [saving, setSaving] = useState(false);
 
@@ -46,7 +47,7 @@ export default function EditUserModal({ vecino, vecinos, currentUserId, onClose,
       await updateUser(vecino.user_id!, {
         email: email || undefined,
         vecino_piso: piso || null,
-        is_admin: isOwnUser ? undefined : isAdmin,
+        role: isOwnUser ? undefined : role,
       });
       onSaved();
     } catch (err: any) {
@@ -108,17 +109,17 @@ export default function EditUserModal({ vecino, vecinos, currentUserId, onClose,
             </select>
           </div>
           {!isOwnUser && (
-            <div className="flex items-center gap-3">
-              <input
-                type="checkbox"
-                id="isAdminEdit"
-                checked={isAdmin}
-                onChange={(e) => setIsAdmin(e.target.checked)}
-                className="w-4 h-4 rounded accent-[var(--accent)]"
-              />
-              <label htmlFor="isAdminEdit" className="text-sm text-cocoa/70 cursor-pointer select-none">
-                Es administrador
-              </label>
+            <div>
+              <label className="block text-xs font-semibold uppercase tracking-wider text-cocoa/40 mb-1.5">Rol</label>
+              <select
+                value={role}
+                onChange={(e) => setRole(e.target.value as Role)}
+                className="input-card"
+              >
+                <option value="usuario">Usuario</option>
+                <option value="directiva">Directiva</option>
+                <option value="admin">Admin</option>
+              </select>
             </div>
           )}
           <div className="flex justify-end gap-3 mt-2">
