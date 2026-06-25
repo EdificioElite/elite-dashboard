@@ -2,6 +2,7 @@ import { useEffect, useState, useMemo } from 'react';
 import { useSearchParams, Link } from 'react-router-dom';
 import { useAuthStore } from '../store/auth';
 import { apiFetch } from '../api/client';
+import { canViewAdmin } from '../lib/roles';
 import { greeting } from '../lib/format';
 
 import ConsumoCard from '../components/ConsumoCard';
@@ -49,7 +50,7 @@ export default function DashboardPage() {
   const [loading, setLoading] = useState(true);
 
   const pisoParam = searchParams.get('piso');
-  const viewingAs = user?.is_admin && pisoParam ? pisoParam : null;
+  const viewingAs = user && canViewAdmin(user.role) && pisoParam ? pisoParam : null;
 
   const [preset, setPreset] = useState<Preset | null>('30d');
   const [desdeInput, setDesdeInput] = useState(() => toDatetimeLocal(applyPreset('30d').desde));
