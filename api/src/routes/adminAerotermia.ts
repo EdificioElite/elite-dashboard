@@ -1,7 +1,7 @@
 import { Router, Request, Response } from 'express';
 import { query } from '../db';
 import { authMiddleware } from '../middleware/auth';
-import { adminMiddleware } from '../middleware/admin';
+import { requireRole } from '../middleware/roles';
 import { logger } from '../lib/logger';
 
 const MODO_CALEFACCION_UMBRAL = 29;
@@ -9,7 +9,7 @@ const MODO_REFRIGERACION_UMBRAL = 21;
 
 const router = Router();
 
-router.get('/admin/aerotermia/consumos', authMiddleware, adminMiddleware, async (req: Request, res: Response) => {
+router.get('/admin/aerotermia/consumos', authMiddleware, requireRole('directiva', 'admin'), async (req: Request, res: Response) => {
   try {
     const { desde, hasta } = req.query;
 
@@ -98,7 +98,7 @@ router.get('/admin/aerotermia/consumos', authMiddleware, adminMiddleware, async 
   }
 });
 
-router.get('/admin/aerotermia/facturas', authMiddleware, adminMiddleware, async (_req: Request, res: Response) => {
+router.get('/admin/aerotermia/facturas', authMiddleware, requireRole('directiva', 'admin'), async (_req: Request, res: Response) => {
   try {
     const result = await query(`
       SELECT
@@ -127,7 +127,7 @@ router.get('/admin/aerotermia/facturas', authMiddleware, adminMiddleware, async 
   }
 });
 
-router.get('/admin/aerotermia/facturas/:id_factura', authMiddleware, adminMiddleware, async (req: Request, res: Response) => {
+router.get('/admin/aerotermia/facturas/:id_factura', authMiddleware, requireRole('directiva', 'admin'), async (req: Request, res: Response) => {
   try {
     const { id_factura } = req.params;
 
@@ -158,7 +158,7 @@ router.get('/admin/aerotermia/facturas/:id_factura', authMiddleware, adminMiddle
   }
 });
 
-router.get('/admin/aerotermia/cop', authMiddleware, adminMiddleware, async (_req: Request, res: Response) => {
+router.get('/admin/aerotermia/cop', authMiddleware, requireRole('directiva', 'admin'), async (_req: Request, res: Response) => {
   try {
     const result = await query(`
       SELECT
@@ -184,7 +184,7 @@ router.get('/admin/aerotermia/cop', authMiddleware, adminMiddleware, async (_req
   }
 });
 
-router.get('/admin/aerotermia/en-vivo', authMiddleware, adminMiddleware, async (_req: Request, res: Response) => {
+router.get('/admin/aerotermia/en-vivo', authMiddleware, requireRole('directiva', 'admin'), async (_req: Request, res: Response) => {
   try {
     const sql = `
       WITH latest AS (
