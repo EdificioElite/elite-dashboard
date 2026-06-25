@@ -5,7 +5,7 @@ import Sidebar from '../components/Sidebar';
 
 vi.mock('../store/auth', () => ({
   useAuthStore: vi.fn((selector?: any) => {
-    const state = { user: { is_admin: true }, token: 'test-token', loading: false };
+    const state = { user: { role: 'admin' }, token: 'test-token', loading: false };
     return selector ? selector(state) : state;
   }),
 }));

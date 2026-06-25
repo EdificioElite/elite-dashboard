@@ -22,7 +22,7 @@ describe('auth store', () => {
     const mockFetch = apiFetch as ReturnType<typeof vi.fn>;
     mockFetch.mockResolvedValueOnce({
       token: 'test-token',
-      user: { id: 1, vecino_id: 10, email: 'test@test.com', is_admin: false },
+      user: { id: 1, vecino_id: 10, email: 'test@test.com', role: 'usuario' },
     });
 
     await useAuthStore.getState().login('test@test.com', 'password123');
@@ -36,7 +36,7 @@ describe('auth store', () => {
     const mockFetch = apiFetch as ReturnType<typeof vi.fn>;
     mockFetch.mockResolvedValueOnce({
       token: 'test-token',
-      user: { id: 1, vecino_id: 10, email: 'test@test.com', is_admin: false },
+      user: { id: 1, vecino_id: 10, email: 'test@test.com', role: 'usuario' },
     });
     await useAuthStore.getState().login('test@test.com', 'password');
 
@@ -50,7 +50,7 @@ describe('auth store', () => {
   it('checkAuth validates existing token', async () => {
     localStorage.setItem('token', 'existing-token');
     const mockFetch = apiFetch as ReturnType<typeof vi.fn>;
-    mockFetch.mockResolvedValueOnce({ id: 1, vecino_id: 10, email: 'test@test.com', is_admin: false });
+    mockFetch.mockResolvedValueOnce({ id: 1, vecino_id: 10, email: 'test@test.com', role: 'usuario' });
 
     await useAuthStore.getState().checkAuth();
 

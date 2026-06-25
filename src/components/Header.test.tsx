@@ -21,7 +21,7 @@ function renderHeader(initialRoute = '/inicio') {
 describe('Header', () => {
   beforeEach(() => {
     mockStore.mockReturnValue({
-      user: { vecino_piso: '1A', email: 'vecino@test.com', is_admin: false },
+      user: { vecino_piso: '1A', email: 'vecino@test.com', role: 'usuario' },
       logout: vi.fn(),
     });
   });
@@ -67,7 +67,7 @@ describe('Header', () => {
 
   it('does not show admin nav in header when user is admin', () => {
     mockStore.mockReturnValue({
-      user: { vecino_piso: '1A', email: 'admin@test.com', is_admin: true },
+      user: { vecino_piso: '1A', email: 'admin@test.com', role: 'admin' },
       logout: vi.fn(),
     });
     renderHeader();

@@ -5,7 +5,7 @@ import InicioPage from '../pages/InicioPage';
 
 vi.mock('../store/auth', () => ({
   useAuthStore: vi.fn(() => ({
-    user: { vecino_piso: '1A', email: 'vecino@test.com', is_admin: false },
+    user: { vecino_piso: '1A', email: 'vecino@test.com', role: 'usuario' },
   })),
 }));
 

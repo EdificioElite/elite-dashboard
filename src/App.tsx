@@ -1,7 +1,7 @@
 import { useEffect } from 'react';
 import { BrowserRouter, Routes, Route, Navigate, useLocation, useParams } from 'react-router-dom';
 import { useAuthStore } from './store/auth';
-import { canViewAdmin, canManage, type Role } from './lib/roles';
+import { type Role } from './lib/roles';
 import LoginPage from './pages/LoginPage';
 import InicioPage from './pages/InicioPage';
 import DashboardPage from './pages/DashboardPage';
