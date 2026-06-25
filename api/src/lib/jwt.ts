@@ -1,11 +1,13 @@
 import jwt from 'jsonwebtoken';
 import { config } from '../config';
 
+export type Role = 'usuario' | 'directiva' | 'admin';
+
 export interface JwtPayload {
   userId: number;
   vecinoPiso: string;
   email: string;
-  isAdmin: boolean;
+  role: Role;
   source?: string;
 }
 
