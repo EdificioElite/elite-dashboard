@@ -12,8 +12,8 @@ router.get('/consumos', authMiddleware, async (req: Request, res: Response) => {
   try {
     const { desde, hasta } = req.query;
     const pisoQuery = req.query.piso as string | undefined;
-    const isAdmin = req.user!.isAdmin;
-    const vecinoPiso = (isAdmin && pisoQuery) ? pisoQuery : req.user!.vecinoPiso;
+    const role = req.user!.role;
+    const vecinoPiso = ((role === 'admin' || role === 'directiva') && pisoQuery) ? pisoQuery : req.user!.vecinoPiso;
 
     let whereSql = `WHERE v.piso = $1`;
     const params: unknown[] = [vecinoPiso];
@@ -83,8 +83,8 @@ router.get('/consumos', authMiddleware, async (req: Request, res: Response) => {
 router.get('/consumo-actual', authMiddleware, async (req: Request, res: Response) => {
   try {
     const pisoQuery = req.query.piso as string | undefined;
-    const isAdmin = req.user!.isAdmin;
-    const vecinoPiso = (isAdmin && pisoQuery) ? pisoQuery : req.user!.vecinoPiso;
+    const role = req.user!.role;
+    const vecinoPiso = ((role === 'admin' || role === 'directiva') && pisoQuery) ? pisoQuery : req.user!.vecinoPiso;
 
     const result = await query(
        `WITH latest AS (
