@@ -57,8 +57,8 @@ function createApp() {
   return app;
 }
 
-function userToken(isAdmin = false) {
-  return signToken({ userId: 1, vecinoPiso: '1A', email: 'test@test.com', isAdmin });
+function userToken(role: 'usuario' | 'directiva' | 'admin' = 'usuario') {
+  return signToken({ userId: 1, vecinoPiso: '1A', email: 'test@test.com', role });
 }
 
 describe('Auth routes', () => {
@@ -97,7 +97,7 @@ describe('Auth routes', () => {
       const bcrypt = await import('bcrypt');
       const hash = await bcrypt.hash('correct', 12);
       mockQuery.mockResolvedValueOnce({
-        rows: [{ id: 1, vecino_piso: '1A', email: 'test@test.com', password_hash: hash, is_admin: false }],
+        rows: [{ id: 1, vecino_piso: '1A', email: 'test@test.com', password_hash: hash, role: 'usuario' }],
       });
       const app = createApp();
       const res = await request(app)
@@ -110,7 +110,7 @@ describe('Auth routes', () => {
       const bcrypt = await import('bcrypt');
       const hash = await bcrypt.hash('correct', 12);
       mockQuery.mockResolvedValueOnce({
-        rows: [{ id: 1, vecino_piso: '1A', email: 'test@test.com', password_hash: hash, is_admin: false }],
+        rows: [{ id: 1, vecino_piso: '1A', email: 'test@test.com', password_hash: hash, role: 'usuario' }],
       });
       const app = createApp();
       const res = await request(app)
@@ -119,7 +119,7 @@ describe('Auth routes', () => {
       expect(res.status).toBe(200);
       expect(res.body.token).toBeDefined();
       expect(res.body.user.email).toBe('test@test.com');
-      expect(res.body.user.is_admin).toBe(false);
+      expect(res.body.user.role).toBe('usuario');
     });
   });
 
@@ -134,7 +134,7 @@ describe('Auth routes', () => {
       mockQuery
         .mockResolvedValueOnce({ rows: [] })
         .mockResolvedValueOnce({
-          rows: [{ id: 1, vecino_piso: '1A', email: 'test@test.com', is_admin: false, ultima_conexion: null, ultima_consulta_ha: null }],
+          rows: [{ id: 1, vecino_piso: '1A', email: 'test@test.com', role: 'usuario', ultima_conexion: null, ultima_consulta_ha: null }],
         });
       const app = createApp();
       const token = userToken();
@@ -376,7 +376,7 @@ describe('Auth routes', () => {
 
     it('allows multiple users for the same piso', async () => {
       mockVerifyEmailToken.mockResolvedValueOnce({ id: 1, email: 'a@a.com', piso: '2A' });
-      mockQuery.mockResolvedValueOnce({ rows: [{ id: 10, vecino_piso: '2A', email: 'a@a.com', is_admin: false }] });
+      mockQuery.mockResolvedValueOnce({ rows: [{ id: 10, vecino_piso: '2A', email: 'a@a.com', role: 'usuario' }] });
       const app = createApp();
       const res = await request(app).post('/api/auth/register').send({ token: 'valid', password: 'Pass1234' });
       expect(res.status).toBe(200);
@@ -386,7 +386,7 @@ describe('Auth routes', () => {
 
     it('registers user and returns token', async () => {
       mockVerifyEmailToken.mockResolvedValueOnce({ id: 1, email: 'a@a.com', piso: '2A' });
-      mockQuery.mockResolvedValueOnce({ rows: [{ id: 10, vecino_piso: '2A', email: 'a@a.com', is_admin: false }] });
+      mockQuery.mockResolvedValueOnce({ rows: [{ id: 10, vecino_piso: '2A', email: 'a@a.com', role: 'usuario' }] });
       const app = createApp();
       const res = await request(app).post('/api/auth/register').send({ token: 'valid', password: 'Pass1234' });
       expect(res.status).toBe(200);
@@ -699,7 +699,7 @@ describe('Admin routes', () => {
 
     it('returns 403 for non-admin user', async () => {
       const app = createApp();
-      const token = userToken(false);
+      const token = userToken('usuario');
       const res = await request(app)
         .get('/api/admin/vecinos')
         .set('Authorization', `Bearer ${token}`);
@@ -708,10 +708,10 @@ describe('Admin routes', () => {
 
     it('returns vecinos for admin', async () => {
       mockQuery.mockResolvedValueOnce({
-        rows: [{ piso: '1A', nombre: 'Vecino 1', email: 'a@a.com', is_admin: false }],
+        rows: [{ piso: '1A', nombre: 'Vecino 1', email: 'a@a.com', role: 'usuario' }],
       });
       const app = createApp();
-      const token = userToken(true);
+      const token = userToken('admin');
       const res = await request(app)
         .get('/api/admin/vecinos')
         .set('Authorization', `Bearer ${token}`);
@@ -729,7 +729,7 @@ describe('Admin routes', () => {
   describe('POST /api/admin/usuarios', () => {
     it('returns 400 when email is missing', async () => {
       const app = createApp();
-      const token = userToken(true);
+      const token = userToken('admin');
       const res = await request(app)
         .post('/api/admin/usuarios')
         .set('Authorization', `Bearer ${token}`)
@@ -740,7 +740,7 @@ describe('Admin routes', () => {
     it('sends invite email for admin', async () => {
       mockQuery.mockResolvedValueOnce({ rows: [{ piso: '2A' }] });
       const app = createApp();
-      const token = userToken(true);
+      const token = userToken('admin');
       const res = await request(app)
         .post('/api/admin/usuarios')
         .set('Authorization', `Bearer ${token}`)
@@ -752,7 +752,7 @@ describe('Admin routes', () => {
     it('returns 400 when vecino does not exist', async () => {
       mockQuery.mockResolvedValueOnce({ rows: [] });
       const app = createApp();
-      const token = userToken(true);
+      const token = userToken('admin');
       const res = await request(app)
         .post('/api/admin/usuarios')
         .set('Authorization', `Bearer ${token}`)
@@ -765,7 +765,7 @@ describe('Admin routes', () => {
       const app = createApp();
       const res = await request(app)
         .post('/api/admin/usuarios')
-        .set('Authorization', `Bearer ${userToken(true)}`)
+        .set('Authorization', `Bearer ${userToken('admin')}`)
         .send({ email: 'gestor@elite.com' });
       expect(res.status).toBe(200);
       expect(res.body.message).toBe('Invitación enviada correctamente');
@@ -783,18 +783,18 @@ describe('Admin routes', () => {
       const app = createApp();
       const res = await request(app)
         .get('/api/admin/usuarios')
-        .set('Authorization', `Bearer ${userToken(false)}`);
+        .set('Authorization', `Bearer ${userToken('usuario')}`);
       expect(res.status).toBe(403);
     });
 
     it('returns users for admin', async () => {
       mockQuery.mockResolvedValueOnce({
-        rows: [{ id: 1, vecino_piso: '1A', email: 'a@a.com', is_admin: true, created_at: '2026-01-01', ultima_conexion: null, ultima_consulta_ha: null }],
+        rows: [{ id: 1, vecino_piso: '1A', email: 'a@a.com', role: 'admin', created_at: '2026-01-01', ultima_conexion: null, ultima_consulta_ha: null }],
       });
       const app = createApp();
       const res = await request(app)
         .get('/api/admin/usuarios')
-        .set('Authorization', `Bearer ${userToken(true)}`);
+        .set('Authorization', `Bearer ${userToken('admin')}`);
       expect(res.status).toBe(200);
       expect(res.body).toHaveLength(1);
     });
@@ -813,19 +813,19 @@ describe('Admin routes', () => {
       const app = createApp();
       const res = await request(app)
         .put('/api/admin/usuarios/1')
-        .set('Authorization', `Bearer ${userToken(false)}`)
+        .set('Authorization', `Bearer ${userToken('usuario')}`)
         .send({ email: 'x@x.com' });
       expect(res.status).toBe(403);
     });
 
     it('updates user for admin', async () => {
       mockQuery.mockResolvedValueOnce({
-        rows: [{ id: 2, vecino_piso: '2A', email: 'updated@test.com', is_admin: false, created_at: '2026-01-01' }],
+        rows: [{ id: 2, vecino_piso: '2A', email: 'updated@test.com', role: 'usuario', created_at: '2026-01-01' }],
       });
       const app = createApp();
       const res = await request(app)
         .put('/api/admin/usuarios/2')
-        .set('Authorization', `Bearer ${userToken(true)}`)
+        .set('Authorization', `Bearer ${userToken('admin')}`)
         .send({ email: 'updated@test.com' });
       expect(res.status).toBe(200);
       expect(res.body.email).toBe('updated@test.com');
@@ -836,7 +836,7 @@ describe('Admin routes', () => {
       const app = createApp();
       const res = await request(app)
         .put('/api/admin/usuarios/999')
-        .set('Authorization', `Bearer ${userToken(true)}`)
+        .set('Authorization', `Bearer ${userToken('admin')}`)
         .send({ email: 'x@x.com' });
       expect(res.status).toBe(404);
     });
@@ -849,7 +849,7 @@ describe('Admin routes', () => {
       const app = createApp();
       const res = await request(app)
         .put('/api/admin/usuarios/2')
-        .set('Authorization', `Bearer ${userToken(true)}`)
+        .set('Authorization', `Bearer ${userToken('admin')}`)
         .send({ email: 'taken@test.com' });
       expect(res.status).toBe(409);
     });
@@ -868,7 +868,7 @@ describe('Admin routes', () => {
       const app = createApp();
       const res = await request(app)
         .put('/api/admin/usuarios/1/password')
-        .set('Authorization', `Bearer ${userToken(true)}`)
+        .set('Authorization', `Bearer ${userToken('admin')}`)
         .send({ password: '12345' });
       expect(res.status).toBe(400);
     });
@@ -877,7 +877,7 @@ describe('Admin routes', () => {
       const app = createApp();
       const res = await request(app)
         .put('/api/admin/usuarios/1/password')
-        .set('Authorization', `Bearer ${userToken(true)}`)
+        .set('Authorization', `Bearer ${userToken('admin')}`)
         .send({});
       expect(res.status).toBe(400);
     });
@@ -887,7 +887,7 @@ describe('Admin routes', () => {
       const app = createApp();
       const res = await request(app)
         .put('/api/admin/usuarios/999/password')
-        .set('Authorization', `Bearer ${userToken(true)}`)
+        .set('Authorization', `Bearer ${userToken('admin')}`)
         .send({ password: 'newpassword' });
       expect(res.status).toBe(404);
     });
@@ -897,7 +897,7 @@ describe('Admin routes', () => {
       const app = createApp();
       const res = await request(app)
         .put('/api/admin/usuarios/2/password')
-        .set('Authorization', `Bearer ${userToken(true)}`)
+        .set('Authorization', `Bearer ${userToken('admin')}`)
         .send({ password: 'newpassword' });
       expect(res.status).toBe(200);
     });
@@ -914,7 +914,7 @@ describe('Admin routes', () => {
       const app = createApp();
       const res = await request(app)
         .delete('/api/admin/usuarios/1')
-        .set('Authorization', `Bearer ${userToken(false)}`);
+        .set('Authorization', `Bearer ${userToken('usuario')}`);
       expect(res.status).toBe(403);
     });
 
@@ -922,7 +922,7 @@ describe('Admin routes', () => {
       const app = createApp();
       const res = await request(app)
         .delete('/api/admin/usuarios/1')
-        .set('Authorization', `Bearer ${userToken(true)}`);
+        .set('Authorization', `Bearer ${userToken('admin')}`);
       expect(res.status).toBe(400);
     });
 
@@ -931,7 +931,7 @@ describe('Admin routes', () => {
       const app = createApp();
       const res = await request(app)
         .delete('/api/admin/usuarios/999')
-        .set('Authorization', `Bearer ${userToken(true)}`);
+        .set('Authorization', `Bearer ${userToken('admin')}`);
       expect(res.status).toBe(404);
     });
 
@@ -940,7 +940,7 @@ describe('Admin routes', () => {
       const app = createApp();
       const res = await request(app)
         .delete('/api/admin/usuarios/2')
-        .set('Authorization', `Bearer ${userToken(true)}`);
+        .set('Authorization', `Bearer ${userToken('admin')}`);
       expect(res.status).toBe(200);
     });
   });
@@ -956,7 +956,7 @@ describe('Admin routes', () => {
       const app = createApp();
       const res = await request(app)
         .post('/api/admin/invitar')
-        .set('Authorization', `Bearer ${userToken(false)}`)
+        .set('Authorization', `Bearer ${userToken('usuario')}`)
         .send({ piso: '2A' });
       expect(res.status).toBe(403);
     });
@@ -965,7 +965,7 @@ describe('Admin routes', () => {
       const app = createApp();
       const res = await request(app)
         .post('/api/admin/invitar')
-        .set('Authorization', `Bearer ${userToken(true)}`)
+        .set('Authorization', `Bearer ${userToken('admin')}`)
         .send({});
       expect(res.status).toBe(400);
     });
@@ -975,7 +975,7 @@ describe('Admin routes', () => {
       const app = createApp();
       const res = await request(app)
         .post('/api/admin/invitar')
-        .set('Authorization', `Bearer ${userToken(true)}`)
+        .set('Authorization', `Bearer ${userToken('admin')}`)
         .send({ piso: 'Z9' });
       expect(res.status).toBe(400);
     });
@@ -985,7 +985,7 @@ describe('Admin routes', () => {
       const app = createApp();
       const res = await request(app)
         .post('/api/admin/invitar')
-        .set('Authorization', `Bearer ${userToken(true)}`)
+        .set('Authorization', `Bearer ${userToken('admin')}`)
         .send({ piso: '2A' });
       expect(res.status).toBe(400);
     });
@@ -995,7 +995,7 @@ describe('Admin routes', () => {
       const app = createApp();
       const res = await request(app)
         .post('/api/admin/invitar')
-        .set('Authorization', `Bearer ${userToken(true)}`)
+        .set('Authorization', `Bearer ${userToken('admin')}`)
         .send({ piso: '2A' });
       expect(res.status).toBe(200);
       expect(res.body.message).toContain('Invitación enviada');
@@ -1006,7 +1006,7 @@ describe('Admin routes', () => {
       const app = createApp();
       const res = await request(app)
         .post('/api/admin/invitar')
-        .set('Authorization', `Bearer ${userToken(true)}`)
+        .set('Authorization', `Bearer ${userToken('admin')}`)
         .send({ piso: '2A' });
       expect(res.status).toBe(200);
       expect(res.body.message).toContain('Invitación enviada');
@@ -1022,7 +1022,7 @@ describe('Admin routes', () => {
       const app = createApp();
       const res = await request(app)
         .put('/api/admin/vecinos/1A')
-        .set('Authorization', `Bearer ${userToken(false)}`)
+        .set('Authorization', `Bearer ${userToken('usuario')}`)
         .send({ nombre: 'Nuevo nombre' });
       expect(res.status).toBe(403);
     });
@@ -1039,7 +1039,7 @@ describe('Admin routes', () => {
       const app = createApp();
       const res = await request(app)
         .put('/api/admin/vecinos/1A')
-        .set('Authorization', `Bearer ${userToken(true)}`)
+        .set('Authorization', `Bearer ${userToken('admin')}`)
         .send({});
       expect(res.status).toBe(400);
       expect(res.body.error).toMatch(/campo/);
@@ -1050,7 +1050,7 @@ describe('Admin routes', () => {
       const app = createApp();
       const res = await request(app)
         .put('/api/admin/vecinos/1A')
-        .set('Authorization', `Bearer ${userToken(true)}`)
+        .set('Authorization', `Bearer ${userToken('admin')}`)
         .send({ nombre: 'Nuevo nombre' });
       expect(res.status).toBe(200);
       expect(res.body.nombre).toBe('Nuevo nombre');
@@ -1065,7 +1065,7 @@ describe('Admin routes', () => {
       const app = createApp();
       const res = await request(app)
         .put('/api/admin/vecinos/1A')
-        .set('Authorization', `Bearer ${userToken(true)}`)
+        .set('Authorization', `Bearer ${userToken('admin')}`)
         .send({ email: 'new@email.com' });
       expect(res.status).toBe(200);
       expect(res.body.email).toBe('new@email.com');
@@ -1076,7 +1076,7 @@ describe('Admin routes', () => {
       const app = createApp();
       const res = await request(app)
         .put('/api/admin/vecinos/1A')
-        .set('Authorization', `Bearer ${userToken(true)}`)
+        .set('Authorization', `Bearer ${userToken('admin')}`)
         .send({ coeficiente: '0.30' });
       expect(res.status).toBe(200);
       expect(res.body.coeficiente).toBe('0.30');
@@ -1087,7 +1087,7 @@ describe('Admin routes', () => {
       const app = createApp();
       const res = await request(app)
         .put('/api/admin/vecinos/1A')
-        .set('Authorization', `Bearer ${userToken(true)}`)
+        .set('Authorization', `Bearer ${userToken('admin')}`)
         .send({ enviar_email: true });
       expect(res.status).toBe(200);
       expect(res.body.enviar_email).toBe(true);
@@ -1098,7 +1098,7 @@ describe('Admin routes', () => {
       const app = createApp();
       const res = await request(app)
         .put('/api/admin/vecinos/1A')
-        .set('Authorization', `Bearer ${userToken(true)}`)
+        .set('Authorization', `Bearer ${userToken('admin')}`)
         .send({ device_identification: 'DEVID99' });
       expect(res.status).toBe(200);
       expect(res.body.device_identification).toBe('DEVID99');
@@ -1109,7 +1109,7 @@ describe('Admin routes', () => {
       const app = createApp();
       const res = await request(app)
         .put('/api/admin/vecinos/1A')
-        .set('Authorization', `Bearer ${userToken(true)}`)
+        .set('Authorization', `Bearer ${userToken('admin')}`)
         .send({ serial_number: '1234' });
       expect(res.status).toBe(200);
       expect(res.body.serial_number).toBe('1234');
@@ -1120,7 +1120,7 @@ describe('Admin routes', () => {
       const app = createApp();
       const res = await request(app)
         .put('/api/admin/vecinos/99Z')
-        .set('Authorization', `Bearer ${userToken(true)}`)
+        .set('Authorization', `Bearer ${userToken('admin')}`)
         .send({ nombre: 'X' });
       expect(res.status).toBe(404);
     });
@@ -1135,7 +1135,7 @@ describe('Admin routes', () => {
       const app = createApp();
       const res = await request(app)
         .post('/api/admin/vecinos')
-        .set('Authorization', `Bearer ${userToken(false)}`)
+        .set('Authorization', `Bearer ${userToken('usuario')}`)
         .send({ piso: '7A', nombre: 'Vecino 7A' });
       expect(res.status).toBe(403);
     });
@@ -1152,7 +1152,7 @@ describe('Admin routes', () => {
       const app = createApp();
       const res = await request(app)
         .post('/api/admin/vecinos')
-        .set('Authorization', `Bearer ${userToken(true)}`)
+        .set('Authorization', `Bearer ${userToken('admin')}`)
         .send({ nombre: 'Sin piso' });
       expect(res.status).toBe(400);
     });
@@ -1162,7 +1162,7 @@ describe('Admin routes', () => {
       const app = createApp();
       const res = await request(app)
         .post('/api/admin/vecinos')
-        .set('Authorization', `Bearer ${userToken(true)}`)
+        .set('Authorization', `Bearer ${userToken('admin')}`)
         .send({ piso: '7A', nombre: 'Vecino 7A', email: 'vecino7a@elite.com' });
       expect(res.status).toBe(201);
       expect(res.body.piso).toBe('7A');
@@ -1177,7 +1177,7 @@ describe('Admin routes', () => {
       const app = createApp();
       const res = await request(app)
         .post('/api/admin/vecinos')
-        .set('Authorization', `Bearer ${userToken(true)}`)
+        .set('Authorization', `Bearer ${userToken('admin')}`)
         .send({ piso: '1A', nombre: 'Duplicado' });
       expect(res.status).toBe(409);
     });
@@ -1192,7 +1192,7 @@ describe('Admin routes', () => {
       const app = createApp();
       const res = await request(app)
         .delete('/api/admin/vecinos/1A')
-        .set('Authorization', `Bearer ${userToken(false)}`);
+        .set('Authorization', `Bearer ${userToken('usuario')}`);
       expect(res.status).toBe(403);
     });
 
@@ -1209,7 +1209,7 @@ describe('Admin routes', () => {
       const app = createApp();
       const res = await request(app)
         .delete('/api/admin/vecinos/7A')
-        .set('Authorization', `Bearer ${userToken(true)}`);
+        .set('Authorization', `Bearer ${userToken('admin')}`);
       expect(res.status).toBe(200);
       expect(res.body.message).toMatch(/eliminado/);
     });
@@ -1220,7 +1220,7 @@ describe('Admin routes', () => {
       const app = createApp();
       const res = await request(app)
         .delete('/api/admin/vecinos/99Z')
-        .set('Authorization', `Bearer ${userToken(true)}`);
+        .set('Authorization', `Bearer ${userToken('admin')}`);
       expect(res.status).toBe(404);
     });
 
@@ -1230,7 +1230,7 @@ describe('Admin routes', () => {
       const app = createApp();
       const res = await request(app)
         .delete('/api/admin/vecinos/7A')
-        .set('Authorization', `Bearer ${userToken(true)}`);
+        .set('Authorization', `Bearer ${userToken('admin')}`);
       expect(res.status).toBe(200);
       expect(mockQuery).toHaveBeenCalledWith(
         expect.stringContaining('UPDATE usuarios SET vecino_piso = NULL'),
