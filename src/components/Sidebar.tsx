@@ -1,5 +1,6 @@
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuthStore } from '../store/auth';
+import { canViewAdmin } from '../lib/roles';
 import { ADMIN_NAV, EDIFICIO_NAV } from '../lib/nav';
 import type { NavItem } from '../lib/nav';
 
@@ -7,7 +8,7 @@ export default function Sidebar() {
   const navigate = useNavigate();
   const location = useLocation();
   const user = useAuthStore((s) => s.user);
-  const isAdmin = user?.is_admin;
+  const showAdmin = user ? canViewAdmin(user.role) : false;
 
   const isActive = (path: string) =>
     location.pathname === path ||
@@ -22,7 +23,7 @@ export default function Sidebar() {
     >
       <nav className="flex flex-col gap-6 p-4 pt-6">
         <Section label="Edificio" items={EDIFICIO_NAV} isActive={isActive} onClick={(p) => navigate(p)} />
-        {isAdmin && <Section label="Admin" items={ADMIN_NAV} isActive={isActive} onClick={(p) => navigate(p)} />}
+        {showAdmin && <Section label="Admin" items={ADMIN_NAV} isActive={isActive} onClick={(p) => navigate(p)} />}
       </nav>
     </aside>
   );
