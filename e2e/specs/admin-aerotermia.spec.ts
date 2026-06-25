@@ -15,11 +15,13 @@ test.describe('Admin Aerotermia Dashboard', () => {
     await expect(page.getByText('Panel de administración')).toBeVisible({ timeout: 10000 });
   });
 
-  test('shows stat cards with values', async ({ page }) => {
-    await expect(page.getByText('Total kWh calor')).toBeVisible({ timeout: 15000 });
-    await expect(page.getByText('Total kWh frio')).toBeVisible();
-    await expect(page.getByText('Total m³ ACS')).toBeVisible();
-    await expect(page.getByText('Total facturado')).toBeVisible();
+  test('shows global live card with data', async ({ page }) => {
+    await expect(page.getByText('Aerotermia Global en Vivo')).toBeVisible({ timeout: 15000 });
+    await expect(page.getByText('Calefacción').first()).toBeVisible();
+    await expect(page.getByText('Refrigeración').first()).toBeVisible();
+    await expect(page.getByText('ACS').first()).toBeVisible();
+    await expect(page.getByText('Climatización').first()).toBeVisible();
+    await expect(page.getByText('Temperaturas').first()).toBeVisible();
   });
 
   test('shows date range presets and custom button', async ({ page }) => {
@@ -32,14 +34,14 @@ test.describe('Admin Aerotermia Dashboard', () => {
   });
 
   test('shows all dashboard sections', async ({ page }) => {
-    await expect(page.getByText('Distribución por vecino')).toBeVisible({ timeout: 15000 });
-    await expect(page.getByText('Consumo por vecino')).toBeVisible();
-    await expect(page.getByText('Histórico — Global')).toBeVisible();
+    await expect(page.getByText('Dashboards de vecinos')).toBeVisible({ timeout: 15000 });
+    await expect(page.getByText('Histórico global')).toBeVisible();
     await expect(page.getByRole('button', { name: 'Facturas' })).toBeVisible();
+    await expect(page.getByText('COP y factura electrica')).toBeVisible();
     await expect(page.getByText('Heatmap')).toBeVisible();
   });
 
-  test('shows facturas chart section', async ({ page }) => {
+  test('shows facturas pivot table', async ({ page }) => {
     await expect(page.getByText('Facturas').first()).toBeVisible({ timeout: 15000 });
   });
 
@@ -58,9 +60,8 @@ test.describe('Admin Aerotermia Dashboard', () => {
     await expect(page.getByRole('tab', { name: '1 año' })).toHaveAttribute('aria-selected', 'true');
   });
 
-  test('factura selector has options', async ({ page }) => {
-    const select = page.locator('select');
-    await expect(select).toBeVisible({ timeout: 15000 });
+  test('pivot table shows piso column and period headers', async ({ page }) => {
+    await expect(page.locator('th', { hasText: 'Piso' })).toBeVisible({ timeout: 15000 });
   });
 
   test('non-admin cannot access admin aerotermia', async ({ page }) => {

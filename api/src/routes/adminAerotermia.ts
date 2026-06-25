@@ -4,6 +4,9 @@ import { authMiddleware } from '../middleware/auth';
 import { adminMiddleware } from '../middleware/admin';
 import { logger } from '../lib/logger';
 
+const MODO_CALEFACCION_UMBRAL = 29;
+const MODO_REFRIGERACION_UMBRAL = 21;
+
 const router = Router();
 
 router.get('/admin/aerotermia/consumos', authMiddleware, adminMiddleware, async (req: Request, res: Response) => {
@@ -177,6 +180,78 @@ router.get('/admin/aerotermia/cop', authMiddleware, adminMiddleware, async (_req
     res.json(result.rows);
   } catch (err) {
     logger.error(err, 'Admin aerotermia COP error');
+    res.status(500).json({ error: 'Error interno del servidor' });
+  }
+});
+
+router.get('/admin/aerotermia/en-vivo', authMiddleware, adminMiddleware, async (_req: Request, res: Response) => {
+  try {
+    const sql = `
+      WITH latest AS (
+        SELECT DISTINCT ON (v.piso)
+          v.piso,
+          ct.created AS timestamp,
+          ct.energy_wh_inst_value_0_0_0 / 1000.0 AS kwh_calor_abs,
+          ct.energy_manufacturer_specific_02_wh_inst_value_0_0_0 / 1000.0 AS kwh_frio_abs,
+          ct.volume_m3_inst_value_0_1_0 AS m3_acs_abs,
+          ct.flow_temp_c_inst_value_0_0_0 AS temp_impulsion,
+          ct.return_temp_c_inst_value_0_0_0 AS temp_retorno,
+          ct.power_w_inst_value_0_0_0 AS power_w
+        FROM contadores ct
+        JOIN vecinos v ON ct.device_identification = v.device_identification
+          AND ct.serial_number::text = v.serial_number
+        ORDER BY v.piso, ct.created DESC
+      ),
+      first_of_month AS (
+        SELECT DISTINCT ON (v.piso)
+          v.piso,
+          ct.energy_wh_inst_value_0_0_0 / 1000.0 AS kwh_calor_start,
+          ct.energy_manufacturer_specific_02_wh_inst_value_0_0_0 / 1000.0 AS kwh_frio_start,
+          ct.volume_m3_inst_value_0_1_0 AS m3_acs_start
+        FROM contadores ct
+        JOIN vecinos v ON ct.device_identification = v.device_identification
+          AND ct.serial_number::text = v.serial_number
+        WHERE ct.created >= date_trunc('month', NOW())
+        ORDER BY v.piso, ct.created ASC
+      )
+      SELECT
+        MAX(l.timestamp) AS timestamp,
+        ROUND(SUM(l.kwh_calor_abs)::numeric, 1) AS kwh_calor_abs,
+        ROUND(SUM(l.kwh_frio_abs)::numeric, 1) AS kwh_frio_abs,
+        ROUND(SUM(l.m3_acs_abs)::numeric, 3) AS m3_acs_abs,
+        ROUND(SUM(l.kwh_calor_abs - COALESCE(f.kwh_calor_start, l.kwh_calor_abs))::numeric, 1) AS kwh_calor_mes_inicio,
+        ROUND(SUM(l.kwh_frio_abs - COALESCE(f.kwh_frio_start, l.kwh_frio_abs))::numeric, 1) AS kwh_frio_mes_inicio,
+        ROUND(SUM(l.m3_acs_abs - COALESCE(f.m3_acs_start, l.m3_acs_abs))::numeric, 3) AS m3_acs_mes_inicio,
+        ROUND(AVG(l.temp_impulsion)::numeric, 2) AS temp_impulsion_avg,
+        ROUND(MAX(l.temp_impulsion)::numeric, 2) AS temp_impulsion_max,
+        ROUND(MIN(l.temp_impulsion)::numeric, 2) AS temp_impulsion_min,
+        ROUND(AVG(l.temp_retorno)::numeric, 2) AS temp_retorno_avg,
+        ROUND(MAX(l.temp_retorno)::numeric, 2) AS temp_retorno_max,
+        ROUND(MIN(l.temp_retorno)::numeric, 2) AS temp_retorno_min,
+        ROUND(SUM(l.power_w)::numeric, 1) AS power_w_total
+      FROM latest l
+      LEFT JOIN first_of_month f ON l.piso = f.piso
+    `;
+
+    const result = await query(sql);
+
+    if (result.rows.length === 0 || result.rows[0].kwh_calor_abs === null) {
+      res.json(null);
+      return;
+    }
+
+    const row = result.rows[0];
+    const t = row.temp_impulsion_avg as number | null;
+
+    let modo: 'calefaccion' | 'refrigeracion' | 'desconocido' = 'desconocido';
+    if (t != null) {
+      if (t > MODO_CALEFACCION_UMBRAL) modo = 'calefaccion';
+      else if (t < MODO_REFRIGERACION_UMBRAL) modo = 'refrigeracion';
+    }
+
+    res.json({ ...row, modo });
+  } catch (err) {
+    logger.error(err, 'Admin aerotermia en-vivo error');
     res.status(500).json({ error: 'Error interno del servidor' });
   }
 });
