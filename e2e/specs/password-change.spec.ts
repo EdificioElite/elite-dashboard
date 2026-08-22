@@ -44,7 +44,7 @@ test.describe('Password Change (self-service)', () => {
     await loginAs(page, TEST_EMAIL, OLD_PASSWORD);
     await page.waitForSelector('text=Cargando tus datos', { state: 'hidden', timeout: 10000 }).catch(() => {});
 
-    await page.locator('.rounded-full').click();
+    await page.locator('button.rounded-full').click();
     await page.getByText('Cambiar contraseña').click();
 
     const modal = page.locator('[role="dialog"]').last();
@@ -62,7 +62,7 @@ test.describe('Password Change (self-service)', () => {
   test('shows error with wrong current password', async ({ page }) => {
     await loginAs(page, TEST_EMAIL, OLD_PASSWORD);
 
-    await page.locator('.rounded-full').click();
+    await page.locator('button.rounded-full').click();
     await page.getByText('Cambiar contraseña').click();
 
     const modal = page.locator('[role="dialog"]').last();
@@ -78,7 +78,7 @@ test.describe('Password Change (self-service)', () => {
   test('shows error with weak password (too short)', async ({ page }) => {
     await loginAs(page, TEST_EMAIL, OLD_PASSWORD);
 
-    await page.locator('.rounded-full').click();
+    await page.locator('button.rounded-full').click();
     await page.getByText('Cambiar contraseña').click();
 
     const modal = page.locator('[role="dialog"]').last();
@@ -94,7 +94,7 @@ test.describe('Password Change (self-service)', () => {
   test('shows error when passwords do not match', async ({ page }) => {
     await loginAs(page, TEST_EMAIL, OLD_PASSWORD);
 
-    await page.locator('.rounded-full').click();
+    await page.locator('button.rounded-full').click();
     await page.getByText('Cambiar contraseña').click();
 
     const modal = page.locator('[role="dialog"]').last();

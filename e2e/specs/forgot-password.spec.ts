@@ -254,7 +254,7 @@ test.describe('Invitation Flow', () => {
     await expect(page.getByText(/Inicio/)).toBeVisible({ timeout: 5000 });
 
     // Step 7: Logout
-    await page.locator('.rounded-full').click();
+    await page.locator('button.rounded-full').click();
     await page.getByText('Salir').click();
     await page.waitForURL('/login');
 
