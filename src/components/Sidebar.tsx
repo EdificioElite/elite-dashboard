@@ -2,7 +2,7 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuthStore } from '../store/auth';
 import { canViewAdmin } from '../lib/roles';
 import { ADMIN_NAV, EDIFICIO_NAV } from '../lib/nav';
-import type { NavItem } from '../lib/nav';
+import NavSection from './NavSection';
 
 export default function Sidebar() {
   const navigate = useNavigate();
@@ -10,9 +10,7 @@ export default function Sidebar() {
   const user = useAuthStore((s) => s.user);
   const showAdmin = user ? canViewAdmin(user.role) : false;
 
-  const isActive = (path: string) =>
-    location.pathname === path ||
-    (path === '/admin/aerotermia' && location.pathname === path);
+  const isActive = (path: string) => location.pathname === path;
 
   return (
     <aside
@@ -22,43 +20,9 @@ export default function Sidebar() {
       aria-label="Navegación principal"
     >
       <nav className="flex flex-col gap-6 p-4 pt-6">
-        <Section label="Edificio" items={EDIFICIO_NAV} isActive={isActive} onClick={(p) => navigate(p)} />
-        {showAdmin && <Section label="Admin" items={ADMIN_NAV} isActive={isActive} onClick={(p) => navigate(p)} />}
+        <NavSection tone="edificio" label="Edificio" items={EDIFICIO_NAV} isActive={isActive} onSelect={(p) => navigate(p)} />
+        {showAdmin && <NavSection tone="admin" label="Admin" items={ADMIN_NAV} isActive={isActive} onSelect={(p) => navigate(p)} />}
       </nav>
     </aside>
-  );
-}
-
-function Section({ label, items, isActive, onClick }: {
-  label: string;
-  items: NavItem[];
-  isActive: (path: string) => boolean;
-  onClick: (path: string) => void;
-}) {
-  return (
-    <div>
-      <div className="eyebrow px-3 mb-2">{label}</div>
-      <ul className="flex flex-col gap-0.5" role="list">
-        {items.map((item) => {
-          const active = isActive(item.path);
-          return (
-            <li key={item.path}>
-              <button
-                onClick={() => onClick(item.path)}
-                className={`w-full text-left px-3 py-2 rounded-lg text-[13px] font-medium transition-colors ${
-                  active
-                    ? 'text-cocoa bg-accent/12 font-semibold'
-                    : 'text-cocoa/55 hover:text-cocoa hover:bg-cocoa/4'
-                }`}
-                style={active ? { boxShadow: 'inset 2px 0 0 var(--accent)' } : undefined}
-                aria-current={active ? 'page' : undefined}
-              >
-                {item.label}
-              </button>
-            </li>
-          );
-        })}
-      </ul>
-    </div>
   );
 }

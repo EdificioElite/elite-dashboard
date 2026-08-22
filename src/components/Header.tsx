@@ -5,6 +5,7 @@ import { useAuthStore } from '../store/auth';
 import { canViewAdmin } from '../lib/roles';
 import { ADMIN_NAV, EDIFICIO_NAV } from '../lib/nav';
 import Icon from './Icon';
+import NavSection from './NavSection';
 import SelfPasswordModal from './SelfPasswordModal';
 
 export default function Header() {
@@ -141,13 +142,13 @@ export default function Header() {
             aria-hidden="true"
           />
           <div
-            className="fixed left-0 top-0 bottom-0 z-[80] w-[260px] border-r border-cocoa/10 p-4 flex flex-col gap-1 lg:hidden"
+            className="fixed left-0 top-0 bottom-0 z-[80] w-[260px] border-r border-cocoa/10 p-4 flex flex-col gap-3 lg:hidden"
             style={{ animation: 'slideInLeft 250ms ease-out', background: '#FFFFFF', boxShadow: '8px 0 30px rgba(0,0,0,.15)' }}
             role="dialog"
             aria-modal="true"
             aria-label="Menú de navegación"
           >
-            <div className="flex items-center justify-between mb-3">
+            <div className="flex items-center justify-between">
               <span className="eyebrow">Menú</span>
               <button
                 onClick={() => setMobileNavOpen(false)}
@@ -158,38 +159,24 @@ export default function Header() {
                 <Icon name="x" size={18} />
               </button>
             </div>
+            <NavSection
+              tone="edificio"
+              label="Edificio"
+              items={EDIFICIO_NAV}
+              isActive={isActive}
+              onSelect={(p) => { navigate(p); setMobileNavOpen(false); }}
+              itemClassName="px-3 py-2.5 text-[14px]"
+            />
             {showAdmin && (
-              <>
-                <div className="eyebrow px-3 pt-3 pb-1 mt-2 border-t border-cocoa/6">Admin</div>
-                {ADMIN_NAV.map((item) => (
-                  <button
-                    key={item.path}
-                    onClick={() => { navigate(item.path); setMobileNavOpen(false); }}
-                    className={`w-full text-left px-3 py-2.5 text-[14px] font-medium rounded-lg transition-colors ${
-                      isActive(item.path)
-                        ? 'text-cocoa bg-accent/12 font-semibold'
-                        : 'text-cocoa/55 hover:text-cocoa hover:bg-cocoa/4'
-                    }`}
-                  >
-                    {item.label}
-                  </button>
-                ))}
-                <div className="eyebrow px-3 pt-3 pb-1 mt-1">Edificio</div>
-              </>
+              <NavSection
+                tone="admin"
+                label="Admin"
+                items={ADMIN_NAV}
+                isActive={isActive}
+                onSelect={(p) => { navigate(p); setMobileNavOpen(false); }}
+                itemClassName="px-3 py-2.5 text-[14px]"
+              />
             )}
-            {EDIFICIO_NAV.map((item) => (
-              <button
-                key={item.path}
-                onClick={() => { navigate(item.path); setMobileNavOpen(false); }}
-                className={`w-full text-left px-3 py-2.5 text-[14px] font-medium rounded-lg transition-colors ${
-                  isActive(item.path)
-                    ? 'text-cocoa bg-accent/12 font-semibold'
-                    : 'text-cocoa/55 hover:text-cocoa hover:bg-cocoa/4'
-                }`}
-              >
-                {item.label}
-              </button>
-            ))}
           </div>
         </>,
         document.body
