@@ -4,8 +4,10 @@ import { VitePWA } from 'vite-plugin-pwa';
 import { execSync } from 'child_process';
 
 let commitHash = 'unknown';
+let release = '';
 try {
   commitHash = execSync('git rev-parse --short HEAD').toString().trim();
+  release = execSync('git describe --tags --abbrev=0').toString().trim();
 } catch {}
 
 export default defineConfig({
@@ -46,6 +48,7 @@ export default defineConfig({
   ],
   define: {
     __COMMIT_HASH__: JSON.stringify(commitHash),
+    __VERSION__: JSON.stringify(release),
     __BUILD_TIME__: JSON.stringify(new Date().toISOString()),
   },
 });

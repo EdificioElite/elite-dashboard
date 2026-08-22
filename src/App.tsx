@@ -16,7 +16,6 @@ import ResetPasswordPage from './pages/ResetPasswordPage';
 import Header from './components/Header';
 import Sidebar from './components/Sidebar';
 import SkipLink from './components/SkipLink';
-import VersionFooter from './components/VersionFooter';
 
 function ProtectedRoute({ children, requiredRole }: { children: React.ReactNode; requiredRole?: Role | Role[] }) {
   const { user, loading } = useAuthStore();
@@ -115,7 +114,6 @@ export default function App() {
           <Route path="/" element={<Navigate to="/inicio" replace />} />
           <Route path="*" element={<Navigate to="/inicio" replace />} />
         </Routes>
-        <VersionFooter />
       </div>
     </BrowserRouter>
   );

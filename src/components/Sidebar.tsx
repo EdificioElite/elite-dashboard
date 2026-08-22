@@ -3,6 +3,7 @@ import { useAuthStore } from '../store/auth';
 import { canViewAdmin } from '../lib/roles';
 import { ADMIN_NAV, EDIFICIO_NAV } from '../lib/nav';
 import NavSection from './NavSection';
+import VersionFooter from './VersionFooter';
 
 export default function Sidebar() {
   const navigate = useNavigate();
@@ -23,6 +24,7 @@ export default function Sidebar() {
         <NavSection tone="edificio" label="Edificio" items={EDIFICIO_NAV} isActive={isActive} onSelect={(p) => navigate(p)} />
         {showAdmin && <NavSection tone="admin" label="Admin" items={ADMIN_NAV} isActive={isActive} onSelect={(p) => navigate(p)} />}
       </nav>
+      <VersionFooter />
     </aside>
   );
 }

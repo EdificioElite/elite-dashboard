@@ -1,9 +1,11 @@
 export default function VersionFooter() {
+  const version = typeof __VERSION__ !== 'undefined' ? __VERSION__ : '';
+  const commit = typeof __COMMIT_HASH__ !== 'undefined' ? __COMMIT_HASH__ : '';
+  const label = [version, commit].filter(Boolean).join(' · ') || 'dev';
+
   return (
-    <footer className="absolute bottom-6 right-4 select-none opacity-25">
-      <span className="text-[9px] font-mono text-cocoa">
-        {typeof __COMMIT_HASH__ !== 'undefined' ? __COMMIT_HASH__ : 'dev'}
-      </span>
+    <footer className="mt-auto px-4 pb-4 select-none">
+      <span className="text-[11px] font-mono text-cocoa/40">{label}</span>
     </footer>
   );
 }
