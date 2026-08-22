@@ -1,16 +1,44 @@
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, afterEach } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import VersionFooter from './VersionFooter';
 
+const g = globalThis as Record<string, unknown>;
+
+afterEach(() => {
+  delete g.__VERSION__;
+  delete g.__COMMIT_HASH__;
+});
+
 describe('VersionFooter', () => {
-  it('renders a fallback label', () => {
+  it('renders fallback when no build metadata is present', () => {
     render(
       <MemoryRouter>
         <VersionFooter />
       </MemoryRouter>
     );
     expect(screen.getByText('dev')).toBeInTheDocument();
+  });
+
+  it('renders release · commit when both are present', () => {
+    g.__VERSION__ = 'v1.14.0';
+    g.__COMMIT_HASH__ = '824a6be';
+    render(
+      <MemoryRouter>
+        <VersionFooter />
+      </MemoryRouter>
+    );
+    expect(screen.getByText('v1.14.0 · 824a6be')).toBeInTheDocument();
+  });
+
+  it('renders only commit when release tag is missing', () => {
+    g.__COMMIT_HASH__ = '824a6be';
+    render(
+      <MemoryRouter>
+        <VersionFooter />
+      </MemoryRouter>
+    );
+    expect(screen.getByText('824a6be')).toBeInTheDocument();
   });
 
   it('has text-11px font-mono class', () => {
