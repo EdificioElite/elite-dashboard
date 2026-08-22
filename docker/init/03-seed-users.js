@@ -7,18 +7,19 @@ async function seed() {
   });
 
   const users = [
-    { email: 'admin@elite.com', password: 'admin123', vecino_piso: '1A', is_admin: true },
-    { email: 'vecino1@elite.com', password: 'password1', vecino_piso: '2A', is_admin: false },
-    { email: 'vecino2@elite.com', password: 'password1', vecino_piso: '3A', is_admin: false },
-    { email: 'vecino3@elite.com', password: 'password1', vecino_piso: '4A', is_admin: false },
-    { email: 'vecino4@elite.com', password: 'password1', vecino_piso: '5A', is_admin: false },
+    { email: 'admin@elite.com', password: 'admin123', vecino_piso: '1A', role: 'admin' },
+    { email: 'directiva@elite.com', password: 'directiva123', vecino_piso: '6A', role: 'directiva' },
+    { email: 'vecino1@elite.com', password: 'password1', vecino_piso: '2A', role: 'usuario' },
+    { email: 'vecino2@elite.com', password: 'password1', vecino_piso: '3A', role: 'usuario' },
+    { email: 'vecino3@elite.com', password: 'password1', vecino_piso: '4A', role: 'usuario' },
+    { email: 'vecino4@elite.com', password: 'password1', vecino_piso: '5A', role: 'usuario' },
   ];
 
   for (const u of users) {
     const hash = await bcrypt.hash(u.password, 12);
     await pool.query(
-      'INSERT INTO usuarios (email, password_hash, vecino_piso, is_admin) VALUES ($1, $2, $3, $4) ON CONFLICT (email) DO NOTHING',
-      [u.email, hash, u.vecino_piso, u.is_admin]
+      'INSERT INTO usuarios (email, password_hash, vecino_piso, role) VALUES ($1, $2, $3, $4) ON CONFLICT (email) DO NOTHING',
+      [u.email, hash, u.vecino_piso, u.role]
     );
     console.log('Usuario creado: ' + u.email);
   }
