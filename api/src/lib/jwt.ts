@@ -11,7 +11,7 @@ export interface JwtPayload {
   source?: string;
 }
 
-const EXPIRATION = '7d';
+const EXPIRATION = '1h';
 
 export function signToken(payload: JwtPayload): string {
   return jwt.sign(payload, config.jwtSecret, { expiresIn: EXPIRATION });
