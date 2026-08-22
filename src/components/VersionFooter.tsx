@@ -1,6 +1,7 @@
 export default function VersionFooter() {
+  const version = typeof __VERSION__ !== 'undefined' && __VERSION__ ? `v${__VERSION__}` : '';
   const commit = typeof __COMMIT_HASH__ !== 'undefined' ? __COMMIT_HASH__ : '';
-  const label = commit || 'dev';
+  const label = [version, commit].filter(Boolean).join(' · ') || 'dev';
 
   return (
     <footer className="select-none">

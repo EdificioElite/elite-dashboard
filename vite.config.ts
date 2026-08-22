@@ -2,6 +2,7 @@ import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 import { VitePWA } from 'vite-plugin-pwa';
 import { execSync } from 'child_process';
+import { readFileSync } from 'fs';
 
 function getCommitHash(): string {
   if (process.env.VERCEL_GIT_COMMIT_SHA) {
@@ -14,7 +15,12 @@ function getCommitHash(): string {
   }
 }
 
+const pkg = JSON.parse(readFileSync(new URL('./package.json', import.meta.url), 'utf-8')) as {
+  version?: string;
+};
+
 const commitHash = getCommitHash();
+const version = pkg.version ?? '';
 
 export default defineConfig({
   plugins: [
@@ -54,6 +60,7 @@ export default defineConfig({
   ],
   define: {
     __COMMIT_HASH__: JSON.stringify(commitHash),
+    __VERSION__: JSON.stringify(version),
     __BUILD_TIME__: JSON.stringify(new Date().toISOString()),
   },
 });

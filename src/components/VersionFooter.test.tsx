@@ -6,6 +6,7 @@ import VersionFooter from './VersionFooter';
 const g = globalThis as Record<string, unknown>;
 
 afterEach(() => {
+  delete g.__VERSION__;
   delete g.__COMMIT_HASH__;
 });
 
@@ -19,7 +20,18 @@ describe('VersionFooter', () => {
     expect(screen.getByText('dev')).toBeInTheDocument();
   });
 
-  it('renders commit hash when present', () => {
+  it('renders version · commit when both are present', () => {
+    g.__VERSION__ = '1.14.0';
+    g.__COMMIT_HASH__ = '824a6be';
+    render(
+      <MemoryRouter>
+        <VersionFooter />
+      </MemoryRouter>
+    );
+    expect(screen.getByText('v1.14.0 · 824a6be')).toBeInTheDocument();
+  });
+
+  it('renders only commit when version is missing', () => {
     g.__COMMIT_HASH__ = '824a6be';
     render(
       <MemoryRouter>
