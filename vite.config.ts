@@ -3,12 +3,18 @@ import react from '@vitejs/plugin-react';
 import { VitePWA } from 'vite-plugin-pwa';
 import { execSync } from 'child_process';
 
-let commitHash = 'unknown';
-let release = '';
-try {
-  commitHash = execSync('git rev-parse --short HEAD').toString().trim();
-  release = execSync('git describe --tags --abbrev=0').toString().trim();
-} catch {}
+function getCommitHash(): string {
+  if (process.env.VERCEL_GIT_COMMIT_SHA) {
+    return process.env.VERCEL_GIT_COMMIT_SHA.slice(0, 7);
+  }
+  try {
+    return execSync('git rev-parse --short HEAD').toString().trim();
+  } catch {
+    return 'unknown';
+  }
+}
+
+const commitHash = getCommitHash();
 
 export default defineConfig({
   plugins: [
@@ -48,7 +54,6 @@ export default defineConfig({
   ],
   define: {
     __COMMIT_HASH__: JSON.stringify(commitHash),
-    __VERSION__: JSON.stringify(release),
     __BUILD_TIME__: JSON.stringify(new Date().toISOString()),
   },
 });
