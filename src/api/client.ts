@@ -1,7 +1,56 @@
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001/api';
 
+const ACCESS_KEY = 'token';
+const REFRESH_KEY = 'refreshToken';
+
 function getToken(): string | null {
-  return localStorage.getItem('token');
+  return localStorage.getItem(ACCESS_KEY);
+}
+
+function getRefreshToken(): string | null {
+  return localStorage.getItem(REFRESH_KEY);
+}
+
+function setTokens(access: string, refresh: string) {
+  localStorage.setItem(ACCESS_KEY, access);
+  localStorage.setItem(REFRESH_KEY, refresh);
+}
+
+function clearTokens() {
+  localStorage.removeItem(ACCESS_KEY);
+  localStorage.removeItem(REFRESH_KEY);
+}
+
+const AUTH_ENDPOINTS = new Set([
+  '/auth/login',
+  '/auth/refresh',
+  '/auth/register',
+  '/auth/logout',
+  '/auth/forgot-password',
+  '/auth/reset-password',
+]);
+
+let refreshPromise: Promise<string> | null = null;
+
+async function refreshAccessToken(): Promise<string> {
+  const refreshToken = getRefreshToken();
+  if (!refreshToken) throw new Error('No refresh token');
+
+  const response = await fetch(`${API_URL}/auth/refresh`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ refreshToken }),
+  });
+
+  if (!response.ok) {
+    clearTokens();
+    const body = await response.json().catch(() => ({}));
+    throw new Error(body.error || 'Refresh failed');
+  }
+
+  const data = await response.json();
+  setTokens(data.token, data.refreshToken);
+  return data.token;
 }
 
 export async function apiFetch<T>(
@@ -23,6 +72,33 @@ export async function apiFetch<T>(
     ...options,
     headers,
   });
+
+  if (response.status === 401 && !AUTH_ENDPOINTS.has(endpoint) && getRefreshToken()) {
+    if (!refreshPromise) {
+      refreshPromise = refreshAccessToken().finally(() => {
+        refreshPromise = null;
+      });
+    }
+    const newToken = await refreshPromise;
+
+    const retryHeaders: Record<string, string> = {
+      'Content-Type': 'application/json',
+      ...((options.headers as Record<string, string>) || {}),
+      Authorization: `Bearer ${newToken}`,
+    };
+
+    const retryResponse = await fetch(`${API_URL}${endpoint}`, {
+      ...options,
+      headers: retryHeaders,
+    });
+
+    if (!retryResponse.ok) {
+      const body = await retryResponse.json().catch(() => ({}));
+      throw new Error(body.error || `HTTP ${retryResponse.status}`);
+    }
+
+    return retryResponse.json();
+  }
 
   if (!response.ok) {
     const body = await response.json().catch(() => ({}));
