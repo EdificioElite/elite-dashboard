@@ -4,7 +4,7 @@ export default function VersionFooter() {
   const label = [version, commit].filter(Boolean).join(' · ') || 'dev';
 
   return (
-    <footer className="mt-auto px-4 pb-4 select-none">
+    <footer className="select-none">
       <span className="text-[11px] font-mono text-cocoa/40">{label}</span>
     </footer>
   );

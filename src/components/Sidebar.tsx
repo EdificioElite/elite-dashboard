@@ -15,7 +15,7 @@ export default function Sidebar() {
 
   return (
     <aside
-      className="hidden lg:flex flex-col w-[220px] shrink-0 border-r border-cocoa/6 bg-cream/60 backdrop-blur-sm min-h-screen sticky top-[52px]"
+      className="hidden lg:flex flex-col w-[220px] shrink-0 border-r border-cocoa/6 bg-cream/60 backdrop-blur-sm sticky top-[52px]"
       style={{ height: 'calc(100vh - 52px)' }}
       role="navigation"
       aria-label="Navegación principal"
@@ -24,7 +24,9 @@ export default function Sidebar() {
         <NavSection tone="edificio" label="Edificio" items={EDIFICIO_NAV} isActive={isActive} onSelect={(p) => navigate(p)} />
         {showAdmin && <NavSection tone="admin" label="Admin" items={ADMIN_NAV} isActive={isActive} onSelect={(p) => navigate(p)} />}
       </nav>
-      <VersionFooter />
+      <div className="mt-auto px-4 pb-4">
+        <VersionFooter />
+      </div>
     </aside>
   );
 }
