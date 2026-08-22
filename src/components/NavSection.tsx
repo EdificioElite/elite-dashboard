@@ -10,7 +10,7 @@ export default function NavSection({ label, tone = 'edificio', items, isActive, 
 }) {
   const titleColor = tone === 'admin' ? 'text-accent-2' : 'text-accent-dark';
   return (
-    <section className="rounded-md border border-cocoa/8 bg-cocoa/4 p-3">
+    <section className="rounded-md border border-cocoa/8 bg-cocoa/4 p-3" aria-label={label}>
       <div className={`eyebrow px-1 pb-2 mb-2 border-b border-cocoa/10 ${titleColor}`}>{label}</div>
       <ul className="flex flex-col gap-0.5" role="list">
         {items.map((item) => {
