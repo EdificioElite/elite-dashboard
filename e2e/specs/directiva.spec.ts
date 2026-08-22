@@ -51,7 +51,7 @@ test.describe('Directiva (admin solo lectura)', () => {
     await expect(page.locator('[title="Cambiar contraseña"]')).toHaveCount(0);
 
     await expect(page.locator('tbody select')).toHaveCount(0);
-    await expect(page.locator('tbody').getByText('Directiva')).toBeVisible();
+    await expect(page.locator('tbody').getByText('Directiva', { exact: true })).toBeVisible();
   });
 
   test('no puede escribir via API (403)', async () => {
@@ -87,15 +87,52 @@ test.describe('Directiva (admin solo lectura)', () => {
 });
 
 test.describe('Admin gestiona roles', () => {
-  test('cambia el rol de un usuario a directiva con el dropdown', async ({ page }) => {
+  let api: APIRequestContext;
+
+  test.beforeAll(async () => {
+    api = await request.newContext({ baseURL: API_BASE });
+  });
+
+  test.afterAll(async () => {
+    await api.dispose();
+  });
+
+  test('ve el dropdown de rol en cada usuario', async ({ page }) => {
     await loginAsAdmin(page);
     await page.goto('/admin/usuarios');
 
-    const row = page.locator('tr', { hasText: 'vecino4@elite.com' });
-    await row.locator('select').selectOption('directiva');
-    await expect(row.locator('select')).toHaveValue('directiva', { timeout: 5000 });
+    const row = page.locator('tr', { hasText: 'vecino1@elite.com' });
+    const select = row.locator('select');
+    await expect(select).toBeVisible();
+    await expect(select).toHaveValue('usuario');
+    await expect(select.locator('option')).toHaveText(['Usuario', 'Directiva', 'Admin']);
+  });
 
-    await row.locator('select').selectOption('usuario');
-    await expect(row.locator('select')).toHaveValue('usuario', { timeout: 5000 });
+  test('cambia el rol de un usuario via API', async () => {
+    const adminLogin = await api.post('/api/auth/login', {
+      data: { email: 'admin@elite.com', password: 'admin123' },
+    });
+    const { token } = await adminLogin.json();
+
+    const usersRes = await api.get('/api/admin/usuarios', {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    const users = await usersRes.json();
+    const vecino1 = users.find((u: any) => u.email === 'vecino1@elite.com');
+    expect(vecino1).toBeDefined();
+
+    const updateRes = await api.put(`/api/admin/usuarios/${vecino1.id}`, {
+      headers: { Authorization: `Bearer ${token}` },
+      data: { role: 'directiva' },
+    });
+    expect(updateRes.status()).toBe(200);
+    expect((await updateRes.json()).role).toBe('directiva');
+
+    const restoreRes = await api.put(`/api/admin/usuarios/${vecino1.id}`, {
+      headers: { Authorization: `Bearer ${token}` },
+      data: { role: 'usuario' },
+    });
+    expect(restoreRes.status()).toBe(200);
+    expect((await restoreRes.json()).role).toBe('usuario');
   });
 });

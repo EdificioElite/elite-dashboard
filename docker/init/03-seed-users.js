@@ -8,7 +8,7 @@ async function seed() {
 
   const users = [
     { email: 'admin@elite.com', password: 'admin123', vecino_piso: '1A', role: 'admin' },
-    { email: 'directiva@elite.com', password: 'directiva123', vecino_piso: '6A', role: 'directiva' },
+    { email: 'directiva@elite.com', password: 'directiva123', vecino_piso: '1A', role: 'directiva' },
     { email: 'vecino1@elite.com', password: 'password1', vecino_piso: '2A', role: 'usuario' },
     { email: 'vecino2@elite.com', password: 'password1', vecino_piso: '3A', role: 'usuario' },
     { email: 'vecino3@elite.com', password: 'password1', vecino_piso: '4A', role: 'usuario' },
