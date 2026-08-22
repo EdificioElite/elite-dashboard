@@ -54,6 +54,19 @@ describe('apiFetch silent refresh', () => {
     expect(localStorage.getItem('refreshToken')).toBeNull();
   });
 
+  it('keeps tokens on transient refresh error (5xx)', async () => {
+    localStorage.setItem('token', 'expired-access');
+    localStorage.setItem('refreshToken', 'valid-refresh');
+
+    fetchMock
+      .mockResolvedValueOnce(jsonResponse(401, { error: 'Token inválido o expirado' }))
+      .mockResolvedValueOnce(jsonResponse(500, { error: 'Error interno del servidor' }));
+
+    await expect(apiFetch('/consumos')).rejects.toThrow('Error interno del servidor');
+    expect(localStorage.getItem('token')).toBe('expired-access');
+    expect(localStorage.getItem('refreshToken')).toBe('valid-refresh');
+  });
+
   it('does not attempt refresh on auth endpoints', async () => {
     fetchMock.mockResolvedValueOnce(jsonResponse(401, { error: 'Credenciales inválidas' }));
 

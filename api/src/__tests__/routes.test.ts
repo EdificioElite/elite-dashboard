@@ -547,6 +547,15 @@ describe('Auth routes', () => {
       const res = await request(app).post('/api/auth/logout').send({});
       expect(res.status).toBe(200);
     });
+
+    it('returns 200 even if revocation fails', async () => {
+      mockRevokeRefreshToken.mockRejectedValueOnce(new Error('db down'));
+      const app = createApp();
+      const res = await request(app)
+        .post('/api/auth/logout')
+        .send({ refreshToken: 'tok' });
+      expect(res.status).toBe(200);
+    });
   });
 });
 

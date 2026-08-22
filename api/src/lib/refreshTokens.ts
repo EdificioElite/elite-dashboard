@@ -49,13 +49,20 @@ export async function verifyRefreshToken(rawToken: string): Promise<RefreshToken
 }
 
 export async function rotateRefreshToken(rawToken: string): Promise<RotatedRefreshToken | null> {
-  const data = await verifyRefreshToken(rawToken);
-  if (!data) return null;
+  const tokenHash = hashRefreshToken(rawToken);
+  // Reclamación atómica: solo una petición concurrente puede revocar un token dado.
+  const result = await query(
+    `UPDATE refresh_tokens SET revoked_at = NOW()
+     WHERE token_hash = $1 AND revoked_at IS NULL AND expires_at > NOW()
+     RETURNING id, user_id`,
+    [tokenHash]
+  );
 
-  await query(`UPDATE refresh_tokens SET revoked_at = NOW() WHERE id = $1`, [data.id]);
+  if (result.rows.length === 0) return null;
 
-  const newToken = await createRefreshToken(data.userId);
-  return { userId: data.userId, refreshToken: newToken };
+  const row = result.rows[0];
+  const newToken = await createRefreshToken(row.user_id);
+  return { userId: row.user_id, refreshToken: newToken };
 }
 
 export async function revokeRefreshToken(rawToken: string): Promise<void> {

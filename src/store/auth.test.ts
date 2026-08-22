@@ -86,7 +86,7 @@ describe('auth store', () => {
     expect(useAuthStore.getState().user).toBeNull();
   });
 
-  it('checkAuth refreshes when only refresh token exists', async () => {
+  it('checkAuth proceeds when only refresh token exists', async () => {
     localStorage.setItem('refreshToken', 'valid-refresh');
     const mockFetch = apiFetch as ReturnType<typeof vi.fn>;
     mockFetch.mockResolvedValueOnce({ id: 1, vecino_piso: '1A', email: 'test@test.com', role: 'usuario' });

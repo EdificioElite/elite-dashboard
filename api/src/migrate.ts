@@ -25,7 +25,7 @@ async function migrate() {
     const sql = fs.readFileSync(path.join(migrationsDir, file), 'utf-8');
     logger.info(`Running migration: ${file}`);
     await pool.query(sql);
-    await pool.query('INSERT INTO schema_migrations (name) VALUES ($1)', [file]);
+    await pool.query('INSERT INTO schema_migrations (name) VALUES ($1) ON CONFLICT (name) DO NOTHING', [file]);
     logger.info(`Migration ${file} complete`);
   }
 

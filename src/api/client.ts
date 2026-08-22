@@ -43,8 +43,12 @@ async function refreshAccessToken(): Promise<string> {
   });
 
   if (!response.ok) {
-    clearTokens();
     const body = await response.json().catch(() => ({}));
+    // Solo limpiamos tokens si el refresh token es inválido/expirado (400/401).
+    // Ante errores transitorios (5xx/red) conservamos la sesión para reintentar.
+    if (response.status === 400 || response.status === 401) {
+      clearTokens();
+    }
     throw new Error(body.error || 'Refresh failed');
   }
 

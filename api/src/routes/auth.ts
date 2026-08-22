@@ -119,11 +119,10 @@ router.post('/auth/logout', rateLimit(30, 60 * 1000), async (req: Request, res: 
     if (refreshToken && typeof refreshToken === 'string') {
       await revokeRefreshToken(refreshToken);
     }
-    res.json({ message: 'Sesión cerrada' });
   } catch (err) {
     logger.error(err, 'Logout error');
-    res.status(500).json({ error: 'Error interno del servidor' });
   }
+  res.json({ message: 'Sesión cerrada' });
 });
 
 router.get('/auth/me', authMiddleware, async (req: Request, res: Response) => {

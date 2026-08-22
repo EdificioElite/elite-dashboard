@@ -82,9 +82,8 @@ describe('refreshTokens', () => {
   it('rotateRefreshToken revokes old and creates new', async () => {
     mockQuery
       .mockResolvedValueOnce({
-        rows: [{ id: 7, user_id: 3, expires_at: new Date(Date.now() + 100000).toISOString(), revoked_at: null }],
-      })
-      .mockResolvedValueOnce({ rows: [] }) // UPDATE revoke
+        rows: [{ id: 7, user_id: 3 }],
+      }) // UPDATE ... RETURNING
       .mockResolvedValueOnce({ rows: [] }); // INSERT new
 
     const result = await rotateRefreshToken('old');
@@ -96,12 +95,20 @@ describe('refreshTokens', () => {
       c[0].includes('UPDATE refresh_tokens SET revoked_at')
     );
     expect(updateCall).toBeDefined();
-    expect(updateCall![1]).toEqual([7]);
+    expect(updateCall![0]).toContain('revoked_at IS NULL');
+    expect(updateCall![0]).toContain('RETURNING');
+    expect(updateCall![1]).toEqual([hashRefreshToken('old')]);
   });
 
   it('rotateRefreshToken returns null for invalid token', async () => {
     mockQuery.mockResolvedValueOnce({ rows: [] });
     const result = await rotateRefreshToken('bad');
+    expect(result).toBeNull();
+  });
+
+  it('rotateRefreshToken returns null for expired token', async () => {
+    mockQuery.mockResolvedValueOnce({ rows: [] });
+    const result = await rotateRefreshToken('expired');
     expect(result).toBeNull();
   });
 
