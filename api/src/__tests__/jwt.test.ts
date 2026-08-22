@@ -43,9 +43,9 @@ describe('JWT helpers', () => {
     const token = signToken(payload);
     const decoded = jwt.decode(token) as any;
     expect(decoded.exp).toBeDefined();
-    // Should expire in ~7 days
+    // Should expire in ~1 hour
     const now = Math.floor(Date.now() / 1000);
     expect(decoded.exp).toBeGreaterThan(now);
-    expect(decoded.exp).toBeLessThan(now + 8 * 24 * 60 * 60);
+    expect(decoded.exp).toBeLessThan(now + 2 * 60 * 60);
   });
 });

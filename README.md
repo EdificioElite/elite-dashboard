@@ -10,7 +10,7 @@ Vecino -> Frontend React (Vercel) -> Cloudflare Tunnel -> API Express (docker-co
 
 - **Frontend:** React + Vite + TypeScript + Tailwind + Recharts, desplegado en Vercel
 - **Backend:** Express + TypeScript, dockerizado dentro del docker-compose del NUC
-- **Auth:** JWT con email/password
+- **Auth:** JWT access token (1h) + refresh token (30d, sesión deslizante)
 - **Datos:** Solo lectura de las tablas `consumos` y `facturas` del PostgreSQL existente (n8n escribe)
 
 ## Desarrollo local
@@ -43,18 +43,9 @@ npm run dev            # arranca en :5173
 
 ### Backend (NUC)
 
-Anadir al `docker-compose.yml` existente:
+El backend se despliega como stack de Portainer desde el repo [`EdificioElite/portainer-compose`](https://github.com/EdificioElite/portainer-compose) (directorio `dashboards/`), usando la imagen `ghcr.io/edificioelite/elite-dashboard/api`.
 
-```yaml
-elite-api:
-  build: ./api
-  ports:
-    - "3001:3001"
-  environment:
-    - DATABASE_URL=postgres://...
-    - JWT_SECRET=...
-    - CORS_ORIGIN=https://elite-dashboard.vercel.app
-```
+Las migraciones se ejecutan automáticamente con un init-container (`dashboard-api-migrate` / `dashboard-api-dev-migrate`) que corre `node dist/migrate.js` con los roles `migrator` (prod) y `migrator_dev` (dev) antes de arrancar la API. Ver [CONTRIBUTING.md](./CONTRIBUTING.md#migraciones) para el proceso completo (roles de migración, baseline y release).
 
 ### Frontend (Vercel)
 
@@ -67,8 +58,8 @@ Conectar el repo en Vercel:
 ### Crear primer usuario admin
 
 ```sql
-INSERT INTO usuarios (email, password_hash, vecino_piso, is_admin)
-VALUES ('admin@email.com', '<hash generado con bcrypt>', '1A', true);
+INSERT INTO usuarios (email, password_hash, vecino_piso, role)
+VALUES ('admin@email.com', '<hash generado con bcrypt>', '1A', 'admin');
 ```
 
 ## Estructura

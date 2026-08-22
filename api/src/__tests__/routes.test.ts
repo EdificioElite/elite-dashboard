@@ -36,12 +36,22 @@ vi.mock('../lib/email', () => ({
   sentEmails: [],
 }));
 
+vi.mock('../lib/refreshTokens', () => ({
+  createRefreshToken: vi.fn().mockResolvedValue('mock-refresh-token'),
+  rotateRefreshToken: vi.fn(),
+  revokeRefreshToken: vi.fn().mockResolvedValue(undefined),
+}));
+
 import { verifyEmailToken, createEmailToken, markTokenUsed } from '../lib/tokens';
 import { sendResetEmail } from '../lib/email';
+import { createRefreshToken, rotateRefreshToken, revokeRefreshToken } from '../lib/refreshTokens';
 const mockVerifyEmailToken = verifyEmailToken as ReturnType<typeof vi.fn>;
 const mockCreateEmailToken = createEmailToken as ReturnType<typeof vi.fn>;
 const mockMarkTokenUsed = markTokenUsed as ReturnType<typeof vi.fn>;
 const mockSendResetEmail = sendResetEmail as ReturnType<typeof vi.fn>;
+const mockCreateRefreshToken = createRefreshToken as ReturnType<typeof vi.fn>;
+const mockRotateRefreshToken = rotateRefreshToken as ReturnType<typeof vi.fn>;
+const mockRevokeRefreshToken = revokeRefreshToken as ReturnType<typeof vi.fn>;
 
 import { query } from '../db';
 const mockQuery = query as ReturnType<typeof vi.fn>;
@@ -65,6 +75,7 @@ describe('Auth routes', () => {
   beforeEach(() => {
     vi.resetAllMocks();
     mockCreateEmailToken.mockResolvedValue('mock-token');
+    mockCreateRefreshToken.mockResolvedValue('mock-refresh-token');
   });
 
   describe('POST /api/auth/login', () => {
@@ -118,6 +129,7 @@ describe('Auth routes', () => {
         .send({ email: 'test@test.com', password: 'correct' });
       expect(res.status).toBe(200);
       expect(res.body.token).toBeDefined();
+      expect(res.body.refreshToken).toBe('mock-refresh-token');
       expect(res.body.user.email).toBe('test@test.com');
       expect(res.body.user.role).toBe('usuario');
     });
@@ -381,6 +393,7 @@ describe('Auth routes', () => {
       const res = await request(app).post('/api/auth/register').send({ token: 'valid', password: 'Pass1234' });
       expect(res.status).toBe(200);
       expect(res.body.token).toBeDefined();
+      expect(res.body.refreshToken).toBe('mock-refresh-token');
       expect(mockMarkTokenUsed).toHaveBeenCalledWith(1);
     });
 
@@ -391,6 +404,7 @@ describe('Auth routes', () => {
       const res = await request(app).post('/api/auth/register').send({ token: 'valid', password: 'Pass1234' });
       expect(res.status).toBe(200);
       expect(res.body.token).toBeDefined();
+      expect(res.body.refreshToken).toBe('mock-refresh-token');
       expect(res.body.user.email).toBe('a@a.com');
       expect(mockMarkTokenUsed).toHaveBeenCalledWith(1);
     });
@@ -473,6 +487,74 @@ describe('Auth routes', () => {
       expect(res.status).toBe(200);
       expect(res.body.message).toContain('actualizada');
       expect(mockMarkTokenUsed).toHaveBeenCalledWith(1);
+    });
+  });
+
+  describe('POST /api/auth/refresh', () => {
+    it('returns 400 when refreshToken is missing', async () => {
+      const app = createApp();
+      const res = await request(app).post('/api/auth/refresh').send({});
+      expect(res.status).toBe(400);
+    });
+
+    it('returns 401 when refresh token is invalid', async () => {
+      mockRotateRefreshToken.mockResolvedValueOnce(null);
+      const app = createApp();
+      const res = await request(app)
+        .post('/api/auth/refresh')
+        .send({ refreshToken: 'bad' });
+      expect(res.status).toBe(401);
+    });
+
+    it('returns new access + refresh tokens when valid', async () => {
+      mockRotateRefreshToken.mockResolvedValueOnce({ userId: 1, refreshToken: 'new-refresh' });
+      mockQuery.mockResolvedValueOnce({
+        rows: [{ id: 1, vecino_piso: '1A', email: 'test@test.com', role: 'usuario' }],
+      });
+      const app = createApp();
+      const res = await request(app)
+        .post('/api/auth/refresh')
+        .send({ refreshToken: 'valid' });
+      expect(res.status).toBe(200);
+      expect(res.body.token).toBeDefined();
+      expect(res.body.refreshToken).toBe('new-refresh');
+      expect(res.body.user.email).toBe('test@test.com');
+    });
+
+    it('returns 401 when user no longer exists', async () => {
+      mockRotateRefreshToken.mockResolvedValueOnce({ userId: 999, refreshToken: 'new-refresh' });
+      mockQuery.mockResolvedValueOnce({ rows: [] });
+      const app = createApp();
+      const res = await request(app)
+        .post('/api/auth/refresh')
+        .send({ refreshToken: 'valid' });
+      expect(res.status).toBe(401);
+    });
+  });
+
+  describe('POST /api/auth/logout', () => {
+    it('revokes refresh token when provided', async () => {
+      const app = createApp();
+      const res = await request(app)
+        .post('/api/auth/logout')
+        .send({ refreshToken: 'tok' });
+      expect(res.status).toBe(200);
+      expect(mockRevokeRefreshToken).toHaveBeenCalledWith('tok');
+    });
+
+    it('returns 200 when no refresh token provided', async () => {
+      const app = createApp();
+      const res = await request(app).post('/api/auth/logout').send({});
+      expect(res.status).toBe(200);
+    });
+
+    it('returns 200 even if revocation fails', async () => {
+      mockRevokeRefreshToken.mockRejectedValueOnce(new Error('db down'));
+      const app = createApp();
+      const res = await request(app)
+        .post('/api/auth/logout')
+        .send({ refreshToken: 'tok' });
+      expect(res.status).toBe(200);
     });
   });
 });
