@@ -1,11 +1,12 @@
 import { create } from 'zustand';
 import { apiFetch } from '../api/client';
+import type { Role } from '../lib/roles';
 
 interface User {
   id: number;
   vecino_piso: string;
   email: string;
-  is_admin: boolean;
+  role: Role;
   ultima_conexion: string | null;
   ultima_consulta_ha: string | null;
 }

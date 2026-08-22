@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
-import { apiFetch } from '../api/client';
+import { apiFetch, updateUser } from '../api/client';
 import { useAuthStore } from '../store/auth';
+import { canManage, type Role } from '../lib/roles';
 import Icon from '../components/Icon';
 import EditUserModal from '../components/EditUserModal';
 import ChangePasswordModal from '../components/ChangePasswordModal';
@@ -11,7 +12,7 @@ interface Usuario {
   id: number;
   vecino_piso: string | null;
   email: string;
-  is_admin: boolean;
+  role: Role;
   created_at: string;
   ultima_conexion: string | null;
   ultima_consulta_ha: string | null;
@@ -71,7 +72,8 @@ export default function UsuariosPage() {
 
   const stats = [
     { label: 'Usuarios', value: usuarios.length, icon: 'users', iconColor: 'var(--accent)' },
-    { label: 'Admins', value: usuarios.filter(u => u.is_admin).length, icon: 'settings', iconColor: 'var(--accent-2)' },
+    { label: 'Admins', value: usuarios.filter(u => u.role === 'admin').length, icon: 'settings', iconColor: 'var(--accent-2)' },
+    { label: 'Directiva', value: usuarios.filter(u => u.role === 'directiva').length, icon: 'eye', iconColor: 'var(--sage)' },
     { label: 'Con piso', value: usuarios.filter(u => u.vecino_piso).length, icon: 'check', iconColor: 'var(--sage)' },
   ];
 
@@ -86,15 +88,17 @@ export default function UsuariosPage() {
             <h1 className="font-display text-[40px] font-medium text-cocoa mt-1" style={{ letterSpacing: '-0.02em' }}>Usuarios</h1>
             <p className="text-sm text-cocoa/60 mt-1.5 max-w-lg">Gestiona los accesos al dashboard.</p>
           </div>
+          {user && canManage(user.role) && (
           <button onClick={() => setShowInviteModal(true)} className="btn btn-primary">
             <Icon name="plus" size={14} />
             Crear acceso
           </button>
+          )}
         </div>
 
         <section aria-label="Gestión de usuarios">
 
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-[16px]">
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-[16px]">
           {stats.map(s => (
             <div key={s.label} className="glass p-[20px] glass-hover">
               <div className="flex items-center gap-2.5 mb-2">
@@ -139,16 +143,33 @@ export default function UsuariosPage() {
                     <td className="text-sm text-cocoa">{u.email}</td>
                     <td className="text-sm text-cocoa/60">{u.vecino_piso || '—'}</td>
                     <td>
-                      <button
-                        onClick={() => setEditingUser(u)}
-                        className={`toggle-track ${u.is_admin ? 'on' : ''}`}
-                        aria-label={u.is_admin ? 'Quitar admin' : 'Hacer admin'}
-                        role="switch"
-                        aria-checked={u.is_admin}
-                        title="Editar rol"
-                      >
-                        <span className="toggle-thumb" />
-                      </button>
+                      {user && canManage(user.role) ? (
+                        <select
+                          value={u.role}
+                          onChange={async (e) => {
+                            const newRole = e.target.value as Role;
+                            try {
+                              await updateUser(u.id, { role: newRole });
+                              fetchUsuarios();
+                            } catch (err: any) {
+                              alert(err.message || 'Error al cambiar rol');
+                            }
+                          }}
+                          className="input-card text-xs py-1"
+                        >
+                          <option value="usuario">Usuario</option>
+                          <option value="directiva">Directiva</option>
+                          <option value="admin">Admin</option>
+                        </select>
+                      ) : (
+                        <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${
+                          u.role === 'admin' ? 'bg-accent/10 text-accent' :
+                          u.role === 'directiva' ? 'bg-sage/10 text-sage' :
+                          'text-cocoa/40'
+                        }`}>
+                          {u.role === 'admin' ? 'Admin' : u.role === 'directiva' ? 'Directiva' : 'Usuario'}
+                        </span>
+                      )}
                     </td>
                     <td className="text-center">
                       <span className="inline-flex items-center gap-1.5">
@@ -176,6 +197,7 @@ export default function UsuariosPage() {
                     </td>
                     <td className="text-sm text-cocoa/60 text-center">{formatUltimaConexion(u.ultima_conexion)}</td>
                     <td>
+                      {user && canManage(user.role) ? (
                       <div className="flex items-center justify-center gap-1">
                         <button onClick={() => setEditingUser(u)} className="btn btn-ghost p-2 text-cocoa/40 hover:text-cocoa" title="Editar usuario"><Icon name="edit" size={15} /></button>
                         <button onClick={() => setChangingPassword(u)} className="btn btn-ghost p-2 text-cocoa/40 hover:text-cocoa" title="Cambiar contraseña"><Icon name="key" size={15} /></button>
@@ -183,6 +205,9 @@ export default function UsuariosPage() {
                           <button onClick={() => setDeletingUser(u)} className="btn btn-ghost p-2 text-cocoa/40 hover:text-red-600" title="Eliminar usuario"><Icon name="trash" size={15} /></button>
                         )}
                       </div>
+                      ) : (
+                        <span className="text-xs text-cocoa/30">—</span>
+                      )}
                     </td>
                   </tr>
                 ))}
@@ -195,8 +220,8 @@ export default function UsuariosPage() {
 
       {editingUser && (
         <EditUserModal
-          vecino={{ piso: editingUser.vecino_piso || '', nombre: '', user_id: editingUser.id, email: editingUser.email, is_admin: editingUser.is_admin }}
-          vecinos={usuarios.map(u => ({ piso: u.vecino_piso || '', nombre: '', user_id: u.id, email: u.email, is_admin: u.is_admin }))}
+          vecino={{ piso: editingUser.vecino_piso || '', nombre: '', user_id: editingUser.id, email: editingUser.email, role: editingUser.role }}
+          vecinos={usuarios.map(u => ({ piso: u.vecino_piso || '', nombre: '', user_id: u.id, email: u.email, role: u.role }))}
           currentUserId={user?.id || 0}
           onClose={() => setEditingUser(null)}
           onSaved={() => { setEditingUser(null); fetchUsuarios(); }}

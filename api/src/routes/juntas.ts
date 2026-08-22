@@ -2,7 +2,7 @@ import { Router, Request, Response } from 'express';
 import multer from 'multer';
 import { query } from '../db';
 import { authMiddleware } from '../middleware/auth';
-import { adminMiddleware } from '../middleware/admin';
+import { requireAdmin } from '../middleware/roles';
 import { logger } from '../lib/logger';
 import { uploadPDF, getPDFStream, deleteFile, renameFile } from '../lib/googleDrive';
 
@@ -125,7 +125,7 @@ router.get('/juntas/:id', authMiddleware, async (req: Request, res: Response) =>
   }
 });
 
-router.post('/admin/juntas', authMiddleware, adminMiddleware, (req, res) => {
+router.post('/admin/juntas', authMiddleware, requireAdmin, (req, res) => {
   handleUpload(req, res, async () => {
     try {
       const { tipo, fecha } = req.body;
@@ -172,7 +172,7 @@ router.post('/admin/juntas', authMiddleware, adminMiddleware, (req, res) => {
   });
 });
 
-router.put('/admin/juntas/:id', authMiddleware, adminMiddleware, (req, res) => {
+router.put('/admin/juntas/:id', authMiddleware, requireAdmin, (req, res) => {
   handleUpload(req, res, async () => {
     try {
       const { id } = req.params;
@@ -232,7 +232,7 @@ router.put('/admin/juntas/:id', authMiddleware, adminMiddleware, (req, res) => {
   });
 });
 
-router.delete('/admin/juntas/:id', authMiddleware, adminMiddleware, async (req: Request, res: Response) => {
+router.delete('/admin/juntas/:id', authMiddleware, requireAdmin, async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
     const result = await query('SELECT drive_file_id FROM juntas WHERE id = $1', [id]);

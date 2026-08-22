@@ -2,20 +2,23 @@ import { Router, Request, Response } from 'express';
 import bcrypt from 'bcrypt';
 import { query } from '../db';
 import { authMiddleware } from '../middleware/auth';
-import { adminMiddleware } from '../middleware/admin';
+import { requireRole, requireAdmin } from '../middleware/roles';
 import { rateLimit } from '../middleware/rateLimit';
 
 import { logger } from '../lib/logger';
 import { createEmailToken } from '../lib/tokens';
 import { sendInviteEmail } from '../lib/email';
+import { Role } from '../lib/jwt';
+
+const VALID_ROLES: Role[] = ['usuario', 'directiva', 'admin'];
 
 const router = Router();
 
-router.get('/admin/vecinos', authMiddleware, adminMiddleware, async (_req: Request, res: Response) => {
+router.get('/admin/vecinos', authMiddleware, requireRole('directiva', 'admin'), async (_req: Request, res: Response) => {
   try {
     const result = await query(`
       SELECT DISTINCT ON (v.piso)
-             v.piso, v.nombre, u.id as user_id, u.email, v.email as vecino_email, u.is_admin,
+              v.piso, v.nombre, u.id as user_id, u.email, v.email as vecino_email, u.role,
              v.coeficiente, v.enviar_email, v.device_identification, v.serial_number
       FROM vecinos v
       LEFT JOIN usuarios u ON u.vecino_piso = v.piso
@@ -28,7 +31,7 @@ router.get('/admin/vecinos', authMiddleware, adminMiddleware, async (_req: Reque
   }
 });
 
-router.put('/admin/vecinos/:piso', authMiddleware, adminMiddleware, async (req: Request, res: Response) => {
+router.put('/admin/vecinos/:piso', authMiddleware, requireAdmin, async (req: Request, res: Response) => {
   try {
     const { piso } = req.params;
     const allowedFields = ['nombre', 'email', 'coeficiente', 'enviar_email', 'device_identification', 'serial_number'];
@@ -64,7 +67,7 @@ router.put('/admin/vecinos/:piso', authMiddleware, adminMiddleware, async (req: 
   }
 });
 
-router.post('/admin/vecinos', authMiddleware, adminMiddleware, async (req: Request, res: Response) => {
+router.post('/admin/vecinos', authMiddleware, requireAdmin, async (req: Request, res: Response) => {
   try {
     const { piso, nombre, email, coeficiente, enviar_email, device_identification, serial_number } = req.body;
     if (!piso) {
@@ -88,7 +91,7 @@ router.post('/admin/vecinos', authMiddleware, adminMiddleware, async (req: Reque
   }
 });
 
-router.get('/admin/vecinos/:piso', authMiddleware, adminMiddleware, async (req: Request, res: Response) => {
+router.get('/admin/vecinos/:piso', authMiddleware, requireRole('directiva', 'admin'), async (req: Request, res: Response) => {
   try {
     const { piso } = req.params;
     const { desde, hasta } = req.query;
@@ -154,7 +157,7 @@ router.get('/admin/vecinos/:piso', authMiddleware, adminMiddleware, async (req: 
   }
 });
 
-router.delete('/admin/vecinos/:piso', authMiddleware, adminMiddleware, async (req: Request, res: Response) => {
+router.delete('/admin/vecinos/:piso', authMiddleware, requireAdmin, async (req: Request, res: Response) => {
   try {
     const { piso } = req.params;
 
@@ -177,7 +180,7 @@ router.delete('/admin/vecinos/:piso', authMiddleware, adminMiddleware, async (re
   }
 });
 
-router.post('/admin/usuarios', authMiddleware, adminMiddleware, async (req: Request, res: Response) => {
+router.post('/admin/usuarios', authMiddleware, requireAdmin, async (req: Request, res: Response) => {
   try {
     const { email, vecino_piso } = req.body;
 
@@ -203,10 +206,10 @@ router.post('/admin/usuarios', authMiddleware, adminMiddleware, async (req: Requ
   }
 });
 
-router.get('/admin/usuarios', authMiddleware, adminMiddleware, async (_req: Request, res: Response) => {
+router.get('/admin/usuarios', authMiddleware, requireRole('directiva', 'admin'), async (_req: Request, res: Response) => {
   try {
     const result = await query(`
-      SELECT id, vecino_piso, email, is_admin, created_at, ultima_conexion, ultima_consulta_ha
+      SELECT id, vecino_piso, email, role, created_at, ultima_conexion, ultima_consulta_ha
       FROM usuarios
       ORDER BY id
     `);
@@ -217,10 +220,20 @@ router.get('/admin/usuarios', authMiddleware, adminMiddleware, async (_req: Requ
   }
 });
 
-router.put('/admin/usuarios/:id', authMiddleware, adminMiddleware, async (req: Request, res: Response) => {
+router.put('/admin/usuarios/:id', authMiddleware, requireAdmin, async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
-    const { email, vecino_piso, is_admin } = req.body;
+    const { email, vecino_piso, role } = req.body;
+
+    if (parseInt(id as string) === req.user!.userId && role !== undefined && role !== 'admin') {
+      res.status(400).json({ error: 'No puedes cambiarte tu propio rol' });
+      return;
+    }
+
+    if (role !== undefined && !VALID_ROLES.includes(role)) {
+      res.status(400).json({ error: `role inválido. Valores permitidos: ${VALID_ROLES.join(', ')}` });
+      return;
+    }
 
     const updates: string[] = [];
     const values: unknown[] = [];
@@ -234,9 +247,9 @@ router.put('/admin/usuarios/:id', authMiddleware, adminMiddleware, async (req: R
       updates.push(`vecino_piso = $${param++}`);
       values.push(vecino_piso);
     }
-    if (is_admin !== undefined) {
-      updates.push(`is_admin = $${param++}`);
-      values.push(is_admin);
+    if (role !== undefined) {
+      updates.push(`role = $${param++}`);
+      values.push(role);
     }
 
     if (updates.length === 0) {
@@ -246,7 +259,7 @@ router.put('/admin/usuarios/:id', authMiddleware, adminMiddleware, async (req: R
 
     values.push(id);
     const result = await query(
-      `UPDATE usuarios SET ${updates.join(', ')} WHERE id = $${param} RETURNING id, vecino_piso, email, is_admin, created_at`,
+      `UPDATE usuarios SET ${updates.join(', ')} WHERE id = $${param} RETURNING id, vecino_piso, email, role, created_at`,
       values
     );
 
@@ -267,7 +280,7 @@ router.put('/admin/usuarios/:id', authMiddleware, adminMiddleware, async (req: R
   }
 });
 
-router.put('/admin/usuarios/:id/password', authMiddleware, adminMiddleware, async (req: Request, res: Response) => {
+router.put('/admin/usuarios/:id/password', authMiddleware, requireAdmin, async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
     const { password } = req.body;
@@ -296,7 +309,7 @@ router.put('/admin/usuarios/:id/password', authMiddleware, adminMiddleware, asyn
   }
 });
 
-router.delete('/admin/usuarios/:id', authMiddleware, adminMiddleware, async (req: Request, res: Response) => {
+router.delete('/admin/usuarios/:id', authMiddleware, requireAdmin, async (req: Request, res: Response) => {
   try {
     const id = req.params.id as string;
 
@@ -322,7 +335,7 @@ router.delete('/admin/usuarios/:id', authMiddleware, adminMiddleware, async (req
   }
 });
 
-router.post('/admin/invitar', authMiddleware, adminMiddleware, rateLimit(100, 60 * 60 * 1000), async (req: Request, res: Response) => {
+router.post('/admin/invitar', authMiddleware, requireAdmin, rateLimit(100, 60 * 60 * 1000), async (req: Request, res: Response) => {
   try {
     const { piso } = req.body;
     if (!piso) {
@@ -348,7 +361,7 @@ router.post('/admin/invitar', authMiddleware, adminMiddleware, rateLimit(100, 60
   }
 });
 
-router.get('/admin/vecinos/:piso/facturas', authMiddleware, adminMiddleware, async (req: Request, res: Response) => {
+router.get('/admin/vecinos/:piso/facturas', authMiddleware, requireRole('directiva', 'admin'), async (req: Request, res: Response) => {
   try {
     const { piso } = req.params;
 

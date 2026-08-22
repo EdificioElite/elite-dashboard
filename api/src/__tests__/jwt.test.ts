@@ -10,7 +10,7 @@ describe('JWT helpers', () => {
     userId: 1,
     vecinoPiso: '1A',
     email: 'test@test.com',
-    isAdmin: false,
+    role: 'usuario',
   };
 
   it('signToken generates a valid JWT', () => {
@@ -27,7 +27,7 @@ describe('JWT helpers', () => {
     expect(decoded.userId).toBe(1);
     expect(decoded.vecinoPiso).toBe('1A');
     expect(decoded.email).toBe('test@test.com');
-    expect(decoded.isAdmin).toBe(false);
+    expect(decoded.role).toBe('usuario');
   });
 
   it('verifyToken throws on invalid token', () => {

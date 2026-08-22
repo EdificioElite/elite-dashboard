@@ -1,6 +1,7 @@
 import { useState, FormEvent } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuthStore } from '../store/auth';
+import { canViewAdmin } from '../lib/roles';
 
 export default function LoginPage() {
   const [email, setEmail] = useState('');
@@ -17,7 +18,7 @@ export default function LoginPage() {
     try {
       await login(email, password);
       const user = useAuthStore.getState().user;
-      navigate(user?.is_admin ? '/admin' : '/dashboard');
+      navigate(user && canViewAdmin(user.role) ? '/admin' : '/dashboard');
     } catch (err: any) {
       setError(err.message || 'Error al iniciar sesión');
     } finally {

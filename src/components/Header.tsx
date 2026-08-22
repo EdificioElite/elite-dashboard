@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuthStore } from '../store/auth';
+import { canViewAdmin } from '../lib/roles';
 import { ADMIN_NAV, EDIFICIO_NAV } from '../lib/nav';
 import Icon from './Icon';
 import SelfPasswordModal from './SelfPasswordModal';
@@ -10,7 +11,7 @@ export default function Header() {
   const { user, logout } = useAuthStore();
   const navigate = useNavigate();
   const location = useLocation();
-  const isAdmin = user?.is_admin;
+  const showAdmin = user ? canViewAdmin(user.role) : false;
   const [open, setOpen] = useState(false);
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
   const [showPasswordModal, setShowPasswordModal] = useState(false);
@@ -157,7 +158,7 @@ export default function Header() {
                 <Icon name="x" size={18} />
               </button>
             </div>
-            {isAdmin && (
+            {showAdmin && (
               <>
                 <div className="eyebrow px-3 pt-3 pb-1 mt-2 border-t border-cocoa/6">Admin</div>
                 {ADMIN_NAV.map((item) => (

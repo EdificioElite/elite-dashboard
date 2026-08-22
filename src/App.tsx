@@ -1,6 +1,7 @@
 import { useEffect } from 'react';
 import { BrowserRouter, Routes, Route, Navigate, useLocation, useParams } from 'react-router-dom';
 import { useAuthStore } from './store/auth';
+import { type Role } from './lib/roles';
 import LoginPage from './pages/LoginPage';
 import InicioPage from './pages/InicioPage';
 import DashboardPage from './pages/DashboardPage';
@@ -17,7 +18,7 @@ import Sidebar from './components/Sidebar';
 import SkipLink from './components/SkipLink';
 import VersionFooter from './components/VersionFooter';
 
-function ProtectedRoute({ children, adminOnly = false }: { children: React.ReactNode; adminOnly?: boolean }) {
+function ProtectedRoute({ children, requiredRole }: { children: React.ReactNode; requiredRole?: Role | Role[] }) {
   const { user, loading } = useAuthStore();
 
   if (loading) {
@@ -29,7 +30,11 @@ function ProtectedRoute({ children, adminOnly = false }: { children: React.React
   }
 
   if (!user) return <Navigate to="/login" replace />;
-  if (adminOnly && !user.is_admin) return <Navigate to="/inicio" replace />;
+
+  if (requiredRole) {
+    const roles = Array.isArray(requiredRole) ? requiredRole : [requiredRole];
+    if (!roles.includes(user.role)) return <Navigate to="/inicio" replace />;
+  }
 
   return <>{children}</>;
 }
@@ -103,10 +108,10 @@ export default function App() {
 
           {/* Admin routes */}
           <Route path="/admin" element={<Navigate to="/admin/vecinos" replace />} />
-          <Route path="/admin/vecinos" element={<ProtectedRoute adminOnly><AuthLayout><VecinosPage /></AuthLayout></ProtectedRoute>} />
-          <Route path="/admin/usuarios" element={<ProtectedRoute adminOnly><AuthLayout><UsuariosPage /></AuthLayout></ProtectedRoute>} />
-          <Route path="/admin/aerotermia" element={<ProtectedRoute adminOnly><AuthLayout><AdminAerotermiaPage /></AuthLayout></ProtectedRoute>} />
-          <Route path="/admin/vecino/:piso" element={<ProtectedRoute adminOnly><RedirectVecino /></ProtectedRoute>} />
+          <Route path="/admin/vecinos" element={<ProtectedRoute requiredRole={['directiva', 'admin']}><AuthLayout><VecinosPage /></AuthLayout></ProtectedRoute>} />
+          <Route path="/admin/usuarios" element={<ProtectedRoute requiredRole={['directiva', 'admin']}><AuthLayout><UsuariosPage /></AuthLayout></ProtectedRoute>} />
+          <Route path="/admin/aerotermia" element={<ProtectedRoute requiredRole={['directiva', 'admin']}><AuthLayout><AdminAerotermiaPage /></AuthLayout></ProtectedRoute>} />
+          <Route path="/admin/vecino/:piso" element={<ProtectedRoute requiredRole={['directiva', 'admin']}><RedirectVecino /></ProtectedRoute>} />
           <Route path="/" element={<Navigate to="/inicio" replace />} />
           <Route path="*" element={<Navigate to="/inicio" replace />} />
         </Routes>

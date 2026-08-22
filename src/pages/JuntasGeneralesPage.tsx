@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useAuthStore } from '../store/auth';
+import { canManage } from '../lib/roles';
 import { fetchJuntas, downloadJuntaPDF } from '../api/client';
 import CreateJuntaModal from '../components/CreateJuntaModal';
 import EditJuntaModal from '../components/EditJuntaModal';
@@ -37,7 +38,7 @@ function fmtFecha(iso: string): string {
 
 export default function JuntasGeneralesPage() {
   const user = useAuthStore((s) => s.user);
-  const isAdmin = user?.is_admin ?? false;
+  const isAdmin = user ? canManage(user.role) : false;
 
   const [juntas, setJuntas] = useState<Junta[]>([]);
   const [loading, setLoading] = useState(true);

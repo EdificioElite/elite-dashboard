@@ -12,6 +12,10 @@ export async function loginAsAdmin(page: Page) {
   await loginAs(page, 'admin@elite.com', 'admin123');
 }
 
+export async function loginAsDirectiva(page: Page) {
+  await loginAs(page, 'directiva@elite.com', 'directiva123');
+}
+
 export async function loginAsVecino(page: Page) {
   await loginAs(page, 'vecino1@elite.com', 'password1');
 }

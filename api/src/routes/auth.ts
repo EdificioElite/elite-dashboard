@@ -20,7 +20,7 @@ router.post('/auth/login', rateLimitOnlyOnFailure(5, 60 * 1000), async (req: Req
     }
 
     const result = await query(
-      'SELECT u.id, u.vecino_piso, u.email, u.password_hash, u.is_admin FROM usuarios u WHERE u.email = $1',
+      'SELECT u.id, u.vecino_piso, u.email, u.password_hash, u.role FROM usuarios u WHERE u.email = $1',
       [email]
     );
 
@@ -43,7 +43,7 @@ router.post('/auth/login', rateLimitOnlyOnFailure(5, 60 * 1000), async (req: Req
       userId: user.id,
       vecinoPiso: user.vecino_piso,
       email: user.email,
-      isAdmin: user.is_admin,
+      role: user.role,
       source,
     });
 
@@ -53,7 +53,7 @@ router.post('/auth/login', rateLimitOnlyOnFailure(5, 60 * 1000), async (req: Req
         id: user.id,
         vecino_piso: user.vecino_piso,
         email: user.email,
-        is_admin: user.is_admin,
+        role: user.role,
       },
     });
   } catch (err) {
@@ -65,7 +65,7 @@ router.post('/auth/login', rateLimitOnlyOnFailure(5, 60 * 1000), async (req: Req
 router.get('/auth/me', authMiddleware, async (req: Request, res: Response) => {
   try {
     await query('UPDATE usuarios SET ultima_conexion = NOW() WHERE id = $1', [req.user!.userId]);
-    const result = await query('SELECT id, vecino_piso, email, is_admin, ultima_conexion, ultima_consulta_ha FROM usuarios WHERE id = $1', [req.user!.userId]);
+    const result = await query('SELECT id, vecino_piso, email, role, ultima_conexion, ultima_consulta_ha FROM usuarios WHERE id = $1', [req.user!.userId]);
     if (result.rows.length === 0) {
       res.status(401).json({ error: 'Usuario no encontrado' });
       return;
@@ -75,7 +75,7 @@ router.get('/auth/me', authMiddleware, async (req: Request, res: Response) => {
       id: user.id,
       vecino_piso: user.vecino_piso,
       email: user.email,
-      is_admin: user.is_admin,
+      role: user.role,
       ultima_conexion: user.ultima_conexion,
       ultima_consulta_ha: user.ultima_consulta_ha,
     });
@@ -191,7 +191,7 @@ router.post('/auth/register', rateLimitOnError(20, 60 * 1000), async (req: Reque
     }
     const password_hash = await bcrypt.hash(password, 12);
     const result = await query(
-      `INSERT INTO usuarios (vecino_piso, email, password_hash) VALUES ($1, $2, $3) RETURNING id, vecino_piso, email, is_admin`,
+      `INSERT INTO usuarios (vecino_piso, email, password_hash) VALUES ($1, $2, $3) RETURNING id, vecino_piso, email, role`,
       [tokenData.piso, tokenData.email, password_hash]
     );
     await markTokenUsed(tokenData.id);
@@ -200,7 +200,7 @@ router.post('/auth/register', rateLimitOnError(20, 60 * 1000), async (req: Reque
       userId: user.id,
       vecinoPiso: user.vecino_piso,
       email: user.email,
-      isAdmin: user.is_admin,
+      role: user.role,
     });
     res.json({ token: jwtToken, user });
   } catch (err) {

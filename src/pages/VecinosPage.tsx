@@ -1,6 +1,8 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { apiFetch } from '../api/client';
+import { canManage } from '../lib/roles';
+import { useAuthStore } from '../store/auth';
 import Icon from '../components/Icon';
 import EditVecinoModal from '../components/EditVecinoModal';
 import DeleteVecinoModal from '../components/DeleteVecinoModal';
@@ -12,7 +14,7 @@ interface Vecino {
   user_id: number | null;
   email: string | null;
   vecino_email: string | null;
-  is_admin: boolean;
+  role: string;
   coeficiente: string | null;
   enviar_email: boolean;
   device_identification: string | null;
@@ -21,6 +23,7 @@ interface Vecino {
 
 export default function VecinosPage() {
   const navigate = useNavigate();
+  const authUser = useAuthStore(s => s.user);
   const [vecinos, setVecinos] = useState<Vecino[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
@@ -110,10 +113,12 @@ export default function VecinosPage() {
             <h1 className="font-display text-[40px] font-medium text-cocoa mt-1" style={{ letterSpacing: '-0.02em' }}>Vecinos</h1>
             <p className="text-sm text-cocoa/60 mt-1.5 max-w-lg">Gestiona los vecinos del edificio.</p>
           </div>
+          {authUser && canManage(authUser.role) && (
           <button onClick={() => setShowAddModal(true)} className="btn btn-primary">
             <Icon name="plus" size={14} />
             Añadir vecino
           </button>
+          )}
         </div>
 
         <section aria-label="Gestión de vecinos">
@@ -168,6 +173,8 @@ export default function VecinosPage() {
                         <button onClick={() => navigate(`/aerotermia?piso=${encodeURIComponent(v.piso)}`)} className="btn btn-ghost p-2 text-accent hover:text-accent/80" title="Ver aerotermia">
                           <Icon name="chart" size={15} />
                         </button>
+                        {authUser && canManage(authUser.role) && (
+                        <>
                         {v.vecino_email ? (
                           !v.user_id ? (
                             <button onClick={() => handleInvite(v.piso)} className="btn btn-ghost p-2 text-accent hover:text-accent/80" title="Enviar invitación">
@@ -195,6 +202,8 @@ export default function VecinosPage() {
                         <button onClick={() => setDeletingVecino(v)} className="btn btn-ghost p-2 text-cocoa/40 hover:text-red-600" title="Eliminar vecino">
                           <Icon name="trash" size={15} />
                         </button>
+                        </>
+                        )}
                       </div>
                     </td>
                   </tr>

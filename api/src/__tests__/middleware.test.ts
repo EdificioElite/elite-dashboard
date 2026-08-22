@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { Request, Response, NextFunction } from 'express';
 import { authMiddleware } from '../middleware/auth';
-import { adminMiddleware } from '../middleware/admin';
+import { requireAdmin } from '../middleware/roles';
 import { rateLimit, rateLimitOnlyOnFailure, rateLimitOnError } from '../middleware/rateLimit';
 import { signToken } from '../lib/jwt';
 
@@ -50,7 +50,7 @@ describe('authMiddleware', () => {
   });
 
   it('calls next() when token is valid', () => {
-    const token = signToken({ userId: 1, vecinoPiso: '1A', email: 'a@a.com', isAdmin: false });
+    const token = signToken({ userId: 1, vecinoPiso: '1A', email: 'a@a.com', role: 'usuario' });
     const req = mockReq({ headers: { authorization: `Bearer ${token}` } });
     const res = mockRes();
     const next = mockNext();
@@ -70,23 +70,23 @@ describe('authMiddleware', () => {
   });
 });
 
-describe('adminMiddleware', () => {
+describe('requireAdmin', () => {
   it('returns 403 when user is not admin', () => {
     const req = mockReq();
-    req.user = { userId: 1, vecinoPiso: '1A', email: 'a@a.com', isAdmin: false };
+    req.user = { userId: 1, vecinoPiso: '1A', email: 'a@a.com', role: 'usuario' };
     const res = mockRes();
     const next = mockNext();
-    adminMiddleware(req, res, next);
+    requireAdmin(req, res, next);
     expect(res.status).toHaveBeenCalledWith(403);
     expect(next).not.toHaveBeenCalled();
   });
 
   it('calls next() when user is admin', () => {
     const req = mockReq();
-    req.user = { userId: 1, vecinoPiso: '1A', email: 'a@a.com', isAdmin: true };
+    req.user = { userId: 1, vecinoPiso: '1A', email: 'a@a.com', role: 'admin' };
     const res = mockRes();
     const next = mockNext();
-    adminMiddleware(req, res, next);
+    requireAdmin(req, res, next);
     expect(next).toHaveBeenCalled();
   });
 
@@ -95,7 +95,7 @@ describe('adminMiddleware', () => {
     delete (req as any).user;
     const res = mockRes();
     const next = mockNext();
-    adminMiddleware(req, res, next);
+    requireAdmin(req, res, next);
     expect(res.status).toHaveBeenCalledWith(403);
     expect(next).not.toHaveBeenCalled();
   });

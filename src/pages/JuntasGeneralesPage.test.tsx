@@ -21,7 +21,7 @@ import { fetchJuntas } from '../api/client';
 const mockUseAuthStore = useAuthStore as unknown as ReturnType<typeof vi.fn>;
 const mockFetchJuntas = fetchJuntas as ReturnType<typeof vi.fn>;
 
-function setUser(user: { vecino_piso: string; email: string; is_admin: boolean } | null) {
+function setUser(user: { vecino_piso: string; email: string; role: string } | null) {
   mockUseAuthStore.mockImplementation((selector?: any) => {
     const state = { user };
     return selector ? selector(state) : state;
@@ -35,7 +35,7 @@ function mockJuntas(data: any[]) {
 describe('JuntasGeneralesPage', () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    setUser({ vecino_piso: '1A', email: 'vecino@test.com', is_admin: false });
+    setUser({ vecino_piso: '1A', email: 'vecino@test.com', role: 'usuario' });
   });
 
   it('renders title and subtitle', async () => {
@@ -98,7 +98,7 @@ describe('JuntasGeneralesPage', () => {
   });
 
   it('shows crear junta button for admin', async () => {
-    setUser({ vecino_piso: '1A', email: 'admin@test.com', is_admin: true });
+    setUser({ vecino_piso: '1A', email: 'admin@test.com', role: 'admin' });
     mockJuntas([]);
     render(<MemoryRouter><JuntasGeneralesPage /></MemoryRouter>);
     await waitFor(() => {
@@ -107,7 +107,7 @@ describe('JuntasGeneralesPage', () => {
   });
 
   it('hides crear junta button for vecino', async () => {
-    setUser({ vecino_piso: '1A', email: 'vecino@test.com', is_admin: false });
+    setUser({ vecino_piso: '1A', email: 'vecino@test.com', role: 'usuario' });
     mockJuntas([]);
     render(<MemoryRouter><JuntasGeneralesPage /></MemoryRouter>);
     await waitFor(() => {
