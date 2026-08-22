@@ -169,11 +169,12 @@ export default function VecinosPage() {
                     <td className="text-sm text-cocoa/50">{v.vecino_email || '—'}</td>
                     <td className="text-sm text-cocoa/50">{v.coeficiente || '—'}</td>
                     <td>
-                      {authUser && canManage(authUser.role) ? (
                       <div className="flex items-center justify-center gap-1">
                         <button onClick={() => navigate(`/aerotermia?piso=${encodeURIComponent(v.piso)}`)} className="btn btn-ghost p-2 text-accent hover:text-accent/80" title="Ver aerotermia">
                           <Icon name="chart" size={15} />
                         </button>
+                        {authUser && canManage(authUser.role) && (
+                        <>
                         {v.vecino_email ? (
                           !v.user_id ? (
                             <button onClick={() => handleInvite(v.piso)} className="btn btn-ghost p-2 text-accent hover:text-accent/80" title="Enviar invitación">
@@ -201,10 +202,9 @@ export default function VecinosPage() {
                         <button onClick={() => setDeletingVecino(v)} className="btn btn-ghost p-2 text-cocoa/40 hover:text-red-600" title="Eliminar vecino">
                           <Icon name="trash" size={15} />
                         </button>
+                        </>
+                        )}
                       </div>
-                      ) : (
-                        <span className="text-xs text-cocoa/30">—</span>
-                      )}
                     </td>
                   </tr>
                 ))}
