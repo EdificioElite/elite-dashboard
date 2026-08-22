@@ -32,8 +32,10 @@ export async function apiFetch<T>(
   return response.json();
 }
 
-export async function updateUser(id: number, data: { email?: string; vecino_piso?: string | null; role?: string }) {
-  return apiFetch<{ id: number; vecino_piso: string | null; email: string; role: string; created_at: string }>(
+import type { Role } from '../lib/roles';
+
+export async function updateUser(id: number, data: { email?: string; vecino_piso?: string | null; role?: Role }) {
+  return apiFetch<{ id: number; vecino_piso: string | null; email: string; role: Role; created_at: string }>(
     `/admin/usuarios/${id}`,
     { method: 'PUT', body: JSON.stringify(data) }
   );

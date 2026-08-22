@@ -831,6 +831,24 @@ describe('Admin routes', () => {
       expect(res.body.email).toBe('updated@test.com');
     });
 
+    it('returns 400 for invalid role', async () => {
+      const app = createApp();
+      const res = await request(app)
+        .put('/api/admin/usuarios/2')
+        .set('Authorization', `Bearer ${userToken('admin')}`)
+        .send({ role: 'superadmin' });
+      expect(res.status).toBe(400);
+    });
+
+    it('returns 400 when admin tries to demote self', async () => {
+      const app = createApp();
+      const res = await request(app)
+        .put('/api/admin/usuarios/1')
+        .set('Authorization', `Bearer ${userToken('admin')}`)
+        .send({ role: 'usuario' });
+      expect(res.status).toBe(400);
+    });
+
     it('returns 404 for non-existent user', async () => {
       mockQuery.mockResolvedValueOnce({ rows: [] });
       const app = createApp();

@@ -8,6 +8,9 @@ import { rateLimit } from '../middleware/rateLimit';
 import { logger } from '../lib/logger';
 import { createEmailToken } from '../lib/tokens';
 import { sendInviteEmail } from '../lib/email';
+import { Role } from '../lib/jwt';
+
+const VALID_ROLES: Role[] = ['usuario', 'directiva', 'admin'];
 
 const router = Router();
 
@@ -224,6 +227,11 @@ router.put('/admin/usuarios/:id', authMiddleware, requireAdmin, async (req: Requ
 
     if (parseInt(id as string) === req.user!.userId && role !== undefined && role !== 'admin') {
       res.status(400).json({ error: 'No puedes cambiarte tu propio rol' });
+      return;
+    }
+
+    if (role !== undefined && !VALID_ROLES.includes(role)) {
+      res.status(400).json({ error: `role inválido. Valores permitidos: ${VALID_ROLES.join(', ')}` });
       return;
     }
 

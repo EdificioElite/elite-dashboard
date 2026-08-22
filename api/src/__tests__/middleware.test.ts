@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { Request, Response, NextFunction } from 'express';
 import { authMiddleware } from '../middleware/auth';
-import { requireRole, requireAdmin } from '../middleware/roles';
+import { requireAdmin } from '../middleware/roles';
 import { rateLimit, rateLimitOnlyOnFailure, rateLimitOnError } from '../middleware/rateLimit';
 import { signToken } from '../lib/jwt';
 
