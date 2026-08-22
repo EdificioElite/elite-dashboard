@@ -37,3 +37,59 @@ Release (`.github/workflows/release.yml`): workflow_dispatch manual con selector
 - Publica imagen Docker `:X.Y.Z` y `:latest`
 
 Docker PR (`.github/workflows/docker-pr.yml`): en cada PR se construye la imagen `:dev` para el entorno de preview.
+
+## Migraciones
+
+Las migraciones SQL viven en `api/migrations/` y se ejecutan **automáticamente** en los entornos reales (dev y prod) mediante un init-container que corre `node dist/migrate.js` con el rol dedicado `migrator`, antes de arrancar la API. `migrate.ts` registra las migraciones aplicadas en la tabla `schema_migrations` y solo aplica las pendientes.
+
+**Reglas:**
+
+- Los archivos de migración los **commitea el agente** para que un humano los revise antes de mergear (igual que antes).
+- El rol `migrator` y las tablas `schema_migrations` son propios del dashboard. **Los roles y tablas de n8n (`n8nuser`, `n8n`, `contadores`, `facturas`, `facturaelectrica`, `consumos`) son de otro servicio separado: no se tocan ni se usan.**
+- Roles de runtime: `dashboard_api` (prod) y `dashboard_api_dev` (dev), con mínimos privilegios.
+
+**Setup inicial (una sola vez, manual, con superuser vía pgAdmin):**
+
+1. Crear el rol `migrator`:
+
+```sql
+CREATE ROLE migrator LOGIN PASSWORD '<password-fuerte>';
+
+-- conectado a 'aerotermia':
+GRANT CONNECT ON DATABASE aerotermia TO migrator;
+GRANT USAGE, CREATE ON SCHEMA public TO migrator;
+
+-- conectado a 'aerotermia-dev':
+GRANT CONNECT ON DATABASE "aerotermia-dev" TO migrator;
+GRANT USAGE, CREATE ON SCHEMA public TO migrator;
+
+-- roles cluster-wide (para poder hacer ALTER OWNER y GRANT):
+GRANT dashboard_api TO migrator;
+GRANT dashboard_api_dev TO migrator;
+```
+
+2. Baseline de migraciones ya aplicadas, en ambas BDs (`aerotermia` y `aerotermia-dev`):
+
+```sql
+CREATE TABLE IF NOT EXISTS schema_migrations (
+  name VARCHAR(255) PRIMARY KEY,
+  applied_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+INSERT INTO schema_migrations (name) VALUES
+  ('001_create_usuarios.sql'),
+  ('002_create_readonly_user.sql'),
+  ('003_email_tokens.sql'),
+  ('004_vecinos_ownership.sql'),
+  ('005_add_ultima_conexion.sql'),
+  ('006_add_ultima_consulta_ha.sql'),
+  ('007_facturaelectrica.sql'),
+  ('008_multi_usuario_por_piso.sql'),
+  ('009_juntas.sql'),
+  ('010_replace_is_admin_with_role.sql')
+ON CONFLICT (name) DO NOTHING;
+```
+
+> El baseline evita que el init-container re-ejecute 001–010 (la `002` referencia `DATABASE elite`, nombre incorrecto; la real es `aerotermia`).
+
+3. Los init-containers `dashboard-api-migrate` / `dashboard-api-dev-migrate` están definidos en el repo `portainer-compose` (directorio `dashboards/`), donde se configura el `DATABASE_URL` del rol `migrator`.

@@ -21,7 +21,7 @@ npm run preview      # Previsualizar build de produccion
 cd api && npm install   # Instalar dependencias
 cd api && npm run dev   # Servidor de desarrollo con tsx (:3001)
 cd api && npm run build # Compilar TypeScript a dist/
-cd api && npm run migrate # Ejecutar migraciones SQL (solo humanas)
+cd api && npm run migrate # Ejecutar migraciones SQL (solo en local/desarrollo)
 ```
 
 ### Verificacion
@@ -45,11 +45,14 @@ cd api && npx tsc --noEmit     # Verificar backend compila
 
 ## Base de datos
 
-- **Las migraciones SQL en los entornos reales (dev.edificioelite.com, www.edificioelite.com) las ejecuta un humano, NUNCA un agente de IA.** Los archivos de migracion en `api/migrations/` deben ser commiteados por el agente para que el humano los revise y ejecute manualmente en esos entornos. En docker-compose local o entorno de desarrollo local, el agente puede ejecutar migraciones sin problema.
-- Las tablas de n8n (`contadores`, `facturas`, `facturaelectrica`, `consumos`) son de solo lectura para el dashboard.
-- La tabla `vecinos` es propiedad del dashboard. `n8nuser` solo tiene lectura sobre ella.
-- El dashboard es propietario de las tablas `usuarios`, `vecinos` y `email_tokens`.
-- Los cambios de permisos (GRANTs) van en las migraciones — un humano los aplica.
+- **Migraciones automaticas en los entornos reales (dev y prod):** las ejecuta un init-container (`dashboard-api-migrate` / `dashboard-api-dev-migrate`) que corre `node dist/migrate.js` con el rol dedicado `migrator` antes de arrancar la API. Ver [CONTRIBUTING.md](./CONTRIBUTING.md) para el proceso completo.
+- **Los archivos de migracion en `api/migrations/` los commitea el agente para que el humano los revise**, igual que antes. El humano solo ejecuta manualmente, una sola vez: (1) crear el rol `migrator` y (2) el baseline de `schema_migrations`.
+- `migrate.ts` trackea las migraciones aplicadas en la tabla `schema_migrations` (propiedad del rol `migrator`) y solo aplica las pendientes.
+- **Los roles y tablas de n8n (`n8nuser`, `n8n`, `contadores`, `facturas`, `facturaelectrica`, `consumos`) son de otro servicio separado. NO se tocan ni se usan desde el dashboard.** Las tablas de n8n son de solo lectura para el dashboard y n8n es el unico que escribe datos de consumo/facturas.
+- La tabla `vecinos` es propiedad del dashboard. `n8nuser` solo tiene lectura sobre ella (relacion de solo lectura ya existente, no se modifica).
+- El dashboard es propietario de las tablas `usuarios`, `vecinos`, `email_tokens` y `refresh_tokens`.
+- Los cambios de permisos (GRANTs) van en las migraciones — los aplica el init-container con el rol `migrator`.
+- Los roles de runtime son `dashboard_api` (prod) y `dashboard_api_dev` (dev), con minimos privilegios. El rol `migrator` solo se usa para migrar.
 
 ## Testing
 
