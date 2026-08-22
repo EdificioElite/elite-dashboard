@@ -34,4 +34,14 @@ describe('Sidebar', () => {
     expect(getByText('Juntas')).toBeInTheDocument();
     expect(getByText('Contactos')).toBeInTheDocument();
   });
+
+  it('applies distinct tone colors to section labels', () => {
+    const { getByText } = render(
+      <MemoryRouter>
+        <Sidebar />
+      </MemoryRouter>
+    );
+    expect(getByText('Edificio').className).toContain('text-accent-dark');
+    expect(getByText('Admin').className).toContain('text-accent-2');
+  });
 });
