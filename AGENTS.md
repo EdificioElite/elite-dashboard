@@ -52,7 +52,7 @@ cd api && npx tsc --noEmit     # Verificar backend compila
 - La tabla `vecinos` es propiedad del dashboard. `n8nuser` solo tiene lectura sobre ella (relacion de solo lectura ya existente, no se modifica).
 - El dashboard es propietario de las tablas `usuarios`, `vecinos`, `email_tokens` y `refresh_tokens`.
 - Los cambios de permisos (GRANTs) van en las migraciones — los aplica el init-container con los roles `migrator` / `migrator_dev`.
-- Los roles de runtime son `dashboard_api` (prod) y `dashboard_api_dev` (dev), con minimos privilegios. Los roles `migrator` (prod) y `migrator_dev` (dev) solo se usan para migrar.
+- Los roles de runtime son `dashboard_api` (prod) y `dashboard_api_dev` (dev), con minimos privilegios. Los roles `migrator` (prod) y `migrator_dev` (dev) son **SUPERUSER** (las migraciones hacen `ALTER OWNER`/`GRANT`/`CREATE ROLE`) y solo se usan para migrar.
 
 ## Testing
 
