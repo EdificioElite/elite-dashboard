@@ -7,6 +7,7 @@ import { rateLimit, rateLimitOnlyOnFailure, rateLimitOnError } from '../middlewa
 import { logger } from '../lib/logger';
 import { createEmailToken, verifyEmailToken, markTokenUsed, hashToken } from '../lib/tokens';
 import { sendResetEmail } from '../lib/email';
+import { createRefreshToken, rotateRefreshToken, revokeRefreshToken } from '../lib/refreshTokens';
 
 const router = Router();
 
@@ -47,8 +48,11 @@ router.post('/auth/login', rateLimitOnlyOnFailure(5, 60 * 1000), async (req: Req
       source,
     });
 
+    const refreshToken = await createRefreshToken(user.id);
+
     res.json({
       token,
+      refreshToken,
       user: {
         id: user.id,
         vecino_piso: user.vecino_piso,
@@ -58,6 +62,66 @@ router.post('/auth/login', rateLimitOnlyOnFailure(5, 60 * 1000), async (req: Req
     });
   } catch (err) {
     logger.error(err, 'Login error');
+    res.status(500).json({ error: 'Error interno del servidor' });
+  }
+});
+
+router.post('/auth/refresh', rateLimit(30, 60 * 1000), async (req: Request, res: Response) => {
+  try {
+    const { refreshToken } = req.body;
+    if (!refreshToken || typeof refreshToken !== 'string') {
+      res.status(400).json({ error: 'Refresh token requerido' });
+      return;
+    }
+
+    const rotated = await rotateRefreshToken(refreshToken);
+    if (!rotated) {
+      res.status(401).json({ error: 'Sesión expirada, inicia sesión de nuevo' });
+      return;
+    }
+
+    const result = await query(
+      'SELECT id, vecino_piso, email, role FROM usuarios WHERE id = $1',
+      [rotated.userId]
+    );
+    if (result.rows.length === 0) {
+      res.status(401).json({ error: 'Usuario no encontrado' });
+      return;
+    }
+
+    const user = result.rows[0];
+    const token = signToken({
+      userId: user.id,
+      vecinoPiso: user.vecino_piso,
+      email: user.email,
+      role: user.role,
+    });
+
+    res.json({
+      token,
+      refreshToken: rotated.refreshToken,
+      user: {
+        id: user.id,
+        vecino_piso: user.vecino_piso,
+        email: user.email,
+        role: user.role,
+      },
+    });
+  } catch (err) {
+    logger.error(err, 'Refresh error');
+    res.status(500).json({ error: 'Error interno del servidor' });
+  }
+});
+
+router.post('/auth/logout', rateLimit(30, 60 * 1000), async (req: Request, res: Response) => {
+  try {
+    const { refreshToken } = req.body;
+    if (refreshToken && typeof refreshToken === 'string') {
+      await revokeRefreshToken(refreshToken);
+    }
+    res.json({ message: 'Sesión cerrada' });
+  } catch (err) {
+    logger.error(err, 'Logout error');
     res.status(500).json({ error: 'Error interno del servidor' });
   }
 });
@@ -202,7 +266,8 @@ router.post('/auth/register', rateLimitOnError(20, 60 * 1000), async (req: Reque
       email: user.email,
       role: user.role,
     });
-    res.json({ token: jwtToken, user });
+    const refreshToken = await createRefreshToken(user.id);
+    res.json({ token: jwtToken, refreshToken, user });
   } catch (err) {
     logger.error(err, 'Register error');
     res.status(500).json({ error: 'Error interno del servidor' });
