@@ -73,4 +73,17 @@ describe('Header', () => {
     renderHeader();
     expect(screen.queryByText('Vecinos')).not.toBeInTheDocument();
   });
+
+  it('renders section boxes with tone colors in mobile drawer', async () => {
+    mockStore.mockReturnValue({
+      user: { vecino_piso: '1A', email: 'admin@test.com', role: 'admin' },
+      logout: vi.fn(),
+    });
+    const { default: userEvent } = await import('@testing-library/user-event');
+    const user = userEvent.setup();
+    renderHeader();
+    await user.click(screen.getByLabelText('Abrir menú'));
+    expect(screen.getByText('Edificio').className).toContain('text-accent-dark');
+    expect(screen.getByText('Admin').className).toContain('text-accent-2');
+  });
 });
