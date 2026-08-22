@@ -142,19 +142,11 @@ Las migraciones 001–010 ya estan aplicadas en prod/dev. Para que el nuevo `mig
 
 ### Roles `migrator` / `migrator_dev` (una vez, manual)
 
-Roles dedicados cluster-wide con permisos minimos para DDL + ceder ownership + otorgar grants, siguiendo el patron `dashboard_api` / `dashboard_api_dev`:
+Roles dedicados cluster-wide **SUPERUSER** (las migraciones hacen `ALTER OWNER`, `GRANT ... TO otros roles` y `CREATE ROLE`, que un rol de minimos privilegios no puede hacer de forma fiable):
 
 ```sql
-CREATE ROLE migrator LOGIN PASSWORD '<generar-fuerte>';
-CREATE ROLE migrator_dev LOGIN PASSWORD '<generar-fuerte>';
--- prod (aerotermia):
-GRANT CONNECT ON DATABASE aerotermia TO migrator;
-GRANT USAGE, CREATE ON SCHEMA public TO migrator;
-GRANT dashboard_api TO migrator;
--- dev (aerotermia-dev):
-GRANT CONNECT ON DATABASE "aerotermia-dev" TO migrator_dev;
-GRANT USAGE, CREATE ON SCHEMA public TO migrator_dev;
-GRANT dashboard_api TO migrator_dev;
+CREATE ROLE migrator SUPERUSER LOGIN PASSWORD '<generar-fuerte>';
+CREATE ROLE migrator_dev SUPERUSER LOGIN PASSWORD '<generar-fuerte>';
 ```
 
 La API de runtime sigue usando `dashboard_api` / `dashboard_api_dev` (minimos privilegios).
