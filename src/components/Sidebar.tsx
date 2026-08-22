@@ -22,22 +22,24 @@ export default function Sidebar() {
       aria-label="Navegación principal"
     >
       <nav className="flex flex-col gap-6 p-4 pt-6">
-        <Section label="Edificio" items={EDIFICIO_NAV} isActive={isActive} onClick={(p) => navigate(p)} />
-        {showAdmin && <Section label="Admin" items={ADMIN_NAV} isActive={isActive} onClick={(p) => navigate(p)} />}
+        <Section tone="edificio" label="Edificio" items={EDIFICIO_NAV} isActive={isActive} onClick={(p) => navigate(p)} />
+        {showAdmin && <Section tone="admin" label="Admin" items={ADMIN_NAV} isActive={isActive} onClick={(p) => navigate(p)} />}
       </nav>
     </aside>
   );
 }
 
-function Section({ label, items, isActive, onClick }: {
+function Section({ label, items, isActive, onClick, tone = 'edificio' }: {
   label: string;
   items: NavItem[];
   isActive: (path: string) => boolean;
   onClick: (path: string) => void;
+  tone?: 'edificio' | 'admin';
 }) {
+  const titleColor = tone === 'admin' ? 'text-accent-2' : 'text-accent-dark';
   return (
-    <div>
-      <div className="eyebrow px-3 mb-2">{label}</div>
+    <section className="rounded-md border border-cocoa/8 bg-cocoa/4 p-3">
+      <div className={`eyebrow px-1 pb-2 mb-2 border-b border-cocoa/10 ${titleColor}`}>{label}</div>
       <ul className="flex flex-col gap-0.5" role="list">
         {items.map((item) => {
           const active = isActive(item.path);
@@ -59,6 +61,6 @@ function Section({ label, items, isActive, onClick }: {
           );
         })}
       </ul>
-    </div>
+    </section>
   );
 }
