@@ -45,7 +45,7 @@ npm run dev            # arranca en :5173
 
 El backend se despliega como stack de Portainer desde el repo [`EdificioElite/portainer-compose`](https://github.com/EdificioElite/portainer-compose) (directorio `dashboards/`), usando la imagen `ghcr.io/edificioelite/elite-dashboard/api`.
 
-Las migraciones se ejecutan automáticamente con un init-container (`dashboard-api-migrate`) que corre `node dist/migrate.js` con el rol `migrator` antes de arrancar la API. Ver [CONTRIBUTING.md](./CONTRIBUTING.md#migraciones) para el proceso completo (rol `migrator`, baseline y release).
+Las migraciones se ejecutan automáticamente con un init-container (`dashboard-api-migrate` / `dashboard-api-dev-migrate`) que corre `node dist/migrate.js` con los roles `migrator` (prod) y `migrator_dev` (dev) antes de arrancar la API. Ver [CONTRIBUTING.md](./CONTRIBUTING.md#migraciones) para el proceso completo (roles de migración, baseline y release).
 
 ### Frontend (Vercel)
 

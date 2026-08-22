@@ -12,7 +12,7 @@ Eliminar la necesidad de re-login con usuario+contrasena cuando caduca el access
 - Backend: access token JWT pasa de `7d` a `1h`; refresh token opaco de 30 dias con rotacion, almacenado (hasheado) en una tabla nueva `refresh_tokens`.
 - Backend: nuevos endpoints `POST /auth/refresh` y `POST /auth/logout`; `login` y `register` devuelven ademas `refreshToken`.
 - Frontend: refresh silencioso en `apiFetch` (detectar 401, refrescar, reintentar) y almacenamiento del refresh token en el store.
-- Migraciones: tracking de migraciones aplicadas en `schema_migrations` + `migrate.ts` que solo ejecuta pendientes. Ejecucion automatica via init-container con rol `migrator` dedicado.
+- Migraciones: tracking de migraciones aplicadas en `schema_migrations` + `migrate.ts` que solo ejecuta pendientes. Ejecucion automatica via init-container con roles `migrator` / `migrator_dev` dedicados.
 
 No incluido:
 - Revocacion por dispositivo / listado de sesiones activas.
@@ -140,25 +140,28 @@ CREATE TABLE IF NOT EXISTS schema_migrations (
 
 Las migraciones 001–010 ya estan aplicadas en prod/dev. Para que el nuevo `migrate.ts` no intente re-aplicarlas (la `002` referencia `DATABASE elite`, nombre incorrecto; la real es `aerotermia`), se insertan como ya aplicadas en ambas BDs (`aerotermia` y `aerotermia-dev`) antes del primer arranque automatico.
 
-### Rol `migrator` (una vez, manual)
+### Roles `migrator` / `migrator_dev` (una vez, manual)
 
-Rol dedicado cluster-wide con permisos minimos para DDL + ceder ownership + otorgar grants:
+Roles dedicados cluster-wide con permisos minimos para DDL + ceder ownership + otorgar grants, siguiendo el patron `dashboard_api` / `dashboard_api_dev`:
 
 ```sql
 CREATE ROLE migrator LOGIN PASSWORD '<generar-fuerte>';
--- por BD (aerotermia y aerotermia-dev):
-GRANT CONNECT ON DATABASE <db> TO migrator;
+CREATE ROLE migrator_dev LOGIN PASSWORD '<generar-fuerte>';
+-- prod (aerotermia):
+GRANT CONNECT ON DATABASE aerotermia TO migrator;
 GRANT USAGE, CREATE ON SCHEMA public TO migrator;
--- roles cluster-wide:
 GRANT dashboard_api TO migrator;
-GRANT dashboard_api_dev TO migrator;
+-- dev (aerotermia-dev):
+GRANT CONNECT ON DATABASE "aerotermia-dev" TO migrator_dev;
+GRANT USAGE, CREATE ON SCHEMA public TO migrator_dev;
+GRANT dashboard_api TO migrator_dev;
 ```
 
 La API de runtime sigue usando `dashboard_api` / `dashboard_api_dev` (minimos privilegios).
 
 ### Init-container
 
-Servicio one-shot `dashboard-api-migrate` en `docker-compose.yml` y `docker-compose.dev.yml` que ejecuta `node dist/migrate.js` con `DATABASE_URL` del rol `migrator`, y `dashboard-api` espera `service_completed_successfully`.
+Servicios one-shot `dashboard-api-migrate` (prod) y `dashboard-api-dev-migrate` (dev) en `docker-compose.yml` y `docker-compose.dev.yml` que ejecutan `node dist/migrate.js` con `DATABASE_URL` de los roles `migrator` y `migrator_dev` respectivamente, y `dashboard-api` / `dashboard-api-dev` esperan `service_completed_successfully`.
 
 ---
 
@@ -193,4 +196,4 @@ Archivo: `api/migrations/011_refresh_tokens.sql` (tabla `refresh_tokens` + grant
 6. Frontend: refresh silencioso en `apiFetch`
 7. Frontend: store con refreshToken
 8. Verificacion completa (backend + frontend)
-9. INFRA manual: rol `migrator`, baseline, servicio `migrate` en compose
+9. INFRA manual: roles `migrator`/`migrator_dev`, baseline, servicio `migrate` en compose
