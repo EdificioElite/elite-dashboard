@@ -7,6 +7,7 @@ import { ADMIN_NAV, EDIFICIO_NAV } from '../lib/nav';
 import Icon from './Icon';
 import NavSection from './NavSection';
 import SelfPasswordModal from './SelfPasswordModal';
+import VersionFooter from './VersionFooter';
 
 export default function Header() {
   const { user, logout } = useAuthStore();
@@ -177,6 +178,9 @@ export default function Header() {
                 itemClassName="px-3 py-2.5 text-[14px]"
               />
             )}
+            <div className="mt-auto">
+              <VersionFooter />
+            </div>
           </div>
         </>,
         document.body
