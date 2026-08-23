@@ -10,6 +10,7 @@ Guía para contribuir al proyecto Edificio Elite.
 - Para publicar una release: mergear el *release PR* que abre `release-please` en `main` (`.github/workflows/release.yml`)
   - El release PR bumpa la versión en `package.json` + genera `CHANGELOG.md` automáticamente a partir de los conventional commits
   - Al mergear, release-please crea el tag `vX.Y.Z`, la GitHub Release y construye la imagen Docker `:X.Y.Z` y `:latest`
+- Requiere el secret `RELEASE_PLEASE_TOKEN` (PAT con permisos `contents: write` y `pull-requests: write`) para que la CI corra sobre el release PR y se pueda mergear (con `GITHUB_TOKEN` los checks no se ejecutan y `main` está protegido)
 
 ## Ramas protegidas
 
