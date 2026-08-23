@@ -4,31 +4,29 @@ dotenv.config();
 const nodeEnv = process.env.NODE_ENV || 'development';
 const isProduction = nodeEnv === 'production';
 
-function resolveJwtSecret(): string {
+// Fallo duro en producción si JWT_SECRET no está bien configurado.
+// Se llama explícitamente al arrancar la API (index.ts), NO al importar
+// el módulo, para no romper otros consumidores (p. ej. migrate.ts).
+export function validateConfig(): void {
+  if (!isProduction) return;
+
   const secret = process.env.JWT_SECRET;
-
   if (!secret) {
-    if (isProduction) {
-      throw new Error(
-        'JWT_SECRET no está definido. Es obligatorio configurarlo en producción.',
-      );
-    }
-    return 'dev-secret-change-me';
+    throw new Error(
+      'JWT_SECRET no está definido. Es obligatorio configurarlo en producción.',
+    );
   }
-
-  if (isProduction && secret.length < 32) {
+  if (secret.length < 32) {
     throw new Error(
       'JWT_SECRET es demasiado corto. Debe tener al menos 32 caracteres en producción.',
     );
   }
-
-  return secret;
 }
 
 export const config = {
   port: +(process.env.PORT || '3001'),
   databaseUrl: process.env.DATABASE_URL || 'postgres://postgres:postgres@localhost:5432/elite',
-  jwtSecret: resolveJwtSecret(),
+  jwtSecret: process.env.JWT_SECRET || 'dev-secret-change-me',
   corsOrigin: process.env.CORS_ORIGIN
     ? process.env.CORS_ORIGIN.split(',').map((o) => {
         const trimmed = o.trim();

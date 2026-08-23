@@ -16,7 +16,7 @@ function restoreEnv(name: string, original: string | undefined) {
   }
 }
 
-describe('config jwtSecret', () => {
+describe('validateConfig', () => {
   beforeEach(() => {
     vi.resetModules();
     delete process.env.NODE_ENV;
@@ -29,27 +29,29 @@ describe('config jwtSecret', () => {
     vi.resetModules();
   });
 
-  it('usa el default de desarrollo si no hay JWT_SECRET fuera de producción', async () => {
+  it('no lanza fuera de producción sin JWT_SECRET', async () => {
     process.env.NODE_ENV = 'development';
-    const { config } = await import('../config');
-    expect(config.jwtSecret).toBe('dev-secret-change-me');
+    const { validateConfig } = await import('../config');
+    expect(() => validateConfig()).not.toThrow();
   });
 
   it('lanza error si falta JWT_SECRET en producción', async () => {
     process.env.NODE_ENV = 'production';
-    await expect(import('../config')).rejects.toThrow(/JWT_SECRET/);
+    const { validateConfig } = await import('../config');
+    expect(() => validateConfig()).toThrow(/JWT_SECRET/);
   });
 
   it('lanza error si JWT_SECRET es demasiado corto en producción', async () => {
     process.env.NODE_ENV = 'production';
     process.env.JWT_SECRET = 'corto';
-    await expect(import('../config')).rejects.toThrow(/al menos 32 caracteres/);
+    const { validateConfig } = await import('../config');
+    expect(() => validateConfig()).toThrow(/al menos 32 caracteres/);
   });
 
-  it('acepta un JWT_SECRET válido en producción', async () => {
+  it('no lanza con un JWT_SECRET válido en producción', async () => {
     process.env.NODE_ENV = 'production';
     process.env.JWT_SECRET = 'a'.repeat(32);
-    const { config } = await import('../config');
-    expect(config.jwtSecret).toBe('a'.repeat(32));
+    const { validateConfig } = await import('../config');
+    expect(() => validateConfig()).not.toThrow();
   });
 });
