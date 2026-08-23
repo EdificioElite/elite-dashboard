@@ -68,7 +68,7 @@ services:
     environment:
       BASE_URL: http://frontend:80
       API_URL: http://api:3001
-    command: sh -c "npm install && npx playwright test"
+    command: sh -c "npm ci && npx playwright test --project=readonly --workers=4 && npx playwright test --project=stateful --workers=1"
     profiles:
       - test
 
