@@ -1,10 +1,34 @@
 import dotenv from 'dotenv';
 dotenv.config();
 
+const nodeEnv = process.env.NODE_ENV || 'development';
+const isProduction = nodeEnv === 'production';
+
+function resolveJwtSecret(): string {
+  const secret = process.env.JWT_SECRET;
+
+  if (!secret) {
+    if (isProduction) {
+      throw new Error(
+        'JWT_SECRET no está definido. Es obligatorio configurarlo en producción.',
+      );
+    }
+    return 'dev-secret-change-me';
+  }
+
+  if (isProduction && secret.length < 32) {
+    throw new Error(
+      'JWT_SECRET es demasiado corto. Debe tener al menos 32 caracteres en producción.',
+    );
+  }
+
+  return secret;
+}
+
 export const config = {
   port: +(process.env.PORT || '3001'),
   databaseUrl: process.env.DATABASE_URL || 'postgres://postgres:postgres@localhost:5432/elite',
-  jwtSecret: process.env.JWT_SECRET || 'dev-secret-change-me',
+  jwtSecret: resolveJwtSecret(),
   corsOrigin: process.env.CORS_ORIGIN
     ? process.env.CORS_ORIGIN.split(',').map((o) => {
         const trimmed = o.trim();

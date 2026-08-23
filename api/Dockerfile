@@ -14,4 +14,5 @@ RUN npm ci --omit=dev
 COPY --from=builder /app/dist ./dist
 COPY migrations/ ./migrations/
 EXPOSE 3001
+ENV NODE_ENV=production
 CMD ["node", "dist/index.js"]
