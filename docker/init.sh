@@ -1,5 +1,17 @@
 #!/bin/sh
+# ============================================================
+# SEED DE DESARROLLO / E2E — NO EJECUTAR EN PRODUCCIÓN
+# Crea datos de ejemplo (usuarios con contraseñas conocidas,
+# consumos y facturas) SOLO para dev local y e2e.
+# En producción las migraciones las ejecuta `node dist/migrate.js`
+# con los roles `migrator` / `migrator_dev` (ver AGENTS.md).
+# ============================================================
 set -e
+
+if [ "$NODE_ENV" = "production" ]; then
+  echo "ERROR: este script de seed es SOLO para desarrollo/e2e. Abortando." >&2
+  exit 1
+fi
 
 echo "Installing pg and bcrypt..."
 test -f package.json || npm init -y > /dev/null
