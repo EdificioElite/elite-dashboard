@@ -1,7 +1,20 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 
+vi.mock('dotenv', () => ({
+  default: { config: () => ({ parsed: {} }) },
+  config: () => ({ parsed: {} }),
+}));
+
 const originalNodeEnv = process.env.NODE_ENV;
 const originalJwtSecret = process.env.JWT_SECRET;
+
+function restoreEnv(name: string, original: string | undefined) {
+  if (original === undefined) {
+    delete process.env[name];
+  } else {
+    process.env[name] = original;
+  }
+}
 
 describe('config jwtSecret', () => {
   beforeEach(() => {
@@ -11,8 +24,8 @@ describe('config jwtSecret', () => {
   });
 
   afterEach(() => {
-    process.env.NODE_ENV = originalNodeEnv;
-    process.env.JWT_SECRET = originalJwtSecret;
+    restoreEnv('NODE_ENV', originalNodeEnv);
+    restoreEnv('JWT_SECRET', originalJwtSecret);
     vi.resetModules();
   });
 
