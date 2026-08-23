@@ -74,7 +74,7 @@ cd api && npm test        # Backend tests (vitest + supertest)
 
 ### E2E (e2e/)
 - **Playwright tests:** login, dashboard, admin, date-range
-- Ejecutar con docker: `docker compose -f docker-compose.e2e.yml up -d && docker compose -f docker-compose.e2e.yml --profile test run --rm playwright sh -c "npm install && npx playwright test --project=readonly --workers=4 && npx playwright test --project=stateful --workers=1"`
+- Ejecutar con docker: `docker compose -f docker-compose.e2e.yml up -d && docker compose -f docker-compose.e2e.yml --profile test run --rm playwright sh -c "npm ci && npx playwright test --project=readonly --workers=4 && npx playwright test --project=stateful --workers=1"`
 - Los specs se reparten en dos proyectos: `readonly` (paralelo, `--workers=4`) y `stateful` (serial, muta `vecino1`/emails mock: forgot-password, password-change, directiva). No paralelizar `stateful` con nada.
 - Las specs usan fixtures en `e2e/fixtures/auth.ts`
 
