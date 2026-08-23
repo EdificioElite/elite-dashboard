@@ -7,9 +7,9 @@ Guía para contribuir al proyecto Edificio Elite.
 - **Siempre trabajar en ramas**: `feat/`, `fix/`, `docs/`, `chore/` desde `main`
 - **Siempre crear PR** para mergear a `main`. Nunca push directo a `main`.
 - **Siempre revisar los comentarios de Copilot en el PR** y resolver los issues que señale antes de pedir review humana. Copilot revisa automáticamente cada PR y deja comentarios inline.
-- Para publicar una release, ejecutar manualmente el workflow `Release` (`.github/workflows/release.yml`)
-  - Seleccionar el tipo de versión (`major`, `minor`, `patch`)
-  - El workflow calcula el nuevo tag, lo crea en `main`, publica la GitHub Release y construye la imagen Docker `:X.Y.Z` y `:latest`
+- Para publicar una release: mergear el *release PR* que abre `release-please` en `main` (`.github/workflows/release.yml`)
+  - El release PR bumpa la versión en `package.json` + genera `CHANGELOG.md` automáticamente a partir de los conventional commits
+  - Al mergear, release-please crea el tag `vX.Y.Z`, la GitHub Release y construye la imagen Docker `:X.Y.Z` y `:latest`
 
 ## Ramas protegidas
 
@@ -30,11 +30,9 @@ GitHub Actions (`.github/workflows/ci.yml`) ejecuta en cada push y PR a `main`:
 - Frontend: tests + build
 - E2E: stack docker-compose + Playwright
 
-Release (`.github/workflows/release.yml`): workflow_dispatch manual con selector de versión:
-- Calcula la siguiente versión semver desde el último tag
-- Crea y pushea el tag `vX.Y.Z` en main
-- Crea la GitHub Release con notas generadas automáticamente
-- Publica imagen Docker `:X.Y.Z` y `:latest`
+Release (`.github/workflows/release.yml`): `release-please` basado en conventional commits:
+- En cada push a `main` abre/actualiza un *release PR* que bumpa `package.json` + genera `CHANGELOG.md`
+- Al mergear el release PR, crea el tag `vX.Y.Z`, la GitHub Release y publica la imagen Docker `:X.Y.Z` y `:latest`
 
 Docker PR (`.github/workflows/docker-pr.yml`): en cada PR se construye la imagen `:dev` para el entorno de preview.
 
