@@ -2,7 +2,7 @@ import express from 'express';
 import cors from 'cors';
 import pinoHttp from 'pino-http';
 import promBundle from 'express-prom-bundle';
-import { config } from './config';
+import { config, validateConfig } from './config';
 import { logger } from './lib/logger';
 import authRoutes from './routes/auth';
 import consumosRoutes from './routes/consumos';
@@ -11,6 +11,8 @@ import adminRoutes from './routes/admin';
 import adminAerotermiaRoutes from './routes/adminAerotermia';
 import juntasRoutes from './routes/juntas';
 import testRoutes from './routes/test';
+
+validateConfig();
 
 const app = express();
 
