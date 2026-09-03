@@ -1,6 +1,6 @@
 import { defineConfig } from '@playwright/test';
 
-const STATEFUL = /(forgot-password|password-change|directiva)\.spec\.ts$/;
+const STATEFUL = /(forgot-password|password-change|directiva|admin-stateful)\.spec\.ts$/;
 
 export default defineConfig({
   testDir: './specs',
