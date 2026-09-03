@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.16.0](https://github.com/EdificioElite/elite-dashboard/compare/v1.15.1...v1.16.0) (2026-09-03)
+
+
+### Features
+
+* ordenar tabla de usuarios por piso y por columna ([#111](https://github.com/EdificioElite/elite-dashboard/issues/111)) ([f1a783d](https://github.com/EdificioElite/elite-dashboard/commit/f1a783d1ed7265553c87da31eae229e96a35d39f))
+
 ## [1.15.1](https://github.com/EdificioElite/elite-dashboard/compare/v1.15.0...v1.15.1) (2026-08-23)
 
 
