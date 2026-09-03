@@ -112,10 +112,10 @@ export default function UsuariosPage() {
 
   useEffect(() => { fetchUsuarios(); }, []);
 
-  const filtered = usuarios.filter(u =>
+  const filtered = useMemo(() => usuarios.filter(u =>
     u.email.toLowerCase().includes(search.toLowerCase()) ||
     (u.vecino_piso && u.vecino_piso.toLowerCase().includes(search.toLowerCase()))
-  );
+  ), [usuarios, search]);
 
   const sorted = useMemo(() => {
     const dir = sortDir === 'asc' ? 1 : -1;
