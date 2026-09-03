@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import { apiFetch, updateUser } from '../api/client';
 import { useAuthStore } from '../store/auth';
 import { canManage, type Role } from '../lib/roles';
@@ -18,6 +18,70 @@ interface Usuario {
   ultima_consulta_ha: string | null;
 }
 
+type SortKey = 'email' | 'piso' | 'rol' | 'estado' | 'ultima_conexion';
+type SortDir = 'asc' | 'desc';
+
+const roleOrder: Record<Role, number> = { admin: 0, directiva: 1, usuario: 2 };
+
+function isOnline(date: string | null): boolean {
+  if (!date) return false;
+  return Date.now() - new Date(date).getTime() < 5 * 60 * 1000;
+}
+
+function parsePiso(piso: string): { num: number; letra: string } {
+  const match = piso.match(/^(\d+)([A-Za-z]*)$/);
+  if (!match) return { num: Number.MAX_SAFE_INTEGER, letra: piso.toLowerCase() };
+  return { num: parseInt(match[1], 10), letra: (match[2] || '').toLowerCase() };
+}
+
+const comparators: Record<SortKey, (a: Usuario, b: Usuario) => number> = {
+  email: (a, b) => a.email.toLowerCase().localeCompare(b.email.toLowerCase()),
+  piso: (a, b) => {
+    if (a.vecino_piso === null && b.vecino_piso === null) return 0;
+    if (a.vecino_piso === null) return -1;
+    if (b.vecino_piso === null) return 1;
+    const pa = parsePiso(a.vecino_piso);
+    const pb = parsePiso(b.vecino_piso);
+    if (pa.num !== pb.num) return pa.num - pb.num;
+    return pa.letra.localeCompare(pb.letra);
+  },
+  rol: (a, b) => roleOrder[a.role] - roleOrder[b.role],
+  estado: (a, b) => Number(isOnline(a.ultima_conexion)) - Number(isOnline(b.ultima_conexion)),
+  ultima_conexion: (a, b) => {
+    if (a.ultima_conexion === null && b.ultima_conexion === null) return 0;
+    if (a.ultima_conexion === null) return 1;
+    if (b.ultima_conexion === null) return -1;
+    return new Date(a.ultima_conexion).getTime() - new Date(b.ultima_conexion).getTime();
+  },
+};
+
+function SortHeader({ label, k, sortKey, sortDir, onSort, align }: {
+  label: string;
+  k: SortKey;
+  sortKey: SortKey;
+  sortDir: SortDir;
+  onSort: (k: SortKey) => void;
+  align?: 'center';
+}) {
+  const active = sortKey === k;
+  return (
+    <th
+      scope="col"
+      className={align === 'center' ? 'text-center' : undefined}
+      aria-sort={active ? (sortDir === 'asc' ? 'ascending' : 'descending') : undefined}
+    >
+      <button
+        type="button"
+        onClick={() => onSort(k)}
+        className={`inline-flex items-center gap-1 cursor-pointer ${align === 'center' ? 'w-full justify-center' : ''}`}
+      >
+        {label}
+        {active && <Icon name={sortDir === 'asc' ? 'chevronUp' : 'chevronDown'} size={11} />}
+      </button>
+    </th>
+  );
+}
+
 export default function UsuariosPage() {
   const user = useAuthStore(s => s.user);
   const [usuarios, setUsuarios] = useState<Usuario[]>([]);
@@ -30,16 +94,33 @@ export default function UsuariosPage() {
   const [changingPassword, setChangingPassword] = useState<Usuario | null>(null);
   const [deletingUser, setDeletingUser] = useState<Usuario | null>(null);
 
+  const [sortKey, setSortKey] = useState<SortKey>('piso');
+  const [sortDir, setSortDir] = useState<SortDir>('asc');
+
+  const toggleSort = (key: SortKey) => {
+    if (sortKey === key) {
+      setSortDir(d => (d === 'asc' ? 'desc' : 'asc'));
+    } else {
+      setSortKey(key);
+      setSortDir('asc');
+    }
+  };
+
   const fetchUsuarios = () => {
     apiFetch<Usuario[]>('/admin/usuarios').then(setUsuarios).catch(console.error).finally(() => setLoading(false));
   };
 
   useEffect(() => { fetchUsuarios(); }, []);
 
-  const filtered = usuarios.filter(u =>
+  const filtered = useMemo(() => usuarios.filter(u =>
     u.email.toLowerCase().includes(search.toLowerCase()) ||
     (u.vecino_piso && u.vecino_piso.toLowerCase().includes(search.toLowerCase()))
-  );
+  ), [usuarios, search]);
+
+  const sorted = useMemo(() => {
+    const dir = sortDir === 'asc' ? 1 : -1;
+    return [...filtered].sort((a, b) => dir * comparators[sortKey](a, b));
+  }, [filtered, sortKey, sortDir]);
 
   const formatUltimaConexion = (date: string | null) => {
     if (!date) return '—';
@@ -51,11 +132,6 @@ export default function UsuariosPage() {
       hour: '2-digit',
       minute: '2-digit',
     });
-  };
-
-  const isOnline = (date: string | null) => {
-    if (!date) return false;
-    return Date.now() - new Date(date).getTime() < 5 * 60 * 1000;
   };
 
   const formatHaTooltip = (date: string | null) => {
@@ -129,16 +205,16 @@ export default function UsuariosPage() {
               <caption className="sr-only">Tabla de usuarios del sistema</caption>
               <thead>
                 <tr>
-                  <th scope="col">Email</th>
-                  <th scope="col">Piso</th>
-                  <th scope="col">Rol</th>
-                  <th scope="col" className="text-center">Estado</th>
-                  <th scope="col" className="text-center">Ult. conexión</th>
+                  <SortHeader label="Email" k="email" sortKey={sortKey} sortDir={sortDir} onSort={toggleSort} />
+                  <SortHeader label="Piso" k="piso" sortKey={sortKey} sortDir={sortDir} onSort={toggleSort} />
+                  <SortHeader label="Rol" k="rol" sortKey={sortKey} sortDir={sortDir} onSort={toggleSort} />
+                  <SortHeader label="Estado" k="estado" sortKey={sortKey} sortDir={sortDir} onSort={toggleSort} align="center" />
+                  <SortHeader label="Ult. conexión" k="ultima_conexion" sortKey={sortKey} sortDir={sortDir} onSort={toggleSort} align="center" />
                   <th scope="col" className="text-center min-w-[130px]">Acciones</th>
                 </tr>
               </thead>
               <tbody>
-                {filtered.map((u, i) => (
+                {sorted.map((u, i) => (
                   <tr key={u.id} className="row-stagger" style={{ animationDelay: `${i * 40}ms` }}>
                     <td className="text-sm text-cocoa">{u.email}</td>
                     <td className="text-sm text-cocoa/60">{u.vecino_piso || '—'}</td>
