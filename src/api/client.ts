@@ -211,6 +211,44 @@ export async function downloadJuntaPDF(id: number): Promise<void> {
   URL.revokeObjectURL(url);
 }
 
+export async function downloadFacturaPDF(
+  idFactura: string,
+  opts?: { admin?: boolean; piso?: string }
+): Promise<void> {
+  const token = getToken();
+  const headers: Record<string, string> = {};
+  if (token) {
+    headers['Authorization'] = `Bearer ${token}`;
+  }
+
+  let endpoint: string;
+  if (opts?.admin) {
+    endpoint = `${API_URL}/admin/aerotermia/facturas/${encodeURIComponent(idFactura)}/descargar`;
+  } else {
+    const pisoQs = opts?.piso ? `?piso=${encodeURIComponent(opts.piso)}` : '';
+    endpoint = `${API_URL}/facturas/${encodeURIComponent(idFactura)}/descargar${pisoQs}`;
+  }
+
+  const response = await fetch(endpoint, { headers });
+  if (!response.ok) {
+    const body = await response.json().catch(() => ({}));
+    throw new Error(body.error || `HTTP ${response.status}`);
+  }
+  const blob = await response.blob();
+  const disposition = response.headers.get('content-disposition') || '';
+  const match = disposition.match(/filename[^;=\n]*=((['"]).*?\2|[^;\n]*)/);
+  const filename = match ? match[1].replace(/['"]/g, '') : `factura-${idFactura}.pdf`;
+
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  URL.revokeObjectURL(url);
+}
+
 async function apiForm<T>(endpoint: string, method: string, formData: FormData): Promise<T> {
   const token = getToken();
   const headers: Record<string, string> = {};
