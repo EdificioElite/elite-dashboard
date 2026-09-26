@@ -40,6 +40,8 @@ app.use(promBundle({
     [/^\/api\/admin\/usuarios\/\d+\/password$/, '/api/admin/usuarios/:id/password'],
     [/^\/api\/admin\/aerotermia\/consumos$/, '/api/admin/aerotermia/consumos'],
     [/^\/api\/admin\/aerotermia\/facturas$/, '/api/admin/aerotermia/facturas'],
+    [/^\/api\/admin\/aerotermia\/facturas\/[^/]+\/descargar$/, '/api/admin/aerotermia/facturas/:id_factura/descargar'],
+    [/^\/api\/facturas\/[^/]+\/descargar$/, '/api/facturas/:id_factura/descargar'],
     [/^\/api\/admin\/aerotermia\/cop$/, '/api/admin/aerotermia/cop'],
     [/^\/api\/juntas\/\d+$/, '/api/juntas/:id'],
     [/^\/api\/admin\/juntas\/\d+$/, '/api/admin/juntas/:id'],
