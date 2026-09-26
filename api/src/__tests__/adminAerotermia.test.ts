@@ -1,5 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { Request, Response, NextFunction } from 'express';
+import { Readable } from 'stream';
 import request from 'supertest';
 import express from 'express';
 import cors from 'cors';
@@ -13,6 +14,13 @@ vi.mock('../db', () => ({
   pool: {},
 }));
 
+vi.mock('../lib/googleDrive', () => ({
+  getPDFStream: vi.fn(),
+  uploadPDF: vi.fn(),
+  deleteFile: vi.fn(),
+  renameFile: vi.fn(),
+}));
+
 vi.mock('../middleware/rateLimit', () => ({
   rateLimit: () => (_req: Request, _res: Response, next: NextFunction) => next(),
   rateLimitOnError: () => (_req: Request, _res: Response, next: NextFunction) => next(),
@@ -20,6 +28,9 @@ vi.mock('../middleware/rateLimit', () => ({
 
 import { query } from '../db';
 const mockQuery = query as ReturnType<typeof vi.fn>;
+
+import { getPDFStream } from '../lib/googleDrive';
+const mockGetPDFStream = getPDFStream as ReturnType<typeof vi.fn>;
 
 function createApp() {
   const app = express();
@@ -123,6 +134,58 @@ describe('Admin Aerotermia routes', () => {
         .set('Authorization', `Bearer ${adminToken()}`);
       expect(res.status).toBe(200);
       expect(res.body).toHaveLength(3);
+    });
+
+    it('exposes tiene_pdf from drive_file_id', async () => {
+      mockQuery.mockResolvedValueOnce({ rows: [] });
+      const app = createApp();
+      await request(app)
+        .get('/api/admin/aerotermia/facturas')
+        .set('Authorization', `Bearer ${adminToken()}`);
+      const sql = mockQuery.mock.calls[0][0];
+      expect(sql).toContain('drive_file_id');
+      expect(sql).toContain('tiene_pdf');
+    });
+  });
+
+  describe('GET /api/admin/aerotermia/facturas/:id_factura/descargar', () => {
+    it('rejects non-admin users with 403', async () => {
+      const app = createApp();
+      const res = await request(app)
+        .get('/api/admin/aerotermia/facturas/FAC-001/descargar')
+        .set('Authorization', `Bearer ${userToken()}`);
+      expect(res.status).toBe(403);
+    });
+
+    it('returns 404 when factura not found', async () => {
+      mockQuery.mockResolvedValueOnce({ rows: [] });
+      const app = createApp();
+      const res = await request(app)
+        .get('/api/admin/aerotermia/facturas/FAC-001/descargar')
+        .set('Authorization', `Bearer ${adminToken()}`);
+      expect(res.status).toBe(404);
+    });
+
+    it('returns 404 when factura has no file', async () => {
+      mockQuery.mockResolvedValueOnce({ rows: [{ drive_file_id: null }] });
+      const app = createApp();
+      const res = await request(app)
+        .get('/api/admin/aerotermia/facturas/FAC-001/descargar')
+        .set('Authorization', `Bearer ${adminToken()}`);
+      expect(res.status).toBe(404);
+    });
+
+    it('streams PDF when file exists', async () => {
+      mockQuery.mockResolvedValueOnce({ rows: [{ drive_file_id: 'drive-123' }] });
+      mockGetPDFStream.mockResolvedValueOnce(Readable.from(['fake-pdf-content']));
+      const app = createApp();
+      const res = await request(app)
+        .get('/api/admin/aerotermia/facturas/FAC-001/descargar')
+        .set('Authorization', `Bearer ${adminToken()}`);
+      expect(res.status).toBe(200);
+      expect(res.headers['content-type']).toBe('application/pdf');
+      expect(res.headers['content-disposition']).toContain('attachment');
+      expect(mockGetPDFStream).toHaveBeenCalledWith('drive-123');
     });
   });
 
