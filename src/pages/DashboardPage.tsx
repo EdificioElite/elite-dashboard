@@ -12,6 +12,7 @@ import FacturasTable from '../components/FacturasTable';
 import Icon from '../components/Icon';
 import DateRangeControls from '../components/DateRangeControls';
 import { toDatetimeLocal, fromDatetimeLocal, applyPreset, Preset } from '../lib/dates';
+import { facturaEnRango } from '../lib/facturas';
 
 interface Consumo {
   timestamp: string;
@@ -40,6 +41,8 @@ interface Factura {
   importe_frio: number;
   importe_variable_acs: number;
   importe_acs: number;
+  fecha_factura_inicio?: string;
+  fecha_factura_fin?: string;
 }
 
 export default function DashboardPage() {
@@ -96,12 +99,7 @@ export default function DashboardPage() {
 
   const filteredFacturas = useMemo(() => {
     if (!desde || !hasta) return facturas;
-    const desdeD = new Date(desde).getTime();
-    const hastaD = new Date(hasta).getTime();
-    return facturas.filter((f) => {
-      const t = new Date(f.periodo).getTime();
-      return t >= desdeD && t <= hastaD;
-    });
+    return facturas.filter((f) => facturaEnRango(f, desde, hasta));
   }, [facturas, desde, hasta]);
 
   if (loading) {

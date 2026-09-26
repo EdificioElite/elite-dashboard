@@ -7,6 +7,7 @@ import CopChart from '../components/CopChart';
 import FacturaElectricaTable from '../components/FacturaElectricaTable';
 import HeatmapChart from '../components/HeatmapChart';
 import { toDatetimeLocal, fromDatetimeLocal, applyPreset, Preset } from '../lib/dates';
+import { facturaEnRango } from '../lib/facturas';
 import DateRangeControls from '../components/DateRangeControls';
 import GlobalEnVivoCard from '../components/GlobalEnVivoCard';
 
@@ -102,12 +103,7 @@ export default function AdminAerotermiaPage() {
 
   const filteredFacturas = useMemo(() => {
     if (!desde || !hasta) return facturas;
-    const desdeD = new Date(desde).getTime();
-    const hastaD = new Date(hasta).getTime();
-    return facturas.filter((f) => {
-      const t = new Date(f.periodo).getTime();
-      return t >= desdeD && t <= hastaD;
-    });
+    return facturas.filter((f) => facturaEnRango(f, desde, hasta));
   }, [facturas, desde, hasta]);
 
   const pisosUnicos = useMemo(() => {
