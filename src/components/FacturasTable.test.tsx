@@ -1,6 +1,12 @@
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, vi } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import FacturasTable from './FacturasTable';
+
+vi.mock('../api/client', () => ({
+  downloadFacturaPDF: vi.fn(),
+}));
+
+import { downloadFacturaPDF } from '../api/client';
 
 describe('FacturasTable', () => {
   it('shows empty state when no facturas', () => {
@@ -60,5 +66,33 @@ describe('FacturasTable', () => {
     expect(junIdx).toBeGreaterThan(-1);
     expect(agoIdx).toBeGreaterThan(-1);
     expect(junIdx).toBeLessThan(agoIdx);
+  });
+
+  it('shows download button only for facturas with tiene_pdf', () => {
+    render(
+      <FacturasTable
+        data={[
+          { id_factura: '1', periodo: '2026-01-01', importe_total: 80.5, importe_fijo: 20, kwh_calor: 100, kwh_frio: 30, kwh_acs: 50, m3_acs: 2.5, importe_calor: 40, importe_frio: 10, importe_variable_acs: 15, importe_acs: 30.5, tiene_pdf: true },
+          { id_factura: '2', periodo: '2026-02-01', importe_total: 90, importe_fijo: 20, kwh_calor: 110, kwh_frio: 25, kwh_acs: 55, m3_acs: 2.8, importe_calor: 45, importe_frio: 8, importe_variable_acs: 18, importe_acs: 37 },
+        ]}
+      />
+    );
+    expect(screen.getByRole('button', { name: 'Descargar' })).toBeInTheDocument();
+    const buttons = screen.getAllByRole('button');
+    expect(buttons).toHaveLength(1);
+  });
+
+  it('calls downloadFacturaPDF when button clicked', () => {
+    render(
+      <FacturasTable
+        data={[
+          { id_factura: '1', periodo: '2026-01-01', importe_total: 80.5, importe_fijo: 20, kwh_calor: 100, kwh_frio: 30, kwh_acs: 50, m3_acs: 2.5, importe_calor: 40, importe_frio: 10, importe_variable_acs: 15, importe_acs: 30.5, tiene_pdf: true },
+        ]}
+        downloadPiso="2A"
+      />
+    );
+    const button = screen.getByRole('button');
+    button.click();
+    expect(downloadFacturaPDF).toHaveBeenCalledWith('1', { piso: '2A' });
   });
 });

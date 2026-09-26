@@ -1,5 +1,6 @@
-import { Fragment, useMemo } from 'react';
+import { Fragment, useMemo, useState } from 'react';
 import { capitalizar } from '../lib/format';
+import { downloadFacturaPDF } from '../api/client';
 import Icon from './Icon';
 
 interface Factura {
@@ -15,6 +16,7 @@ interface Factura {
   importe_frio: number;
   importe_variable_acs: number;
   importe_acs: number;
+  tiene_pdf?: boolean;
 }
 
 function fmt(val: number, decimals: number, unit: string): string {
@@ -33,7 +35,20 @@ interface RowDef {
   section?: string;
 }
 
-export default function FacturasTable({ data }: { data: Factura[] }) {
+export default function FacturasTable({ data, downloadPiso }: { data: Factura[]; downloadPiso?: string }) {
+  const [downloading, setDownloading] = useState<string | null>(null);
+
+  const handleDownload = async (f: Factura) => {
+    setDownloading(f.id_factura);
+    try {
+      await downloadFacturaPDF(f.id_factura, { piso: downloadPiso });
+    } catch (err) {
+      console.error('Error descargando factura:', err);
+    } finally {
+      setDownloading(null);
+    }
+  };
+
   if (data.length === 0) {
     return (
       <div className="glass p-[26px]">
@@ -106,6 +121,28 @@ export default function FacturasTable({ data }: { data: Factura[] }) {
                 </tr>
               </Fragment>
             ))}
+            <tr>
+              <td className="sticky left-0 z-10 bg-cream py-1.5 pr-4 text-cocoa/60 text-[11px] border-t border-cocoa/8" style={{ minWidth: '100px' }}>
+                Descargar
+              </td>
+              {chrono.map((f) => (
+                <td key={f.id_factura} className="text-center py-1.5 px-3 border-t border-cocoa/8">
+                  {f.tiene_pdf ? (
+                    <button
+                      onClick={() => handleDownload(f)}
+                      disabled={downloading === f.id_factura}
+                      className="btn btn-ghost text-xs"
+                      title="Descargar factura"
+                    >
+                      <Icon name="download" size={12} />
+                      {downloading === f.id_factura ? 'Descargando…' : 'Descargar'}
+                    </button>
+                  ) : (
+                    <span className="text-cocoa/20 text-xs">—</span>
+                  )}
+                </td>
+              ))}
+            </tr>
           </tbody>
         </table>
       </div>
