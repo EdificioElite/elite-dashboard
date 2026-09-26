@@ -95,6 +95,7 @@ CREATE TABLE IF NOT EXISTS facturas (
   kwh_total_viviendas BIGINT,
   enviar_email BOOLEAN NOT NULL DEFAULT false,
   id_factura_electrica VARCHAR(255),
+  drive_file_id VARCHAR(255),
   fecha_h_factura_creacion VARCHAR(255),
   fecha_h_factura_inicio VARCHAR(255),
   fecha_h_factura_fin VARCHAR(255),
