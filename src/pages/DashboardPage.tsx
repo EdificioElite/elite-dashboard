@@ -43,6 +43,7 @@ interface Factura {
   importe_acs: number;
   fecha_factura_inicio?: string;
   fecha_factura_fin?: string;
+  tiene_pdf?: boolean;
 }
 
 export default function DashboardPage() {
@@ -146,7 +147,7 @@ export default function DashboardPage() {
           <div id="facturas" className="scroll-mt-20 relative z-10">
             <FacturasChart data={filteredFacturas} />
           </div>
-          <FacturasTable data={filteredFacturas} />
+          <FacturasTable data={filteredFacturas} downloadPiso={viewingAs ?? undefined} />
 
           <div className="glass p-[26px]">
             <div className="flex items-center gap-3 mb-5">

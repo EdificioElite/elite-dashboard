@@ -1,4 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { Readable } from 'stream';
 import { Request, Response, NextFunction } from 'express';
 import request from 'supertest';
 import express from 'express';
@@ -14,6 +15,13 @@ process.env.JWT_SECRET = 'test-secret-key';
 vi.mock('../db', () => ({
   query: vi.fn(),
   pool: {},
+}));
+
+vi.mock('../lib/googleDrive', () => ({
+  getPDFStream: vi.fn(),
+  uploadPDF: vi.fn(),
+  deleteFile: vi.fn(),
+  renameFile: vi.fn(),
 }));
 
 vi.mock('../middleware/rateLimit', () => ({
@@ -55,6 +63,9 @@ const mockRevokeRefreshToken = revokeRefreshToken as ReturnType<typeof vi.fn>;
 
 import { query } from '../db';
 const mockQuery = query as ReturnType<typeof vi.fn>;
+
+import { getPDFStream } from '../lib/googleDrive';
+const mockGetPDFStream = getPDFStream as ReturnType<typeof vi.fn>;
 
 function createApp() {
   const app = express();
@@ -763,6 +774,78 @@ describe('Facturas routes', () => {
       expect(res.status).toBe(200);
       expect(res.body).toHaveLength(1);
       expect(res.body[0].importe_total).toBe(80.5);
+    });
+
+    it('exposes tiene_pdf from drive_file_id', async () => {
+      mockQuery.mockResolvedValueOnce({ rows: [] });
+      const app = createApp();
+      await request(app)
+        .get('/api/facturas')
+        .set('Authorization', `Bearer ${userToken()}`);
+      const sql = mockQuery.mock.calls[0][0];
+      expect(sql).toContain('drive_file_id');
+      expect(sql).toContain('tiene_pdf');
+    });
+
+    it('returns tiene_pdf flag without exposing drive_file_id', async () => {
+      mockQuery.mockResolvedValueOnce({
+        rows: [{ id_factura: '1', periodo: '2026-01-01', importe_total: 80.5, tiene_pdf: true }],
+      });
+      const app = createApp();
+      const res = await request(app)
+        .get('/api/facturas')
+        .set('Authorization', `Bearer ${userToken()}`);
+      expect(res.status).toBe(200);
+      expect(res.body[0].tiene_pdf).toBe(true);
+      expect(res.body[0].drive_file_id).toBeUndefined();
+    });
+  });
+
+  describe('GET /api/facturas/:id_factura/descargar', () => {
+    it('returns 401 without token', async () => {
+      const app = createApp();
+      const res = await request(app).get('/api/facturas/1A-2026-01/descargar');
+      expect(res.status).toBe(401);
+    });
+
+    it('returns 404 when factura not found', async () => {
+      mockQuery.mockResolvedValueOnce({ rows: [] });
+      const app = createApp();
+      const res = await request(app)
+        .get('/api/facturas/1A-2026-01/descargar')
+        .set('Authorization', `Bearer ${userToken()}`);
+      expect(res.status).toBe(404);
+    });
+
+    it('returns 404 when factura belongs to another piso', async () => {
+      mockQuery.mockResolvedValueOnce({ rows: [{ piso: '2A', drive_file_id: 'drive-123' }] });
+      const app = createApp();
+      const res = await request(app)
+        .get('/api/facturas/2A-2026-01/descargar')
+        .set('Authorization', `Bearer ${userToken()}`);
+      expect(res.status).toBe(404);
+    });
+
+    it('returns 404 when factura has no file', async () => {
+      mockQuery.mockResolvedValueOnce({ rows: [{ piso: '1A', drive_file_id: null }] });
+      const app = createApp();
+      const res = await request(app)
+        .get('/api/facturas/1A-2026-01/descargar')
+        .set('Authorization', `Bearer ${userToken()}`);
+      expect(res.status).toBe(404);
+    });
+
+    it('streams PDF when file exists', async () => {
+      mockQuery.mockResolvedValueOnce({ rows: [{ piso: '1A', drive_file_id: 'drive-123' }] });
+      mockGetPDFStream.mockResolvedValueOnce(Readable.from(['fake-pdf-content']));
+      const app = createApp();
+      const res = await request(app)
+        .get('/api/facturas/1A-2026-01/descargar')
+        .set('Authorization', `Bearer ${userToken()}`);
+      expect(res.status).toBe(200);
+      expect(res.headers['content-type']).toBe('application/pdf');
+      expect(res.headers['content-disposition']).toContain('attachment');
+      expect(mockGetPDFStream).toHaveBeenCalledWith('drive-123');
     });
   });
 });

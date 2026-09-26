@@ -3,6 +3,7 @@ import { query } from '../db';
 import { authMiddleware } from '../middleware/auth';
 import { requireRole } from '../middleware/roles';
 import { logger } from '../lib/logger';
+import { getPDFStream } from '../lib/googleDrive';
 
 const MODO_CALEFACCION_UMBRAL = 29;
 const MODO_REFRIGERACION_UMBRAL = 21;
@@ -116,7 +117,8 @@ router.get('/admin/aerotermia/facturas', authMiddleware, requireRole('directiva'
         f.importe_vivienda_variable_acs AS importe_variable_acs,
         f.importe_vivienda_acs AS importe_acs,
         f.fecha_factura_inicio,
-        f.fecha_factura_fin
+        f.fecha_factura_fin,
+        (f.drive_file_id IS NOT NULL) AS tiene_pdf
       FROM facturas f
       ORDER BY f.fecha_factura_inicio DESC, f.piso ASC
     `);
@@ -124,6 +126,41 @@ router.get('/admin/aerotermia/facturas', authMiddleware, requireRole('directiva'
   } catch (err) {
     logger.error(err, 'Admin aerotermia facturas error');
     res.status(500).json({ error: 'Error interno del servidor' });
+  }
+});
+
+router.get('/admin/aerotermia/facturas/:id_factura/descargar', authMiddleware, requireRole('directiva', 'admin'), async (req: Request, res: Response) => {
+  try {
+    const { id_factura } = req.params;
+
+    const result = await query(
+      'SELECT drive_file_id FROM facturas WHERE id_factura = $1',
+      [id_factura]
+    );
+
+    if (result.rows.length === 0) {
+      res.status(404).json({ error: 'Factura no encontrada' });
+      return;
+    }
+
+    const factura = result.rows[0];
+    if (!factura.drive_file_id) {
+      res.status(404).json({ error: 'Esta factura no tiene archivo adjunto' });
+      return;
+    }
+
+    const fileName = `factura-${id_factura}.pdf`;
+    res.setHeader('Content-Type', 'application/pdf');
+    res.setHeader('Content-Disposition', `attachment; filename="${fileName}"`);
+    res.setHeader('Access-Control-Expose-Headers', 'Content-Disposition');
+
+    const stream = await getPDFStream(factura.drive_file_id);
+    stream.pipe(res);
+  } catch (err) {
+    logger.error(err, 'Admin aerotermia factura download error');
+    if (!res.headersSent) {
+      res.status(500).json({ error: 'Error al descargar el archivo' });
+    }
   }
 });
 
