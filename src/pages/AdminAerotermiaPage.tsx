@@ -286,7 +286,7 @@ export default function AdminAerotermiaPage() {
               {sections.facturas && (
                 <div className="mt-3 overflow-x-auto">
                   {downloadError && (
-                    <div className="px-4 py-3 rounded-xl text-sm flex items-center gap-2 mb-4" style={{ background: 'rgba(163,64,42,.08)', color: '#a3402a' }}>
+                    <div role="alert" className="px-4 py-3 rounded-xl text-sm flex items-center gap-2 mb-4" style={{ background: 'rgba(163,64,42,.08)', color: '#a3402a' }}>
                       <Icon name="alertTriangle" size={14} />
                       {downloadError}
                     </div>
