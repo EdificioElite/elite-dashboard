@@ -4,7 +4,6 @@ import { loginAsVecino } from '../fixtures/auth';
 test.describe('Dashboard date range picker', () => {
   test.beforeEach(async ({ page }) => {
     await loginAsVecino(page);
-    await page.waitForSelector('text=Cargando tus datos', { state: 'hidden', timeout: 10000 }).catch(() => {});
   });
 
   test('shows preset buttons and custom button', async ({ page }) => {
@@ -22,14 +21,8 @@ test.describe('Dashboard date range picker', () => {
   });
 
   test('clicking 24h preset changes selection', async ({ page }) => {
-    const tab = page.getByRole('tab', { name: '24h' });
-    await tab.click();
-    try {
-      await expect(tab).toHaveAttribute('aria-selected', 'true', { timeout: 5000 });
-    } catch {
-      await tab.click();
-      await expect(tab).toHaveAttribute('aria-selected', 'true', { timeout: 10000 });
-    }
+    await page.getByRole('tab', { name: '24h' }).click();
+    await expect(page.getByRole('tab', { name: '24h' })).toHaveAttribute('aria-selected', 'true');
   });
 
   test('clicking 30d preset loads chart data', async ({ page }) => {
