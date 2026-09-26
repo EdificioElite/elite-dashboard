@@ -4,6 +4,7 @@ import { loginAsVecino } from '../fixtures/auth';
 test.describe('Dashboard date range picker', () => {
   test.beforeEach(async ({ page }) => {
     await loginAsVecino(page);
+    await page.waitForSelector('text=Cargando tus datos', { state: 'hidden', timeout: 10000 }).catch(() => {});
   });
 
   test('shows preset buttons and custom button', async ({ page }) => {
