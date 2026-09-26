@@ -1,6 +1,6 @@
 import { useEffect, useState, useMemo } from 'react';
 import { Link } from 'react-router-dom';
-import { apiFetch } from '../api/client';
+import { apiFetch, downloadFacturaPDF } from '../api/client';
 import Icon from '../components/Icon';
 import HistoricoCharts from '../components/HistoricoCharts';
 import CopChart from '../components/CopChart';
@@ -27,6 +27,7 @@ interface FacturaGlobal {
   importe_acs: number;
   fecha_factura_inicio?: string;
   fecha_factura_fin?: string;
+  tiene_pdf?: boolean;
 }
 
 interface CopDatum {
@@ -82,6 +83,18 @@ export default function AdminAerotermiaPage() {
   });
 
   const [searchVecino, setSearchVecino] = useState('');
+  const [downloading, setDownloading] = useState<string | null>(null);
+
+  const handleDownload = async (idFactura: string) => {
+    setDownloading(idFactura);
+    try {
+      await downloadFacturaPDF(idFactura, { admin: true });
+    } catch (err) {
+      console.error('Error descargando factura:', err);
+    } finally {
+      setDownloading(null);
+    }
+  };
 
   const toggleSection = (key: string) => {
     setSections((prev) => ({ ...prev, [key]: !prev[key] }));
@@ -123,11 +136,21 @@ export default function AdminAerotermiaPage() {
     return [...set].sort((a, b) => new Date(b).getTime() - new Date(a).getTime());
   }, [filteredFacturas]);
 
+  interface PivotCell {
+    importe: number;
+    id_factura: string;
+    tiene_pdf: boolean;
+  }
+
   const facturasPivote = useMemo(() => {
-    const map = new Map<string, Record<string, number>>();
+    const map = new Map<string, Map<string, PivotCell>>();
     filteredFacturas.forEach((f) => {
-      if (!map.has(f.piso)) map.set(f.piso, {});
-      map.get(f.piso)![f.periodo] = Number(f.importe_total);
+      if (!map.has(f.piso)) map.set(f.piso, new Map());
+      map.get(f.piso)!.set(f.periodo, {
+        importe: Number(f.importe_total),
+        id_factura: f.id_factura,
+        tiene_pdf: !!f.tiene_pdf,
+      });
     });
     return map;
   }, [filteredFacturas]);
@@ -279,10 +302,27 @@ export default function AdminAerotermiaPage() {
                           <tr key={piso} className="border-t border-cocoa/5">
                             <td className="py-2 px-3 font-semibold text-cocoa sticky left-0" style={{ background: 'rgba(255,251,245,0.95)' }}>{piso}</td>
                             {periodosUnicos.map((periodo) => {
-                              const importe = facturasPivote.get(piso)?.[periodo];
+                              const cell = facturasPivote.get(piso)?.get(periodo);
+                              if (!cell) {
+                                return (
+                                  <td key={periodo} className="py-2 px-3 text-right font-mono font-num text-cocoa/40">—</td>
+                                );
+                              }
+                              const importeStr = `${cell.importe.toLocaleString('es-ES', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} €`;
                               return (
                                 <td key={periodo} className="py-2 px-3 text-right font-mono font-num text-cocoa/70">
-                                  {importe != null ? `${importe.toLocaleString('es-ES', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} €` : '—'}
+                                  {cell.tiene_pdf ? (
+                                    <button
+                                      onClick={() => handleDownload(cell.id_factura)}
+                                      disabled={downloading === cell.id_factura}
+                                      className="underline decoration-dotted hover:text-accent transition-colors disabled:opacity-50"
+                                      title="Descargar factura"
+                                    >
+                                      {downloading === cell.id_factura ? 'Descargando…' : importeStr}
+                                    </button>
+                                  ) : (
+                                    importeStr
+                                  )}
                                 </td>
                               );
                             })}

@@ -1,6 +1,6 @@
 import { describe, it, expect, vi } from 'vitest';
 import { render, screen, waitFor, fireEvent } from '@testing-library/react';
-import { apiFetch } from '../api/client';
+import { apiFetch, downloadFacturaPDF } from '../api/client';
 import { MemoryRouter } from 'react-router-dom';
 import AdminAerotermiaPage from '../pages/AdminAerotermiaPage';
 
@@ -12,6 +12,7 @@ vi.mock('../api/client', () => ({
     if (url === '/admin/aerotermia/en-vivo') return Promise.resolve(null);
     return Promise.resolve([]);
   }),
+  downloadFacturaPDF: vi.fn(),
 }));
 
 function recentPeriod(monthsBack: number): string {
@@ -97,5 +98,23 @@ describe('AdminAerotermiaPage', () => {
       expect(screen.getAllByText('1A').length).toBe(1);
       expect(screen.getAllByText('1B').length).toBe(1);
     });
+  });
+
+  it('descarga la factura al pulsar el total cuando tiene_pdf', async () => {
+    vi.mocked(apiFetch).mockImplementation((url: string) => {
+      if (url === '/admin/aerotermia/facturas') return Promise.resolve([
+        { id_factura: 'F1', piso: '1A', periodo: recentPeriod(1), importe_total: 100, importe_fijo: 10, kwh_calor: 50, kwh_frio: 10, kwh_acs: 5, m3_acs: 1, importe_calor: 30, importe_frio: 5, importe_variable_acs: 2, importe_acs: 15, tiene_pdf: true },
+      ]);
+      if (url === '/admin/aerotermia/cop') return Promise.resolve([]);
+      if (url.includes('/admin/aerotermia/consumos')) return Promise.resolve([]);
+      if (url === '/admin/aerotermia/en-vivo') return Promise.resolve(null);
+      return Promise.resolve([]);
+    });
+    render(<MemoryRouter><AdminAerotermiaPage /></MemoryRouter>);
+    await waitFor(() => {
+      expect(screen.getByText('100,00 €')).toBeInTheDocument();
+    });
+    fireEvent.click(screen.getByText('100,00 €'));
+    expect(downloadFacturaPDF).toHaveBeenCalledWith('F1', { admin: true });
   });
 });
