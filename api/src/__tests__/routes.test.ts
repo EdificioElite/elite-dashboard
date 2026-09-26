@@ -786,6 +786,19 @@ describe('Facturas routes', () => {
       expect(sql).toContain('drive_file_id');
       expect(sql).toContain('tiene_pdf');
     });
+
+    it('returns tiene_pdf flag without exposing drive_file_id', async () => {
+      mockQuery.mockResolvedValueOnce({
+        rows: [{ id_factura: '1', periodo: '2026-01-01', importe_total: 80.5, tiene_pdf: true }],
+      });
+      const app = createApp();
+      const res = await request(app)
+        .get('/api/facturas')
+        .set('Authorization', `Bearer ${userToken()}`);
+      expect(res.status).toBe(200);
+      expect(res.body[0].tiene_pdf).toBe(true);
+      expect(res.body[0].drive_file_id).toBeUndefined();
+    });
   });
 
   describe('GET /api/facturas/:id_factura/descargar', () => {
@@ -832,6 +845,7 @@ describe('Facturas routes', () => {
       expect(res.status).toBe(200);
       expect(res.headers['content-type']).toBe('application/pdf');
       expect(res.headers['content-disposition']).toContain('attachment');
+      expect(mockGetPDFStream).toHaveBeenCalledWith('drive-123');
     });
   });
 });
