@@ -37,13 +37,15 @@ interface RowDef {
 
 export default function FacturasTable({ data, downloadPiso }: { data: Factura[]; downloadPiso?: string }) {
   const [downloading, setDownloading] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
 
   const handleDownload = async (f: Factura) => {
     setDownloading(f.id_factura);
+    setError(null);
     try {
       await downloadFacturaPDF(f.id_factura, { piso: downloadPiso });
     } catch (err) {
-      console.error('Error descargando factura:', err);
+      setError(err instanceof Error ? err.message : 'Error al descargar la factura');
     } finally {
       setDownloading(null);
     }
@@ -86,6 +88,13 @@ export default function FacturasTable({ data, downloadPiso }: { data: Factura[];
         </div>
         <span className="eyebrow">Facturas</span>
       </div>
+
+      {error && (
+        <div className="px-4 py-3 rounded-xl text-sm flex items-center gap-2 mb-4" style={{ background: 'rgba(163,64,42,.08)', color: '#a3402a' }}>
+          <Icon name="alertTriangle" size={14} />
+          {error}
+        </div>
+      )}
 
       <div className="overflow-x-auto -mx-2">
         <table className="w-full text-xs border-separate" style={{ borderSpacing: 0 }}>
@@ -131,11 +140,11 @@ export default function FacturasTable({ data, downloadPiso }: { data: Factura[];
                     <button
                       onClick={() => handleDownload(f)}
                       disabled={downloading === f.id_factura}
-                      className="btn btn-ghost text-xs"
+                      className="btn btn-ghost text-xs disabled:opacity-50"
                       title="Descargar factura"
+                      aria-label="Descargar factura"
                     >
                       <Icon name="download" size={12} />
-                      {downloading === f.id_factura ? 'Descargando…' : 'Descargar'}
                     </button>
                   ) : (
                     <span className="text-cocoa/20 text-xs">—</span>

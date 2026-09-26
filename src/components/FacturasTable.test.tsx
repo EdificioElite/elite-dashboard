@@ -77,7 +77,7 @@ describe('FacturasTable', () => {
         ]}
       />
     );
-    expect(screen.getByRole('button', { name: 'Descargar' })).toBeInTheDocument();
+    expect(screen.getByText('Descargar')).toBeInTheDocument();
     const buttons = screen.getAllByRole('button');
     expect(buttons).toHaveLength(1);
   });
@@ -94,5 +94,18 @@ describe('FacturasTable', () => {
     const button = screen.getByRole('button');
     button.click();
     expect(downloadFacturaPDF).toHaveBeenCalledWith('1', { piso: '2A' });
+  });
+
+  it('shows error message when download fails', async () => {
+    vi.mocked(downloadFacturaPDF).mockRejectedValueOnce(new Error('Esta factura no tiene archivo adjunto'));
+    render(
+      <FacturasTable
+        data={[
+          { id_factura: '1', periodo: '2026-01-01', importe_total: 80.5, importe_fijo: 20, kwh_calor: 100, kwh_frio: 30, kwh_acs: 50, m3_acs: 2.5, importe_calor: 40, importe_frio: 10, importe_variable_acs: 15, importe_acs: 30.5, tiene_pdf: true },
+        ]}
+      />
+    );
+    screen.getByRole('button').click();
+    expect(await screen.findByText('Esta factura no tiene archivo adjunto')).toBeInTheDocument();
   });
 });

@@ -84,13 +84,15 @@ export default function AdminAerotermiaPage() {
 
   const [searchVecino, setSearchVecino] = useState('');
   const [downloading, setDownloading] = useState<string | null>(null);
+  const [downloadError, setDownloadError] = useState<string | null>(null);
 
   const handleDownload = async (idFactura: string) => {
     setDownloading(idFactura);
+    setDownloadError(null);
     try {
       await downloadFacturaPDF(idFactura, { admin: true });
     } catch (err) {
-      console.error('Error descargando factura:', err);
+      setDownloadError(err instanceof Error ? err.message : 'Error al descargar la factura');
     } finally {
       setDownloading(null);
     }
@@ -283,6 +285,12 @@ export default function AdminAerotermiaPage() {
               <SectionHeader id="facturas" label="Facturas" icon="dollar" expanded={sections.facturas} onToggle={toggleSection} />
               {sections.facturas && (
                 <div className="mt-3 overflow-x-auto">
+                  {downloadError && (
+                    <div className="px-4 py-3 rounded-xl text-sm flex items-center gap-2 mb-4" style={{ background: 'rgba(163,64,42,.08)', color: '#a3402a' }}>
+                      <Icon name="alertTriangle" size={14} />
+                      {downloadError}
+                    </div>
+                  )}
                   {periodosUnicos.length === 0 ? (
                     <p className="text-sm text-cocoa/40 py-8">No hay facturas en este periodo</p>
                   ) : (
