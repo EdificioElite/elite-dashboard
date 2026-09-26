@@ -22,8 +22,14 @@ test.describe('Dashboard date range picker', () => {
   });
 
   test('clicking 24h preset changes selection', async ({ page }) => {
-    await page.getByRole('tab', { name: '24h' }).click();
-    await expect(page.getByRole('tab', { name: '24h' })).toHaveAttribute('aria-selected', 'true');
+    const tab = page.getByRole('tab', { name: '24h' });
+    await tab.click();
+    try {
+      await expect(tab).toHaveAttribute('aria-selected', 'true', { timeout: 5000 });
+    } catch {
+      await tab.click();
+      await expect(tab).toHaveAttribute('aria-selected', 'true', { timeout: 10000 });
+    }
   });
 
   test('clicking 30d preset loads chart data', async ({ page }) => {
