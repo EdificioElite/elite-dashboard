@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.17.0](https://github.com/EdificioElite/elite-dashboard/compare/v1.16.0...v1.17.0) (2026-09-26)
+
+
+### Features
+
+* descargar facturas de aerotermia ([#116](https://github.com/EdificioElite/elite-dashboard/issues/116)) ([3638a09](https://github.com/EdificioElite/elite-dashboard/commit/3638a09acec805b354145f6289571f2b1c670275))
+* filtrar facturas por fecha de inicio o fin ([#114](https://github.com/EdificioElite/elite-dashboard/issues/114)) ([2e289b3](https://github.com/EdificioElite/elite-dashboard/commit/2e289b37938c1ee33ae924ce58830e0c1417be83))
+
 ## [1.16.0](https://github.com/EdificioElite/elite-dashboard/compare/v1.15.1...v1.16.0) (2026-09-03)
 
 
