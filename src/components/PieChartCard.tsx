@@ -1,4 +1,4 @@
-import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer, Legend, Label } from 'recharts';
+import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer, Label } from 'recharts';
 import ChartTooltip from './ChartTooltip';
 import Icon from './Icon';
 
@@ -10,24 +10,6 @@ interface PieSlice {
 }
 
 const COLORS = ['#B53228', '#4A7A8C', '#5D7A4A', '#A6754B', '#8B6B4A', '#4A7A8C', '#A6754B', '#5D7A4A'];
-
-function legendContent(props: any) {
-  const { payload } = props;
-  if (!payload) return null;
-  return (
-    <div className="flex flex-wrap gap-x-3 gap-y-1 justify-center mt-2">
-      {payload.map((entry: any, index: number) => {
-        const d = entry.payload as PieSlice;
-        return (
-          <span key={d.piso} className="flex items-center gap-1.5 text-[10px] text-cocoa/50">
-            <span className="w-2 h-2 rounded-full shrink-0" style={{ background: COLORS[index % COLORS.length] }} />
-            {d.piso} ({d.porcentaje.toFixed(0)}%)
-          </span>
-        );
-      })}
-    </div>
-  );
-}
 
 export default function PieChartCard({ data }: { data: PieSlice[] }) {
   if (data.length === 0) {
@@ -83,9 +65,17 @@ export default function PieChartCard({ data }: { data: PieSlice[] }) {
             />
           </Pie>
           <Tooltip content={<ChartTooltip unit="kWh" />} wrapperStyle={{ zIndex: 9999, pointerEvents: 'none' }} />
-          <Legend content={legendContent} />
         </PieChart>
       </ResponsiveContainer>
+
+      <div className="flex flex-wrap gap-x-3 gap-y-1 justify-center mt-2">
+        {displayData.map((d, index) => (
+          <span key={d.piso} className="flex items-center gap-1.5 text-[10px] text-cocoa/50">
+            <span className="w-2 h-2 rounded-full shrink-0" style={{ background: COLORS[index % COLORS.length] }} />
+            {d.piso} ({d.porcentaje.toFixed(0)}%)
+          </span>
+        ))}
+      </div>
     </div>
   );
 }
