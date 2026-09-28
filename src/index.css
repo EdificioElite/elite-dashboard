@@ -1,6 +1,30 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss";
+
+@theme {
+  --color-cream: #FFFBF5;
+  --color-sand: #EDE0CC;
+  --color-camel: #C9A87C;
+  --color-wheat: #E8D5C0;
+  --color-cocoa: #1E140A;
+  --color-accent: #A6754B;
+  --color-accent-dark: #8C5E3A;
+  --color-accent-2: #4A5F7A;
+  --color-sage: #5D7A4A;
+  --color-sage-dark: #4A6338;
+  --color-rise: #8A2A1E;
+  --color-calor: #B53228;
+  --color-frio: #4A7A8C;
+  --font-sans: 'Manrope', ui-sans-serif, system-ui, sans-serif;
+  --font-display: 'Fraunces', ui-serif, Georgia, serif;
+  --font-mono: 'JetBrains Mono', ui-monospace, monospace;
+  --radius-xl: 28px;
+  --radius-lg: 20px;
+  --radius-md: 14px;
+  --radius-sm: 10px;
+  --shadow-glass: 0 1px 0 rgba(255,255,255,.5) inset, 0 12px 32px -16px rgba(30,20,10,.12), 0 4px 12px -6px rgba(30,20,10,.08);
+  --min-height-touch: 44px;
+  --min-width-touch: 44px;
+}
 
 @layer base {
   :root {
