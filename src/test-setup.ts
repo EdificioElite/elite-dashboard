@@ -1,4 +1,4 @@
-import '@testing-library/jest-dom';
+import '@testing-library/jest-dom/vitest';
 
 class LocalStorageMock {
   private store: Record<string, string> = {};
