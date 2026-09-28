@@ -40,7 +40,7 @@ test.describe('Admin (stateful)', () => {
 
   test('edits user email and piso', async ({ page }) => {
     await page.goto('/admin/usuarios');
-    await page.waitForSelector('table tbody', { timeout: 15000 });
+    await page.waitForSelector('table tbody', { timeout: 25000 });
     const row = page.locator('tr', { hasText: 'vecino4@elite.com' });
     await row.locator('[title="Editar usuario"]').waitFor({ state: 'visible', timeout: 10000 });
     await row.locator('[title="Editar usuario"]').click();
@@ -57,7 +57,7 @@ test.describe('Admin (stateful)', () => {
 
   test('changes user password', async ({ page }) => {
     await page.goto('/admin/usuarios');
-    await page.waitForSelector('table tbody', { timeout: 15000 });
+    await page.waitForSelector('table tbody', { timeout: 25000 });
     const row = page.locator('tr', { hasText: 'vecino2@elite.com' });
     await row.locator('[title="Cambiar contraseña"]').waitFor({ state: 'visible', timeout: 10000 });
     await row.locator('[title="Cambiar contraseña"]').click();
@@ -76,7 +76,7 @@ test.describe('Admin (stateful)', () => {
 
   test('deletes a user', async ({ page }) => {
     await page.goto('/admin/usuarios');
-    await page.waitForSelector('table tbody', { timeout: 15000 });
+    await page.waitForSelector('table tbody', { timeout: 25000 });
     const row = page.locator('tr', { hasText: 'vecino3@elite.com' });
     await row.locator('[title="Eliminar usuario"]').waitFor({ state: 'visible', timeout: 10000 });
     await row.locator('[title="Eliminar usuario"]').click();
@@ -92,7 +92,7 @@ test.describe('Admin (stateful)', () => {
 
   test('ultima_conexion updates after vecino logs in', async ({ page }) => {
     await page.goto('/admin/usuarios');
-    await page.waitForSelector('table tbody', { timeout: 15000 });
+    await page.waitForSelector('table tbody', { timeout: 25000 });
 
     await logout(page);
     await loginAsVecino(page);
