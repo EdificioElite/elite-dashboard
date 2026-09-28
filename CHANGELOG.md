@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.17.1](https://github.com/EdificioElite/elite-dashboard/compare/v1.17.0...v1.17.1) (2026-09-28)
+
+
+### Bug Fixes
+
+* corregir orden de hooks en FacturasTable al vaciarse las facturas ([#117](https://github.com/EdificioElite/elite-dashboard/issues/117)) ([6d10532](https://github.com/EdificioElite/elite-dashboard/commit/6d1053278865c582c51b8c6daf480bc4c4f9683e))
+
 ## [1.17.0](https://github.com/EdificioElite/elite-dashboard/compare/v1.16.0...v1.17.0) (2026-09-26)
 
 
