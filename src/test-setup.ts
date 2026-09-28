@@ -21,7 +21,7 @@ Object.defineProperty(globalThis, 'localStorage', {
   writable: true,
 });
 
-global.ResizeObserver = class ResizeObserver {
+globalThis.ResizeObserver = class ResizeObserver {
   private cb: ResizeObserverCallback;
   constructor(cb: ResizeObserverCallback) {
     this.cb = cb;
