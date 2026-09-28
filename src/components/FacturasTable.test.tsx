@@ -14,6 +14,13 @@ describe('FacturasTable', () => {
     expect(screen.getByText('No hay facturas disponibles')).toBeInTheDocument();
   });
 
+  it('does not crash when data transitions from populated to empty', () => {
+    const factura = { id_factura: '1', periodo: '2026-01-01', importe_total: 80.5, importe_fijo: 20, kwh_calor: 100, kwh_frio: 30, kwh_acs: 50, m3_acs: 2.5, importe_calor: 40, importe_frio: 10, importe_variable_acs: 15, importe_acs: 30.5 };
+    const { rerender } = render(<FacturasTable data={[factura]} />);
+    rerender(<FacturasTable data={[]} />);
+    expect(screen.getByText('No hay facturas disponibles')).toBeInTheDocument();
+  });
+
   it('renders facturas with transposed layout', () => {
     render(
       <FacturasTable
