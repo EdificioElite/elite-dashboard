@@ -58,7 +58,7 @@ services:
       - api
 
   playwright:
-    image: mcr.microsoft.com/playwright:v1.46.1-jammy
+    image: mcr.microsoft.com/playwright:v1.63.0-jammy
     working_dir: /e2e
     depends_on:
       - frontend
