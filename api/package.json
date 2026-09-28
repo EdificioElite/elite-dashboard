@@ -18,7 +18,7 @@
     "googleapis": "^182.0.0",
     "jsonwebtoken": "^9.0.2",
     "multer": "^2.1.1",
-    "nodemailer": "^9.0.0",
+    "nodemailer": "^10.0.0",
     "pg": "^8.13.1",
     "pino": "^10.0.0",
     "pino-http": "^11.0.0"
