@@ -51,6 +51,8 @@ export default function FacturasTable({ data, downloadPiso }: { data: Factura[];
     }
   };
 
+  const chrono = useMemo(() => [...data].reverse(), [data]);
+
   if (data.length === 0) {
     return (
       <div className="glass p-[26px]">
@@ -64,8 +66,6 @@ export default function FacturasTable({ data, downloadPiso }: { data: Factura[];
       </div>
     );
   }
-
-  const chrono = useMemo(() => [...data].reverse(), [data]);
 
   const rows: RowDef[] = [
     { label: 'kWh calor', accessor: (f) => fmt(f.kwh_calor, 0, 'kWh'), section: 'Consumos' },
