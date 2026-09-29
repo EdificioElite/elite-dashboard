@@ -32,6 +32,16 @@ const CONTACTS: ContactEntry[] = [
     ],
   },
   {
+    title: 'Limpieza y Paquetería',
+    subtitle: 'Cristina',
+    icon: 'home',
+    color: '#6f8a5c',
+    details: [
+      { label: 'Email', value: 'info@cnlimpiezas.com', href: 'mailto:info@cnlimpiezas.com', icon: 'mail' },
+      { label: 'Teléfono', value: '634 466 849', href: 'tel:+34634466849', icon: 'phone' },
+    ],
+  },
+  {
     title: 'Mantenimiento Aerotermia',
     subtitle: 'a360',
     icon: 'settings',
@@ -60,16 +70,6 @@ const CONTACTS: ContactEntry[] = [
       { label: 'Web', value: 'www.altatec-seguridad.com', href: 'https://www.altatec-seguridad.com/', icon: 'eye' },
       { label: 'Teléfono', value: '800 808 728', href: 'tel:+34800808728', icon: 'phone' },
       { label: 'Email', value: 'info@altatec-seguridad.com', href: 'mailto:info@altatec-seguridad.com', icon: 'mail' },
-    ],
-  },
-  {
-    title: 'Limpieza y Paquetería',
-    subtitle: 'Cristina',
-    icon: 'home',
-    color: '#6f8a5c',
-    details: [
-      { label: 'Email', value: 'info@cnlimpiezas.com', href: 'mailto:info@cnlimpiezas.com', icon: 'mail' },
-      { label: 'Teléfono', value: '634 466 849', href: 'tel:+34634466849', icon: 'phone' },
     ],
   },
 ];
