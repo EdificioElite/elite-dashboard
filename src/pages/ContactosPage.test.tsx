@@ -136,6 +136,19 @@ describe('ContactosPage', () => {
     expect(screen.getByText('www.domya.es')).toBeInTheDocument();
   });
 
+  it('renders Presman card', () => {
+    render(
+      <MemoryRouter>
+        <ContactosPage />
+      </MemoryRouter>
+    );
+    expect(screen.getByText('Protección contra Incendios')).toBeInTheDocument();
+    expect(screen.getByText('Presman')).toBeInTheDocument();
+    expect(screen.getByText('918 284 326')).toBeInTheDocument();
+    expect(screen.getByText('info@presman.es')).toBeInTheDocument();
+    expect(screen.getByText('www.presman.es')).toBeInTheDocument();
+  });
+
   it('renders email as mailto links', () => {
     render(
       <MemoryRouter>
@@ -144,7 +157,7 @@ describe('ContactosPage', () => {
     );
     const links = screen.getAllByRole('link');
     const emails = links.filter((l) => l.getAttribute('href')?.startsWith('mailto:'));
-    expect(emails.length).toBe(7);
+    expect(emails.length).toBe(8);
   });
 
   it('renders phone as tel links', () => {
@@ -155,6 +168,6 @@ describe('ContactosPage', () => {
     );
     const links = screen.getAllByRole('link');
     const tels = links.filter((l) => l.getAttribute('href')?.startsWith('tel:'));
-    expect(tels.length).toBe(12);
+    expect(tels.length).toBe(13);
   });
 });

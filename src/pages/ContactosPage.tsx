@@ -105,6 +105,17 @@ const CONTACTS: ContactEntry[] = [
     ],
   },
   {
+    title: 'Protección contra Incendios',
+    subtitle: 'Presman',
+    icon: 'flame',
+    color: '#d25b3c',
+    details: [
+      { label: 'Teléfono', value: '918 284 326', href: 'tel:+34918284326', icon: 'phone' },
+      { label: 'Email', value: 'info@presman.es', href: 'mailto:info@presman.es', icon: 'mail' },
+      { label: 'Web', value: 'www.presman.es', href: 'https://presman.es/', icon: 'eye' },
+    ],
+  },
+  {
     title: 'Seguro',
     subtitle: 'Mapfre',
     icon: 'umbrella',
