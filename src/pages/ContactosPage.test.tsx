@@ -85,6 +85,107 @@ describe('ContactosPage', () => {
     expect(screen.getByText('cpedificioelite@gmail.com')).toBeInTheDocument();
   });
 
+  it('renders Mapfre card', () => {
+    render(
+      <MemoryRouter>
+        <ContactosPage />
+      </MemoryRouter>
+    );
+    expect(screen.getByText('Seguro')).toBeInTheDocument();
+    expect(screen.getByText('Mapfre')).toBeInTheDocument();
+    expect(screen.getByText('918 365 365')).toBeInTheDocument();
+    expect(screen.getByText('900 822 822')).toBeInTheDocument();
+    expect(screen.getByText('www.mapfre.es')).toBeInTheDocument();
+  });
+
+  it('renders Lizama card', () => {
+    render(
+      <MemoryRouter>
+        <ContactosPage />
+      </MemoryRouter>
+    );
+    expect(screen.getByText('Jardinería')).toBeInTheDocument();
+    expect(screen.getByText('Lizama')).toBeInTheDocument();
+    expect(screen.getByText('609 645 633')).toBeInTheDocument();
+    expect(screen.getByText('www.lizamamultiservicios.com')).toBeInTheDocument();
+  });
+
+  it('renders Mayns card', () => {
+    render(
+      <MemoryRouter>
+        <ContactosPage />
+      </MemoryRouter>
+    );
+    expect(screen.getByText('Puerta del Garaje')).toBeInTheDocument();
+    expect(screen.getByText('Mayns')).toBeInTheDocument();
+    expect(screen.getByText('mayns@mayns.es')).toBeInTheDocument();
+    expect(screen.getByText('917 335 229')).toBeInTheDocument();
+    expect(screen.getByText('www.mayns.es')).toBeInTheDocument();
+  });
+
+  it('renders Domya card', () => {
+    render(
+      <MemoryRouter>
+        <ContactosPage />
+      </MemoryRouter>
+    );
+    expect(screen.getByText('Puerta de la Urbanización')).toBeInTheDocument();
+    expect(screen.getByText('Domya')).toBeInTheDocument();
+    expect(screen.getByText('900 373 602')).toBeInTheDocument();
+    expect(screen.getByText('info@domya.es')).toBeInTheDocument();
+    expect(screen.getByText('www.domya.es')).toBeInTheDocument();
+  });
+
+  it('renders Presman card', () => {
+    render(
+      <MemoryRouter>
+        <ContactosPage />
+      </MemoryRouter>
+    );
+    expect(screen.getByText('Protección contra Incendios')).toBeInTheDocument();
+    expect(screen.getByText('Presman')).toBeInTheDocument();
+    expect(screen.getByText('918 284 326')).toBeInTheDocument();
+    expect(screen.getByText('info@presman.es')).toBeInTheDocument();
+    expect(screen.getByText('www.presman.es')).toBeInTheDocument();
+  });
+
+  it('renders Iberdrola card', () => {
+    render(
+      <MemoryRouter>
+        <ContactosPage />
+      </MemoryRouter>
+    );
+    expect(screen.getByText('Suministro Eléctrico')).toBeInTheDocument();
+    expect(screen.getByText('Iberdrola')).toBeInTheDocument();
+    expect(screen.getByText('900 225 235')).toBeInTheDocument();
+    expect(screen.getByText('clientes@tuiberdrola.es')).toBeInTheDocument();
+    expect(screen.getByText('www.iberdrola.es')).toBeInTheDocument();
+  });
+
+  it('renders Canal de Isabel II card', () => {
+    render(
+      <MemoryRouter>
+        <ContactosPage />
+      </MemoryRouter>
+    );
+    expect(screen.getByText('Agua')).toBeInTheDocument();
+    expect(screen.getByText('Canal de Isabel II')).toBeInTheDocument();
+    expect(screen.getByText('900 365 365')).toBeInTheDocument();
+    expect(screen.getByText('clientes@canaldeisabelsegunda.es')).toBeInTheDocument();
+    expect(screen.getByText('www.canaldeisabelsegunda.es')).toBeInTheDocument();
+  });
+
+  it('renders Funny & Pool card', () => {
+    render(
+      <MemoryRouter>
+        <ContactosPage />
+      </MemoryRouter>
+    );
+    expect(screen.getByText('Piscina')).toBeInTheDocument();
+    expect(screen.getByText('Funny & Pool S.L.')).toBeInTheDocument();
+    expect(screen.getByText('655 901 399')).toBeInTheDocument();
+  });
+
   it('renders email as mailto links', () => {
     render(
       <MemoryRouter>
@@ -93,7 +194,7 @@ describe('ContactosPage', () => {
     );
     const links = screen.getAllByRole('link');
     const emails = links.filter((l) => l.getAttribute('href')?.startsWith('mailto:'));
-    expect(emails.length).toBe(5);
+    expect(emails.length).toBe(10);
   });
 
   it('renders phone as tel links', () => {
@@ -104,6 +205,6 @@ describe('ContactosPage', () => {
     );
     const links = screen.getAllByRole('link');
     const tels = links.filter((l) => l.getAttribute('href')?.startsWith('tel:'));
-    expect(tels.length).toBe(7);
+    expect(tels.length).toBe(16);
   });
 });

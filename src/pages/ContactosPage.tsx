@@ -42,9 +42,28 @@ const CONTACTS: ContactEntry[] = [
     ],
   },
   {
+    title: 'Jardinería',
+    subtitle: 'Lizama',
+    icon: 'leaf',
+    color: '#5f9c54',
+    details: [
+      { label: 'Teléfono', value: '609 645 633', href: 'tel:+34609645633', icon: 'phone' },
+      { label: 'Web', value: 'www.lizamamultiservicios.com', href: 'https://www.lizamamultiservicios.com/', icon: 'eye' },
+    ],
+  },
+  {
+    title: 'Piscina',
+    subtitle: 'Funny & Pool S.L.',
+    icon: 'waves',
+    color: '#2aa8b0',
+    details: [
+      { label: 'Teléfono', value: '655 901 399', href: 'tel:+34655901399', icon: 'phone' },
+    ],
+  },
+  {
     title: 'Mantenimiento Aerotermia',
     subtitle: 'a360',
-    icon: 'settings',
+    icon: 'thermometer',
     color: '#4a7a8c',
     details: [
       { label: 'Teléfono', value: '911 591 170', href: 'tel:+34911591170', icon: 'phone' },
@@ -62,14 +81,80 @@ const CONTACTS: ContactEntry[] = [
     ],
   },
   {
+    title: 'Puerta del Garaje',
+    subtitle: 'Mayns',
+    icon: 'doorClosed',
+    color: '#c0793e',
+    details: [
+      { label: 'Email', value: 'mayns@mayns.es', href: 'mailto:mayns@mayns.es', icon: 'mail' },
+      { label: 'Teléfono', value: '917 335 229', href: 'tel:+34917335229', icon: 'phone' },
+      { label: 'Web', value: 'www.mayns.es', href: 'https://mayns.es/', icon: 'eye' },
+    ],
+  },
+  {
+    title: 'Puerta de la Urbanización',
+    subtitle: 'Domya',
+    icon: 'fence',
+    color: '#5b6fa8',
+    details: [
+      { label: 'Teléfono', value: '900 373 602', href: 'tel:+34900373602', icon: 'phone' },
+      { label: 'Email', value: 'info@domya.es', href: 'mailto:info@domya.es', icon: 'mail' },
+      { label: 'Web', value: 'www.domya.es', href: 'https://domya.es', icon: 'eye' },
+    ],
+  },
+  {
     title: 'Seguridad',
     subtitle: 'Altatec',
-    icon: 'shield',
+    icon: 'video',
     color: '#3b6ea5',
     details: [
       { label: 'Web', value: 'www.altatec-seguridad.com', href: 'https://www.altatec-seguridad.com/', icon: 'eye' },
       { label: 'Teléfono', value: '800 808 728', href: 'tel:+34800808728', icon: 'phone' },
       { label: 'Email', value: 'info@altatec-seguridad.com', href: 'mailto:info@altatec-seguridad.com', icon: 'mail' },
+    ],
+  },
+  {
+    title: 'Protección contra Incendios',
+    subtitle: 'Presman',
+    icon: 'flame',
+    color: '#d25b3c',
+    details: [
+      { label: 'Teléfono', value: '918 284 326', href: 'tel:+34918284326', icon: 'phone' },
+      { label: 'Email', value: 'info@presman.es', href: 'mailto:info@presman.es', icon: 'mail' },
+      { label: 'Web', value: 'www.presman.es', href: 'https://presman.es/', icon: 'eye' },
+    ],
+  },
+  {
+    title: 'Seguro',
+    subtitle: 'Mapfre',
+    icon: 'umbrella',
+    color: '#d52b1e',
+    details: [
+      { label: 'Teléfono', value: '918 365 365', href: 'tel:+34918365365', icon: 'phone' },
+      { label: 'Teléfono gratuito', value: '900 822 822', href: 'tel:+34900822822', icon: 'phone' },
+      { label: 'Web', value: 'www.mapfre.es', href: 'https://www.mapfre.es', icon: 'eye' },
+    ],
+  },
+  {
+    title: 'Suministro Eléctrico',
+    subtitle: 'Iberdrola',
+    icon: 'zap',
+    color: '#3f9e4f',
+    details: [
+      { label: 'Teléfono', value: '900 225 235', href: 'tel:+34900225235', icon: 'phone' },
+      { label: 'Email', value: 'clientes@tuiberdrola.es', href: 'mailto:clientes@tuiberdrola.es', icon: 'mail' },
+      { label: 'Web', value: 'www.iberdrola.es', href: 'https://www.iberdrola.es', icon: 'eye' },
+    ],
+  },
+  {
+    title: 'Agua',
+    subtitle: 'Canal de Isabel II',
+    icon: 'droplet',
+    color: '#2f89c4',
+    details: [
+      { label: 'Teléfono', value: '900 365 365', href: 'tel:+34900365365', icon: 'phone' },
+      { label: 'Email', value: 'clientes@canaldeisabelsegunda.es', href: 'mailto:clientes@canaldeisabelsegunda.es', icon: 'mail' },
+      { label: 'Web', value: 'www.canaldeisabelsegunda.es', href: 'https://www.canaldeisabelsegunda.es', icon: 'eye' },
     ],
   },
 ];
