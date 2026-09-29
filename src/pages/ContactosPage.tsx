@@ -83,6 +83,17 @@ const CONTACTS: ContactEntry[] = [
     ],
   },
   {
+    title: 'Puerta de la Urbanización',
+    subtitle: 'Domya',
+    icon: 'fence',
+    color: '#5b6fa8',
+    details: [
+      { label: 'Teléfono', value: '900 373 602', href: 'tel:+34900373602', icon: 'phone' },
+      { label: 'Email', value: 'info@domya.es', href: 'mailto:info@domya.es', icon: 'mail' },
+      { label: 'Web', value: 'www.domya.es', href: 'https://domya.es', icon: 'eye' },
+    ],
+  },
+  {
     title: 'Seguridad',
     subtitle: 'Altatec',
     icon: 'shield',

@@ -123,6 +123,19 @@ describe('ContactosPage', () => {
     expect(screen.getByText('www.mayns.es')).toBeInTheDocument();
   });
 
+  it('renders Domya card', () => {
+    render(
+      <MemoryRouter>
+        <ContactosPage />
+      </MemoryRouter>
+    );
+    expect(screen.getByText('Puerta de la Urbanización')).toBeInTheDocument();
+    expect(screen.getByText('Domya')).toBeInTheDocument();
+    expect(screen.getByText('900 373 602')).toBeInTheDocument();
+    expect(screen.getByText('info@domya.es')).toBeInTheDocument();
+    expect(screen.getByText('www.domya.es')).toBeInTheDocument();
+  });
+
   it('renders email as mailto links', () => {
     render(
       <MemoryRouter>
@@ -131,7 +144,7 @@ describe('ContactosPage', () => {
     );
     const links = screen.getAllByRole('link');
     const emails = links.filter((l) => l.getAttribute('href')?.startsWith('mailto:'));
-    expect(emails.length).toBe(6);
+    expect(emails.length).toBe(7);
   });
 
   it('renders phone as tel links', () => {
@@ -142,6 +155,6 @@ describe('ContactosPage', () => {
     );
     const links = screen.getAllByRole('link');
     const tels = links.filter((l) => l.getAttribute('href')?.startsWith('tel:'));
-    expect(tels.length).toBe(11);
+    expect(tels.length).toBe(12);
   });
 });
