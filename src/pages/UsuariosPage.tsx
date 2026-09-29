@@ -172,7 +172,7 @@ export default function UsuariosPage() {
           )}
         </div>
 
-        <section aria-label="Gestión de usuarios">
+        <section aria-label="Gestión de usuarios" className="flex flex-col gap-[22px]">
 
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-[16px]">
           {stats.map(s => (
