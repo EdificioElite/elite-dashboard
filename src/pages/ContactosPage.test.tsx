@@ -85,6 +85,19 @@ describe('ContactosPage', () => {
     expect(screen.getByText('cpedificioelite@gmail.com')).toBeInTheDocument();
   });
 
+  it('renders Mapfre card', () => {
+    render(
+      <MemoryRouter>
+        <ContactosPage />
+      </MemoryRouter>
+    );
+    expect(screen.getByText('Seguro')).toBeInTheDocument();
+    expect(screen.getByText('Mapfre')).toBeInTheDocument();
+    expect(screen.getByText('918 365 365')).toBeInTheDocument();
+    expect(screen.getByText('900 822 822')).toBeInTheDocument();
+    expect(screen.getByText('www.mapfre.es')).toBeInTheDocument();
+  });
+
   it('renders email as mailto links', () => {
     render(
       <MemoryRouter>
@@ -104,6 +117,6 @@ describe('ContactosPage', () => {
     );
     const links = screen.getAllByRole('link');
     const tels = links.filter((l) => l.getAttribute('href')?.startsWith('tel:'));
-    expect(tels.length).toBe(7);
+    expect(tels.length).toBe(9);
   });
 });

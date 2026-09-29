@@ -72,6 +72,17 @@ const CONTACTS: ContactEntry[] = [
       { label: 'Email', value: 'info@altatec-seguridad.com', href: 'mailto:info@altatec-seguridad.com', icon: 'mail' },
     ],
   },
+  {
+    title: 'Seguro',
+    subtitle: 'Mapfre',
+    icon: 'umbrella',
+    color: '#d52b1e',
+    details: [
+      { label: 'Teléfono', value: '918 365 365', href: 'tel:+34918365365', icon: 'phone' },
+      { label: 'Teléfono gratuito', value: '900 822 822', href: 'tel:+34900822822', icon: 'phone' },
+      { label: 'Web', value: 'www.mapfre.es', href: 'https://www.mapfre.es', icon: 'eye' },
+    ],
+  },
 ];
 
 export default function ContactosPage() {
