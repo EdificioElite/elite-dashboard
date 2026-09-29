@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.18.0](https://github.com/EdificioElite/elite-dashboard/compare/v1.17.2...v1.18.0) (2026-09-29)
+
+
+### Features
+
+* actualizar contactos (a360, Altatec) y añadir Orona ([#176](https://github.com/EdificioElite/elite-dashboard/issues/176)) ([e269ed2](https://github.com/EdificioElite/elite-dashboard/commit/e269ed23ce4234592d7d5313dfdfb73582a168e5))
+
 ## [1.17.2](https://github.com/EdificioElite/elite-dashboard/compare/v1.17.1...v1.17.2) (2026-09-29)
 
 
