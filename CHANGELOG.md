@@ -1,5 +1,22 @@
 # Changelog
 
+## [1.17.2](https://github.com/EdificioElite/elite-dashboard/compare/v1.17.1...v1.17.2) (2026-09-29)
+
+
+### Bug Fixes
+
+* **deps:** update dependency bcrypt to v6 ([#156](https://github.com/EdificioElite/elite-dashboard/issues/156)) ([35058d8](https://github.com/EdificioElite/elite-dashboard/commit/35058d86f300446231602ad6049d9efe4adb1995))
+* **deps:** update dependency dotenv to v18 ([#157](https://github.com/EdificioElite/elite-dashboard/issues/157)) ([0b3ee26](https://github.com/EdificioElite/elite-dashboard/commit/0b3ee261853e36930ccd84cc1b723f3db609ffb9))
+* **deps:** update dependency express to v5 ([#159](https://github.com/EdificioElite/elite-dashboard/issues/159)) ([4c17076](https://github.com/EdificioElite/elite-dashboard/commit/4c17076faf2a5d05a17d7ec15febfd4f9453b393))
+* **deps:** update dependency googleapis to v182 ([#160](https://github.com/EdificioElite/elite-dashboard/issues/160)) ([5ea6736](https://github.com/EdificioElite/elite-dashboard/commit/5ea67361bb96ed33106312f58aa95b9ddb4b2367))
+* **deps:** update dependency nodemailer to v10 ([#169](https://github.com/EdificioElite/elite-dashboard/issues/169)) ([88e6e10](https://github.com/EdificioElite/elite-dashboard/commit/88e6e10bf98abf2995489be1cf03993dfe849fa5))
+* **deps:** update dependency nodemailer to v9 [security] ([#124](https://github.com/EdificioElite/elite-dashboard/issues/124)) ([0766656](https://github.com/EdificioElite/elite-dashboard/commit/0766656abbfee4acab452933cb0562362ce9275e))
+* **deps:** update dependency pino to v10 ([#161](https://github.com/EdificioElite/elite-dashboard/issues/161)) ([c59f6f7](https://github.com/EdificioElite/elite-dashboard/commit/c59f6f7f544be1a8e4df64433c4d80b9e5d86a79))
+* **deps:** update dependency pino-http to v11 ([#162](https://github.com/EdificioElite/elite-dashboard/issues/162)) ([afdeb5d](https://github.com/EdificioElite/elite-dashboard/commit/afdeb5d282ecae0611588163a28abb219adfd865))
+* **deps:** update dependency react-router-dom to v7 ([#171](https://github.com/EdificioElite/elite-dashboard/issues/171)) ([337ec19](https://github.com/EdificioElite/elite-dashboard/commit/337ec19370ea32fbe3cc03530dd90a0d39ac4711))
+* **deps:** update dependency recharts to v3 ([#163](https://github.com/EdificioElite/elite-dashboard/issues/163)) ([c89ea31](https://github.com/EdificioElite/elite-dashboard/commit/c89ea314dd749389e6ade329a102820fe38326eb))
+* unificar separación superior de la card de listado en admin ([#172](https://github.com/EdificioElite/elite-dashboard/issues/172)) ([471d33e](https://github.com/EdificioElite/elite-dashboard/commit/471d33e7478e0ceb87883db8692f36727a01da95))
+
 ## [1.17.1](https://github.com/EdificioElite/elite-dashboard/compare/v1.17.0...v1.17.1) (2026-09-28)
 
 
