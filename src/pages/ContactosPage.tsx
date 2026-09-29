@@ -63,7 +63,7 @@ const CONTACTS: ContactEntry[] = [
   {
     title: 'Mantenimiento Aerotermia',
     subtitle: 'a360',
-    icon: 'settings',
+    icon: 'thermometer',
     color: '#4a7a8c',
     details: [
       { label: 'Teléfono', value: '911 591 170', href: 'tel:+34911591170', icon: 'phone' },
