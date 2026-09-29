@@ -25,17 +25,41 @@ describe('ContactosPage', () => {
     expect(screen.getByText('91 060 79 46')).toBeInTheDocument();
   });
 
-  it('renders Ness card', () => {
+  it('renders a360 card', () => {
     render(
       <MemoryRouter>
         <ContactosPage />
       </MemoryRouter>
     );
     expect(screen.getByText('Mantenimiento Aerotermia')).toBeInTheDocument();
-    expect(screen.getByText('Ness')).toBeInTheDocument();
-    expect(screen.getByText('+34 602 22 52 97')).toBeInTheDocument();
-    expect(screen.getByText('+34 917 99 26 88')).toBeInTheDocument();
-    expect(screen.getByText('clientes@ness.es')).toBeInTheDocument();
+    expect(screen.getByText('a360')).toBeInTheDocument();
+    expect(screen.getByText('911 591 170')).toBeInTheDocument();
+    expect(screen.getByText('www.a360se.com')).toBeInTheDocument();
+    expect(screen.getByText('clientes@a360se.com')).toBeInTheDocument();
+  });
+
+  it('renders Orona card', () => {
+    render(
+      <MemoryRouter>
+        <ContactosPage />
+      </MemoryRouter>
+    );
+    expect(screen.getByText('Mantenimiento de Ascensores')).toBeInTheDocument();
+    expect(screen.getByText('Orona')).toBeInTheDocument();
+    expect(screen.getByText('900 210 813')).toBeInTheDocument();
+  });
+
+  it('renders Altatec card', () => {
+    render(
+      <MemoryRouter>
+        <ContactosPage />
+      </MemoryRouter>
+    );
+    expect(screen.getByText('Seguridad')).toBeInTheDocument();
+    expect(screen.getByText('Altatec')).toBeInTheDocument();
+    expect(screen.getByText('www.altatec-seguridad.com')).toBeInTheDocument();
+    expect(screen.getByText('800 808 728')).toBeInTheDocument();
+    expect(screen.getByText('info@altatec-seguridad.com')).toBeInTheDocument();
   });
 
   it('renders Cristina card', () => {
@@ -69,7 +93,7 @@ describe('ContactosPage', () => {
     );
     const links = screen.getAllByRole('link');
     const emails = links.filter((l) => l.getAttribute('href')?.startsWith('mailto:'));
-    expect(emails.length).toBe(4);
+    expect(emails.length).toBe(5);
   });
 
   it('renders phone as tel links', () => {
@@ -80,6 +104,6 @@ describe('ContactosPage', () => {
     );
     const links = screen.getAllByRole('link');
     const tels = links.filter((l) => l.getAttribute('href')?.startsWith('tel:'));
-    expect(tels.length).toBe(6);
+    expect(tels.length).toBe(7);
   });
 });
