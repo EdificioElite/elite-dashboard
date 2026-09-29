@@ -105,7 +105,7 @@ const CONTACTS: ContactEntry[] = [
   {
     title: 'Seguridad',
     subtitle: 'Altatec',
-    icon: 'shield',
+    icon: 'video',
     color: '#3b6ea5',
     details: [
       { label: 'Web', value: 'www.altatec-seguridad.com', href: 'https://www.altatec-seguridad.com/', icon: 'eye' },
