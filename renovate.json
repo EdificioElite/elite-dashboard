@@ -20,6 +20,11 @@
       "matchUpdateTypes": ["minor"],
       "groupName": "dependencias minor",
       "groupSlug": "dependencias-minor"
+    },
+    {
+      "matchPackageNames": ["@babel/plugin-transform-runtime"],
+      "matchUpdateTypes": ["major"],
+      "enabled": false
     }
   ]
 }
