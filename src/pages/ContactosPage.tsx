@@ -52,6 +52,15 @@ const CONTACTS: ContactEntry[] = [
     ],
   },
   {
+    title: 'Piscina',
+    subtitle: 'Funny & Pool S.L.',
+    icon: 'waves',
+    color: '#2aa8b0',
+    details: [
+      { label: 'Teléfono', value: '655 901 399', href: 'tel:+34655901399', icon: 'phone' },
+    ],
+  },
+  {
     title: 'Mantenimiento Aerotermia',
     subtitle: 'a360',
     icon: 'settings',

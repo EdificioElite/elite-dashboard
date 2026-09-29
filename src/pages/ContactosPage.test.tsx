@@ -175,6 +175,17 @@ describe('ContactosPage', () => {
     expect(screen.getByText('www.canaldeisabelsegunda.es')).toBeInTheDocument();
   });
 
+  it('renders Funny & Pool card', () => {
+    render(
+      <MemoryRouter>
+        <ContactosPage />
+      </MemoryRouter>
+    );
+    expect(screen.getByText('Piscina')).toBeInTheDocument();
+    expect(screen.getByText('Funny & Pool S.L.')).toBeInTheDocument();
+    expect(screen.getByText('655 901 399')).toBeInTheDocument();
+  });
+
   it('renders email as mailto links', () => {
     render(
       <MemoryRouter>
@@ -194,6 +205,6 @@ describe('ContactosPage', () => {
     );
     const links = screen.getAllByRole('link');
     const tels = links.filter((l) => l.getAttribute('href')?.startsWith('tel:'));
-    expect(tels.length).toBe(15);
+    expect(tels.length).toBe(16);
   });
 });
