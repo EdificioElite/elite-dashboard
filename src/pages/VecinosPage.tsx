@@ -121,7 +121,7 @@ export default function VecinosPage() {
           )}
         </div>
 
-        <section aria-label="Gestión de vecinos">
+        <section aria-label="Gestión de vecinos" className="flex flex-col gap-[22px]">
 
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-[16px]">
           {stats.map(s => (
