@@ -18,7 +18,7 @@
     "@vercel/speed-insights": "^2.0.0",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
-    "react-router-dom": "^6.28.0",
+    "react-router-dom": "^7.0.0",
     "recharts": "^3.0.0",
     "zustand": "^5.0.0"
   },
