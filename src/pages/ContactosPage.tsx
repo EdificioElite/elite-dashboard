@@ -126,6 +126,28 @@ const CONTACTS: ContactEntry[] = [
       { label: 'Web', value: 'www.mapfre.es', href: 'https://www.mapfre.es', icon: 'eye' },
     ],
   },
+  {
+    title: 'Suministro Eléctrico',
+    subtitle: 'Iberdrola',
+    icon: 'zap',
+    color: '#3f9e4f',
+    details: [
+      { label: 'Teléfono', value: '900 225 235', href: 'tel:+34900225235', icon: 'phone' },
+      { label: 'Email', value: 'clientes@tuiberdrola.es', href: 'mailto:clientes@tuiberdrola.es', icon: 'mail' },
+      { label: 'Web', value: 'www.iberdrola.es', href: 'https://www.iberdrola.es', icon: 'eye' },
+    ],
+  },
+  {
+    title: 'Agua',
+    subtitle: 'Canal de Isabel II',
+    icon: 'droplet',
+    color: '#2f89c4',
+    details: [
+      { label: 'Teléfono', value: '900 365 365', href: 'tel:+34900365365', icon: 'phone' },
+      { label: 'Email', value: 'clientes@canaldeisabelsegunda.es', href: 'mailto:clientes@canaldeisabelsegunda.es', icon: 'mail' },
+      { label: 'Web', value: 'www.canaldeisabelsegunda.es', href: 'https://www.canaldeisabelsegunda.es', icon: 'eye' },
+    ],
+  },
 ];
 
 export default function ContactosPage() {

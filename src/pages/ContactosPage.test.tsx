@@ -149,6 +149,32 @@ describe('ContactosPage', () => {
     expect(screen.getByText('www.presman.es')).toBeInTheDocument();
   });
 
+  it('renders Iberdrola card', () => {
+    render(
+      <MemoryRouter>
+        <ContactosPage />
+      </MemoryRouter>
+    );
+    expect(screen.getByText('Suministro Eléctrico')).toBeInTheDocument();
+    expect(screen.getByText('Iberdrola')).toBeInTheDocument();
+    expect(screen.getByText('900 225 235')).toBeInTheDocument();
+    expect(screen.getByText('clientes@tuiberdrola.es')).toBeInTheDocument();
+    expect(screen.getByText('www.iberdrola.es')).toBeInTheDocument();
+  });
+
+  it('renders Canal de Isabel II card', () => {
+    render(
+      <MemoryRouter>
+        <ContactosPage />
+      </MemoryRouter>
+    );
+    expect(screen.getByText('Agua')).toBeInTheDocument();
+    expect(screen.getByText('Canal de Isabel II')).toBeInTheDocument();
+    expect(screen.getByText('900 365 365')).toBeInTheDocument();
+    expect(screen.getByText('clientes@canaldeisabelsegunda.es')).toBeInTheDocument();
+    expect(screen.getByText('www.canaldeisabelsegunda.es')).toBeInTheDocument();
+  });
+
   it('renders email as mailto links', () => {
     render(
       <MemoryRouter>
@@ -157,7 +183,7 @@ describe('ContactosPage', () => {
     );
     const links = screen.getAllByRole('link');
     const emails = links.filter((l) => l.getAttribute('href')?.startsWith('mailto:'));
-    expect(emails.length).toBe(8);
+    expect(emails.length).toBe(10);
   });
 
   it('renders phone as tel links', () => {
@@ -168,6 +194,6 @@ describe('ContactosPage', () => {
     );
     const links = screen.getAllByRole('link');
     const tels = links.filter((l) => l.getAttribute('href')?.startsWith('tel:'));
-    expect(tels.length).toBe(13);
+    expect(tels.length).toBe(15);
   });
 });
