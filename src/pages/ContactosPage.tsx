@@ -42,6 +42,16 @@ const CONTACTS: ContactEntry[] = [
     ],
   },
   {
+    title: 'Jardinería',
+    subtitle: 'Lizama',
+    icon: 'leaf',
+    color: '#5f9c54',
+    details: [
+      { label: 'Teléfono', value: '609 645 633', href: 'tel:+34609645633', icon: 'phone' },
+      { label: 'Web', value: 'www.lizamamultiservicios.com', href: 'https://www.lizamamultiservicios.com/', icon: 'eye' },
+    ],
+  },
+  {
     title: 'Mantenimiento Aerotermia',
     subtitle: 'a360',
     icon: 'settings',
@@ -59,6 +69,17 @@ const CONTACTS: ContactEntry[] = [
     color: '#c2574a',
     details: [
       { label: 'Teléfono', value: '900 210 813', href: 'tel:+34900210813', icon: 'phone' },
+    ],
+  },
+  {
+    title: 'Puerta del Garaje',
+    subtitle: 'Mayns',
+    icon: 'doorClosed',
+    color: '#c0793e',
+    details: [
+      { label: 'Email', value: 'mayns@mayns.es', href: 'mailto:mayns@mayns.es', icon: 'mail' },
+      { label: 'Teléfono', value: '917 335 229', href: 'tel:+34917335229', icon: 'phone' },
+      { label: 'Web', value: 'www.mayns.es', href: 'https://mayns.es/', icon: 'eye' },
     ],
   },
   {

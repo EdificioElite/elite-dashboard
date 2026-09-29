@@ -98,6 +98,31 @@ describe('ContactosPage', () => {
     expect(screen.getByText('www.mapfre.es')).toBeInTheDocument();
   });
 
+  it('renders Lizama card', () => {
+    render(
+      <MemoryRouter>
+        <ContactosPage />
+      </MemoryRouter>
+    );
+    expect(screen.getByText('Jardinería')).toBeInTheDocument();
+    expect(screen.getByText('Lizama')).toBeInTheDocument();
+    expect(screen.getByText('609 645 633')).toBeInTheDocument();
+    expect(screen.getByText('www.lizamamultiservicios.com')).toBeInTheDocument();
+  });
+
+  it('renders Mayns card', () => {
+    render(
+      <MemoryRouter>
+        <ContactosPage />
+      </MemoryRouter>
+    );
+    expect(screen.getByText('Puerta del Garaje')).toBeInTheDocument();
+    expect(screen.getByText('Mayns')).toBeInTheDocument();
+    expect(screen.getByText('mayns@mayns.es')).toBeInTheDocument();
+    expect(screen.getByText('917 335 229')).toBeInTheDocument();
+    expect(screen.getByText('www.mayns.es')).toBeInTheDocument();
+  });
+
   it('renders email as mailto links', () => {
     render(
       <MemoryRouter>
@@ -106,7 +131,7 @@ describe('ContactosPage', () => {
     );
     const links = screen.getAllByRole('link');
     const emails = links.filter((l) => l.getAttribute('href')?.startsWith('mailto:'));
-    expect(emails.length).toBe(5);
+    expect(emails.length).toBe(6);
   });
 
   it('renders phone as tel links', () => {
@@ -117,6 +142,6 @@ describe('ContactosPage', () => {
     );
     const links = screen.getAllByRole('link');
     const tels = links.filter((l) => l.getAttribute('href')?.startsWith('tel:'));
-    expect(tels.length).toBe(9);
+    expect(tels.length).toBe(11);
   });
 });
