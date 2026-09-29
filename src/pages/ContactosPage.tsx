@@ -33,13 +33,33 @@ const CONTACTS: ContactEntry[] = [
   },
   {
     title: 'Mantenimiento Aerotermia',
-    subtitle: 'Ness',
+    subtitle: 'a360',
     icon: 'settings',
     color: '#4a7a8c',
     details: [
-      { label: 'Urgencias 24h', value: '+34 602 22 52 97', href: 'tel:+34602225297', icon: 'zap' },
-      { label: 'Atención al cliente', value: '+34 917 99 26 88', href: 'tel:+34917992688', icon: 'phone' },
-      { label: 'Email', value: 'clientes@ness.es', href: 'mailto:clientes@ness.es', icon: 'mail' },
+      { label: 'Teléfono', value: '911 591 170', href: 'tel:+34911591170', icon: 'phone' },
+      { label: 'Web', value: 'www.a360se.com', href: 'https://www.a360se.com/', icon: 'eye' },
+      { label: 'Email', value: 'clientes@a360se.com', href: 'mailto:clientes@a360se.com', icon: 'mail' },
+    ],
+  },
+  {
+    title: 'Mantenimiento de Ascensores',
+    subtitle: 'Orona',
+    icon: 'elevator',
+    color: '#c2574a',
+    details: [
+      { label: 'Teléfono', value: '900 210 813', href: 'tel:+34900210813', icon: 'phone' },
+    ],
+  },
+  {
+    title: 'Seguridad',
+    subtitle: 'Altatec',
+    icon: 'shield',
+    color: '#3b6ea5',
+    details: [
+      { label: 'Web', value: 'www.altatec-seguridad.com', href: 'https://www.altatec-seguridad.com/', icon: 'eye' },
+      { label: 'Teléfono', value: '800 808 728', href: 'tel:+34800808728', icon: 'phone' },
+      { label: 'Email', value: 'info@altatec-seguridad.com', href: 'mailto:info@altatec-seguridad.com', icon: 'mail' },
     ],
   },
   {
