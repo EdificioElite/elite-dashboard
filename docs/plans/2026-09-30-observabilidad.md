@@ -862,7 +862,7 @@ describe('metrics + logging (auth)', () => {
 
     expect(res.status).toBe(401);
 
-    const values = loginsTotal.get().values;
+    const values = (await loginsTotal.get()).values;
     expect(
       values.find((v) => v.labels.outcome === 'failure' && v.labels.reason === 'invalid_credentials')?.value
     ).toBe(1);
@@ -881,7 +881,7 @@ describe('metrics + logging (auth)', () => {
 
     expect(res.status).toBe(200);
 
-    const values = register.getSingleMetric('dashboard_password_reset_requests_total')!.get().values;
+    const values = (await register.getSingleMetric('dashboard_password_reset_requests_total')!.get()).values;
     expect(values.find((v) => v.labels.email_found === 'true')?.value).toBe(1);
 
     expect(mockLogger.info).toHaveBeenCalledWith(
