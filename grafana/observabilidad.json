@@ -1,0 +1,146 @@
+{
+  "uid": "dashboard-api-observabilidad",
+  "title": "Dashboard API - Observabilidad",
+  "tags": ["dashboard-api", "observabilidad", "elite"],
+  "timezone": "browser",
+  "schemaVersion": 39,
+  "version": 1,
+  "refresh": "30s",
+  "time": { "from": "now-24h", "to": "now" },
+  "templating": {
+    "list": [
+      {
+        "name": "env",
+        "type": "custom",
+        "label": "Entorno",
+        "current": { "text": "prod", "value": "prod" },
+        "options": [
+          { "text": "prod", "value": "prod", "selected": true },
+          { "text": "dev", "value": "dev", "selected": false }
+        ],
+        "query": "prod,dev",
+        "multi": false,
+        "includeAll": false
+      }
+    ]
+  },
+  "panels": [
+    {
+      "id": 1,
+      "type": "stat",
+      "title": "Logins (24h, éxito)",
+      "gridPos": { "h": 4, "w": 6, "x": 0, "y": 0 },
+      "datasource": { "type": "prometheus", "uid": "eezd2pur0jy80e" },
+      "fieldConfig": { "defaults": { "color": { "mode": "thresholds" }, "thresholds": { "steps": [{ "color": "green", "value": null }] } }, "overrides": [] },
+      "options": { "reduceOptions": { "values": false, "calcs": ["lastNotNull"] }, "colorMode": "value", "graphMode": "none", "justifyMode": "auto" },
+      "targets": [
+        { "refId": "A", "expr": "sum(increase(dashboard_logins_total{env=\"$env\",outcome=\"success\"}[24h]))", "datasource": { "type": "prometheus", "uid": "eezd2pur0jy80e" }, "instant": true }
+      ]
+    },
+    {
+      "id": 2,
+      "type": "stat",
+      "title": "Logins fallidos (24h)",
+      "gridPos": { "h": 4, "w": 6, "x": 6, "y": 0 },
+      "datasource": { "type": "prometheus", "uid": "eezd2pur0jy80e" },
+      "fieldConfig": { "defaults": { "color": { "mode": "thresholds" }, "thresholds": { "steps": [{ "color": "red", "value": null }] } }, "overrides": [] },
+      "options": { "reduceOptions": { "values": false, "calcs": ["lastNotNull"] }, "colorMode": "value", "graphMode": "none", "justifyMode": "auto" },
+      "targets": [
+        { "refId": "A", "expr": "sum(increase(dashboard_logins_total{env=\"$env\",outcome=\"failure\"}[24h]))", "datasource": { "type": "prometheus", "uid": "eezd2pur0jy80e" }, "instant": true }
+      ]
+    },
+    {
+      "id": 3,
+      "type": "stat",
+      "title": "Resets solicitados (24h)",
+      "gridPos": { "h": 4, "w": 6, "x": 12, "y": 0 },
+      "datasource": { "type": "prometheus", "uid": "eezd2pur0jy80e" },
+      "fieldConfig": { "defaults": { "color": { "mode": "thresholds" }, "thresholds": { "steps": [{ "color": "blue", "value": null }] } }, "overrides": [] },
+      "options": { "reduceOptions": { "values": false, "calcs": ["lastNotNull"] }, "colorMode": "value", "graphMode": "none", "justifyMode": "auto" },
+      "targets": [
+        { "refId": "A", "expr": "sum(increase(dashboard_password_reset_requests_total{env=\"$env\"}[24h]))", "datasource": { "type": "prometheus", "uid": "eezd2pur0jy80e" }, "instant": true }
+      ]
+    },
+    {
+      "id": 4,
+      "type": "stat",
+      "title": "Resets completados (24h)",
+      "gridPos": { "h": 4, "w": 6, "x": 18, "y": 0 },
+      "datasource": { "type": "prometheus", "uid": "eezd2pur0jy80e" },
+      "fieldConfig": { "defaults": { "color": { "mode": "thresholds" }, "thresholds": { "steps": [{ "color": "green", "value": null }] } }, "overrides": [] },
+      "options": { "reduceOptions": { "values": false, "calcs": ["lastNotNull"] }, "colorMode": "value", "graphMode": "none", "justifyMode": "auto" },
+      "targets": [
+        { "refId": "A", "expr": "sum(increase(dashboard_password_resets_total{env=\"$env\",outcome=\"success\"}[24h]))", "datasource": { "type": "prometheus", "uid": "eezd2pur0jy80e" }, "instant": true }
+      ]
+    },
+    {
+      "id": 5,
+      "type": "timeseries",
+      "title": "Logins por outcome",
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 4 },
+      "datasource": { "type": "prometheus", "uid": "eezd2pur0jy80e" },
+      "fieldConfig": { "defaults": { "unit": "reqps" }, "overrides": [] },
+      "targets": [
+        { "refId": "A", "expr": "sum by (outcome) (rate(dashboard_logins_total{env=\"$env\"}[5m]))", "datasource": { "type": "prometheus", "uid": "eezd2pur0jy80e" }, "legendFormat": "{{outcome}}" }
+      ]
+    },
+    {
+      "id": 6,
+      "type": "timeseries",
+      "title": "Resets solicitados vs completados",
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 4 },
+      "datasource": { "type": "prometheus", "uid": "eezd2pur0jy80e" },
+      "fieldConfig": { "defaults": { "unit": "reqps" }, "overrides": [] },
+      "targets": [
+        { "refId": "A", "expr": "sum(rate(dashboard_password_reset_requests_total{env=\"$env\"}[5m]))", "datasource": { "type": "prometheus", "uid": "eezd2pur0jy80e" }, "legendFormat": "solicitados" },
+        { "refId": "B", "expr": "sum by (outcome) (rate(dashboard_password_resets_total{env=\"$env\"}[5m]))", "datasource": { "type": "prometheus", "uid": "eezd2pur0jy80e" }, "legendFormat": "reset {{outcome}}" }
+      ]
+    },
+    {
+      "id": 7,
+      "type": "timeseries",
+      "title": "Registros e invitaciones",
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 12 },
+      "datasource": { "type": "prometheus", "uid": "eezd2pur0jy80e" },
+      "fieldConfig": { "defaults": { "unit": "reqps" }, "overrides": [] },
+      "targets": [
+        { "refId": "A", "expr": "sum(rate(dashboard_registrations_total{env=\"$env\"}[5m]))", "datasource": { "type": "prometheus", "uid": "eezd2pur0jy80e" }, "legendFormat": "registros" },
+        { "refId": "B", "expr": "sum(rate(dashboard_invites_total{env=\"$env\"}[5m]))", "datasource": { "type": "prometheus", "uid": "eezd2pur0jy80e" }, "legendFormat": "invitaciones" }
+      ]
+    },
+    {
+      "id": 8,
+      "type": "timeseries",
+      "title": "Descargas de facturas",
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 12 },
+      "datasource": { "type": "prometheus", "uid": "eezd2pur0jy80e" },
+      "fieldConfig": { "defaults": { "unit": "reqps" }, "overrides": [] },
+      "targets": [
+        { "refId": "A", "expr": "sum by (scope) (rate(dashboard_facturas_descargas_total{env=\"$env\"}[5m]))", "datasource": { "type": "prometheus", "uid": "eezd2pur0jy80e" }, "legendFormat": "{{scope}}" }
+      ]
+    },
+    {
+      "id": 9,
+      "type": "timeseries",
+      "title": "Acciones de admin",
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 20 },
+      "datasource": { "type": "prometheus", "uid": "eezd2pur0jy80e" },
+      "fieldConfig": { "defaults": { "unit": "reqps" }, "overrides": [] },
+      "targets": [
+        { "refId": "A", "expr": "sum by (action) (rate(dashboard_admin_users_total{env=\"$env\"}[5m]))", "datasource": { "type": "prometheus", "uid": "eezd2pur0jy80e" }, "legendFormat": "usuarios {{action}}" },
+        { "refId": "B", "expr": "sum by (action) (rate(dashboard_admin_vecinos_total{env=\"$env\"}[5m]))", "datasource": { "type": "prometheus", "uid": "eezd2pur0jy80e" }, "legendFormat": "vecinos {{action}}" }
+      ]
+    },
+    {
+      "id": 10,
+      "type": "timeseries",
+      "title": "HTTP: errores 5xx por endpoint",
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 20 },
+      "datasource": { "type": "prometheus", "uid": "eezd2pur0jy80e" },
+      "fieldConfig": { "defaults": { "unit": "reqps" }, "overrides": [] },
+      "targets": [
+        { "refId": "A", "expr": "sum by (path) (rate(http_requests_total{env=\"$env\",status_code=~\"5..\"}[5m]))", "datasource": { "type": "prometheus", "uid": "eezd2pur0jy80e" }, "legendFormat": "{{path}}" }
+      ]
+    }
+  ]
+}
