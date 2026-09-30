@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.19.0](https://github.com/EdificioElite/elite-dashboard/compare/v1.18.0...v1.19.0) (2026-09-30)
+
+
+### Features
+
+* añadir contactos (Mapfre, Lizama, Mayns) ([#178](https://github.com/EdificioElite/elite-dashboard/issues/178)) ([fb8d58c](https://github.com/EdificioElite/elite-dashboard/commit/fb8d58c823e5039ef5a6fe0823fc2f0f854b7eb5))
+* observabilidad (métricas, logging y dashboard) ([b58781e](https://github.com/EdificioElite/elite-dashboard/commit/b58781e0cc7575b6d03694db271f3fdd64304810))
+
 ## [1.18.0](https://github.com/EdificioElite/elite-dashboard/compare/v1.17.2...v1.18.0) (2026-09-29)
 
 
