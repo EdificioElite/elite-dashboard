@@ -3,6 +3,7 @@ import { query } from '../db';
 import { authMiddleware } from '../middleware/auth';
 import { logger } from '../lib/logger';
 import { getPDFStream } from '../lib/googleDrive';
+import { facturasDescargasTotal } from '../lib/metrics';
 
 const router = Router();
 
@@ -74,6 +75,8 @@ router.get('/facturas/:id_factura/descargar', authMiddleware, async (req: Reques
     res.setHeader('Content-Type', 'application/pdf');
     res.setHeader('Content-Disposition', `attachment; filename="${fileName}"`);
     res.setHeader('Access-Control-Expose-Headers', 'Content-Disposition');
+
+    facturasDescargasTotal.inc({ scope: 'user' });
 
     const stream = await getPDFStream(factura.drive_file_id);
     stream.pipe(res);
