@@ -212,6 +212,72 @@
       "targets": [
         { "refId": "A", "expr": "sum by (path) (rate(http_request_duration_seconds_count{env=\"$env\",status_code=~\"5..\"}[5m]))", "datasource": { "type": "prometheus", "uid": "eezd2pur0jy80e" }, "legendFormat": "{{path}}" }
       ]
+    },
+    {
+      "id": 17,
+      "type": "timeseries",
+      "title": "HTTP: latencia p95 por endpoint",
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 48 },
+      "datasource": { "type": "prometheus", "uid": "eezd2pur0jy80e" },
+      "fieldConfig": { "defaults": { "unit": "s" }, "overrides": [] },
+      "targets": [
+        { "refId": "A", "expr": "histogram_quantile(0.95, sum by (le, path) (rate(http_request_duration_seconds_bucket{env=\"$env\"}[5m])))", "datasource": { "type": "prometheus", "uid": "eezd2pur0jy80e" }, "legendFormat": "{{path}}" }
+      ]
+    },
+    {
+      "id": 21,
+      "type": "timeseries",
+      "title": "Requests por método",
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 48 },
+      "datasource": { "type": "prometheus", "uid": "eezd2pur0jy80e" },
+      "fieldConfig": { "defaults": { "unit": "reqps" }, "overrides": [] },
+      "targets": [
+        { "refId": "A", "expr": "sum by (method) (rate(http_request_duration_seconds_count{env=\"$env\"}[5m]))", "datasource": { "type": "prometheus", "uid": "eezd2pur0jy80e" }, "legendFormat": "{{method}}" }
+      ]
+    },
+    {
+      "id": 18,
+      "type": "table",
+      "title": "Top 10 endpoints más lentos (p95)",
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 56 },
+      "datasource": { "type": "prometheus", "uid": "eezd2pur0jy80e" },
+      "fieldConfig": { "defaults": { "unit": "s" }, "overrides": [] },
+      "targets": [
+        { "refId": "A", "expr": "topk(10, histogram_quantile(0.95, sum by (le, path) (rate(http_request_duration_seconds_bucket{env=\"$env\"}[5m]))))", "instant": true, "format": "table", "datasource": { "type": "prometheus", "uid": "eezd2pur0jy80e" } }
+      ]
+    },
+    {
+      "id": 19,
+      "type": "table",
+      "title": "Top 10 endpoints por requests",
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 56 },
+      "datasource": { "type": "prometheus", "uid": "eezd2pur0jy80e" },
+      "fieldConfig": { "defaults": { "unit": "reqps" }, "overrides": [] },
+      "targets": [
+        { "refId": "A", "expr": "topk(10, sum by (path) (rate(http_request_duration_seconds_count{env=\"$env\"}[5m])))", "instant": true, "format": "table", "datasource": { "type": "prometheus", "uid": "eezd2pur0jy80e" } }
+      ]
+    },
+    {
+      "id": 22,
+      "type": "timeseries",
+      "title": "HTTP: latencia media",
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 64 },
+      "datasource": { "type": "prometheus", "uid": "eezd2pur0jy80e" },
+      "fieldConfig": { "defaults": { "unit": "s" }, "overrides": [] },
+      "targets": [
+        { "refId": "A", "expr": "sum(rate(http_request_duration_seconds_sum{env=\"$env\"}[5m])) / sum(rate(http_request_duration_seconds_count{env=\"$env\"}[5m]))", "datasource": { "type": "prometheus", "uid": "eezd2pur0jy80e" }, "legendFormat": "media" }
+      ]
+    },
+    {
+      "id": 20,
+      "type": "timeseries",
+      "title": "HTTP: tasa de error (%)",
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 64 },
+      "datasource": { "type": "prometheus", "uid": "eezd2pur0jy80e" },
+      "fieldConfig": { "defaults": { "unit": "percent" }, "overrides": [] },
+      "targets": [
+        { "refId": "A", "expr": "sum(rate(http_request_duration_seconds_count{env=\"$env\",status_code=~\"4..|5..\"}[5m])) / clamp_min(sum(rate(http_request_duration_seconds_count{env=\"$env\"}[5m])), 1) * 100", "datasource": { "type": "prometheus", "uid": "eezd2pur0jy80e" }, "legendFormat": "tasa error" }
+      ]
     }
   ]
 }
