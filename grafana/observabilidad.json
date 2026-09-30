@@ -74,10 +74,46 @@
       ]
     },
     {
+      "id": 11,
+      "type": "stat",
+      "title": "Requests por segundo",
+      "gridPos": { "h": 4, "w": 6, "x": 0, "y": 4 },
+      "datasource": { "type": "prometheus", "uid": "eezd2pur0jy80e" },
+      "fieldConfig": { "defaults": { "unit": "reqps", "color": { "mode": "thresholds" }, "thresholds": { "steps": [{ "color": "green", "value": null }] } }, "overrides": [] },
+      "options": { "reduceOptions": { "values": false, "calcs": ["lastNotNull"] }, "colorMode": "value", "graphMode": "area", "justifyMode": "auto" },
+      "targets": [
+        { "refId": "A", "expr": "sum(rate(http_request_duration_seconds_count{env=\"$env\"}[5m]))", "datasource": { "type": "prometheus", "uid": "eezd2pur0jy80e" }, "instant": true }
+      ]
+    },
+    {
+      "id": 12,
+      "type": "stat",
+      "title": "Errores 5xx (24h)",
+      "gridPos": { "h": 4, "w": 6, "x": 6, "y": 4 },
+      "datasource": { "type": "prometheus", "uid": "eezd2pur0jy80e" },
+      "fieldConfig": { "defaults": { "color": { "mode": "thresholds" }, "thresholds": { "steps": [{ "color": "red", "value": null }] } }, "overrides": [] },
+      "options": { "reduceOptions": { "values": false, "calcs": ["lastNotNull"] }, "colorMode": "value", "graphMode": "none", "justifyMode": "auto" },
+      "targets": [
+        { "refId": "A", "expr": "sum(increase(http_request_duration_seconds_count{env=\"$env\",status_code=~\"5..\"}[24h]))", "datasource": { "type": "prometheus", "uid": "eezd2pur0jy80e" }, "instant": true }
+      ]
+    },
+    {
+      "id": 13,
+      "type": "stat",
+      "title": "Latencia p95",
+      "gridPos": { "h": 4, "w": 12, "x": 12, "y": 4 },
+      "datasource": { "type": "prometheus", "uid": "eezd2pur0jy80e" },
+      "fieldConfig": { "defaults": { "unit": "s", "color": { "mode": "thresholds" }, "thresholds": { "steps": [{ "color": "green", "value": null }, { "color": "orange", "value": 0.5 }, { "color": "red", "value": 1 }] } }, "overrides": [] },
+      "options": { "reduceOptions": { "values": false, "calcs": ["lastNotNull"] }, "colorMode": "value", "graphMode": "area", "justifyMode": "auto" },
+      "targets": [
+        { "refId": "A", "expr": "histogram_quantile(0.95, sum by (le) (rate(http_request_duration_seconds_bucket{env=\"$env\"}[5m])))", "datasource": { "type": "prometheus", "uid": "eezd2pur0jy80e" }, "instant": true }
+      ]
+    },
+    {
       "id": 5,
       "type": "timeseries",
       "title": "Logins por outcome",
-      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 4 },
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 8 },
       "datasource": { "type": "prometheus", "uid": "eezd2pur0jy80e" },
       "fieldConfig": { "defaults": { "unit": "reqps" }, "overrides": [] },
       "targets": [
@@ -88,7 +124,7 @@
       "id": 6,
       "type": "timeseries",
       "title": "Resets solicitados vs completados",
-      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 4 },
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 8 },
       "datasource": { "type": "prometheus", "uid": "eezd2pur0jy80e" },
       "fieldConfig": { "defaults": { "unit": "reqps" }, "overrides": [] },
       "targets": [
@@ -100,7 +136,7 @@
       "id": 7,
       "type": "timeseries",
       "title": "Registros e invitaciones",
-      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 12 },
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 16 },
       "datasource": { "type": "prometheus", "uid": "eezd2pur0jy80e" },
       "fieldConfig": { "defaults": { "unit": "reqps" }, "overrides": [] },
       "targets": [
@@ -112,7 +148,7 @@
       "id": 8,
       "type": "timeseries",
       "title": "Descargas de facturas",
-      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 12 },
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 16 },
       "datasource": { "type": "prometheus", "uid": "eezd2pur0jy80e" },
       "fieldConfig": { "defaults": { "unit": "reqps" }, "overrides": [] },
       "targets": [
@@ -123,7 +159,7 @@
       "id": 9,
       "type": "timeseries",
       "title": "Acciones de admin",
-      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 20 },
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 24 },
       "datasource": { "type": "prometheus", "uid": "eezd2pur0jy80e" },
       "fieldConfig": { "defaults": { "unit": "reqps" }, "overrides": [] },
       "targets": [
@@ -134,12 +170,47 @@
     {
       "id": 10,
       "type": "timeseries",
-      "title": "HTTP: errores 5xx por endpoint",
-      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 20 },
+      "title": "HTTP: requests por segundo (status)",
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 24 },
       "datasource": { "type": "prometheus", "uid": "eezd2pur0jy80e" },
       "fieldConfig": { "defaults": { "unit": "reqps" }, "overrides": [] },
       "targets": [
-        { "refId": "A", "expr": "sum by (path) (rate(http_requests_total{env=\"$env\",status_code=~\"5..\"}[5m]))", "datasource": { "type": "prometheus", "uid": "eezd2pur0jy80e" }, "legendFormat": "{{path}}" }
+        { "refId": "A", "expr": "sum by (status_code) (rate(http_request_duration_seconds_count{env=\"$env\"}[5m]))", "datasource": { "type": "prometheus", "uid": "eezd2pur0jy80e" }, "legendFormat": "{{status_code}}" }
+      ]
+    },
+    {
+      "id": 14,
+      "type": "timeseries",
+      "title": "HTTP: latencia p50 / p95 / p99",
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 32 },
+      "datasource": { "type": "prometheus", "uid": "eezd2pur0jy80e" },
+      "fieldConfig": { "defaults": { "unit": "s" }, "overrides": [] },
+      "targets": [
+        { "refId": "A", "expr": "histogram_quantile(0.50, sum by (le) (rate(http_request_duration_seconds_bucket{env=\"$env\"}[5m])))", "datasource": { "type": "prometheus", "uid": "eezd2pur0jy80e" }, "legendFormat": "p50" },
+        { "refId": "B", "expr": "histogram_quantile(0.95, sum by (le) (rate(http_request_duration_seconds_bucket{env=\"$env\"}[5m])))", "datasource": { "type": "prometheus", "uid": "eezd2pur0jy80e" }, "legendFormat": "p95" },
+        { "refId": "C", "expr": "histogram_quantile(0.99, sum by (le) (rate(http_request_duration_seconds_bucket{env=\"$env\"}[5m])))", "datasource": { "type": "prometheus", "uid": "eezd2pur0jy80e" }, "legendFormat": "p99" }
+      ]
+    },
+    {
+      "id": 15,
+      "type": "timeseries",
+      "title": "HTTP: errores 4xx/5xx",
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 32 },
+      "datasource": { "type": "prometheus", "uid": "eezd2pur0jy80e" },
+      "fieldConfig": { "defaults": { "unit": "reqps" }, "overrides": [] },
+      "targets": [
+        { "refId": "A", "expr": "sum by (status_code) (rate(http_request_duration_seconds_count{env=\"$env\",status_code=~\"4..|5..\"}[5m]))", "datasource": { "type": "prometheus", "uid": "eezd2pur0jy80e" }, "legendFormat": "{{status_code}}" }
+      ]
+    },
+    {
+      "id": 16,
+      "type": "timeseries",
+      "title": "HTTP: errores 5xx por endpoint",
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 40 },
+      "datasource": { "type": "prometheus", "uid": "eezd2pur0jy80e" },
+      "fieldConfig": { "defaults": { "unit": "reqps" }, "overrides": [] },
+      "targets": [
+        { "refId": "A", "expr": "sum by (path) (rate(http_request_duration_seconds_count{env=\"$env\",status_code=~\"5..\"}[5m]))", "datasource": { "type": "prometheus", "uid": "eezd2pur0jy80e" }, "legendFormat": "{{path}}" }
       ]
     }
   ]
