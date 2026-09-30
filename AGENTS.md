@@ -43,6 +43,30 @@ cd api && npx tsc --noEmit     # Verificar backend compila
 - Estilos con Tailwind CSS, no CSS custom
 - Tailwind config: `content` incluye `./index.html` y `./src/**/*.{js,ts,jsx,tsx}`
 
+## Observabilidad
+
+Todo endpoint nuevo (y todo evento de negocio relevante) debe ser observable:
+
+### Métricas
+
+- Las métricas custom viven en `api/src/lib/metrics.ts` (prom-client, registry compartido con `express-prom-bundle`).
+- Convención: prefijo `dashboard_`, counters con sufijo `_total`, labels en minúsculas y de **baja cardinalidad** (solo valores acotados). **Nunca** usar `email`, `piso` ni `ip` como label (eso va en los logs).
+- Cada handler que representa un evento (login, registro, reset, invitación, CRUD de admin, descarga de PDF...) incrementa su counter con `outcome`/`reason`/`action` según corresponda.
+- Las lecturas puras (GET de listados) ya quedan cubiertas por las métricas HTTP de `express-prom-bundle` (`http_request_duration_seconds` con labels `method`/`path`/`status_code`); no duplicar counters para ellas.
+- El endpoint `/metrics` está habilitado con `autoregister: true` en `api/src/index.ts`. No desactivarlo (Alloy lo scrapea).
+
+### Logging
+
+- Logs explícitos con contexto de usuario/email en los handlers clave: `logger.info({ email }, 'Login successful')`, etc.
+- Errores con contexto: `logger.error({ err, email }, '...')` (no solo `logger.error(err, ...)`).
+- `api/src/lib/logger.ts` ya tiene `redact` de pino para `password`, `password_hash`, `token`, `refresh_token`, `authorization`, `cookie`. No loguear passwords ni tokens bajo ningún concepto.
+
+### Dashboard de Grafana
+
+- El dashboard está versionado en `grafana/observabilidad.json`.
+- **Al añadir una métrica nueva hay que actualizar el JSON del dashboard** para incluirla (y reimportarlo en Grafana).
+- Fuera de este repo, Alloy scrapea `/metrics` (config en `elite-portainer-compose/monitoring/config/config.alloy`, targets `dashboard-api` y `dashboard-api-dev` con label `env`).
+
 ## Base de datos
 
 - **Migraciones automaticas en los entornos reales (dev y prod):** las ejecuta un init-container (`dashboard-api-migrate` / `dashboard-api-dev-migrate`) que corre `node dist/migrate.js` con los roles dedicados `migrator` (prod) y `migrator_dev` (dev) antes de arrancar la API. Ver [CONTRIBUTING.md](./CONTRIBUTING.md) para el proceso completo.

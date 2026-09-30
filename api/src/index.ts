@@ -46,7 +46,7 @@ app.use(promBundle({
     [/^\/api\/juntas\/\d+$/, '/api/juntas/:id'],
     [/^\/api\/admin\/juntas\/\d+$/, '/api/admin/juntas/:id'],
   ],
-  autoregister: false,
+  autoregister: true,
 }));
 
 app.use('/api', authRoutes);
