@@ -86,6 +86,88 @@ export function parseContadoresCsv(raw: string): CsvRow[] {
   return rows;
 }
 
+export interface ContadorId {
+  device_identification: string;
+  serial_number: string;
+}
+
+export function detectarFaltantes(esperados: ContadorId[], presentes: ContadorId[]): ContadorId[] {
+  const presentesSet = new Set(presentes.map((p) => `${p.device_identification}|${p.serial_number}`));
+  return esperados.filter((e) => !presentesSet.has(`${e.device_identification}|${e.serial_number}`));
+}
+
+export interface Desactualizado {
+  device_identification: string;
+  stalenessMin: number;
+}
+
+export function detectarDesactualizados(rows: CsvRow[], staleMinutes: number): Desactualizado[] {
+  const latest = new Map<string, CsvRow>();
+  for (const row of rows) {
+    const id = row['device-identification'];
+    const existing = latest.get(id);
+    if (!existing || (row['created'] ?? '') > (existing['created'] ?? '')) {
+      latest.set(id, row);
+    }
+  }
+
+  const result: Desactualizado[] = [];
+  for (const [id, row] of latest) {
+    const created = row['created'] ?? '';
+    const datetime = row['datetime,,inst-value,0,0,0'] ?? '';
+    if (!created || !datetime) continue;
+    const stalenessMin = (Date.parse(created) - Date.parse(datetime)) / 60000;
+    if (stalenessMin >= staleMinutes) {
+      result.push({ device_identification: id, stalenessMin });
+    }
+  }
+  return result;
+}
+
+const CAMPOS_RESET = [
+  'energy_wh_inst_value_0_0_0',
+  'energy_manufacturer_specific_02_wh_inst_value_0_0_0',
+  'volume_m3_inst_value_0_0_0',
+  'volume_m3_inst_value_0_1_0',
+] as const;
+
+export interface LecturaPrevia {
+  device_identification: string | number;
+  energy_wh_inst_value_0_0_0?: string | number;
+  energy_manufacturer_specific_02_wh_inst_value_0_0_0?: string | number;
+  volume_m3_inst_value_0_0_0?: string | number;
+  volume_m3_inst_value_0_1_0?: string | number;
+}
+
+export interface Reset {
+  device_identification: string;
+  campo: string;
+}
+
+export function detectarResets(inserts: LecturaPrevia[], previos: LecturaPrevia[]): Reset[] {
+  const previosMap = new Map(previos.map((p) => [p.device_identification, p]));
+  const byDevice = new Map<string, LecturaPrevia[]>();
+  for (const ins of inserts) {
+    const k = String(ins.device_identification);
+    if (!byDevice.has(k)) byDevice.set(k, []);
+    byDevice.get(k)!.push(ins);
+  }
+
+  const resets: Reset[] = [];
+  for (const [device, list] of byDevice) {
+    const previo = previosMap.get(device);
+    if (!previo) continue;
+    for (const campo of CAMPOS_RESET) {
+      const minBatch = Math.min(...list.map((i) => Number(i[campo])));
+      const prev = Number(previo[campo]);
+      if (minBatch < prev) {
+        resets.push({ device_identification: device, campo });
+      }
+    }
+  }
+  return resets;
+}
+
 export function transformRow(row: CsvRow): ContadorInsert {
   return {
     serial_number: row['#serial-number'] ?? '',
