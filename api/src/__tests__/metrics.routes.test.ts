@@ -73,7 +73,12 @@ describe('metrics + logging (auth)', () => {
 
     const values = (await loginsTotal.get()).values;
     expect(
-      values.find((v) => v.labels.outcome === 'failure' && v.labels.reason === 'invalid_credentials')?.value
+      values.find(
+        (v) =>
+          v.labels.client === 'dashboard' &&
+          v.labels.outcome === 'failure' &&
+          v.labels.reason === 'invalid_credentials'
+      )?.value
     ).toBe(1);
 
     expect(mockLogger.warn).toHaveBeenCalledWith(

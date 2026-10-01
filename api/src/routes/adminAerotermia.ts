@@ -4,7 +4,7 @@ import { authMiddleware } from '../middleware/auth';
 import { requireRole } from '../middleware/roles';
 import { logger } from '../lib/logger';
 import { getPDFStream } from '../lib/googleDrive';
-import { facturasDescargasTotal } from '../lib/metrics';
+import { clientFromRequest, facturasDescargasTotal } from '../lib/metrics';
 
 const MODO_CALEFACCION_UMBRAL = 29;
 const MODO_REFRIGERACION_UMBRAL = 21;
@@ -155,7 +155,7 @@ router.get('/admin/aerotermia/facturas/:id_factura/descargar', authMiddleware, r
     res.setHeader('Content-Disposition', `attachment; filename="${fileName}"`);
     res.setHeader('Access-Control-Expose-Headers', 'Content-Disposition');
 
-    facturasDescargasTotal.inc({ scope: 'admin' });
+    facturasDescargasTotal.inc({ client: clientFromRequest(req), scope: 'admin' });
 
     const stream = await getPDFStream(factura.drive_file_id);
     stream.pipe(res);
