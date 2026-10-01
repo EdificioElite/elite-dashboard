@@ -87,7 +87,7 @@ router.get('/consumo-actual', authMiddleware, async (req: Request, res: Response
     const vecinoPiso = ((role === 'admin' || role === 'directiva') && pisoQuery) ? pisoQuery : req.user!.vecinoPiso;
 
     const result = await query(
-       `WITH latest AS (
+       `WITH recent AS (
         SELECT
           ct.created AS timestamp,
           ct.energy_wh_inst_value_0_0_0,
@@ -96,16 +96,29 @@ router.get('/consumo-actual', authMiddleware, async (req: Request, res: Response
           ct.volume_m3_inst_value_0_2_0,
           ct.flow_temp_c_inst_value_0_0_0 AS temp_impulsion,
           ct.return_temp_c_inst_value_0_0_0 AS temp_retorno,
-          ct.power_w_inst_value_0_0_0 AS power_w,
-          LAG(ct.energy_wh_inst_value_0_0_0) OVER (ORDER BY ct.created) AS prev_wh_calor,
-          LAG(ct.energy_manufacturer_specific_02_wh_inst_value_0_0_0) OVER (ORDER BY ct.created) AS prev_wh_frio,
-          LAG(ct.volume_m3_inst_value_0_1_0) OVER (ORDER BY ct.created) AS prev_m3_acs,
-          LAG(ct.volume_m3_inst_value_0_2_0) OVER (ORDER BY ct.created) AS prev_m3_afs
+          ct.power_w_inst_value_0_0_0 AS power_w
         FROM contadores ct
         JOIN vecinos v ON ct.device_identification = v.device_identification
           AND ct.serial_number::text = v.serial_number
         WHERE v.piso = $1
         ORDER BY ct.created DESC
+        LIMIT 2
+      ),
+      latest AS (
+        SELECT
+          timestamp,
+          energy_wh_inst_value_0_0_0,
+          energy_manufacturer_specific_02_wh_inst_value_0_0_0,
+          volume_m3_inst_value_0_1_0,
+          volume_m3_inst_value_0_2_0,
+          temp_impulsion,
+          temp_retorno,
+          power_w,
+          LAG(energy_wh_inst_value_0_0_0) OVER (ORDER BY timestamp) AS prev_wh_calor,
+          LAG(energy_manufacturer_specific_02_wh_inst_value_0_0_0) OVER (ORDER BY timestamp) AS prev_wh_frio,
+          LAG(volume_m3_inst_value_0_1_0) OVER (ORDER BY timestamp) AS prev_m3_acs,
+          LAG(volume_m3_inst_value_0_2_0) OVER (ORDER BY timestamp) AS prev_m3_afs
+        FROM recent
       ),
       mes_inicio AS (
         SELECT
