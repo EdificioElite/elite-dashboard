@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.20.1](https://github.com/EdificioElite/elite-dashboard/compare/v1.20.0...v1.20.1) (2026-10-01)
+
+
+### Bug Fixes
+
+* **api:** limitar consumo-actual a las 2 ultimas lecturas ([#187](https://github.com/EdificioElite/elite-dashboard/issues/187)) ([0d776ee](https://github.com/EdificioElite/elite-dashboard/commit/0d776eed796ce42dc99d8b14bc6f859a85ad544c))
+
 ## [1.20.0](https://github.com/EdificioElite/elite-dashboard/compare/v1.19.0...v1.20.0) (2026-10-01)
 
 
