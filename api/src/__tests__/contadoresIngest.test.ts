@@ -87,7 +87,7 @@ describe('transformRow', () => {
     const insert = transformRow(row);
 
     expect(insert.created).toBe('2026-10-01T20:00:00.000Z');
-    expect(insert.energy_wh_inst_value_0_0_0).toBe(4138000);
+    expect(insert.energy_wh_inst_value_0_0_0).toBe('4138000');
     expect(insert.energy_manufacturer_specific_02_wh_inst_value_0_0_0).toBe(1302000);
     expect(insert.volume_m3_inst_value_0_0_0).toBeCloseTo(95.916);
     expect(insert.volume_m3_inst_value_0_1_0).toBeCloseTo(173.622);

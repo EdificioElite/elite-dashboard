@@ -182,7 +182,7 @@ export function transformRow(row: CsvRow): ContadorInsert {
     access_number: row['access-number'] ?? '',
     status: row['status'] ?? '',
     signature: row['signature'] ?? '',
-    energy_wh_inst_value_0_0_0: Number(row['energy,Wh,inst-value,0,0,0'] ?? ''),
+    energy_wh_inst_value_0_0_0: row['energy,Wh,inst-value,0,0,0'] ?? '',
     energy_manufacturer_specific_02_wh_inst_value_0_0_0: Number(row['energy manufacturer-specific-02,Wh,inst-value,0,0,0'] ?? ''),
     manufacturer_specific_ff_07_inst_value_0_0_0: row['manufacturer-specific-ff-07,,inst-value,0,0,0'] ?? '',
     manufacturer_specific_ff_08_inst_value_0_0_0: row['manufacturer-specific-ff-08,,inst-value,0,0,0'] ?? '',
