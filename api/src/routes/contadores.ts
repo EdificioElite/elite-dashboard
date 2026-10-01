@@ -55,6 +55,8 @@ function pingUptime(status: 'up' | 'down', msg: string): void {
 
 const CLAVES_CONFLICTO = new Set(['serial_number', 'device_identification', 'created']);
 
+let dispositivosConocidos = new Set<string>();
+
 router.post('/contadores', rateLimit(60, 5 * 60 * 1000), bodyParser, async (req: Request, res: Response) => {
   try {
     if (!checkBasicAuth(req)) {
@@ -140,6 +142,15 @@ router.post('/contadores', rateLimit(60, 5 * 60 * 1000), bodyParser, async (req:
     for (const r of resets) {
       contadoresResetsTotal.inc({ device_identification: r.device_identification });
     }
+
+    const esperadosIds = new Set(esperados.map((e) => e.device_identification));
+    for (const id of dispositivosConocidos) {
+      if (!esperadosIds.has(id)) {
+        contadoresFaltantes.remove({ device_identification: id });
+        contadoresDesactualizados.remove({ device_identification: id });
+      }
+    }
+    dispositivosConocidos = esperadosIds;
 
     if (faltantes.length) logger.warn({ faltantes }, 'Contadores faltantes en ingesta');
     if (desactualizados.length) logger.warn({ desactualizados }, 'Contadores desactualizados en ingesta');
