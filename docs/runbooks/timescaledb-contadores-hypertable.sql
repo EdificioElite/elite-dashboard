@@ -14,7 +14,8 @@ BEGIN
   ) THEN
     PERFORM create_hypertable(
       'contadores', 'created',
-      chunk_time_interval => INTERVAL '7 days'
+      chunk_time_interval => INTERVAL '7 days',
+      migrate_data => true
     );
   END IF;
 END $$;

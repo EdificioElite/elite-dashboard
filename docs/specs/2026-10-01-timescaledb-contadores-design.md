@@ -89,7 +89,8 @@ Ejecutar los comandos del Paso 3 en la BD de dev para validar el flujo.
 ```sql
 -- 3.1 hypertable (reescribe ~2,8 GB; lock de escritura unos minutos)
 SELECT create_hypertable('contadores', 'created',
-  chunk_time_interval => INTERVAL '7 days');
+  chunk_time_interval => INTERVAL '7 days',
+  migrate_data => true);
 
 -- 3.2 compresión
 ALTER TABLE contadores SET (
