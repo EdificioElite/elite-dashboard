@@ -9,6 +9,7 @@ import { createEmailToken, verifyEmailToken, markTokenUsed, hashToken } from '..
 import { sendResetEmail } from '../lib/email';
 import { createRefreshToken, rotateRefreshToken, revokeRefreshToken } from '../lib/refreshTokens';
 import {
+  clientFromRequest,
   loginsTotal,
   registrationsTotal,
   passwordResetRequestsTotal,
@@ -25,7 +26,7 @@ router.post('/auth/login', rateLimitOnlyOnFailure(5, 60 * 1000), async (req: Req
     const { email, password, source } = req.body;
 
     if (!email || !password) {
-      loginsTotal.inc({ outcome: 'failure', reason: 'missing_credentials' });
+      loginsTotal.inc({ client: clientFromRequest(req), outcome: 'failure', reason: 'missing_credentials' });
       logger.warn({ email: email ?? null, reason: 'missing_credentials' }, 'Login failed');
       res.status(400).json({ error: 'Email y password son requeridos' });
       return;
@@ -37,7 +38,7 @@ router.post('/auth/login', rateLimitOnlyOnFailure(5, 60 * 1000), async (req: Req
     );
 
     if (result.rows.length === 0) {
-      loginsTotal.inc({ outcome: 'failure', reason: 'not_found' });
+      loginsTotal.inc({ client: clientFromRequest(req), outcome: 'failure', reason: 'not_found' });
       logger.warn({ email, reason: 'not_found' }, 'Login failed');
       res.status(401).json({ error: 'Credenciales inválidas' });
       return;
@@ -47,7 +48,7 @@ router.post('/auth/login', rateLimitOnlyOnFailure(5, 60 * 1000), async (req: Req
     const valid = await bcrypt.compare(password, user.password_hash);
 
     if (!valid) {
-      loginsTotal.inc({ outcome: 'failure', reason: 'invalid_credentials' });
+      loginsTotal.inc({ client: clientFromRequest(req), outcome: 'failure', reason: 'invalid_credentials' });
       logger.warn({ email, reason: 'invalid_credentials' }, 'Login failed');
       res.status(401).json({ error: 'Credenciales inválidas' });
       return;
@@ -65,7 +66,7 @@ router.post('/auth/login', rateLimitOnlyOnFailure(5, 60 * 1000), async (req: Req
 
     const refreshToken = await createRefreshToken(user.id);
 
-    loginsTotal.inc({ outcome: 'success', reason: '' });
+    loginsTotal.inc({ client: clientFromRequest(req), outcome: 'success', reason: '' });
     logger.info({ email }, 'Login successful');
 
     res.json({
@@ -79,7 +80,7 @@ router.post('/auth/login', rateLimitOnlyOnFailure(5, 60 * 1000), async (req: Req
       },
     });
   } catch (err) {
-    loginsTotal.inc({ outcome: 'failure', reason: 'server_error' });
+    loginsTotal.inc({ client: clientFromRequest(req), outcome: 'failure', reason: 'server_error' });
     logger.error({ err, email: req.body?.email ?? null }, 'Login error');
     res.status(500).json({ error: 'Error interno del servidor' });
   }
@@ -89,14 +90,14 @@ router.post('/auth/refresh', rateLimit(30, 60 * 1000), async (req: Request, res:
   try {
     const { refreshToken } = req.body;
     if (!refreshToken || typeof refreshToken !== 'string') {
-      refreshTokensTotal.inc({ outcome: 'failure' });
+      refreshTokensTotal.inc({ client: clientFromRequest(req), outcome: 'failure' });
       res.status(400).json({ error: 'Refresh token requerido' });
       return;
     }
 
     const rotated = await rotateRefreshToken(refreshToken);
     if (!rotated) {
-      refreshTokensTotal.inc({ outcome: 'failure' });
+      refreshTokensTotal.inc({ client: clientFromRequest(req), outcome: 'failure' });
       res.status(401).json({ error: 'Sesión expirada, inicia sesión de nuevo' });
       return;
     }
@@ -106,7 +107,7 @@ router.post('/auth/refresh', rateLimit(30, 60 * 1000), async (req: Request, res:
       [rotated.userId]
     );
     if (result.rows.length === 0) {
-      refreshTokensTotal.inc({ outcome: 'failure' });
+      refreshTokensTotal.inc({ client: clientFromRequest(req), outcome: 'failure' });
       res.status(401).json({ error: 'Usuario no encontrado' });
       return;
     }
@@ -119,7 +120,7 @@ router.post('/auth/refresh', rateLimit(30, 60 * 1000), async (req: Request, res:
       role: user.role,
     });
 
-    refreshTokensTotal.inc({ outcome: 'success' });
+    refreshTokensTotal.inc({ client: clientFromRequest(req), outcome: 'success' });
 
     res.json({
       token,
@@ -132,7 +133,7 @@ router.post('/auth/refresh', rateLimit(30, 60 * 1000), async (req: Request, res:
       },
     });
   } catch (err) {
-    refreshTokensTotal.inc({ outcome: 'failure' });
+    refreshTokensTotal.inc({ client: clientFromRequest(req), outcome: 'failure' });
     logger.error({ err }, 'Refresh error');
     res.status(500).json({ error: 'Error interno del servidor' });
   }
@@ -144,7 +145,7 @@ router.post('/auth/logout', rateLimit(30, 60 * 1000), async (req: Request, res: 
     if (refreshToken && typeof refreshToken === 'string') {
       await revokeRefreshToken(refreshToken);
     }
-    logoutsTotal.inc();
+    logoutsTotal.inc({ client: clientFromRequest(req) });
   } catch (err) {
     logger.error({ err }, 'Logout error');
   }
@@ -234,7 +235,7 @@ router.get('/auth/verify-token', rateLimitOnError(20, 60 * 1000), async (req: Re
   try {
     const { token } = req.query;
     if (!token || typeof token !== 'string') {
-      verifyTokensTotal.inc({ outcome: 'failure' });
+      verifyTokensTotal.inc({ client: clientFromRequest(req), outcome: 'failure' });
       res.status(400).json({ error: 'Token requerido' });
       return;
     }
@@ -243,25 +244,25 @@ router.get('/auth/verify-token', rateLimitOnError(20, 60 * 1000), async (req: Re
       [hashToken(token)]
     );
     if (result.rows.length === 0) {
-      verifyTokensTotal.inc({ outcome: 'failure' });
+      verifyTokensTotal.inc({ client: clientFromRequest(req), outcome: 'failure' });
       res.status(400).json({ error: 'Token inválido' });
       return;
     }
     const row = result.rows[0];
     if (row.used_at) {
-      verifyTokensTotal.inc({ outcome: 'failure' });
+      verifyTokensTotal.inc({ client: clientFromRequest(req), outcome: 'failure' });
       res.status(400).json({ error: 'Token ya usado' });
       return;
     }
     if (new Date() > new Date(row.expires_at)) {
-      verifyTokensTotal.inc({ outcome: 'failure' });
+      verifyTokensTotal.inc({ client: clientFromRequest(req), outcome: 'failure' });
       res.status(400).json({ error: 'Token expirado' });
       return;
     }
-    verifyTokensTotal.inc({ outcome: 'success' });
+    verifyTokensTotal.inc({ client: clientFromRequest(req), outcome: 'success' });
     res.json({ email: row.email, piso: row.piso, type: row.type });
   } catch (err) {
-    verifyTokensTotal.inc({ outcome: 'failure' });
+    verifyTokensTotal.inc({ client: clientFromRequest(req), outcome: 'failure' });
     logger.error({ err }, 'Verify token error');
     res.status(500).json({ error: 'Error interno del servidor' });
   }
@@ -271,19 +272,19 @@ router.post('/auth/register', rateLimitOnError(20, 60 * 1000), async (req: Reque
   try {
     const { token, password } = req.body;
     if (!token || !password) {
-      registrationsTotal.inc({ outcome: 'failure' });
+      registrationsTotal.inc({ client: clientFromRequest(req), outcome: 'failure' });
       res.status(400).json({ error: 'Token y contraseña son requeridos' });
       return;
     }
     const pwdError = validatePassword(password);
     if (pwdError) {
-      registrationsTotal.inc({ outcome: 'failure' });
+      registrationsTotal.inc({ client: clientFromRequest(req), outcome: 'failure' });
       res.status(400).json({ error: pwdError });
       return;
     }
     const tokenData = await verifyEmailToken(token, 'invite');
     if (!tokenData) {
-      registrationsTotal.inc({ outcome: 'failure' });
+      registrationsTotal.inc({ client: clientFromRequest(req), outcome: 'failure' });
       res.status(400).json({ error: 'Token inválido, expirado o ya usado' });
       return;
     }
@@ -302,12 +303,12 @@ router.post('/auth/register', rateLimitOnError(20, 60 * 1000), async (req: Reque
     });
     const refreshToken = await createRefreshToken(user.id);
 
-    registrationsTotal.inc({ outcome: 'success' });
+    registrationsTotal.inc({ client: clientFromRequest(req), outcome: 'success' });
     logger.info({ email: user.email, piso: user.vecino_piso }, 'User registered');
 
     res.json({ token: jwtToken, refreshToken, user });
   } catch (err) {
-    registrationsTotal.inc({ outcome: 'failure' });
+    registrationsTotal.inc({ client: clientFromRequest(req), outcome: 'failure' });
     logger.error({ err }, 'Register error');
     res.status(500).json({ error: 'Error interno del servidor' });
   }
@@ -326,7 +327,7 @@ router.post('/auth/forgot-password', rateLimit(6, 15 * 60 * 1000), async (req: R
       const token = await createEmailToken(email, 'reset');
       await sendResetEmail(email, token);
     }
-    passwordResetRequestsTotal.inc({ email_found: emailFound ? 'true' : 'false' });
+    passwordResetRequestsTotal.inc({ client: clientFromRequest(req), email_found: emailFound ? 'true' : 'false' });
     logger.info({ email, emailFound }, 'Forgot password requested');
     res.json({ message: 'Si el email existe en nuestro sistema, recibirás un enlace para restablecer tu contraseña' });
   } catch (err) {
@@ -339,19 +340,19 @@ router.post('/auth/reset-password', rateLimit(10, 15 * 60 * 1000), async (req: R
   try {
     const { token, password } = req.body;
     if (!token || !password) {
-      passwordResetsTotal.inc({ outcome: 'failure', reason: 'invalid_token' });
+      passwordResetsTotal.inc({ client: clientFromRequest(req), outcome: 'failure', reason: 'invalid_token' });
       res.status(400).json({ error: 'Token y contraseña son requeridos' });
       return;
     }
     const pwdError = validatePassword(password);
     if (pwdError) {
-      passwordResetsTotal.inc({ outcome: 'failure', reason: 'weak_password' });
+      passwordResetsTotal.inc({ client: clientFromRequest(req), outcome: 'failure', reason: 'weak_password' });
       res.status(400).json({ error: pwdError });
       return;
     }
     const tokenData = await verifyEmailToken(token, 'reset');
     if (!tokenData) {
-      passwordResetsTotal.inc({ outcome: 'failure', reason: 'invalid_token' });
+      passwordResetsTotal.inc({ client: clientFromRequest(req), outcome: 'failure', reason: 'invalid_token' });
       res.status(400).json({ error: 'Token inválido, expirado o ya usado' });
       return;
     }
@@ -359,12 +360,12 @@ router.post('/auth/reset-password', rateLimit(10, 15 * 60 * 1000), async (req: R
     await query('UPDATE usuarios SET password_hash = $1 WHERE email = $2', [password_hash, tokenData.email]);
     await markTokenUsed(tokenData.id);
 
-    passwordResetsTotal.inc({ outcome: 'success', reason: '' });
+    passwordResetsTotal.inc({ client: clientFromRequest(req), outcome: 'success', reason: '' });
     logger.info({ email: tokenData.email }, 'Password reset successful');
 
     res.json({ message: 'Contraseña actualizada correctamente' });
   } catch (err) {
-    passwordResetsTotal.inc({ outcome: 'failure', reason: 'server_error' });
+    passwordResetsTotal.inc({ client: clientFromRequest(req), outcome: 'failure', reason: 'server_error' });
     logger.error({ err }, 'Reset password error');
     res.status(500).json({ error: 'Error interno del servidor' });
   }
