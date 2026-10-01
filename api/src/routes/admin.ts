@@ -8,7 +8,7 @@ import { rateLimit } from '../middleware/rateLimit';
 import { logger } from '../lib/logger';
 import { createEmailToken } from '../lib/tokens';
 import { sendInviteEmail } from '../lib/email';
-import { adminUsersTotal, adminVecinosTotal, invitesTotal } from '../lib/metrics';
+import { clientFromRequest, adminUsersTotal, adminVecinosTotal, invitesTotal } from '../lib/metrics';
 import { Role } from '../lib/jwt';
 
 const VALID_ROLES: Role[] = ['usuario', 'directiva', 'admin'];
@@ -58,14 +58,14 @@ router.put('/admin/vecinos/:piso', authMiddleware, requireAdmin, async (req: Req
     );
 
     if (result.rows.length === 0) {
-      adminVecinosTotal.inc({ action: 'update', outcome: 'failure' });
+      adminVecinosTotal.inc({ client: clientFromRequest(req), action: 'update', outcome: 'failure' });
       res.status(404).json({ error: 'Vecino no encontrado' });
       return;
     }
-    adminVecinosTotal.inc({ action: 'update', outcome: 'success' });
+    adminVecinosTotal.inc({ client: clientFromRequest(req), action: 'update', outcome: 'success' });
     res.json(result.rows[0]);
   } catch (err) {
-    adminVecinosTotal.inc({ action: 'update', outcome: 'failure' });
+    adminVecinosTotal.inc({ client: clientFromRequest(req), action: 'update', outcome: 'failure' });
     logger.error(err, 'Admin update vecino error');
     res.status(500).json({ error: 'Error interno del servidor' });
   }
@@ -75,7 +75,7 @@ router.post('/admin/vecinos', authMiddleware, requireAdmin, async (req: Request,
   try {
     const { piso, nombre, email, coeficiente, enviar_email, device_identification, serial_number } = req.body;
     if (!piso) {
-      adminVecinosTotal.inc({ action: 'create', outcome: 'failure' });
+      adminVecinosTotal.inc({ client: clientFromRequest(req), action: 'create', outcome: 'failure' });
       res.status(400).json({ error: 'Piso requerido' });
       return;
     }
@@ -85,14 +85,14 @@ router.post('/admin/vecinos', authMiddleware, requireAdmin, async (req: Request,
        RETURNING piso, nombre, email, coeficiente, enviar_email, device_identification, serial_number`,
       [piso, nombre || null, email || null, coeficiente || null, enviar_email || false, device_identification || null, serial_number || null]
     );
-    adminVecinosTotal.inc({ action: 'create', outcome: 'success' });
+    adminVecinosTotal.inc({ client: clientFromRequest(req), action: 'create', outcome: 'success' });
     res.status(201).json(result.rows[0]);
   } catch (err: any) {
     if (err.code === '23505') {
       res.status(409).json({ error: 'El piso ya existe' });
       return;
     }
-    adminVecinosTotal.inc({ action: 'create', outcome: 'failure' });
+    adminVecinosTotal.inc({ client: clientFromRequest(req), action: 'create', outcome: 'failure' });
     logger.error(err, 'Admin create vecino error');
     res.status(500).json({ error: 'Error interno del servidor' });
   }
@@ -176,15 +176,15 @@ router.delete('/admin/vecinos/:piso', authMiddleware, requireAdmin, async (req: 
     );
 
     if (result.rows.length === 0) {
-      adminVecinosTotal.inc({ action: 'delete', outcome: 'failure' });
+      adminVecinosTotal.inc({ client: clientFromRequest(req), action: 'delete', outcome: 'failure' });
       res.status(404).json({ error: 'Vecino no encontrado' });
       return;
     }
 
-    adminVecinosTotal.inc({ action: 'delete', outcome: 'success' });
+    adminVecinosTotal.inc({ client: clientFromRequest(req), action: 'delete', outcome: 'success' });
     res.json({ message: 'Vecino eliminado correctamente' });
   } catch (err) {
-    adminVecinosTotal.inc({ action: 'delete', outcome: 'failure' });
+    adminVecinosTotal.inc({ client: clientFromRequest(req), action: 'delete', outcome: 'failure' });
     logger.error(err, 'Admin delete vecino error');
     res.status(500).json({ error: 'Error interno del servidor' });
   }
@@ -209,11 +209,11 @@ router.post('/admin/usuarios', authMiddleware, requireAdmin, async (req: Request
 
     const token = await createEmailToken(email, 'invite', vecino_piso || undefined);
     await sendInviteEmail(email, vecino_piso || null, token);
-    invitesTotal.inc({ outcome: 'success' });
+    invitesTotal.inc({ client: clientFromRequest(req), outcome: 'success' });
     logger.info({ email }, 'Invite sent');
     res.json({ message: 'Invitación enviada correctamente' });
   } catch (err) {
-    invitesTotal.inc({ outcome: 'failure' });
+    invitesTotal.inc({ client: clientFromRequest(req), outcome: 'failure' });
     logger.error({ err, email: req.body?.email ?? null }, 'Admin invite user error');
     res.status(500).json({ error: 'Error interno del servidor' });
   }
@@ -281,16 +281,16 @@ router.put('/admin/usuarios/:id', authMiddleware, requireAdmin, async (req: Requ
       return;
     }
 
-    adminUsersTotal.inc({ action: 'update', outcome: 'success' });
+    adminUsersTotal.inc({ client: clientFromRequest(req), action: 'update', outcome: 'success' });
     res.json(result.rows[0]);
   } catch (err: any) {
     if (err.code === '23505') {
       const field = err.constraint?.includes('email') ? 'email' : 'vecino_piso';
-      adminUsersTotal.inc({ action: 'update', outcome: 'failure' });
+      adminUsersTotal.inc({ client: clientFromRequest(req), action: 'update', outcome: 'failure' });
       res.status(409).json({ error: `El ${field} ya está en uso` });
       return;
     }
-    adminUsersTotal.inc({ action: 'update', outcome: 'failure' });
+    adminUsersTotal.inc({ client: clientFromRequest(req), action: 'update', outcome: 'failure' });
     logger.error({ err, id }, 'Admin update user error');
     res.status(500).json({ error: 'Error interno del servidor' });
   }
@@ -302,7 +302,7 @@ router.put('/admin/usuarios/:id/password', authMiddleware, requireAdmin, async (
     const { password } = req.body;
 
     if (!password || password.length < 6) {
-      adminUsersTotal.inc({ action: 'change_password', outcome: 'failure' });
+      adminUsersTotal.inc({ client: clientFromRequest(req), action: 'change_password', outcome: 'failure' });
       res.status(400).json({ error: 'La contraseña debe tener al menos 6 caracteres' });
       return;
     }
@@ -315,15 +315,15 @@ router.put('/admin/usuarios/:id/password', authMiddleware, requireAdmin, async (
     );
 
     if (result.rows.length === 0) {
-      adminUsersTotal.inc({ action: 'change_password', outcome: 'failure' });
+      adminUsersTotal.inc({ client: clientFromRequest(req), action: 'change_password', outcome: 'failure' });
       res.status(404).json({ error: 'Usuario no encontrado' });
       return;
     }
 
-    adminUsersTotal.inc({ action: 'change_password', outcome: 'success' });
+    adminUsersTotal.inc({ client: clientFromRequest(req), action: 'change_password', outcome: 'success' });
     res.json({ message: 'Contraseña actualizada' });
   } catch (err) {
-    adminUsersTotal.inc({ action: 'change_password', outcome: 'failure' });
+    adminUsersTotal.inc({ client: clientFromRequest(req), action: 'change_password', outcome: 'failure' });
     logger.error(err, 'Admin change password error');
     res.status(500).json({ error: 'Error interno del servidor' });
   }
@@ -334,7 +334,7 @@ router.delete('/admin/usuarios/:id', authMiddleware, requireAdmin, async (req: R
     const id = req.params.id as string;
 
     if (parseInt(id) === req.user!.userId) {
-      adminUsersTotal.inc({ action: 'delete', outcome: 'failure' });
+      adminUsersTotal.inc({ client: clientFromRequest(req), action: 'delete', outcome: 'failure' });
       res.status(400).json({ error: 'No puedes eliminar tu propio usuario' });
       return;
     }
@@ -345,15 +345,15 @@ router.delete('/admin/usuarios/:id', authMiddleware, requireAdmin, async (req: R
     );
 
     if (result.rows.length === 0) {
-      adminUsersTotal.inc({ action: 'delete', outcome: 'failure' });
+      adminUsersTotal.inc({ client: clientFromRequest(req), action: 'delete', outcome: 'failure' });
       res.status(404).json({ error: 'Usuario no encontrado' });
       return;
     }
 
-    adminUsersTotal.inc({ action: 'delete', outcome: 'success' });
+    adminUsersTotal.inc({ client: clientFromRequest(req), action: 'delete', outcome: 'success' });
     res.json({ message: 'Usuario eliminado' });
   } catch (err) {
-    adminUsersTotal.inc({ action: 'delete', outcome: 'failure' });
+    adminUsersTotal.inc({ client: clientFromRequest(req), action: 'delete', outcome: 'failure' });
     logger.error(err, 'Admin delete user error');
     res.status(500).json({ error: 'Error interno del servidor' });
   }
@@ -378,11 +378,11 @@ router.post('/admin/invitar', authMiddleware, requireAdmin, rateLimit(100, 60 * 
     }
     const token = await createEmailToken(vecino.email, 'invite', vecino.piso);
     await sendInviteEmail(vecino.email, vecino.piso, token);
-    invitesTotal.inc({ outcome: 'success' });
+    invitesTotal.inc({ client: clientFromRequest(req), outcome: 'success' });
     logger.info({ email: vecino.email, piso: vecino.piso }, 'Invite sent');
     res.json({ message: 'Invitación enviada correctamente' });
   } catch (err) {
-    invitesTotal.inc({ outcome: 'failure' });
+    invitesTotal.inc({ client: clientFromRequest(req), outcome: 'failure' });
     logger.error({ err }, 'Admin invite error');
     res.status(500).json({ error: 'Error interno del servidor' });
   }
