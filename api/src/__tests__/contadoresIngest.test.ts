@@ -3,6 +3,9 @@ import {
   parseContadoresCsv,
   transformRow,
   CONTADORES_COLUMNAS,
+  detectarFaltantes,
+  detectarDesactualizados,
+  detectarResets,
 } from '../lib/contadoresIngest';
 
 const HEADER = [
@@ -98,5 +101,51 @@ describe('transformRow', () => {
     expect(CONTADORES_COLUMNAS).toHaveLength(42);
     expect(CONTADORES_COLUMNAS).not.toContain('power_w_max_value_0_0_0');
     expect(CONTADORES_COLUMNAS).not.toContain('volume_flow_m3h_max_value_0_0_0');
+  });
+});
+
+describe('detectarFaltantes', () => {
+  it('devuelve los contadores esperados que no están presentes', () => {
+    const esperados = [
+      { device_identification: '72569463', serial_number: '0016045167' },
+      { device_identification: '72569464', serial_number: '0016045167' },
+    ];
+    const presentes = [{ device_identification: '72569463', serial_number: '0016045167' }];
+    const faltantes = detectarFaltantes(esperados, presentes);
+    expect(faltantes).toEqual([{ device_identification: '72569464', serial_number: '0016045167' }]);
+  });
+});
+
+describe('detectarDesactualizados', () => {
+  it('detecta un contador cuyo datetime no avanza', () => {
+    const fila = (created: string, datetime: string) => ({
+      'device-identification': '72569463',
+      created,
+      'datetime,,inst-value,0,0,0': datetime,
+    });
+    const rows = [fila('2026-10-01 20:00:00', '2026-10-01 18:00:00')];
+    const res = detectarDesactualizados(rows, 120);
+    expect(res).toHaveLength(1);
+    expect(res[0].device_identification).toBe('72569463');
+  });
+
+  it('no detecta un contador sano (datetime por delante)', () => {
+    const rows = [
+      { 'device-identification': '72569463', created: '2026-10-01 20:00:00', 'datetime,,inst-value,0,0,0': '2026-10-01 20:56:00' },
+    ];
+    expect(detectarDesactualizados(rows, 120)).toHaveLength(0);
+  });
+});
+
+describe('detectarResets', () => {
+  it('detecta un descenso del acumulado respecto a la lectura previa', () => {
+    const inserts = [
+      { device_identification: '72569463', energy_wh_inst_value_0_0_0: 1000 },
+    ];
+    const previos = [
+      { device_identification: '72569463', energy_wh_inst_value_0_0_0: 5000 },
+    ];
+    const resets = detectarResets(inserts, previos);
+    expect(resets).toEqual([{ device_identification: '72569463', campo: 'energy_wh_inst_value_0_0_0' }]);
   });
 });
