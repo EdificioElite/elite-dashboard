@@ -21,6 +21,20 @@
         "query": "prod,dev",
         "multi": false,
         "includeAll": false
+      },
+      {
+        "name": "client",
+        "type": "custom",
+        "label": "Cliente",
+        "current": { "text": "All", "value": ".*" },
+        "options": [
+          { "text": "All", "value": ".*", "selected": true },
+          { "text": "dashboard", "value": "dashboard", "selected": false },
+          { "text": "home-assistant", "value": "home-assistant", "selected": false }
+        ],
+        "query": ".*,dashboard,home-assistant",
+        "multi": false,
+        "includeAll": false
       }
     ]
   },
@@ -34,7 +48,7 @@
       "fieldConfig": { "defaults": { "color": { "mode": "thresholds" }, "thresholds": { "steps": [{ "color": "green", "value": null }] } }, "overrides": [] },
       "options": { "reduceOptions": { "values": false, "calcs": ["lastNotNull"] }, "colorMode": "value", "graphMode": "none", "justifyMode": "auto" },
       "targets": [
-        { "refId": "A", "expr": "sum(increase(dashboard_logins_total{env=\"$env\",outcome=\"success\"}[24h]))", "datasource": { "type": "prometheus", "uid": "eezd2pur0jy80e" }, "instant": true }
+        { "refId": "A", "expr": "sum(increase(dashboard_logins_total{env=\"$env\",client=~\"$client\",outcome=\"success\"}[24h]))", "datasource": { "type": "prometheus", "uid": "eezd2pur0jy80e" }, "instant": true }
       ]
     },
     {
@@ -46,7 +60,7 @@
       "fieldConfig": { "defaults": { "color": { "mode": "thresholds" }, "thresholds": { "steps": [{ "color": "red", "value": null }] } }, "overrides": [] },
       "options": { "reduceOptions": { "values": false, "calcs": ["lastNotNull"] }, "colorMode": "value", "graphMode": "none", "justifyMode": "auto" },
       "targets": [
-        { "refId": "A", "expr": "sum(increase(dashboard_logins_total{env=\"$env\",outcome=\"failure\"}[24h]))", "datasource": { "type": "prometheus", "uid": "eezd2pur0jy80e" }, "instant": true }
+        { "refId": "A", "expr": "sum(increase(dashboard_logins_total{env=\"$env\",client=~\"$client\",outcome=\"failure\"}[24h]))", "datasource": { "type": "prometheus", "uid": "eezd2pur0jy80e" }, "instant": true }
       ]
     },
     {
@@ -58,7 +72,7 @@
       "fieldConfig": { "defaults": { "color": { "mode": "thresholds" }, "thresholds": { "steps": [{ "color": "blue", "value": null }] } }, "overrides": [] },
       "options": { "reduceOptions": { "values": false, "calcs": ["lastNotNull"] }, "colorMode": "value", "graphMode": "none", "justifyMode": "auto" },
       "targets": [
-        { "refId": "A", "expr": "sum(increase(dashboard_password_reset_requests_total{env=\"$env\"}[24h]))", "datasource": { "type": "prometheus", "uid": "eezd2pur0jy80e" }, "instant": true }
+        { "refId": "A", "expr": "sum(increase(dashboard_password_reset_requests_total{env=\"$env\",client=~\"$client\"}[24h]))", "datasource": { "type": "prometheus", "uid": "eezd2pur0jy80e" }, "instant": true }
       ]
     },
     {
@@ -70,7 +84,7 @@
       "fieldConfig": { "defaults": { "color": { "mode": "thresholds" }, "thresholds": { "steps": [{ "color": "green", "value": null }] } }, "overrides": [] },
       "options": { "reduceOptions": { "values": false, "calcs": ["lastNotNull"] }, "colorMode": "value", "graphMode": "none", "justifyMode": "auto" },
       "targets": [
-        { "refId": "A", "expr": "sum(increase(dashboard_password_resets_total{env=\"$env\",outcome=\"success\"}[24h]))", "datasource": { "type": "prometheus", "uid": "eezd2pur0jy80e" }, "instant": true }
+        { "refId": "A", "expr": "sum(increase(dashboard_password_resets_total{env=\"$env\",client=~\"$client\",outcome=\"success\"}[24h]))", "datasource": { "type": "prometheus", "uid": "eezd2pur0jy80e" }, "instant": true }
       ]
     },
     {
@@ -82,7 +96,7 @@
       "fieldConfig": { "defaults": { "unit": "reqps", "color": { "mode": "thresholds" }, "thresholds": { "steps": [{ "color": "green", "value": null }] } }, "overrides": [] },
       "options": { "reduceOptions": { "values": false, "calcs": ["lastNotNull"] }, "colorMode": "value", "graphMode": "area", "justifyMode": "auto" },
       "targets": [
-        { "refId": "A", "expr": "sum(rate(http_request_duration_seconds_count{env=\"$env\"}[5m]))", "datasource": { "type": "prometheus", "uid": "eezd2pur0jy80e" }, "instant": true }
+        { "refId": "A", "expr": "sum(rate(http_request_duration_seconds_count{env=\"$env\",client=~\"$client\"}[5m]))", "datasource": { "type": "prometheus", "uid": "eezd2pur0jy80e" }, "instant": true }
       ]
     },
     {
@@ -94,7 +108,7 @@
       "fieldConfig": { "defaults": { "color": { "mode": "thresholds" }, "thresholds": { "steps": [{ "color": "red", "value": null }] } }, "overrides": [] },
       "options": { "reduceOptions": { "values": false, "calcs": ["lastNotNull"] }, "colorMode": "value", "graphMode": "none", "justifyMode": "auto" },
       "targets": [
-        { "refId": "A", "expr": "sum(increase(http_request_duration_seconds_count{env=\"$env\",status_code=~\"5..\"}[24h]))", "datasource": { "type": "prometheus", "uid": "eezd2pur0jy80e" }, "instant": true }
+        { "refId": "A", "expr": "sum(increase(http_request_duration_seconds_count{env=\"$env\",client=~\"$client\",status_code=~\"5..\"}[24h]))", "datasource": { "type": "prometheus", "uid": "eezd2pur0jy80e" }, "instant": true }
       ]
     },
     {
@@ -106,7 +120,7 @@
       "fieldConfig": { "defaults": { "unit": "s", "color": { "mode": "thresholds" }, "thresholds": { "steps": [{ "color": "green", "value": null }, { "color": "orange", "value": 0.5 }, { "color": "red", "value": 1 }] } }, "overrides": [] },
       "options": { "reduceOptions": { "values": false, "calcs": ["lastNotNull"] }, "colorMode": "value", "graphMode": "area", "justifyMode": "auto" },
       "targets": [
-        { "refId": "A", "expr": "histogram_quantile(0.95, sum by (le) (rate(http_request_duration_seconds_bucket{env=\"$env\"}[5m])))", "datasource": { "type": "prometheus", "uid": "eezd2pur0jy80e" }, "instant": true }
+        { "refId": "A", "expr": "histogram_quantile(0.95, sum by (le) (rate(http_request_duration_seconds_bucket{env=\"$env\",client=~\"$client\"}[5m])))", "datasource": { "type": "prometheus", "uid": "eezd2pur0jy80e" }, "instant": true }
       ]
     },
     {
@@ -117,7 +131,7 @@
       "datasource": { "type": "prometheus", "uid": "eezd2pur0jy80e" },
       "fieldConfig": { "defaults": { "unit": "reqps" }, "overrides": [] },
       "targets": [
-        { "refId": "A", "expr": "sum by (outcome) (rate(dashboard_logins_total{env=\"$env\"}[5m]))", "datasource": { "type": "prometheus", "uid": "eezd2pur0jy80e" }, "legendFormat": "{{outcome}}" }
+        { "refId": "A", "expr": "sum by (outcome) (rate(dashboard_logins_total{env=\"$env\",client=~\"$client\"}[5m]))", "datasource": { "type": "prometheus", "uid": "eezd2pur0jy80e" }, "legendFormat": "{{outcome}}" }
       ]
     },
     {
@@ -128,8 +142,8 @@
       "datasource": { "type": "prometheus", "uid": "eezd2pur0jy80e" },
       "fieldConfig": { "defaults": { "unit": "reqps" }, "overrides": [] },
       "targets": [
-        { "refId": "A", "expr": "sum(rate(dashboard_password_reset_requests_total{env=\"$env\"}[5m]))", "datasource": { "type": "prometheus", "uid": "eezd2pur0jy80e" }, "legendFormat": "solicitados" },
-        { "refId": "B", "expr": "sum by (outcome) (rate(dashboard_password_resets_total{env=\"$env\"}[5m]))", "datasource": { "type": "prometheus", "uid": "eezd2pur0jy80e" }, "legendFormat": "reset {{outcome}}" }
+        { "refId": "A", "expr": "sum(rate(dashboard_password_reset_requests_total{env=\"$env\",client=~\"$client\"}[5m]))", "datasource": { "type": "prometheus", "uid": "eezd2pur0jy80e" }, "legendFormat": "solicitados" },
+        { "refId": "B", "expr": "sum by (outcome) (rate(dashboard_password_resets_total{env=\"$env\",client=~\"$client\"}[5m]))", "datasource": { "type": "prometheus", "uid": "eezd2pur0jy80e" }, "legendFormat": "reset {{outcome}}" }
       ]
     },
     {
@@ -140,8 +154,8 @@
       "datasource": { "type": "prometheus", "uid": "eezd2pur0jy80e" },
       "fieldConfig": { "defaults": { "unit": "reqps" }, "overrides": [] },
       "targets": [
-        { "refId": "A", "expr": "sum(rate(dashboard_registrations_total{env=\"$env\"}[5m]))", "datasource": { "type": "prometheus", "uid": "eezd2pur0jy80e" }, "legendFormat": "registros" },
-        { "refId": "B", "expr": "sum(rate(dashboard_invites_total{env=\"$env\"}[5m]))", "datasource": { "type": "prometheus", "uid": "eezd2pur0jy80e" }, "legendFormat": "invitaciones" }
+        { "refId": "A", "expr": "sum(rate(dashboard_registrations_total{env=\"$env\",client=~\"$client\"}[5m]))", "datasource": { "type": "prometheus", "uid": "eezd2pur0jy80e" }, "legendFormat": "registros" },
+        { "refId": "B", "expr": "sum(rate(dashboard_invites_total{env=\"$env\",client=~\"$client\"}[5m]))", "datasource": { "type": "prometheus", "uid": "eezd2pur0jy80e" }, "legendFormat": "invitaciones" }
       ]
     },
     {
@@ -152,7 +166,7 @@
       "datasource": { "type": "prometheus", "uid": "eezd2pur0jy80e" },
       "fieldConfig": { "defaults": { "unit": "reqps" }, "overrides": [] },
       "targets": [
-        { "refId": "A", "expr": "sum by (scope) (rate(dashboard_facturas_descargas_total{env=\"$env\"}[5m]))", "datasource": { "type": "prometheus", "uid": "eezd2pur0jy80e" }, "legendFormat": "{{scope}}" }
+        { "refId": "A", "expr": "sum by (scope) (rate(dashboard_facturas_descargas_total{env=\"$env\",client=~\"$client\"}[5m]))", "datasource": { "type": "prometheus", "uid": "eezd2pur0jy80e" }, "legendFormat": "{{scope}}" }
       ]
     },
     {
@@ -163,8 +177,8 @@
       "datasource": { "type": "prometheus", "uid": "eezd2pur0jy80e" },
       "fieldConfig": { "defaults": { "unit": "reqps" }, "overrides": [] },
       "targets": [
-        { "refId": "A", "expr": "sum by (action) (rate(dashboard_admin_users_total{env=\"$env\"}[5m]))", "datasource": { "type": "prometheus", "uid": "eezd2pur0jy80e" }, "legendFormat": "usuarios {{action}}" },
-        { "refId": "B", "expr": "sum by (action) (rate(dashboard_admin_vecinos_total{env=\"$env\"}[5m]))", "datasource": { "type": "prometheus", "uid": "eezd2pur0jy80e" }, "legendFormat": "vecinos {{action}}" }
+        { "refId": "A", "expr": "sum by (action) (rate(dashboard_admin_users_total{env=\"$env\",client=~\"$client\"}[5m]))", "datasource": { "type": "prometheus", "uid": "eezd2pur0jy80e" }, "legendFormat": "usuarios {{action}}" },
+        { "refId": "B", "expr": "sum by (action) (rate(dashboard_admin_vecinos_total{env=\"$env\",client=~\"$client\"}[5m]))", "datasource": { "type": "prometheus", "uid": "eezd2pur0jy80e" }, "legendFormat": "vecinos {{action}}" }
       ]
     },
     {
@@ -175,7 +189,7 @@
       "datasource": { "type": "prometheus", "uid": "eezd2pur0jy80e" },
       "fieldConfig": { "defaults": { "unit": "reqps" }, "overrides": [] },
       "targets": [
-        { "refId": "A", "expr": "sum by (status_code) (rate(http_request_duration_seconds_count{env=\"$env\"}[5m]))", "datasource": { "type": "prometheus", "uid": "eezd2pur0jy80e" }, "legendFormat": "{{status_code}}" }
+        { "refId": "A", "expr": "sum by (status_code) (rate(http_request_duration_seconds_count{env=\"$env\",client=~\"$client\"}[5m]))", "datasource": { "type": "prometheus", "uid": "eezd2pur0jy80e" }, "legendFormat": "{{status_code}}" }
       ]
     },
     {
@@ -186,9 +200,9 @@
       "datasource": { "type": "prometheus", "uid": "eezd2pur0jy80e" },
       "fieldConfig": { "defaults": { "unit": "s" }, "overrides": [] },
       "targets": [
-        { "refId": "A", "expr": "histogram_quantile(0.50, sum by (le) (rate(http_request_duration_seconds_bucket{env=\"$env\"}[5m])))", "datasource": { "type": "prometheus", "uid": "eezd2pur0jy80e" }, "legendFormat": "p50" },
-        { "refId": "B", "expr": "histogram_quantile(0.95, sum by (le) (rate(http_request_duration_seconds_bucket{env=\"$env\"}[5m])))", "datasource": { "type": "prometheus", "uid": "eezd2pur0jy80e" }, "legendFormat": "p95" },
-        { "refId": "C", "expr": "histogram_quantile(0.99, sum by (le) (rate(http_request_duration_seconds_bucket{env=\"$env\"}[5m])))", "datasource": { "type": "prometheus", "uid": "eezd2pur0jy80e" }, "legendFormat": "p99" }
+        { "refId": "A", "expr": "histogram_quantile(0.50, sum by (le) (rate(http_request_duration_seconds_bucket{env=\"$env\",client=~\"$client\"}[5m])))", "datasource": { "type": "prometheus", "uid": "eezd2pur0jy80e" }, "legendFormat": "p50" },
+        { "refId": "B", "expr": "histogram_quantile(0.95, sum by (le) (rate(http_request_duration_seconds_bucket{env=\"$env\",client=~\"$client\"}[5m])))", "datasource": { "type": "prometheus", "uid": "eezd2pur0jy80e" }, "legendFormat": "p95" },
+        { "refId": "C", "expr": "histogram_quantile(0.99, sum by (le) (rate(http_request_duration_seconds_bucket{env=\"$env\",client=~\"$client\"}[5m])))", "datasource": { "type": "prometheus", "uid": "eezd2pur0jy80e" }, "legendFormat": "p99" }
       ]
     },
     {
@@ -199,7 +213,7 @@
       "datasource": { "type": "prometheus", "uid": "eezd2pur0jy80e" },
       "fieldConfig": { "defaults": { "unit": "reqps" }, "overrides": [] },
       "targets": [
-        { "refId": "A", "expr": "sum by (status_code) (rate(http_request_duration_seconds_count{env=\"$env\",status_code=~\"4..|5..\"}[5m]))", "datasource": { "type": "prometheus", "uid": "eezd2pur0jy80e" }, "legendFormat": "{{status_code}}" }
+        { "refId": "A", "expr": "sum by (status_code) (rate(http_request_duration_seconds_count{env=\"$env\",client=~\"$client\",status_code=~\"4..|5..\"}[5m]))", "datasource": { "type": "prometheus", "uid": "eezd2pur0jy80e" }, "legendFormat": "{{status_code}}" }
       ]
     },
     {
@@ -210,7 +224,7 @@
       "datasource": { "type": "prometheus", "uid": "eezd2pur0jy80e" },
       "fieldConfig": { "defaults": { "unit": "reqps" }, "overrides": [] },
       "targets": [
-        { "refId": "A", "expr": "sum by (path) (rate(http_request_duration_seconds_count{env=\"$env\",status_code=~\"5..\"}[5m]))", "datasource": { "type": "prometheus", "uid": "eezd2pur0jy80e" }, "legendFormat": "{{path}}" }
+        { "refId": "A", "expr": "sum by (path) (rate(http_request_duration_seconds_count{env=\"$env\",client=~\"$client\",status_code=~\"5..\"}[5m]))", "datasource": { "type": "prometheus", "uid": "eezd2pur0jy80e" }, "legendFormat": "{{path}}" }
       ]
     },
     {
@@ -221,7 +235,7 @@
       "datasource": { "type": "prometheus", "uid": "eezd2pur0jy80e" },
       "fieldConfig": { "defaults": { "unit": "s" }, "overrides": [] },
       "targets": [
-        { "refId": "A", "expr": "histogram_quantile(0.95, sum by (le, path) (rate(http_request_duration_seconds_bucket{env=\"$env\"}[5m])))", "datasource": { "type": "prometheus", "uid": "eezd2pur0jy80e" }, "legendFormat": "{{path}}" }
+        { "refId": "A", "expr": "histogram_quantile(0.95, sum by (le, path) (rate(http_request_duration_seconds_bucket{env=\"$env\",client=~\"$client\"}[5m])))", "datasource": { "type": "prometheus", "uid": "eezd2pur0jy80e" }, "legendFormat": "{{path}}" }
       ]
     },
     {
@@ -232,7 +246,7 @@
       "datasource": { "type": "prometheus", "uid": "eezd2pur0jy80e" },
       "fieldConfig": { "defaults": { "unit": "reqps" }, "overrides": [] },
       "targets": [
-        { "refId": "A", "expr": "sum by (method) (rate(http_request_duration_seconds_count{env=\"$env\"}[5m]))", "datasource": { "type": "prometheus", "uid": "eezd2pur0jy80e" }, "legendFormat": "{{method}}" }
+        { "refId": "A", "expr": "sum by (method) (rate(http_request_duration_seconds_count{env=\"$env\",client=~\"$client\"}[5m]))", "datasource": { "type": "prometheus", "uid": "eezd2pur0jy80e" }, "legendFormat": "{{method}}" }
       ]
     },
     {
@@ -243,7 +257,7 @@
       "datasource": { "type": "prometheus", "uid": "eezd2pur0jy80e" },
       "fieldConfig": { "defaults": { "unit": "s" }, "overrides": [] },
       "targets": [
-        { "refId": "A", "expr": "topk(10, histogram_quantile(0.95, sum by (le, path) (rate(http_request_duration_seconds_bucket{env=\"$env\"}[5m]))))", "instant": true, "format": "table", "datasource": { "type": "prometheus", "uid": "eezd2pur0jy80e" } }
+        { "refId": "A", "expr": "topk(10, histogram_quantile(0.95, sum by (le, path) (rate(http_request_duration_seconds_bucket{env=\"$env\",client=~\"$client\"}[5m]))))", "instant": true, "format": "table", "datasource": { "type": "prometheus", "uid": "eezd2pur0jy80e" } }
       ]
     },
     {
@@ -254,7 +268,7 @@
       "datasource": { "type": "prometheus", "uid": "eezd2pur0jy80e" },
       "fieldConfig": { "defaults": { "unit": "reqps" }, "overrides": [] },
       "targets": [
-        { "refId": "A", "expr": "topk(10, sum by (path) (rate(http_request_duration_seconds_count{env=\"$env\"}[5m])))", "instant": true, "format": "table", "datasource": { "type": "prometheus", "uid": "eezd2pur0jy80e" } }
+        { "refId": "A", "expr": "topk(10, sum by (path) (rate(http_request_duration_seconds_count{env=\"$env\",client=~\"$client\"}[5m])))", "instant": true, "format": "table", "datasource": { "type": "prometheus", "uid": "eezd2pur0jy80e" } }
       ]
     },
     {
@@ -265,18 +279,36 @@
       "datasource": { "type": "prometheus", "uid": "eezd2pur0jy80e" },
       "fieldConfig": { "defaults": { "unit": "s" }, "overrides": [] },
       "targets": [
-        { "refId": "A", "expr": "sum(rate(http_request_duration_seconds_sum{env=\"$env\"}[5m])) / sum(rate(http_request_duration_seconds_count{env=\"$env\"}[5m]))", "datasource": { "type": "prometheus", "uid": "eezd2pur0jy80e" }, "legendFormat": "media" }
+        { "refId": "A", "expr": "sum(rate(http_request_duration_seconds_sum{env=\"$env\",client=~\"$client\"}[5m])) / sum(rate(http_request_duration_seconds_count{env=\"$env\",client=~\"$client\"}[5m]))", "datasource": { "type": "prometheus", "uid": "eezd2pur0jy80e" }, "legendFormat": "media" }
       ]
     },
     {
       "id": 20,
       "type": "timeseries",
-      "title": "HTTP: tasa de error (%)",
+      "title": "HTTP: tasa de error por tipo",
       "gridPos": { "h": 8, "w": 12, "x": 12, "y": 64 },
       "datasource": { "type": "prometheus", "uid": "eezd2pur0jy80e" },
-      "fieldConfig": { "defaults": { "unit": "percent" }, "overrides": [] },
+      "fieldConfig": {
+        "defaults": { "unit": "percent" },
+        "overrides": [
+          { "matcher": { "id": "byName", "options": "4xx" }, "properties": [ { "id": "color", "value": { "fixedColor": "blue", "mode": "fixed" } } ] },
+          { "matcher": { "id": "byName", "options": "5xx" }, "properties": [ { "id": "color", "value": { "fixedColor": "red", "mode": "fixed" } } ] }
+        ]
+      },
       "targets": [
-        { "refId": "A", "expr": "sum(rate(http_request_duration_seconds_count{env=\"$env\",status_code=~\"4..|5..\"}[5m])) / clamp_min(sum(rate(http_request_duration_seconds_count{env=\"$env\"}[5m])), 1) * 100", "datasource": { "type": "prometheus", "uid": "eezd2pur0jy80e" }, "legendFormat": "tasa error" }
+        { "refId": "A", "expr": "sum(rate(http_request_duration_seconds_count{env=\"$env\",client=~\"$client\",status_code=~\"4..\"}[5m])) / clamp_min(sum(rate(http_request_duration_seconds_count{env=\"$env\",client=~\"$client\"}[5m])), 1) * 100", "datasource": { "type": "prometheus", "uid": "eezd2pur0jy80e" }, "legendFormat": "4xx" },
+        { "refId": "B", "expr": "sum(rate(http_request_duration_seconds_count{env=\"$env\",client=~\"$client\",status_code=~\"5..\"}[5m])) / clamp_min(sum(rate(http_request_duration_seconds_count{env=\"$env\",client=~\"$client\"}[5m])), 1) * 100", "datasource": { "type": "prometheus", "uid": "eezd2pur0jy80e" }, "legendFormat": "5xx" }
+      ]
+    },
+    {
+      "id": 23,
+      "type": "timeseries",
+      "title": "HTTP: requests por segundo por endpoint",
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 72 },
+      "datasource": { "type": "prometheus", "uid": "eezd2pur0jy80e" },
+      "fieldConfig": { "defaults": { "unit": "reqps" }, "overrides": [] },
+      "targets": [
+        { "refId": "A", "expr": "sum by (path) (rate(http_request_duration_seconds_count{env=\"$env\",client=~\"$client\"}[5m]))", "datasource": { "type": "prometheus", "uid": "eezd2pur0jy80e" }, "legendFormat": "{{path}}" }
       ]
     }
   ]
