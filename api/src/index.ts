@@ -4,6 +4,7 @@ import pinoHttp from 'pino-http';
 import promBundle from 'express-prom-bundle';
 import { config, validateConfig } from './config';
 import { logger } from './lib/logger';
+import { clientFromRequest } from './lib/metrics';
 import authRoutes from './routes/auth';
 import consumosRoutes from './routes/consumos';
 import facturasRoutes from './routes/facturas';
@@ -46,6 +47,9 @@ app.use(promBundle({
     [/^\/api\/juntas\/\d+$/, '/api/juntas/:id'],
     [/^\/api\/admin\/juntas\/\d+$/, '/api/admin/juntas/:id'],
   ],
+  transformLabels: (labels, req) => {
+    labels.client = clientFromRequest(req);
+  },
   autoregister: true,
 }));
 
