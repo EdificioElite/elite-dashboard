@@ -6,6 +6,7 @@ api/.env
 *.tsbuildinfo
 .idea/
 *.log
+.DS_Store
 docs/n8n-database.md
 docs/Factura*
 e2e/test-results/
