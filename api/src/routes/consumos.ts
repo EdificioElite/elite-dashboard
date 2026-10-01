@@ -98,9 +98,8 @@ router.get('/consumo-actual', authMiddleware, async (req: Request, res: Response
           ct.return_temp_c_inst_value_0_0_0 AS temp_retorno,
           ct.power_w_inst_value_0_0_0 AS power_w
         FROM contadores ct
-        JOIN vecinos v ON ct.device_identification = v.device_identification
-          AND ct.serial_number::text = v.serial_number
-        WHERE v.piso = $1
+        WHERE ct.device_identification = (SELECT device_identification FROM vecinos WHERE piso = $1)
+          AND ct.serial_number::text = (SELECT serial_number FROM vecinos WHERE piso = $1)
         ORDER BY ct.created DESC
         LIMIT 2
       ),
@@ -127,9 +126,8 @@ router.get('/consumo-actual', authMiddleware, async (req: Request, res: Response
           ct.volume_m3_inst_value_0_1_0 AS m3_acs_mes,
           ct.volume_m3_inst_value_0_2_0 AS m3_afs_mes
         FROM contadores ct
-        JOIN vecinos v ON ct.device_identification = v.device_identification
-          AND ct.serial_number::text = v.serial_number
-        WHERE v.piso = $1
+        WHERE ct.device_identification = (SELECT device_identification FROM vecinos WHERE piso = $1)
+          AND ct.serial_number::text = (SELECT serial_number FROM vecinos WHERE piso = $1)
           AND ct.created <= date_trunc('month', NOW())
         ORDER BY ct.created DESC
         LIMIT 1
