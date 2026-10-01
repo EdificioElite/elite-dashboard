@@ -145,7 +145,7 @@ export interface Reset {
 }
 
 export function detectarResets(inserts: LecturaPrevia[], previos: LecturaPrevia[]): Reset[] {
-  const previosMap = new Map(previos.map((p) => [p.device_identification, p]));
+  const previosMap = new Map(previos.map((p) => [String(p.device_identification), p]));
   const byDevice = new Map<string, LecturaPrevia[]>();
   for (const ins of inserts) {
     const k = String(ins.device_identification);
