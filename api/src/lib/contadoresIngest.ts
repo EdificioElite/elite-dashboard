@@ -1,7 +1,5 @@
 export type CsvRow = Record<string, string>;
 
-export type ContadorInsert = Record<string, string | number>;
-
 export const CONTADORES_COLUMNAS = [
   'serial_number',
   'device_identification',
@@ -46,6 +44,10 @@ export const CONTADORES_COLUMNAS = [
   'manufacturer_specific_ff_16_inst_value_0_0_0',
   'manufacturer_specific_ff_17_inst_value_0_0_0',
 ] as const;
+
+export type ContadorColumn = (typeof CONTADORES_COLUMNAS)[number];
+
+export type ContadorInsert = Record<ContadorColumn, string | number>;
 
 const GRADO_CANONICO = '\u00B0'; // °
 
