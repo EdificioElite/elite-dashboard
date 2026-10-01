@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.20.0](https://github.com/EdificioElite/elite-dashboard/compare/v1.19.0...v1.20.0) (2026-10-01)
+
+
+### Features
+
+* métricas por cliente y paneles Grafana ([#185](https://github.com/EdificioElite/elite-dashboard/issues/185)) ([bd9e8a5](https://github.com/EdificioElite/elite-dashboard/commit/bd9e8a58c7251e87b070509e5f3596690e247eec))
+
 ## [1.19.0](https://github.com/EdificioElite/elite-dashboard/compare/v1.18.0...v1.19.0) (2026-09-30)
 
 
