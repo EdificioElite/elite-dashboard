@@ -5,7 +5,7 @@ import { authMiddleware } from '../middleware/auth';
 import { requireAdmin } from '../middleware/roles';
 import { logger } from '../lib/logger';
 import { uploadPDF, getPDFStream, deleteFile, renameFile } from '../lib/googleDrive';
-import { juntasDescargasTotal, juntasTotal } from '../lib/metrics';
+import { clientFromRequest, juntasDescargasTotal, juntasTotal } from '../lib/metrics';
 
 const PDF_MAGIC = [0x25, 0x50, 0x44, 0x46]; // %PDF
 
@@ -116,7 +116,7 @@ router.get('/juntas/:id', authMiddleware, async (req: Request, res: Response) =>
     res.setHeader('Content-Disposition', `attachment; filename="${fileName}"`);
     res.setHeader('Access-Control-Expose-Headers', 'Content-Disposition');
 
-    juntasDescargasTotal.inc();
+    juntasDescargasTotal.inc({ client: clientFromRequest(req) });
 
     const stream = await getPDFStream(junta.drive_file_id);
     stream.pipe(res);
@@ -162,10 +162,10 @@ router.post('/admin/juntas', authMiddleware, requireAdmin, (req, res) => {
          [tipo, fecha, driveFileId, fileName]
       );
 
-      juntasTotal.inc({ action: 'create', outcome: 'success' });
+      juntasTotal.inc({ client: clientFromRequest(req), action: 'create', outcome: 'success' });
       res.status(201).json(result.rows[0]);
     } catch (err: any) {
-      juntasTotal.inc({ action: 'create', outcome: 'failure' });
+      juntasTotal.inc({ client: clientFromRequest(req), action: 'create', outcome: 'failure' });
       logger.error(err, 'Create junta error');
       const message = err?.message || '';
       if (message.includes('storageQuotaExceeded') || message.includes('Service Accounts do not have storage quota')) {
@@ -183,7 +183,7 @@ router.put('/admin/juntas/:id', authMiddleware, requireAdmin, (req, res) => {
       const { id } = req.params;
       const existing = await query('SELECT * FROM juntas WHERE id = $1', [id]);
       if (existing.rows.length === 0) {
-        juntasTotal.inc({ action: 'update', outcome: 'failure' });
+        juntasTotal.inc({ client: clientFromRequest(req), action: 'update', outcome: 'failure' });
         res.status(404).json({ error: 'Junta no encontrada' });
         return;
       }
@@ -230,10 +230,10 @@ router.put('/admin/juntas/:id', authMiddleware, requireAdmin, (req, res) => {
         await deleteFile(oldDriveFileId);
       }
 
-      juntasTotal.inc({ action: 'update', outcome: 'success' });
+      juntasTotal.inc({ client: clientFromRequest(req), action: 'update', outcome: 'success' });
       res.json(result.rows[0]);
     } catch (err) {
-      juntasTotal.inc({ action: 'update', outcome: 'failure' });
+      juntasTotal.inc({ client: clientFromRequest(req), action: 'update', outcome: 'failure' });
       logger.error(err, 'Update junta error');
       res.status(500).json({ error: 'Error interno del servidor' });
     }
@@ -245,7 +245,7 @@ router.delete('/admin/juntas/:id', authMiddleware, requireAdmin, async (req: Req
     const { id } = req.params;
     const result = await query('SELECT drive_file_id FROM juntas WHERE id = $1', [id]);
     if (result.rows.length === 0) {
-      juntasTotal.inc({ action: 'delete', outcome: 'failure' });
+      juntasTotal.inc({ client: clientFromRequest(req), action: 'delete', outcome: 'failure' });
       res.status(404).json({ error: 'Junta no encontrada' });
       return;
     }
@@ -256,10 +256,10 @@ router.delete('/admin/juntas/:id', authMiddleware, requireAdmin, async (req: Req
     }
 
     await query('DELETE FROM juntas WHERE id = $1', [id]);
-    juntasTotal.inc({ action: 'delete', outcome: 'success' });
+    juntasTotal.inc({ client: clientFromRequest(req), action: 'delete', outcome: 'success' });
     res.json({ message: 'Junta eliminada correctamente' });
   } catch (err) {
-    juntasTotal.inc({ action: 'delete', outcome: 'failure' });
+    juntasTotal.inc({ client: clientFromRequest(req), action: 'delete', outcome: 'failure' });
     logger.error(err, 'Delete junta error');
     res.status(500).json({ error: 'Error interno del servidor' });
   }
