@@ -7,6 +7,8 @@ vi.mock('dotenv', () => ({
 
 const originalNodeEnv = process.env.NODE_ENV;
 const originalJwtSecret = process.env.JWT_SECRET;
+const originalContadoresUser = process.env.CONTADORES_INGEST_USER;
+const originalContadoresPassword = process.env.CONTADORES_INGEST_PASSWORD;
 
 function restoreEnv(name: string, original: string | undefined) {
   if (original === undefined) {
@@ -21,11 +23,15 @@ describe('validateConfig', () => {
     vi.resetModules();
     delete process.env.NODE_ENV;
     delete process.env.JWT_SECRET;
+    delete process.env.CONTADORES_INGEST_USER;
+    delete process.env.CONTADORES_INGEST_PASSWORD;
   });
 
   afterEach(() => {
     restoreEnv('NODE_ENV', originalNodeEnv);
     restoreEnv('JWT_SECRET', originalJwtSecret);
+    restoreEnv('CONTADORES_INGEST_USER', originalContadoresUser);
+    restoreEnv('CONTADORES_INGEST_PASSWORD', originalContadoresPassword);
     vi.resetModules();
   });
 
@@ -51,7 +57,16 @@ describe('validateConfig', () => {
   it('no lanza con un JWT_SECRET válido en producción', async () => {
     process.env.NODE_ENV = 'production';
     process.env.JWT_SECRET = 'a'.repeat(32);
+    process.env.CONTADORES_INGEST_USER = 'cme3100user';
+    process.env.CONTADORES_INGEST_PASSWORD = 'secret';
     const { validateConfig } = await import('../config');
     expect(() => validateConfig()).not.toThrow();
+  });
+
+  it('lanza error si faltan credenciales de contadores en producción', async () => {
+    process.env.NODE_ENV = 'production';
+    process.env.JWT_SECRET = 'a'.repeat(32);
+    const { validateConfig } = await import('../config');
+    expect(() => validateConfig()).toThrow(/CONTADORES_INGEST_USER/);
   });
 });
