@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.20.2](https://github.com/EdificioElite/elite-dashboard/compare/v1.20.1...v1.20.2) (2026-10-01)
+
+
+### Bug Fixes
+
+* **api:** empujar LIMIT al index scan en consumo-actual ([#189](https://github.com/EdificioElite/elite-dashboard/issues/189)) ([6b85190](https://github.com/EdificioElite/elite-dashboard/commit/6b85190f8708540673ebc700ff365c04ea359153))
+
 ## [1.20.1](https://github.com/EdificioElite/elite-dashboard/compare/v1.20.0...v1.20.1) (2026-10-01)
 
 
