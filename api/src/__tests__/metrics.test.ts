@@ -6,6 +6,11 @@ import {
   passwordResetRequestsTotal,
   facturasDescargasTotal,
   clientFromRequest,
+  contadoresIngestTotal,
+  contadoresFaltantes,
+  contadoresDesactualizados,
+  contadoresResetsTotal,
+  contadoresUltimaIngestaTimestamp,
 } from '../lib/metrics';
 
 describe('metrics', () => {
@@ -46,5 +51,19 @@ describe('metrics', () => {
 
     const values = (await facturasDescargasTotal.get()).values;
     expect(values.find((v) => v.labels.scope === 'admin')?.value).toBe(1);
+  });
+
+  it('expone las métricas de ingesta de contadores', async () => {
+    contadoresIngestTotal.inc({ outcome: 'success' });
+    contadoresFaltantes.set({ device_identification: '72569463' }, 1);
+    contadoresDesactualizados.set({ device_identification: '72569464' }, 0);
+    contadoresResetsTotal.inc({ device_identification: '72569463' });
+    contadoresUltimaIngestaTimestamp.set(1700000000);
+
+    const ingest = (await contadoresIngestTotal.get()).values;
+    expect(ingest.find((v) => v.labels.outcome === 'success')?.value).toBe(1);
+
+    const faltantes = (await contadoresFaltantes.get()).values;
+    expect(faltantes.find((v) => v.labels.device_identification === '72569463')?.value).toBe(1);
   });
 });
