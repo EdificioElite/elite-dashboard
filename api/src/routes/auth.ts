@@ -54,7 +54,9 @@ router.post('/auth/login', rateLimitOnlyOnFailure(5, 60 * 1000), async (req: Req
       return;
     }
 
-    await query('UPDATE usuarios SET ultima_conexion = NOW() WHERE id = $1', [user.id]);
+    if (source !== 'home-assistant') {
+      await query('UPDATE usuarios SET ultima_conexion = NOW() WHERE id = $1', [user.id]);
+    }
 
     const token = signToken({
       userId: user.id,

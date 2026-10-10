@@ -144,6 +144,40 @@ describe('Auth routes', () => {
       expect(res.body.user.email).toBe('test@test.com');
       expect(res.body.user.role).toBe('usuario');
     });
+
+    it('updates ultima_conexion on dashboard login', async () => {
+      const bcrypt = await import('bcrypt');
+      const hash = await bcrypt.hash('correct', 12);
+      mockQuery.mockResolvedValueOnce({
+        rows: [{ id: 1, vecino_piso: '1A', email: 'test@test.com', password_hash: hash, role: 'usuario' }],
+      });
+      const app = createApp();
+      const res = await request(app)
+        .post('/api/auth/login')
+        .send({ email: 'test@test.com', password: 'correct' });
+      expect(res.status).toBe(200);
+      expect(mockQuery).toHaveBeenCalledWith(
+        'UPDATE usuarios SET ultima_conexion = NOW() WHERE id = $1',
+        [1]
+      );
+    });
+
+    it('does not update ultima_conexion on home-assistant login', async () => {
+      const bcrypt = await import('bcrypt');
+      const hash = await bcrypt.hash('correct', 12);
+      mockQuery.mockResolvedValueOnce({
+        rows: [{ id: 1, vecino_piso: '1A', email: 'test@test.com', password_hash: hash, role: 'usuario' }],
+      });
+      const app = createApp();
+      const res = await request(app)
+        .post('/api/auth/login')
+        .send({ email: 'test@test.com', password: 'correct', source: 'home-assistant' });
+      expect(res.status).toBe(200);
+      expect(mockQuery).not.toHaveBeenCalledWith(
+        'UPDATE usuarios SET ultima_conexion = NOW() WHERE id = $1',
+        [1]
+      );
+    });
   });
 
   describe('GET /api/auth/me', () => {
