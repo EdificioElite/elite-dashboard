@@ -21,6 +21,11 @@ export function validateConfig(): void {
       'JWT_SECRET es demasiado corto. Debe tener al menos 32 caracteres en producción.',
     );
   }
+  if (!process.env.CONTADORES_INGEST_USER || !process.env.CONTADORES_INGEST_PASSWORD) {
+    throw new Error(
+      'CONTADORES_INGEST_USER y CONTADORES_INGEST_PASSWORD son obligatorios en producción.',
+    );
+  }
 }
 
 export const config = {
@@ -46,4 +51,9 @@ export const config = {
   googleClientSecret: process.env.GOOGLE_CLIENT_SECRET || '',
   googleRefreshToken: process.env.GOOGLE_REFRESH_TOKEN || '',
   googleDriveFolderId: process.env.GOOGLE_DRIVE_FOLDER_ID || '',
+  contadoresIngestUser: process.env.CONTADORES_INGEST_USER || '',
+  contadoresIngestPassword: process.env.CONTADORES_INGEST_PASSWORD || '',
+  contadoresUptimeUrl:
+    process.env.CONTADORES_UPTIME_URL || 'https://uptime.edificioelite.com/api/push/hB52zSOayO',
+  contadoresStaleMinutes: +(process.env.CONTADORES_STALE_MINUTES || '120'),
 };

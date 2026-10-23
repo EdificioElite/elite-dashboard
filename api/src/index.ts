@@ -10,6 +10,7 @@ import facturasRoutes from './routes/facturas';
 import adminRoutes from './routes/admin';
 import adminAerotermiaRoutes from './routes/adminAerotermia';
 import juntasRoutes from './routes/juntas';
+import contadoresRoutes from './routes/contadores';
 import testRoutes from './routes/test';
 
 validateConfig();
@@ -35,6 +36,7 @@ app.use('/api', facturasRoutes);
 app.use('/api', adminRoutes);
 app.use('/api', adminAerotermiaRoutes);
 app.use('/api', juntasRoutes);
+app.use('/api', contadoresRoutes);
 if (config.mockEmail) {
   app.use('/api', testRoutes);
 }

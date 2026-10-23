@@ -1,4 +1,4 @@
-import { Counter, register } from 'prom-client';
+import { Counter, Gauge, register } from 'prom-client';
 import type { Request } from 'express';
 
 export function clientFromRequest(req: Request): string {
@@ -82,6 +82,35 @@ export const juntasDescargasTotal = new Counter({
   name: 'dashboard_juntas_descargas_total',
   help: 'Total de descargas de actas de juntas',
   labelNames: ['client'],
+});
+
+export const contadoresIngestTotal = new Counter({
+  name: 'dashboard_contadores_ingest_total',
+  help: 'Total de ingestas de contadores procesadas',
+  labelNames: ['outcome'],
+});
+
+export const contadoresFaltantes = new Gauge({
+  name: 'dashboard_contadores_faltantes',
+  help: 'Contador esperado ausente en la última ingesta (1 = falta)',
+  labelNames: ['device_identification'],
+});
+
+export const contadoresDesactualizados = new Gauge({
+  name: 'dashboard_contadores_desactualizados',
+  help: 'Contador con reloj desactualizado (1 = desactualizado)',
+  labelNames: ['device_identification'],
+});
+
+export const contadoresResetsTotal = new Counter({
+  name: 'dashboard_contadores_resets_total',
+  help: 'Total de resets/anomalías de acumulado detectados',
+  labelNames: ['device_identification'],
+});
+
+export const contadoresUltimaIngestaTimestamp = new Gauge({
+  name: 'dashboard_contadores_ultima_ingesta_timestamp_seconds',
+  help: 'Epoch (segundos) de la última ingesta de contadores exitosa',
 });
 
 export { register };

@@ -6,6 +6,7 @@
     "build": "tsc",
     "start": "node dist/index.js",
     "migrate": "tsx src/migrate.ts",
+    "mock:datalogger": "tsx scripts/mock-datalogger.ts",
     "test": "vitest run",
     "test:watch": "vitest"
   },

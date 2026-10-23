@@ -310,6 +310,50 @@
       "targets": [
         { "refId": "A", "expr": "sum by (path) (rate(http_request_duration_seconds_count{env=\"$env\",client=~\"$client\"}[5m]))", "datasource": { "type": "prometheus", "uid": "eezd2pur0jy80e" }, "legendFormat": "{{path}}" }
       ]
+    },
+    {
+      "id": 24,
+      "type": "timeseries",
+      "title": "Ingesta de contadores (éxito/error)",
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 80 },
+      "datasource": { "type": "prometheus", "uid": "eezd2pur0jy80e" },
+      "fieldConfig": { "defaults": { "unit": "reqps" }, "overrides": [] },
+      "targets": [
+        { "refId": "A", "expr": "sum by (outcome) (increase(dashboard_contadores_ingest_total{env=\"$env\"}[5m]))", "datasource": { "type": "prometheus", "uid": "eezd2pur0jy80e" }, "legendFormat": "{{outcome}}" }
+      ]
+    },
+    {
+      "id": 25,
+      "type": "timeseries",
+      "title": "Contadores faltantes",
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 80 },
+      "datasource": { "type": "prometheus", "uid": "eezd2pur0jy80e" },
+      "fieldConfig": { "defaults": { "unit": "short" }, "overrides": [] },
+      "targets": [
+        { "refId": "A", "expr": "dashboard_contadores_faltantes{env=\"$env\"}", "datasource": { "type": "prometheus", "uid": "eezd2pur0jy80e" }, "legendFormat": "{{device_identification}}" }
+      ]
+    },
+    {
+      "id": 26,
+      "type": "timeseries",
+      "title": "Contadores desactualizados",
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 88 },
+      "datasource": { "type": "prometheus", "uid": "eezd2pur0jy80e" },
+      "fieldConfig": { "defaults": { "unit": "short" }, "overrides": [] },
+      "targets": [
+        { "refId": "A", "expr": "dashboard_contadores_desactualizados{env=\"$env\"}", "datasource": { "type": "prometheus", "uid": "eezd2pur0jy80e" }, "legendFormat": "{{device_identification}}" }
+      ]
+    },
+    {
+      "id": 27,
+      "type": "timeseries",
+      "title": "Resets de contadores detectados",
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 88 },
+      "datasource": { "type": "prometheus", "uid": "eezd2pur0jy80e" },
+      "fieldConfig": { "defaults": { "unit": "reqps" }, "overrides": [] },
+      "targets": [
+        { "refId": "A", "expr": "sum by (device_identification) (increase(dashboard_contadores_resets_total{env=\"$env\"}[5m]))", "datasource": { "type": "prometheus", "uid": "eezd2pur0jy80e" }, "legendFormat": "{{device_identification}}" }
+      ]
     }
   ]
 }
