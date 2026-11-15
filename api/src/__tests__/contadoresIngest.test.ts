@@ -179,4 +179,18 @@ describe('detectarResets', () => {
       { device_identification: '72569463', campo: 'energy_wh_inst_value_0_0_0' },
     ]);
   });
+
+  it('no marca reset por ruido de precisión float4', () => {
+    const inserts = [
+      { device_identification: '72569471', created: '2026-11-15T20:00:00Z', volume_m3_inst_value_0_0_0: 843.921 },
+    ];
+    const previos = [
+      {
+        device_identification: '72569471',
+        created: '2026-11-15T19:55:00Z',
+        volume_m3_inst_value_0_0_0: 843.9210205078125,
+      },
+    ];
+    expect(detectarResets(inserts, previos)).toEqual([]);
+  });
 });
