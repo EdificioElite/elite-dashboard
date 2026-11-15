@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.21.4](https://github.com/EdificioElite/elite-dashboard/compare/v1.21.3...v1.21.4) (2026-11-15)
+
+
+### Bug Fixes
+
+* loguear warning si el heartbeat de Uptime devuelve non-2xx ([#235](https://github.com/EdificioElite/elite-dashboard/issues/235)) ([b532661](https://github.com/EdificioElite/elite-dashboard/commit/b532661f03785fe1da0b1a1b87d0935332342ff0))
+
 ## [1.21.3](https://github.com/EdificioElite/elite-dashboard/compare/v1.21.2...v1.21.3) (2026-11-15)
 
 
