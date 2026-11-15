@@ -87,6 +87,14 @@ describe('POST /api/contadores', () => {
     });
     expect(sqlArg).toBeDefined();
     expect((sqlArg as unknown[])[0]).toContain('ON CONFLICT (serial_number, device_identification, created)');
+
+    const previosArg = mockQuery.mock.calls.find((c: unknown) => {
+      const first = (c as unknown[])[0];
+      return typeof first === 'string' && first.includes('SELECT DISTINCT ON (device_identification)');
+    });
+    expect(previosArg).toBeDefined();
+    expect((previosArg as unknown[])[0]).toContain('created < $2');
+    expect((previosArg as unknown[])[1]).toEqual([['72569463'], '2026-10-01T20:00:00.000Z']);
   });
 
   it('no envía heartbeat si no hay URL de Uptime configurada', async () => {
