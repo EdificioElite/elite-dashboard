@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.21.2](https://github.com/EdificioElite/elite-dashboard/compare/v1.21.1...v1.21.2) (2026-11-15)
+
+
+### Bug Fixes
+
+* comparar resets contra la última lectura fuera de la ventana reenviada ([#231](https://github.com/EdificioElite/elite-dashboard/issues/231)) ([d8da4fe](https://github.com/EdificioElite/elite-dashboard/commit/d8da4fec9a252755adc7555d0e304e3a19627411))
+
 ## [1.21.1](https://github.com/EdificioElite/elite-dashboard/compare/v1.21.0...v1.21.1) (2026-11-15)
 
 
