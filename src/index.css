@@ -81,6 +81,17 @@
     border-radius: 4px;
   }
 
+  /* Recharts: evitar el outline/highlight azul del navegador al pulsar o tocar la gráfica */
+  .recharts-wrapper,
+  .recharts-surface {
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  .recharts-wrapper:focus,
+  .recharts-surface:focus {
+    outline: none;
+  }
+
   @media (prefers-reduced-motion: reduce) {
     *, *::before, *::after {
       animation-duration: 0.01ms !important;
