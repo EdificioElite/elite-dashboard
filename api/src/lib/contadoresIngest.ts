@@ -92,8 +92,10 @@ export interface ContadorId {
 }
 
 export function detectarFaltantes(esperados: ContadorId[], presentes: ContadorId[]): ContadorId[] {
-  const presentesSet = new Set(presentes.map((p) => `${p.device_identification}|${p.serial_number}`));
-  return esperados.filter((e) => !presentesSet.has(`${e.device_identification}|${e.serial_number}`));
+  const clave = (c: ContadorId) =>
+    `${c.device_identification}|${String(c.serial_number).replace(/^0+(?=\d)/, '')}`;
+  const presentesSet = new Set(presentes.map(clave));
+  return esperados.filter((e) => !presentesSet.has(clave(e)));
 }
 
 export interface Desactualizado {
@@ -133,6 +135,7 @@ const CAMPOS_RESET = [
 
 export interface LecturaPrevia {
   device_identification: string | number;
+  created?: string | number | Date;
   energy_wh_inst_value_0_0_0?: string | number;
   energy_manufacturer_specific_02_wh_inst_value_0_0_0?: string | number;
   volume_m3_inst_value_0_0_0?: string | number;
@@ -144,23 +147,34 @@ export interface Reset {
   campo: string;
 }
 
+function tiempoLectura(v: string | number | Date | undefined): number {
+  return v === undefined ? NaN : new Date(v).getTime();
+}
+
 export function detectarResets(inserts: LecturaPrevia[], previos: LecturaPrevia[]): Reset[] {
   const previosMap = new Map(previos.map((p) => [String(p.device_identification), p]));
-  const byDevice = new Map<string, LecturaPrevia[]>();
+
+  // El report reenvía las últimas lecturas de cada contador, así que solo
+  // comparamos la más nueva del lote contra la última lectura previa.
+  const masNueva = new Map<string, LecturaPrevia>();
   for (const ins of inserts) {
     const k = String(ins.device_identification);
-    if (!byDevice.has(k)) byDevice.set(k, []);
-    byDevice.get(k)!.push(ins);
+    const actual = masNueva.get(k);
+    if (!actual || tiempoLectura(ins.created) > tiempoLectura(actual.created)) {
+      masNueva.set(k, ins);
+    }
   }
 
   const resets: Reset[] = [];
-  for (const [device, list] of byDevice) {
+  for (const [device, ins] of masNueva) {
     const previo = previosMap.get(device);
     if (!previo) continue;
+    const tIns = tiempoLectura(ins.created);
+    const tPrev = tiempoLectura(previo.created);
+    // Si no hay lectura nueva posterior a la previa, no hay nada que comparar.
+    if (Number.isFinite(tIns) && Number.isFinite(tPrev) && tIns <= tPrev) continue;
     for (const campo of CAMPOS_RESET) {
-      const minBatch = Math.min(...list.map((i) => Number(i[campo])));
-      const prev = Number(previo[campo]);
-      if (minBatch < prev) {
+      if (Number(ins[campo]) < Number(previo[campo])) {
         resets.push({ device_identification: device, campo });
       }
     }
