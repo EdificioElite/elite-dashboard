@@ -75,6 +75,7 @@ export default function CopChart({ data }: { data: CopDatum[] }) {
             <Line
               type="monotone"
               dataKey="cop"
+              name="COP"
               stroke="#A6754B"
               strokeWidth={2}
               dot={{ r: 3, fill: '#fff8ee', stroke: '#A6754B', strokeWidth: 1.5 }}
