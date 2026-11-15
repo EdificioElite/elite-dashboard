@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.21.3](https://github.com/EdificioElite/elite-dashboard/compare/v1.21.2...v1.21.3) (2026-11-15)
+
+
+### Bug Fixes
+
+* ignorar ruido de precisión float4 al detectar resets ([#233](https://github.com/EdificioElite/elite-dashboard/issues/233)) ([5ff5294](https://github.com/EdificioElite/elite-dashboard/commit/5ff5294e1b95df5bb86c9382858a750532be961f))
+
 ## [1.21.2](https://github.com/EdificioElite/elite-dashboard/compare/v1.21.1...v1.21.2) (2026-11-15)
 
 
