@@ -4,6 +4,7 @@ type RechartsPayload = Array<{
   name: string;
   value: number | null | undefined;
   color?: string;
+  type?: string;
   payload?: Record<string, unknown>;
 }>;
 
@@ -53,17 +54,18 @@ export const chartTooltipBoxClass =
   'w-full rounded-[10px] border border-[rgba(30,20,10,0.08)] bg-[#FFFBF5] px-3 py-2 font-sans text-xs text-cocoa shadow-[0_4px_16px_rgba(30,20,10,0.08)]';
 
 export default function ChartTooltip({ active, payload, label, labelFormatter, unit }: ChartTooltipProps) {
-  if (!active || !payload?.length) return null;
+  const entries = payload?.filter((entry) => entry.type !== 'none') ?? [];
+  if (!active || entries.length === 0) return null;
 
   return (
     <div className={chartTooltipBoxClass}>
       <div className="flex flex-wrap items-center gap-x-4 gap-y-1">
         {label && (
           <span className="text-[10px] font-semibold uppercase tracking-[0.06em] text-cocoa/50">
-            {labelFormatter ? labelFormatter(label, payload) : label}
+            {labelFormatter ? labelFormatter(label, entries) : label}
           </span>
         )}
-        {payload.map((entry, i) => {
+        {entries.map((entry, i) => {
           const entryUnit = typeof unit === 'string' ? unit : (unit?.[entry.name] ?? '');
           return (
             <span key={i} className="flex items-center gap-1.5 whitespace-nowrap">

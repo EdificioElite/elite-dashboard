@@ -27,6 +27,29 @@ describe('ChartTooltip', () => {
     expect(container.textContent).toContain('56 kWh');
   });
 
+  it('ignores series marked as tooltipType none', () => {
+    render(
+      <ChartTooltip
+        active
+        payload={[
+          { name: 'left', value: 10, color: '#000', type: 'none' },
+          { name: 'Potencia', value: 1234.5, color: '#B53228' },
+        ]}
+        label="22 nov"
+        unit={{ Potencia: 'W' }}
+      />
+    );
+    expect(screen.queryByText('left')).not.toBeInTheDocument();
+    expect(screen.getByText('Potencia')).toBeInTheDocument();
+  });
+
+  it('does not render when every series is hidden from the tooltip', () => {
+    const { container } = render(
+      <ChartTooltip active payload={[{ name: 'left', value: 10, color: '#000', type: 'none' }]} label="22 nov" />
+    );
+    expect(container).toBeEmptyDOMElement();
+  });
+
   it('shows a dash for missing values', () => {
     render(<ChartTooltip active payload={[{ name: 'Potencia', value: null, color: '#B53228' }]} label="22 nov" />);
     expect(screen.getByText('—')).toBeInTheDocument();

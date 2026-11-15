@@ -42,8 +42,9 @@ function FacturasTooltip({ active, payload, label }: {
   payload?: any[];
   label?: string;
 }) {
-  if (!active || !payload?.length) return null;
-  const d = payload[0]?.payload;
+  const entry = payload?.find((item) => item.type !== 'none');
+  if (!active || !entry) return null;
+  const d = entry.payload;
   if (!d) return null;
 
   return (
