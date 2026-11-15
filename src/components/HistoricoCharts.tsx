@@ -143,7 +143,7 @@ function DualAxisChart({ data, leftColor, rightColor, leftName, rightName, leftU
               <stop offset="100%" stopColor={leftColor} stopOpacity={0} />
             </linearGradient>
           </defs>
-          <Area type="monotone" dataKey="left" stroke="none" fill={`url(#${gradientId})`} yAxisId="left" />
+          <Area type="monotone" dataKey="left" stroke="none" fill={`url(#${gradientId})`} yAxisId="left" tooltipType="none" />
           <Line
             yAxisId="left"
             type="monotone"
@@ -201,6 +201,7 @@ function TempChart({ data }: { data: { label: string; timestamp: string; impulsi
           <Line
             type="monotone"
             dataKey="impulsion"
+            name="Impulsión"
             stroke="#E07B39"
             strokeWidth={3}
             dot={false}
@@ -210,6 +211,7 @@ function TempChart({ data }: { data: { label: string; timestamp: string; impulsi
           <Line
             type="monotone"
             dataKey="retorno"
+            name="Retorno"
             stroke="#4A7A8C"
             strokeWidth={3}
             dot={false}
