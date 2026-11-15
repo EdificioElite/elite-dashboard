@@ -51,7 +51,11 @@ function checkBasicAuth(req: Request): boolean {
 function pingUptime(status: 'up' | 'down', msg: string): void {
   if (!config.contadoresUptimeUrl) return;
   const url = `${config.contadoresUptimeUrl}?status=${status}&msg=${encodeURIComponent(msg)}&ping=`;
-  fetch(url).catch((err) => logger.warn({ err }, 'Uptime ping failed'));
+  fetch(url)
+    .then((res) => {
+      if (!res.ok) logger.warn({ status: res.status }, 'Uptime ping failed');
+    })
+    .catch((err) => logger.warn({ err }, 'Uptime ping failed'));
 }
 
 const CLAVES_CONFLICTO = new Set(['serial_number', 'device_identification', 'created']);
