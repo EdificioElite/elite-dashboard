@@ -4,10 +4,10 @@ import {
 } from 'recharts';
 import { apiFetch } from '../api/client';
 import SegmentedControl from './SegmentedControl';
-import ChartTooltip from './ChartTooltip';
+import ChartTooltip, { chartTooltipWrapperStyle, chartTooltipSpaceClass, ChartTooltipHint } from './ChartTooltip';
 import Icon from './Icon';
 
-function formatTooltipDate(_label: string, payload: { name: string; value: number | null | undefined; color: string; payload?: Record<string, unknown> }[]): string {
+function formatTooltipDate(_label: string, payload: { name: string; value: number | null | undefined; color?: string; payload?: Record<string, unknown> }[]): string {
   const entry = payload[0]?.payload as { timestamp?: string } | undefined;
   return (entry?.timestamp)
     ? new Date(entry.timestamp).toLocaleString('es-ES', { day: 'numeric', month: 'long', hour: '2-digit', minute: '2-digit' })
@@ -112,60 +112,63 @@ function DualAxisChart({ data, leftColor, rightColor, leftName, rightName, leftU
   const gradientId = useMemo(() => `dualAreaGradient-${leftColor.replace('#', '')}`, [leftColor]);
 
   return (
-    <ResponsiveContainer width="100%" height={140}>
-      <LineChart data={data} margin={{ top: 4, right: 0, left: 0, bottom: 0 }}>
-        <CartesianGrid strokeDasharray="2 4" stroke="rgba(30,20,10,0.12)" vertical={false} />
-        <XAxis dataKey="label" fontSize={10} tick={{ fill: 'rgba(58,47,36,.35)' }} axisLine={false} tickLine={false} interval="preserveStartEnd" />
-        <YAxis
-          yAxisId="left"
-          fontSize={10}
-          tick={{ fill: 'rgba(58,47,36,.35)', fontFamily: "'JetBrains Mono', monospace" }}
-          axisLine={false} tickLine={false}
-          domain={leftDomain}
-          width={45}
-          tickFormatter={leftTickFormatter ?? defaultLeftTick}
-        />
-        <YAxis
-          yAxisId="right"
-          orientation="right"
-          fontSize={10}
-          tick={{ fill: 'rgba(58,47,36,.35)', fontFamily: "'JetBrains Mono', monospace" }}
-          axisLine={false} tickLine={false}
-          domain={rightDomain}
-          width={45}
-          tickFormatter={rightTickFormatter ?? ((v: number) => `${v.toFixed(0)}`)}
-        />
-        <Tooltip content={<ChartTooltip labelFormatter={formatTooltipDate} unit={{ [leftName]: leftUnit, [rightName]: rightUnit }} />} wrapperStyle={{ zIndex: 9999, pointerEvents: 'none' }} />
-        <defs>
-          <linearGradient id={gradientId} x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%" stopColor={leftColor} stopOpacity={0.12} />
-            <stop offset="100%" stopColor={leftColor} stopOpacity={0} />
-          </linearGradient>
-        </defs>
-        <Area type="monotone" dataKey="left" stroke="none" fill={`url(#${gradientId})`} yAxisId="left" />
-        <Line
-          yAxisId="left"
-          type="monotone"
-          dataKey="left"
-          name={leftName}
-          stroke={leftColor}
-          strokeWidth={3}
-          dot={false}
-          activeDot={{ r: 4, fill: '#fff8ee', stroke: leftColor, strokeWidth: 1.5 }}
-        />
-        <Line
-          yAxisId="right"
-          type="monotone"
-          dataKey="right"
-          name={rightName}
-          stroke={rightColor}
-          strokeWidth={2}
-          strokeDasharray="4 3"
-          dot={false}
-          activeDot={{ r: 4, fill: '#fff8ee', stroke: rightColor, strokeWidth: 1.5 }}
-        />
-      </LineChart>
-    </ResponsiveContainer>
+    <div className={chartTooltipSpaceClass}>
+      <ResponsiveContainer width="100%" height={140}>
+        <LineChart data={data} margin={{ top: 4, right: 0, left: 0, bottom: 0 }}>
+          <CartesianGrid strokeDasharray="2 4" stroke="rgba(30,20,10,0.12)" vertical={false} />
+          <XAxis dataKey="label" fontSize={10} tick={{ fill: 'rgba(58,47,36,.35)' }} axisLine={false} tickLine={false} interval="preserveStartEnd" />
+          <YAxis
+            yAxisId="left"
+            fontSize={10}
+            tick={{ fill: 'rgba(58,47,36,.35)', fontFamily: "'JetBrains Mono', monospace" }}
+            axisLine={false} tickLine={false}
+            domain={leftDomain}
+            width={45}
+            tickFormatter={leftTickFormatter ?? defaultLeftTick}
+          />
+          <YAxis
+            yAxisId="right"
+            orientation="right"
+            fontSize={10}
+            tick={{ fill: 'rgba(58,47,36,.35)', fontFamily: "'JetBrains Mono', monospace" }}
+            axisLine={false} tickLine={false}
+            domain={rightDomain}
+            width={45}
+            tickFormatter={rightTickFormatter ?? ((v: number) => `${v.toFixed(0)}`)}
+          />
+          <Tooltip cursor={false} content={<ChartTooltip labelFormatter={formatTooltipDate} unit={{ [leftName]: leftUnit, [rightName]: rightUnit }} />} wrapperStyle={chartTooltipWrapperStyle} />
+          <defs>
+            <linearGradient id={gradientId} x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stopColor={leftColor} stopOpacity={0.12} />
+              <stop offset="100%" stopColor={leftColor} stopOpacity={0} />
+            </linearGradient>
+          </defs>
+          <Area type="monotone" dataKey="left" stroke="none" fill={`url(#${gradientId})`} yAxisId="left" />
+          <Line
+            yAxisId="left"
+            type="monotone"
+            dataKey="left"
+            name={leftName}
+            stroke={leftColor}
+            strokeWidth={3}
+            dot={false}
+            activeDot={{ r: 4, fill: '#fff8ee', stroke: leftColor, strokeWidth: 1.5 }}
+          />
+          <Line
+            yAxisId="right"
+            type="monotone"
+            dataKey="right"
+            name={rightName}
+            stroke={rightColor}
+            strokeWidth={2}
+            strokeDasharray="4 3"
+            dot={false}
+            activeDot={{ r: 4, fill: '#fff8ee', stroke: rightColor, strokeWidth: 1.5 }}
+          />
+        </LineChart>
+      </ResponsiveContainer>
+      <ChartTooltipHint />
+    </div>
   );
 }
 
@@ -181,39 +184,42 @@ function TempChart({ data }: { data: { label: string; timestamp: string; impulsi
   }, [data]);
 
   return (
-    <ResponsiveContainer width="100%" height={120}>
-      <LineChart data={data} margin={{ top: 4, right: 8, left: 0, bottom: 0 }}>
-        <CartesianGrid strokeDasharray="2 4" stroke="rgba(30,20,10,0.12)" vertical={false} />
-        <XAxis dataKey="label" fontSize={10} tick={{ fill: 'rgba(58,47,36,.35)' }} axisLine={false} tickLine={false} interval="preserveStartEnd" />
-        <YAxis
-          fontSize={10}
-          tick={{ fill: 'rgba(58,47,36,.35)', fontFamily: "'JetBrains Mono', monospace" }}
-          axisLine={false} tickLine={false}
-          domain={domain}
-          width={40}
-          tickFormatter={(v: number) => `${v.toFixed(0)}°`}
-        />
-        <Tooltip content={<ChartTooltip labelFormatter={formatTooltipDate} unit="°C" />} wrapperStyle={{ zIndex: 9999, pointerEvents: 'none' }} />
-        <Line
-          type="monotone"
-          dataKey="impulsion"
-          stroke="#E07B39"
-          strokeWidth={3}
-          dot={false}
-          activeDot={{ r: 4, fill: '#fff8ee', stroke: '#E07B39', strokeWidth: 1.5 }}
-          connectNulls={false}
-        />
-        <Line
-          type="monotone"
-          dataKey="retorno"
-          stroke="#4A7A8C"
-          strokeWidth={3}
-          dot={false}
-          activeDot={{ r: 4, fill: '#fff8ee', stroke: '#4A7A8C', strokeWidth: 1.5 }}
-          connectNulls={false}
-        />
-      </LineChart>
-    </ResponsiveContainer>
+    <div className={chartTooltipSpaceClass}>
+      <ResponsiveContainer width="100%" height={120}>
+        <LineChart data={data} margin={{ top: 4, right: 8, left: 0, bottom: 0 }}>
+          <CartesianGrid strokeDasharray="2 4" stroke="rgba(30,20,10,0.12)" vertical={false} />
+          <XAxis dataKey="label" fontSize={10} tick={{ fill: 'rgba(58,47,36,.35)' }} axisLine={false} tickLine={false} interval="preserveStartEnd" />
+          <YAxis
+            fontSize={10}
+            tick={{ fill: 'rgba(58,47,36,.35)', fontFamily: "'JetBrains Mono', monospace" }}
+            axisLine={false} tickLine={false}
+            domain={domain}
+            width={40}
+            tickFormatter={(v: number) => `${v.toFixed(0)}°`}
+          />
+          <Tooltip cursor={false} content={<ChartTooltip labelFormatter={formatTooltipDate} unit="°C" />} wrapperStyle={chartTooltipWrapperStyle} />
+          <Line
+            type="monotone"
+            dataKey="impulsion"
+            stroke="#E07B39"
+            strokeWidth={3}
+            dot={false}
+            activeDot={{ r: 4, fill: '#fff8ee', stroke: '#E07B39', strokeWidth: 1.5 }}
+            connectNulls={false}
+          />
+          <Line
+            type="monotone"
+            dataKey="retorno"
+            stroke="#4A7A8C"
+            strokeWidth={3}
+            dot={false}
+            activeDot={{ r: 4, fill: '#fff8ee', stroke: '#4A7A8C', strokeWidth: 1.5 }}
+            connectNulls={false}
+          />
+        </LineChart>
+      </ResponsiveContainer>
+      <ChartTooltipHint />
+    </div>
   );
 }
 
