@@ -114,6 +114,12 @@ describe('detectarFaltantes', () => {
     const faltantes = detectarFaltantes(esperados, presentes);
     expect(faltantes).toEqual([{ device_identification: '72569464', serial_number: '0016045167' }]);
   });
+
+  it('ignora los ceros a la izquierda del serial (vecinos bigint vs CSV)', () => {
+    const esperados = [{ device_identification: '72569463', serial_number: '16045167' }];
+    const presentes = [{ device_identification: '72569463', serial_number: '0016045167' }];
+    expect(detectarFaltantes(esperados, presentes)).toEqual([]);
+  });
 });
 
 describe('detectarDesactualizados', () => {
@@ -147,5 +153,30 @@ describe('detectarResets', () => {
     ];
     const resets = detectarResets(inserts, previos);
     expect(resets).toEqual([{ device_identification: '72569463', campo: 'energy_wh_inst_value_0_0_0' }]);
+  });
+
+  it('no marca reset cuando el lote reenvía lecturas antiguas ya conocidas', () => {
+    const inserts = [
+      { device_identification: '72569463', created: '2026-11-15T19:30:00Z', energy_wh_inst_value_0_0_0: 904.507 },
+      { device_identification: '72569463', created: '2026-11-15T19:35:00Z', energy_wh_inst_value_0_0_0: 904.51 },
+      { device_identification: '72569463', created: '2026-11-15T19:40:00Z', energy_wh_inst_value_0_0_0: 904.517 },
+    ];
+    const previos = [
+      { device_identification: '72569463', created: '2026-11-15T19:40:00Z', energy_wh_inst_value_0_0_0: 904.517 },
+    ];
+    expect(detectarResets(inserts, previos)).toEqual([]);
+  });
+
+  it('detecta reset con la lectura más nueva si es posterior a la previa', () => {
+    const inserts = [
+      { device_identification: '72569463', created: '2026-11-15T19:40:00Z', energy_wh_inst_value_0_0_0: 904.517 },
+      { device_identification: '72569463', created: '2026-11-15T19:45:00Z', energy_wh_inst_value_0_0_0: 10 },
+    ];
+    const previos = [
+      { device_identification: '72569463', created: '2026-11-15T19:40:00Z', energy_wh_inst_value_0_0_0: 904.517 },
+    ];
+    expect(detectarResets(inserts, previos)).toEqual([
+      { device_identification: '72569463', campo: 'energy_wh_inst_value_0_0_0' },
+    ]);
   });
 });

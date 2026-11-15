@@ -98,6 +98,7 @@ router.post('/contadores', rateLimit(60, 5 * 60 * 1000), bodyParser, async (req:
     const previosResult = await query(
       `SELECT DISTINCT ON (device_identification)
          device_identification,
+         created,
          energy_wh_inst_value_0_0_0,
          energy_manufacturer_specific_02_wh_inst_value_0_0_0,
          volume_m3_inst_value_0_0_0,
