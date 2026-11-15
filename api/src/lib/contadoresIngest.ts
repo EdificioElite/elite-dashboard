@@ -151,6 +151,12 @@ function tiempoLectura(v: string | number | Date | undefined): number {
   return v === undefined ? NaN : new Date(v).getTime();
 }
 
+// Los volúmenes se guardan como `real` (float4): 843.921 puede volver como
+// 843.9210205 y parecer un descenso mínimo. Comparamos a la precisión del CSV.
+function normalizarValor(v: string | number | undefined): number {
+  return Math.round(Number(v) * 1000) / 1000;
+}
+
 export function detectarResets(inserts: LecturaPrevia[], previos: LecturaPrevia[]): Reset[] {
   const previosMap = new Map(previos.map((p) => [String(p.device_identification), p]));
 
@@ -174,7 +180,7 @@ export function detectarResets(inserts: LecturaPrevia[], previos: LecturaPrevia[
     // Si no hay lectura nueva posterior a la previa, no hay nada que comparar.
     if (Number.isFinite(tIns) && Number.isFinite(tPrev) && tIns <= tPrev) continue;
     for (const campo of CAMPOS_RESET) {
-      if (Number(ins[campo]) < Number(previo[campo])) {
+      if (normalizarValor(ins[campo]) < normalizarValor(previo[campo])) {
         resets.push({ device_identification: device, campo });
       }
     }
