@@ -1,5 +1,5 @@
 import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer, Label } from 'recharts';
-import ChartTooltip from './ChartTooltip';
+import ChartTooltip, { chartTooltipWrapperStyle, chartTooltipSpaceClass, ChartTooltipHint } from './ChartTooltip';
 import Icon from './Icon';
 
 interface PieSlice {
@@ -43,30 +43,33 @@ export default function PieChartCard({ data }: { data: PieSlice[] }) {
         <span className="eyebrow">Distribución por vecino</span>
       </div>
 
-      <ResponsiveContainer width="100%" height={240}>
-        <PieChart>
-          <Pie
-            data={displayData}
-            cx="50%"
-            cy="50%"
-            innerRadius="65%"
-            outerRadius={90}
-            paddingAngle={3}
-            dataKey="kwh_total"
-            nameKey="piso"
-          >
-            {displayData.map((_entry, index) => (
-              <Cell key={index} fill={COLORS[index % COLORS.length]} stroke="transparent" />
-            ))}
-            <Label
-              value={total}
-              position="center"
-              style={{ fontFamily: "'Fraunces', serif", fontSize: '24px', fontWeight: 500, fill: '#1E140A' }}
-            />
-          </Pie>
-          <Tooltip content={<ChartTooltip unit="kWh" />} wrapperStyle={{ zIndex: 9999, pointerEvents: 'none' }} />
-        </PieChart>
-      </ResponsiveContainer>
+      <div className={chartTooltipSpaceClass}>
+        <ResponsiveContainer width="100%" height={240}>
+          <PieChart>
+            <Pie
+              data={displayData}
+              cx="50%"
+              cy="50%"
+              innerRadius="65%"
+              outerRadius={90}
+              paddingAngle={3}
+              dataKey="kwh_total"
+              nameKey="piso"
+            >
+              {displayData.map((_entry, index) => (
+                <Cell key={index} fill={COLORS[index % COLORS.length]} stroke="transparent" />
+              ))}
+              <Label
+                value={total}
+                position="center"
+                style={{ fontFamily: "'Fraunces', serif", fontSize: '24px', fontWeight: 500, fill: '#1E140A' }}
+              />
+            </Pie>
+            <Tooltip cursor={false} content={<ChartTooltip unit="kWh" />} wrapperStyle={chartTooltipWrapperStyle} />
+          </PieChart>
+        </ResponsiveContainer>
+        <ChartTooltipHint />
+      </div>
 
       <div className="flex flex-wrap gap-x-3 gap-y-1 justify-center mt-2">
         {displayData.map((d, index) => (

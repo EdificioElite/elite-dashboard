@@ -1,5 +1,5 @@
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, ReferenceLine } from 'recharts';
-import ChartTooltip from './ChartTooltip';
+import ChartTooltip, { chartTooltipWrapperStyle, chartTooltipSpaceClass, ChartTooltipHint } from './ChartTooltip';
 
 interface CopDatum {
   id: string;
@@ -52,35 +52,38 @@ export default function CopChart({ data }: { data: CopDatum[] }) {
         <span className="text-[11px] text-cocoa/40 font-num">(coeficiente de rendimiento)</span>
       </div>
 
-      <ResponsiveContainer width="100%" height={200}>
-        <LineChart data={chartData} margin={{ top: 4, right: 8, left: 0, bottom: 0 }}>
-          <CartesianGrid strokeDasharray="2 4" stroke="rgba(58,47,36,.06)" vertical={false} />
-          <XAxis
-            dataKey="startdate"
-            fontSize={10}
-            tick={{ fill: 'rgba(58,47,36,.44)' }}
-            axisLine={false} tickLine={false}
-            tickFormatter={labelMes}
-          />
-          <YAxis
-            fontSize={10}
-            tick={{ fill: 'rgba(58,47,36,.44)', fontFamily: "'JetBrains Mono', monospace" }}
-            axisLine={false} tickLine={false}
-            domain={[0, Math.max(maxCop * 1.15, 2)]}
-            width={35}
-          />
-          <Tooltip content={<ChartTooltip labelFormatter={(l) => labelMes(l)} />} wrapperStyle={{ zIndex: 9999, pointerEvents: 'none' }} />
-          <ReferenceLine y={1} stroke="#1E140A" strokeDasharray="4 4" strokeOpacity={0.2} />
-          <Line
-            type="monotone"
-            dataKey="cop"
-            stroke="#A6754B"
-            strokeWidth={2}
-            dot={{ r: 3, fill: '#fff8ee', stroke: '#A6754B', strokeWidth: 1.5 }}
-            activeDot={{ r: 5, fill: '#fff8ee', stroke: '#A6754B', strokeWidth: 2 }}
-          />
-        </LineChart>
-      </ResponsiveContainer>
+      <div className={chartTooltipSpaceClass}>
+        <ResponsiveContainer width="100%" height={200}>
+          <LineChart data={chartData} margin={{ top: 4, right: 8, left: 0, bottom: 0 }}>
+            <CartesianGrid strokeDasharray="2 4" stroke="rgba(58,47,36,.06)" vertical={false} />
+            <XAxis
+              dataKey="startdate"
+              fontSize={10}
+              tick={{ fill: 'rgba(58,47,36,.44)' }}
+              axisLine={false} tickLine={false}
+              tickFormatter={labelMes}
+            />
+            <YAxis
+              fontSize={10}
+              tick={{ fill: 'rgba(58,47,36,.44)', fontFamily: "'JetBrains Mono', monospace" }}
+              axisLine={false} tickLine={false}
+              domain={[0, Math.max(maxCop * 1.15, 2)]}
+              width={35}
+            />
+            <Tooltip cursor={false} content={<ChartTooltip labelFormatter={(l) => labelMes(l)} />} wrapperStyle={chartTooltipWrapperStyle} />
+            <ReferenceLine y={1} stroke="#1E140A" strokeDasharray="4 4" strokeOpacity={0.2} />
+            <Line
+              type="monotone"
+              dataKey="cop"
+              stroke="#A6754B"
+              strokeWidth={2}
+              dot={{ r: 3, fill: '#fff8ee', stroke: '#A6754B', strokeWidth: 1.5 }}
+              activeDot={{ r: 5, fill: '#fff8ee', stroke: '#A6754B', strokeWidth: 2 }}
+            />
+          </LineChart>
+        </ResponsiveContainer>
+        <ChartTooltipHint />
+      </div>
 
       <p className="text-[10px] text-cocoa/30 mt-3">
         COP = kWh térmicos totales / kWh eléctricos. La línea punteada marca COP = 1 (umbral de eficiencia).
