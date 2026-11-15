@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.21.1](https://github.com/EdificioElite/elite-dashboard/compare/v1.21.0...v1.21.1) (2026-11-15)
+
+
+### Bug Fixes
+
+* corregir falsos positivos en integridad de contadores (serial y resets) ([#229](https://github.com/EdificioElite/elite-dashboard/issues/229)) ([7b1afda](https://github.com/EdificioElite/elite-dashboard/commit/7b1afda40e6cb2f256c5847c390af8e5f36e70cc))
+
 ## [1.21.0](https://github.com/EdificioElite/elite-dashboard/compare/v1.20.2...v1.21.0) (2026-11-15)
 
 
