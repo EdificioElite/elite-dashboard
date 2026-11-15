@@ -37,8 +37,8 @@ cd api && npx tsc --noEmit     # Verificar backend compila
 - Backend: CommonJS (`module: commonjs`), target ES2022
 - Frontend: ESNext con bundler, JSX react-jsx
 - Commits en espanol con conventional commits (`feat:`, `fix:`, `docs:`)
-- No modificar tablas existentes de n8n (`vecinos`, `contadores`, `consumos`, `facturas`, `facturaelectrica`)
-- Solo lectura desde el dashboard, n8n es el unico que escribe datos de consumo/facturas
+- No modificar el esquema de las tablas existentes de n8n (`vecinos`, `consumos`, `facturas`, `facturaelectrica`)
+- El dashboard es de solo lectura sobre los datos de n8n, salvo la ingesta de `contadores` (`POST /api/contadores`, migracion `012`), que escribe con permisos acotados
 - Variables de entorno: nunca commitear `.env`, usar `.env.example` como plantilla
 - Estilos con Tailwind CSS, no CSS custom
 - Tailwind config: `content` incluye `./index.html` y `./src/**/*.{js,ts,jsx,tsx}`
@@ -72,7 +72,8 @@ Todo endpoint nuevo (y todo evento de negocio relevante) debe ser observable:
 - **Migraciones automaticas en los entornos reales (dev y prod):** las ejecuta un init-container (`dashboard-api-migrate` / `dashboard-api-dev-migrate`) que corre `node dist/migrate.js` con los roles dedicados `migrator` (prod) y `migrator_dev` (dev) antes de arrancar la API. Ver [CONTRIBUTING.md](./CONTRIBUTING.md) para el proceso completo.
 - **Los archivos de migracion en `api/migrations/` los commitea el agente para que el humano los revise**, igual que antes. El humano solo ejecuta manualmente, una sola vez: (1) crear los roles `migrator` y `migrator_dev` y (2) el baseline de `schema_migrations`.
 - `migrate.ts` trackea las migraciones aplicadas en la tabla `schema_migrations` (propiedad de los roles de migracion) y solo aplica las pendientes.
-- **Los roles y tablas de n8n (`n8nuser`, `n8n`, `contadores`, `facturas`, `facturaelectrica`, `consumos`) son de otro servicio separado. NO se tocan ni se usan desde el dashboard.** Las tablas de n8n son de solo lectura para el dashboard y n8n es el unico que escribe datos de consumo/facturas.
+- **Los roles y tablas de n8n (`n8nuser`, `n8n`, `contadores`, `facturas`, `facturaelectrica`, `consumos`) son de otro servicio separado. NO se tocan ni se usan desde el dashboard**, con una excepcion: la ingesta del datalogger escribe en `contadores` via `POST /api/contadores` y la migracion `012` concede INSERT/UPDATE a `dashboard_api` / `dashboard_api_dev`. El resto sigue siendo de solo lectura para el dashboard y n8n es el unico que escribe datos de consumo/facturas.
+- La ingesta de contadores requiere `CONTADORES_INGEST_USER` y `CONTADORES_INGEST_PASSWORD` en el entorno (obligatorias en produccion: la API no arranca sin ellas). `CONTADORES_UPTIME_URL` es opcional; si esta vacia no se envia heartbeat.
 - La tabla `vecinos` es propiedad del dashboard. `n8nuser` solo tiene lectura sobre ella (relacion de solo lectura ya existente, no se modifica).
 - El dashboard es propietario de las tablas `usuarios`, `vecinos`, `email_tokens` y `refresh_tokens`.
 - Los cambios de permisos (GRANTs) van en las migraciones — los aplica el init-container con los roles `migrator` / `migrator_dev`.

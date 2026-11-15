@@ -53,7 +53,6 @@ export const config = {
   googleDriveFolderId: process.env.GOOGLE_DRIVE_FOLDER_ID || '',
   contadoresIngestUser: process.env.CONTADORES_INGEST_USER || '',
   contadoresIngestPassword: process.env.CONTADORES_INGEST_PASSWORD || '',
-  contadoresUptimeUrl:
-    process.env.CONTADORES_UPTIME_URL || 'https://uptime.edificioelite.com/api/push/hB52zSOayO',
+  contadoresUptimeUrl: process.env.CONTADORES_UPTIME_URL || '',
   contadoresStaleMinutes: +(process.env.CONTADORES_STALE_MINUTES || '120'),
 };

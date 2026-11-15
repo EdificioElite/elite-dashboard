@@ -49,6 +49,7 @@ function checkBasicAuth(req: Request): boolean {
 }
 
 function pingUptime(status: 'up' | 'down', msg: string): void {
+  if (!config.contadoresUptimeUrl) return;
   const url = `${config.contadoresUptimeUrl}?status=${status}&msg=${encodeURIComponent(msg)}&ping=`;
   fetch(url).catch((err) => logger.warn({ err }, 'Uptime ping failed'));
 }

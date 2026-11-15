@@ -29,6 +29,7 @@ vi.mock('../middleware/rateLimit', () => ({
 }));
 
 import { query } from '../db';
+import { config } from '../config';
 const mockQuery = query as ReturnType<typeof vi.fn>;
 
 function createApp() {
@@ -86,5 +87,25 @@ describe('POST /api/contadores', () => {
     });
     expect(sqlArg).toBeDefined();
     expect((sqlArg as unknown[])[0]).toContain('ON CONFLICT (serial_number, device_identification, created)');
+  });
+
+  it('no envía heartbeat si no hay URL de Uptime configurada', async () => {
+    const originalUrl = config.contadoresUptimeUrl;
+    config.contadoresUptimeUrl = '';
+    mockQuery.mockResolvedValueOnce({ rows: [{ device_identification: '72569463', serial_number: '0016045167' }] });
+    mockQuery.mockResolvedValueOnce({ rows: [] });
+    mockQuery.mockResolvedValueOnce({ rows: [] });
+    try {
+      const app = createApp();
+      const res = await request(app)
+        .post('/api/contadores')
+        .set('Authorization', 'Basic ' + Buffer.from('cme3100user:secret').toString('base64'))
+        .set('Content-Type', 'application/octet-stream')
+        .send(CSV);
+      expect(res.status).toBe(200);
+      expect(global.fetch).not.toHaveBeenCalled();
+    } finally {
+      config.contadoresUptimeUrl = originalUrl;
+    }
   });
 });
