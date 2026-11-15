@@ -24,6 +24,8 @@ Guía para contribuir al proyecto Edificio Elite.
 | `main` | Production | www.edificioelite.com | api.edificioelite.com |
 | PR | Preview/Dev | dev.edificioelite.com | api-dev.edificioelite.com |
 
+- La ingesta de contadores (`POST /api/contadores`) requiere `CONTADORES_INGEST_USER` y `CONTADORES_INGEST_PASSWORD` en el stack de dev y prod (en producción la API valida que existan y no arranca si faltan). `CONTADORES_UPTIME_URL` es opcional.
+
 ## CI/CD
 
 GitHub Actions (`.github/workflows/ci.yml`) ejecuta en cada push y PR a `main`:
