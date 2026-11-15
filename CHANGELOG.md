@@ -1,5 +1,18 @@
 # Changelog
 
+## [1.21.0](https://github.com/EdificioElite/elite-dashboard/compare/v1.20.2...v1.21.0) (2026-11-15)
+
+
+### Features
+
+* ingesta de contadores en el dashboard ([#192](https://github.com/EdificioElite/elite-dashboard/issues/192)) ([e1feef3](https://github.com/EdificioElite/elite-dashboard/commit/e1feef31eebb0c38ff569b599c23f5abb32c5398))
+
+
+### Bug Fixes
+
+* **deps:** update dependency googleapis to v185 ([#204](https://github.com/EdificioElite/elite-dashboard/issues/204)) ([0d9ff50](https://github.com/EdificioElite/elite-dashboard/commit/0d9ff50690998f7be41d397adfb84e93a24ef342))
+* no actualizar ultima_conexion en login de home-assistant ([#205](https://github.com/EdificioElite/elite-dashboard/issues/205)) ([9dabfec](https://github.com/EdificioElite/elite-dashboard/commit/9dabfec93d7ef0c2b4e84b3775e0bd956ce2b729))
+
 ## [1.20.2](https://github.com/EdificioElite/elite-dashboard/compare/v1.20.1...v1.20.2) (2026-10-01)
 
 
