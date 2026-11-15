@@ -95,6 +95,14 @@ router.post('/contadores', rateLimit(60, 5 * 60 * 1000), bodyParser, async (req:
     const desactualizados = detectarDesactualizados(rows, config.contadoresStaleMinutes);
 
     const ids = presentes.map((p) => p.device_identification);
+    // El report reenvía las últimas lecturas, así que la "previa" fiable es la
+    // última anterior a la lectura más antigua del lote (fuera de la ventana
+    // reenviada): comparar contra una fila que el propio lote va a sobrescribir
+    // genera falsos resets por pequeñas diferencias de relectura.
+    const minCreated = inserts.reduce(
+      (min, i) => (String(i.created) < min ? String(i.created) : min),
+      String(inserts[0].created),
+    );
     const previosResult = await query(
       `SELECT DISTINCT ON (device_identification)
          device_identification,
@@ -104,9 +112,9 @@ router.post('/contadores', rateLimit(60, 5 * 60 * 1000), bodyParser, async (req:
          volume_m3_inst_value_0_0_0,
          volume_m3_inst_value_0_1_0
        FROM contadores
-       WHERE device_identification = ANY($1)
+       WHERE device_identification = ANY($1) AND created < $2
        ORDER BY device_identification, created DESC`,
-      [ids],
+      [ids, minCreated],
     );
     const resets = detectarResets(inserts, previosResult.rows);
 
