@@ -11,11 +11,11 @@ interface ContactEntry {
 const CONTACTS: ContactEntry[] = [
   {
     title: 'Administrador de Fincas',
-    subtitle: 'Martin y Lorente — Juanjo Montalvo',
+    subtitle: 'Martin y Lorente — Daniel Alvarez',
     icon: 'building',
     color: '#b88a5e',
     details: [
-      { label: 'Email', value: 'juanjomontalvo@martinylorente.es', href: 'mailto:juanjomontalvo@martinylorente.es', icon: 'mail' },
+      { label: 'Email', value: 'danielalvarez@martinylorente.es', href: 'mailto:danielalvarez@martinylorente.es', icon: 'mail' },
       { label: 'Web', value: 'www.martinylorente.es', href: 'https://www.martinylorente.es', icon: 'eye' },
       { label: 'Teléfono', value: '91 796 00 43', href: 'tel:+34917960043', icon: 'phone' },
       { label: 'Teléfono', value: '91 505 53 10', href: 'tel:+34915055310', icon: 'phone' },

@@ -17,8 +17,8 @@ describe('ContactosPage', () => {
       </MemoryRouter>
     );
     expect(screen.getByText('Administrador de Fincas')).toBeInTheDocument();
-    expect(screen.getByText('Martin y Lorente — Juanjo Montalvo')).toBeInTheDocument();
-    expect(screen.getByText('juanjomontalvo@martinylorente.es')).toBeInTheDocument();
+    expect(screen.getByText('Martin y Lorente — Daniel Alvarez')).toBeInTheDocument();
+    expect(screen.getByText('danielalvarez@martinylorente.es')).toBeInTheDocument();
     expect(screen.getByText('www.martinylorente.es')).toBeInTheDocument();
     expect(screen.getByText('91 796 00 43')).toBeInTheDocument();
     expect(screen.getByText('91 505 53 10')).toBeInTheDocument();
