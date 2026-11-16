@@ -1,5 +1,16 @@
 # Changelog
 
+## [1.21.5](https://github.com/EdificioElite/elite-dashboard/compare/v1.21.4...v1.21.5) (2026-11-16)
+
+
+### Bug Fixes
+
+* actualizar contacto del administrador de fincas a Daniel Alvarez ([#243](https://github.com/EdificioElite/elite-dashboard/issues/243)) ([da8dfba](https://github.com/EdificioElite/elite-dashboard/commit/da8dfba3b0cadf9bf0a3087078856e5ef4edb095))
+* anclar el tooltip de las gráficas debajo del área de dibujo ([#237](https://github.com/EdificioElite/elite-dashboard/issues/237)) ([56f2cab](https://github.com/EdificioElite/elite-dashboard/commit/56f2cabdf11861253fe1c0a3eca0c02054751c40))
+* filtrar series ocultas del tooltip personalizado ([#240](https://github.com/EdificioElite/elite-dashboard/issues/240)) ([e8ff995](https://github.com/EdificioElite/elite-dashboard/commit/e8ff995ac69aa05ed39ac4526a7d2a4d0770aafb))
+* nombres legibles en el tooltip de las gráficas ([#239](https://github.com/EdificioElite/elite-dashboard/issues/239)) ([4e39203](https://github.com/EdificioElite/elite-dashboard/commit/4e392032c7be57adfb7973551c55078c86efadbe))
+* quitar el outline azul de las capas de Recharts al pulsar ([#241](https://github.com/EdificioElite/elite-dashboard/issues/241)) ([8276860](https://github.com/EdificioElite/elite-dashboard/commit/8276860cdaa46e3d8a08bd5b4790937b17fc738c))
+
 ## [1.21.4](https://github.com/EdificioElite/elite-dashboard/compare/v1.21.3...v1.21.4) (2026-11-15)
 
 
