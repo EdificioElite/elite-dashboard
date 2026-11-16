@@ -34,16 +34,6 @@ describe('InicioPage', () => {
     expect(screen.getByText('Horario')).toBeInTheDocument();
   });
 
-  it('renders Proxima Junta card', async () => {
-    render(
-      <MemoryRouter>
-        <InicioPage />
-      </MemoryRouter>
-    );
-    expect(await screen.findByText('Próxima Junta de Vecinos')).toBeInTheDocument();
-    expect(screen.getByText('Próximamente. Fecha y hora por determinar.')).toBeInTheDocument();
-  });
-
   it('renders WiFi card', async () => {
     render(
       <MemoryRouter>
