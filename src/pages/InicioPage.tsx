@@ -36,13 +36,6 @@ const POOL_CONTENT = {
   ],
 };
 
-const MEETING_CONTENT = {
-  title: 'Próxima Junta de Vecinos',
-  icon: 'calendar' as const,
-  color: '#b88a5e',
-  text: 'Próximamente. Fecha y hora por determinar.',
-};
-
 const WIFI_CONTENT = {
   title: 'WiFi de la Comunidad',
   icon: 'wifi' as const,
@@ -134,10 +127,6 @@ export default function InicioPage() {
               </table>
             </div>
             <p className="text-cocoa/30 text-[10px] mt-3 leading-relaxed">{POOL_CONTENT.note}</p>
-          </InfoCard>
-
-          <InfoCard title={MEETING_CONTENT.title} icon={MEETING_CONTENT.icon} color={MEETING_CONTENT.color}>
-            <p className="text-sm text-cocoa/80">{MEETING_CONTENT.text}</p>
           </InfoCard>
 
           <InfoCard title={WIFI_CONTENT.title} icon={WIFI_CONTENT.icon} color={WIFI_CONTENT.color}>
